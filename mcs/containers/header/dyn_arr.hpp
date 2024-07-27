@@ -1,0 +1,151 @@
+#pragma once
+#ifndef MCS_DYN_ARR_HPP
+#define MCS_DYN_ARR_HPP
+
+#include <MCS.hpp>
+#include <bit>
+#include <memory>
+#include <initializer_list>
+#include <cstring>
+
+template <typename T> class mcs::dyn_arr {
+   private:
+      uint _bufSize;
+      uint _size;
+      T* _buf;
+   public:
+      dyn_arr();
+      dyn_arr(const uint size);
+      dyn_arr(const uint size, const uint bufSize);
+      dyn_arr(const std::initializer_list<T> initList);
+      void free() const { std::free(_buf); }
+
+      //element access
+      uint size() const { return _size; }
+      uint capacity() const { return _bufSize; }
+      T* const* ptrToBuf() { return &_buf; }
+      T* begin() { return _buf; }
+      T* end() { return _buf + _size; }
+      T& operator[](const uint i) { return _buf[i]; }
+      T& at(const uint i);
+      T& front() { return _buf[0]; }
+      T& back() { return _buf[_size - 1]; }
+
+      const T* const* ptrToBuf() const { return &_buf; }
+      const T* begin() const { return _buf; }
+      const T* end() const { return _buf + _size; }
+      const T& operator[](const uint i) const { return _buf[i]; }
+      const T& at(const uint i) const;
+      const T& front() const { return _buf[0]; }
+      const T& back() const { return _buf[_size - 1]; }
+
+      //MODIFIERS
+      //!std::realloc buffer to at least the specified size
+      bool realloc(const uint newSize) { return realloc_exact(std::bit_ceil(newSize)); }
+      bool realloc_exact(const uint newSize);
+      T* release() { T* temp = _buf; _buf = nullptr; _size = 0; _bufSize = 0; return temp; }
+      bool push_back(const T& obj);
+      T pop_back();
+      T* emplace(const uint i, auto... args);
+      T* emplace_back(auto... args);
+
+      //typecasts
+      operator bool() { return (bool)_size; }
+};
+
+#pragma region src
+//!default constructor
+template<typename T> mcs::dyn_arr<T>::dyn_arr():
+   _bufSize(0),_size(0),_buf(nullptr) {
+
+}
+//!constructor from array size
+template<typename T> mcs::dyn_arr<T>::dyn_arr(const uint size):
+   _bufSize(std::bit_ceil(size)), _size(size),
+   _buf((T*)malloc(_bufSize * sizeof(T))) {
+
+}
+//!constructor from array size and buffer size
+template<typename T> mcs::dyn_arr<T>::dyn_arr(const uint size, const uint bufSize):
+   _bufSize(bufSize), _size(size) {
+      if (_bufSize < _size) {
+         mcs_throw(ErrCode::SEGFAULT, "cannot construct dyn_arr with array size greater than buffer size (\033[4m%u\033[24m < \033[4m%u\033[24m)",_bufSize,_size);
+         _buf = nullptr;
+      }
+      else {
+         _buf = (T*)malloc(_bufSize * sizeof(T));
+      }
+}
+//!constructor from initializer list
+template<typename T> mcs::dyn_arr<T>::dyn_arr(const std::initializer_list<T> initList):
+   _bufSize(std::bit_ceil(initList.size())),_size(initList.size()),
+   _buf((T*)malloc(_bufSize * sizeof(T))) {
+      std::memcpy(_buf,initList.data(),_size * sizeof(T));
+}
+
+//!bounds-checked element access
+template<typename T> T& mcs::dyn_arr<T>::at(const uint i) {
+   if (i >= _size) {
+      mcs_throw(ErrCode::SEGFAULT, "dyn_arr of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m");
+   }
+   return _buf[i];
+}
+//!bounds-checked element access
+template<typename T> const T& mcs::dyn_arr<T>::at(const uint i) const {
+   if (i >= _size) {
+      mcs_throw(ErrCode::SEGFAULT, "dyn_arr of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m");
+   }
+   return _buf[i];
+}
+
+//!std::realloc buffer to the specified size
+template<typename T> bool mcs::dyn_arr<T>::realloc_exact(const uint newSize) {
+   T* temp = (T*)std::realloc(_buf, newSize * sizeof(T));
+   if (!temp) {
+      mcs_throw(ErrCode::ALLOC_FAIL, "failed dyn_arr realloc (buffer size %u -> %u, arr size %u)", _bufSize, newSize, _size);
+      return false;
+   }
+   _buf = temp;
+   _bufSize = newSize;
+   return true;
+}
+
+//!push to the back of the the array
+//!returns if a reallocation was required
+template<typename T> bool mcs::dyn_arr<T>::push_back(const T& obj) {
+   bool realloced = false;
+   if (_size >= _bufSize) {
+      realloced = realloc(_size ? std::bit_floor(_size) << 1 : 1);
+   }
+   _buf[_size++] = obj;
+   return realloced;
+}
+//!remove last element of array
+//!returns the removed element
+//!zeroes out the index in the array
+template<typename T> T mcs::dyn_arr<T>::pop_back() {
+   T temp = _buf[--_size];
+   std::memset(_buf + _size, 0, sizeof(T));
+   return temp;
+}
+//!construct in place
+template<typename T> T* mcs::dyn_arr<T>::emplace(const uint i, auto... args) {
+   if (i >= _size) {
+      mcs_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in dyn_arr of size \033[4m%u\033[24m", i,_size);
+      return nullptr;
+   }
+   std::construct_at(_buf + i, args...);
+   return _buf + i;
+}
+//!construct in place at back of array
+template<typename T> T* mcs::dyn_arr<T>::emplace_back(auto... args) {
+   if (_size >= _bufSize) {
+      realloc(_size ? std::bit_floor(_size) << 1 : 1);
+   }
+   return emplace(_size++, args...);
+}
+
+#pragma endregion src
+
+
+#endif //MCS_DYN_ARR_HPP

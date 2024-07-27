@@ -1,0 +1,49 @@
+#ifndef PARSER_TEST
+#define PARSER_TEST
+
+#include "Parser.hpp"
+#include "Tokenizer.hpp"
+#include "dyn_arr.hpp"
+#include <cstring>
+#include <cstdio>
+#include <iostream>
+
+#define BIG_HEADER "\033[;1m=======================\n\033[0m"
+#define SMALL_HEADER "\033[;1m-----------------------\n\033[0m"
+
+mcs::dyn_arr<void*> ALLOC_BUF;
+//clean up malloc'd memory
+void CLEANUP() {
+   while (ALLOC_BUF) {
+      std::free(ALLOC_BUF.pop_back());
+   }
+}
+
+int main(const int argc, char** argv) {
+   if (argc < 2) {
+      std::printf("No file path provided. Exiting.\n");
+      return EXIT_FAILURE;
+   }
+   std::atexit(CLEANUP);
+
+   printf("%s", BIG_HEADER);
+
+   //read and tokenize file
+   clef::Tokenizer tokenizer = clef::TokenizeFile(argv[1]);
+   std::printf("%sTokens:%s\n%s", clef::BOLD, clef::NOT_BOLD, SMALL_HEADER);
+   tokenizer.printf();
+   
+   //abstract syntax tree
+   clef::Parser parser{&tokenizer};
+   // parser.runPasses(0x100);
+   parser.runPass();
+   std::printf("\n%s%sAbstract Syntax Tree:%s\n%s", BIG_HEADER, clef::BOLD, clef::NOT_BOLD, SMALL_HEADER);
+   parser.getTree()->printf();
+   std::printf("\n%s\n", BIG_HEADER);
+
+   tokenizer.free();
+
+   return EXIT_SUCCESS;
+}
+
+#endif //PARSER_TEST
