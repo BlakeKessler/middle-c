@@ -11,24 +11,15 @@
 #define BIG_HEADER "\033[;1m=======================\n\033[0m"
 #define SMALL_HEADER "\033[;1m-----------------------\n\033[0m"
 
-mcs::dyn_arr<void*> ALLOC_BUF;
-//clean up malloc'd memory
-void CLEANUP() {
-   while (ALLOC_BUF) {
-      std::free(ALLOC_BUF.pop_back());
-   }
-}
 
 int main(const int argc, char** argv) {
    if (argc < 2) {
       std::printf("No file path provided. Exiting.\n");
       return EXIT_FAILURE;
    }
-   std::atexit(CLEANUP);
-
-   printf("%s", BIG_HEADER);
 
    //read and tokenize file
+   printf("%s", BIG_HEADER);
    clef::Tokenizer tokenizer = clef::TokenizeFile(argv[1]);
    std::printf("\033[1mTokens:\033[22m\n%s", SMALL_HEADER);
    tokenizer.printf();

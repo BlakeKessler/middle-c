@@ -20,7 +20,6 @@ class clef::Tokenizer {
       //constructors
       Tokenizer();
       Tokenizer(Source& src);
-      ~Tokenizer() { this->free(); }
       void free() const { _tokens.free();}
 
       static Tokenizer TokenizeFile(const char* path);

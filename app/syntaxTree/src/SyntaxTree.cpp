@@ -36,7 +36,6 @@ clef::SyntaxTree::~SyntaxTree() {
          scout = stack.pop_back();
       }
    }
-   stack.free();
 }
 
 #endif //SYNTAX_TREE_CPP

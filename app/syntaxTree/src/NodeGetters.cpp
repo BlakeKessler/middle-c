@@ -65,7 +65,7 @@ mcs::dyn_arr<clef::Node*> clef::Node::extractByType(const NodeType type) const {
          current->_children[--i] ? stack.push_back(current->_children[i]) : false;
       }
    }
-   stack.free();
+   //!NOTE:needs to be move constructor
    return results;
 }
 

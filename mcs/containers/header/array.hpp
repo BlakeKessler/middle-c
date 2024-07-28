@@ -18,7 +18,7 @@ template <typename T> class mcs::array {
       array(const uint size);
       array(T* buf, const uint size);
       array(std::initializer_list<T>);
-      ~array() { this->free(); }
+      ~array() { if (_buf) { this->free(); } }
       void free() const { std::free(_buf); }
 
       //element access

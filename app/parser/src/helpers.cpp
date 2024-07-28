@@ -34,8 +34,6 @@ bool clef::Parser::handleDelimPairs() {
          }
          else {
             allDelims[i]->throwError(ErrCode::UNCLOSED_BLOCK);
-            allDelims.free();
-            delimStack.free();
             return false;
          }
       }
@@ -55,22 +53,16 @@ bool clef::Parser::handleDelimPairs() {
 
       //illegal delim - throw error
       allDelims[i]->throwError(ErrCode::UNCLOSED_BLOCK);
-      allDelims.free();
-      delimStack.free();
       return false;
    }
 
    //check that all opening delims were closed
    if (delimStack.size()) {
       throwError(ErrCode::UNCLOSED_BLOCK, "\033[4m%u\033[24m unclosed delims", delimStack.size());
-      allDelims.free();
-      delimStack.free();
       return false;
    }
 
    //clean up and return
-   allDelims.free();
-   delimStack.free();
    return madeChanges;
 }
 

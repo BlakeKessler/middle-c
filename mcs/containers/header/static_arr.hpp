@@ -55,11 +55,10 @@ template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr(T* buf) {
    }
 }
 //!constructor from initializer list
-template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr(T initList[_size]):
-   _buf((T*)malloc(_size * sizeof(T))) {
-      for (uint i = 0; i < _size; ++i) {
-         _buf[i] = buf[i];
-      }
+template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr(T initList[_size]) {
+   for (uint i = 0; i < _size; ++i) {
+      _buf[i] = buf[i];
+   }
 }
 
 //!bounds-checked element access

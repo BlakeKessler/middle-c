@@ -5,7 +5,6 @@
 #include <MCS.hpp>
 #include <bit>
 #include <memory>
-#include <initializer_list>
 #include <cstring>
 
 template <typename T> class mcs::dyn_arr {
@@ -17,7 +16,8 @@ template <typename T> class mcs::dyn_arr {
       dyn_arr();
       dyn_arr(const uint size);
       dyn_arr(const uint size, const uint bufSize);
-      dyn_arr(const std::initializer_list<T> initList);
+      dyn_arr(dyn_arr&& other);
+      ~dyn_arr() { if(_buf) { this->free(); } }
       void free() const { std::free(_buf); }
 
       //element access
@@ -76,11 +76,10 @@ template<typename T> mcs::dyn_arr<T>::dyn_arr(const uint size, const uint bufSiz
          _buf = (T*)malloc(_bufSize * sizeof(T));
       }
 }
-//!constructor from initializer list
-template<typename T> mcs::dyn_arr<T>::dyn_arr(const std::initializer_list<T> initList):
-   _bufSize(std::bit_ceil(initList.size())),_size(initList.size()),
-   _buf((T*)malloc(_bufSize * sizeof(T))) {
-      std::memcpy(_buf,initList.data(),_size * sizeof(T));
+//!move constructor
+template<typename T> mcs::dyn_arr<T>::dyn_arr(dyn_arr&& other):
+   _bufSize(other._bufSize),_size(other._size),_buf(other._buf) {
+      other.release();
 }
 
 //!bounds-checked element access

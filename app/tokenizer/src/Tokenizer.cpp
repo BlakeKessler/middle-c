@@ -15,12 +15,13 @@ _src(),_tokens(),_tokLines() {
 //!constructor from results of file reader
 clef::Tokenizer::Tokenizer(Source& src):
 _src(src),_tokens(),_tokLines(src.lineCount()) {
+   src.release();
    mcs::raw_str_span line;
    uint counter;
    
-   for (uint i = 0; i < src.lineCount(); ++i) {
+   for (uint i = 0; i < _src.lineCount(); ++i) {
       //initialize
-      line = src.line(i);
+      line = _src.line(i);
       counter = 0;
 
       //skip leading whitespace
@@ -47,7 +48,6 @@ _src(src),_tokens(),_tokLines(src.lineCount()) {
       //create token line & increment overall count
       _tokLines.emplace(i, _tokens.ptrToBuf(), mcs::pair{i?_tokLines[i-1].lastIndex():0, _tokens.size()});
    }
-   src.release();
 }
 
 //!read and tokenize file
