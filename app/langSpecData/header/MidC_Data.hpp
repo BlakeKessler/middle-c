@@ -12,12 +12,11 @@
 #include <cassert>
 #include <cstring>
 
-extern const char arr[7][2][3];
 namespace clef {
    extern TokenType tokTypeArr[256];
 
    extern const mcs::array<Operator> OPERATORS;
-   // extern const mcs::array<char[2][MAX_DELIM_LEN + 1]> BLOCK_DELIMS;
+   extern const mcs::array<DelimPair> BLOCK_DELIMS;
    // extern const char KEYWORDS[][MAX_KEYWORD_LEN + 1];
    // extern const mcs::array<mcs::string> KEYWORDS;
    
@@ -34,21 +33,36 @@ namespace clef {
 }
 
 //operator string + metadata
-class clef::Operator {
-   public:
-      char opStr[MAX_OP_LEN + 1];
-      byte size;
-      byte precedence;
-      OpType opType; //unary/binary/special, left/right associative
+struct clef::Operator {
+   char opStr[MAX_OP_LEN + 1];
+   byte size;
+   byte precedence;
+   OpType opType; //unary/binary/special, left/right associative
 
-      Operator(const char str[MAX_OP_LEN + 1], const byte prec, const OpType type) {
-         size = std::strlen(str);
-         assert(size < MAX_OP_LEN + 1);                  //bounds-checking
-         std::memcpy(opStr,str,size*sizeof(char));       //copy string
-         std::memset(opStr+size,0,sizeof(opStr)-size);   //null-initialize the rest of the string
-         precedence = prec;
-         opType = type;
-      }
+   Operator() {
+      std::memset(this,0,sizeof(Operator));
+   }
+   Operator(const char str[MAX_OP_LEN + 1], const byte prec, const OpType type) {
+      size = std::strlen(str);
+      assert(size < MAX_OP_LEN + 1);                  //bounds-checking
+      std::memcpy(opStr,str,size*sizeof(char));       //copy string
+      std::memset(opStr+size,0,sizeof(opStr)-size);   //null-initialize the rest of the string
+      precedence = prec;
+      opType = type;
+   }
+};
+//delimiter pair strings
+struct clef::DelimPair {
+   char open[MAX_DELIM_LEN + 1];
+   char close[MAX_DELIM_LEN + 1];
+
+   // DelimPair() {
+   //    std::memset(this,0,sizeof(DelimPair));
+   // }
+   // DelimPair(const char o[MAX_DELIM_LEN + 1], const char c[MAX_DELIM_LEN + 1]) {
+   //    std::memcpy(open,o,sizeof(open));
+   //    std::memcpy(close,c,sizeof(close));
+   // }
 };
 
 #endif //DATA_HPP

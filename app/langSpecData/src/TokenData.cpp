@@ -4,8 +4,9 @@
 #include "MidC_Data.hpp"
 #include <cassert>
 
-
-const char arr[][2][3] = {
+//!array of pairs of strings
+//!represents opening and closing block delimiters
+const mcs::array<clef::DelimPair> clef::BLOCK_DELIMS{
    {"(\0", ")\0"},   //PARENS
    {"[\0", "]\0"},   //SUBSCRIPT
    {"{\0", "}\0"},   //INITIALIZER LIST
@@ -20,12 +21,6 @@ const char arr[][2][3] = {
    // {"//", "\n\0"},   //SINGLE-LINE COMMENT
 };
 
-
-
-//!array of pairs of strings
-//!represents opening and closing block delimiters
-// const mcs::array<char[2][MAX_DELIM_LEN + 1]> clef::BLOCK_DELIMS{arr,7};
-
 //!check if a node is the opening delimiter of a block expression
 //!NOTE: REPLACE WITH HASHMAP
 clef::DelimPairType clef::blockDelimType(const char* str, const uint length) {
@@ -34,11 +29,10 @@ clef::DelimPairType clef::blockDelimType(const char* str, const uint length) {
    }
 
    //search array
-   for (uint i = 0; i < arrlen(arr); ++i) {
-      const uint toklen = std::strlen(arr[i][0]);
-      assert(toklen <= MAX_DELIM_LEN);
+   for (uint i = 0; i < BLOCK_DELIMS.size(); ++i) {
+      const uint toklen = std::strlen(BLOCK_DELIMS[i].open);
       if (toklen <= length) {
-         if (!std::strncmp(str,arr[i][0],toklen)) {
+         if (!std::strncmp(str,BLOCK_DELIMS[i].open,toklen)) {
             return static_cast<DelimPairType>(i);
          }
       }

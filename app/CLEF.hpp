@@ -12,7 +12,8 @@ namespace clef {
    class Token;
    class Tokenizer;
 
-   class Operator;
+   struct Operator;
+   struct DelimPair;
 
    class Node;
    class SyntaxTree;

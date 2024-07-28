@@ -6,7 +6,7 @@
 bool clef::Node::checkDelimMatch(Node* close) const {
    return (
       !_token || !close || !close->token()) ? false :
-      (*close->token() == arr[+_token->blockDelimEval()][1]
+      (*close->token() == BLOCK_DELIMS[+_token->blockDelimEval()].close
    );
 }
 
