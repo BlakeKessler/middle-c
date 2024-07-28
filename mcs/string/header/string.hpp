@@ -39,8 +39,10 @@ class mcs::string {
       #pragma region charArray
       //constructors
       string();
+      string(const uint size);
       string(const char* str, const uint strlen);
       string(const char* str);
+      ~string() { if(_buf) { this->free(); } }
       void free() const { std::free(_buf); }
 
       //properties
@@ -65,6 +67,7 @@ class mcs::string {
       const char& back() const { return _buf[_size - 1]; }
       
       //MODIFIERS
+      bool resize(const uint i) { return (i < _bufSize) ? (_size = i), true : false; }
       //!std::realloc buffer to at least the specified size
       bool realloc(const uint newSize) { return realloc_exact(std::bit_ceil(newSize)); }
       bool realloc_exact(const uint newSize);

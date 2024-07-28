@@ -4,6 +4,7 @@
 #include "Source.hpp"
 #include <cstdio>
 #include <filesystem>
+#include <cassert>
 
 namespace fs = std::filesystem;
 
@@ -12,15 +13,17 @@ namespace fs = std::filesystem;
 clef::Source clef::Source::readFile(const char* path) {
    //get file size and allocate buffer
    //extra char allocated to ensure null-termination
-   const uint fileSize = fs::file_size(fs::path(path)) + sizeof(char);
+   const uint fileSize = fs::file_size(fs::path(path));
 
-   mcs::array<char> _buf(fileSize);
+   mcs::string _buf{fileSize};
+   _buf.resize(fileSize);
 
    //open, read, close, back-fill file
    FILE* srcFile = std::fopen(path, "r");
    const uint charsRead = std::fread(_buf.begin(), sizeof(char), fileSize, srcFile);
    std::fclose(srcFile);
-   std::memset(_buf.begin() + charsRead, '\0', fileSize - charsRead*sizeof(char));
+   std::printf("%u, %u\n",charsRead,_buf.size());
+   assert(charsRead == _buf.size());
 
    //find number of lines
    uint lineCount = 1;

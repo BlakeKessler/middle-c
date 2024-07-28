@@ -55,7 +55,7 @@ template<typename T> mcs::array<T>::array():
 }
 //!allocate array by size (in elements)
 template<typename T> mcs::array<T>::array(const uint size):
-   _buf((T*)malloc(size * sizeof(T))),_size(size) {
+   _buf((T*)std::calloc(size, sizeof(T))),_size(size) {
 
 }
 //!constructor from raw pointer to buffer and size of buffer (in elements)
@@ -65,7 +65,7 @@ template<typename T> mcs::array<T>::array(T* buf, const uint size):
 }
 //!constructor from initializer list
 template<typename T> mcs::array<T>::array(std::initializer_list<T> initPair):
-   _buf((T*)malloc(initPair.size() * sizeof(T))),_size(initPair.size()) {
+   _buf((T*)std::calloc(initPair.size(), sizeof(T))),_size(initPair.size()) {
       std::memcpy(_buf,initPair.begin(),_size * sizeof(T));
 }
 

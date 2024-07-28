@@ -62,7 +62,7 @@ template<typename T> mcs::dyn_arr<T>::dyn_arr():
 //!constructor from array size
 template<typename T> mcs::dyn_arr<T>::dyn_arr(const uint size):
    _bufSize(std::bit_ceil(size)), _size(size),
-   _buf((T*)malloc(_bufSize * sizeof(T))) {
+   _buf((T*)std::calloc(_bufSize, sizeof(T))) {
 
 }
 //!constructor from array size and buffer size
@@ -73,7 +73,7 @@ template<typename T> mcs::dyn_arr<T>::dyn_arr(const uint size, const uint bufSiz
          _buf = nullptr;
       }
       else {
-         _buf = (T*)malloc(_bufSize * sizeof(T));
+         _buf = (T*)std::calloc(_bufSize, sizeof(T));
       }
 }
 //!move constructor

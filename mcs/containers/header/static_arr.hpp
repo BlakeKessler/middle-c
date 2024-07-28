@@ -47,7 +47,9 @@ template <typename T, uint _size> class mcs::static_arr {
 #pragma region src
 //!default constructor
 template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr() {
-
+   for (uint i = 0; i < _size; ++i) {
+      _buf[i] = 0;
+   }
 }
 template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr(T* buf) {
    for (uint i = 0; i < _size; ++i) {

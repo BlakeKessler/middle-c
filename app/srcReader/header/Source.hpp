@@ -5,14 +5,15 @@
 #include "CLEF.hpp"
 #include "raw_str_span.hpp"
 #include "array.hpp"
+#include "string.hpp"
 
 class clef::Source {
    private:
-      mcs::array<char> _buf;
+      mcs::string _buf;
       mcs::array<mcs::raw_str_span> _lines;
    public:
       Source():_buf(),_lines() {}
-      Source(mcs::array<char>& buf,mcs::array<mcs::raw_str_span>& lines):_buf(buf),_lines(lines) {buf.release();lines.release();}
+      Source(mcs::string& buf,mcs::array<mcs::raw_str_span>& lines):_buf(buf),_lines(lines) { buf.release(); lines.release(); }
       void free() const {_buf.free();_lines.free();}
       void release() {_buf.release();_lines.release();}
       
