@@ -8,7 +8,7 @@
 //CLEF defines
 #define MAX_AST_CHILDREN 3
 #define MAX_DELIM_LEN 2
-#define MAX_OP_LEN 4
+#define MAX_OP_LEN 3
 #define MAX_KEYWORD_LEN 15
 
 //type macros

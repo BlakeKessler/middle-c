@@ -2,10 +2,10 @@
 #define TOKEN_DATA_CPP
 
 #include "MidC_Data.hpp"
+#include <cassert>
 
-//!array of pairs of strings
-//!represents opening and closing block delimiters
-const char clef::BLOCK_DELIMS[][2][MAX_DELIM_LEN + 1] = {
+
+const char arr[][2][3] = {
    {"(\0", ")\0"},   //PARENS
    {"[\0", "]\0"},   //SUBSCRIPT
    {"{\0", "}\0"},   //INITIALIZER LIST
@@ -17,49 +17,61 @@ const char clef::BLOCK_DELIMS[][2][MAX_DELIM_LEN + 1] = {
    // {"?\0", ":\0"},   //TERNARY STATEMENT
    
    {"/*", "*/"},     //BLOCK COMMENT
-   {"//", "\n\0"},   //SINGLE-LINE COMMENT
+   // {"//", "\n\0"},   //SINGLE-LINE COMMENT
 };
+
+
+
+//!array of pairs of strings
+//!represents opening and closing block delimiters
+// const mcs::array<char[2][MAX_DELIM_LEN + 1]> clef::BLOCK_DELIMS{arr,7};
 
 //!check if a node is the opening delimiter of a block expression
 //!NOTE: REPLACE WITH HASHMAP
-clef::DelimPairType clef::blockDelimType(char* str, const uint length) {
+clef::DelimPairType clef::blockDelimType(const char* str, const uint length) {
    if (!str || !length || length > MAX_DELIM_LEN) {
       return DelimPairType::NONE;
    }
 
    //search array
-   for (uint i = 0; i < arrlen(BLOCK_DELIMS); ++i) {
-      if (!clef::substrcmp(str, BLOCK_DELIMS[i][0], MAX_DELIM_LEN)) {
-         return static_cast<DelimPairType>(i);
+   for (uint i = 0; i < arrlen(arr); ++i) {
+      const uint toklen = std::strlen(arr[i][0]);
+      assert(toklen <= MAX_DELIM_LEN);
+      if (toklen <= length) {
+         if (!std::strncmp(str,arr[i][0],toklen)) {
+            return static_cast<DelimPairType>(i);
+         }
       }
    }
 
    return DelimPairType::NONE;
 }
 
-//!array of all Middle-C keywords
-const char clef::KEYWORDS[][MAX_KEYWORD_LEN + 1] = {
-      "uint", "ushort", "ulong", "sint", "sshort", "slong", "ubyte", "sbyte", "bool", "float", "char", "wchar", "wwchar", 
-      "uint8", "uint16", "uint32", "uint64", "uint128", "uint256", 
-      "sint8", "sint16", "sint32", "sint64", "sint128", "sint256", 
-      "float16", "float32", "float64", "float128", "float256", 
-      "half", "single", "double", "quad", "oct", 
-      "void", "auto", 
-      "true", "false", "nullptr", 
-      "new", "delete", "sizeof", "arrsizeof", 
-      "const", "constexpr", "immediate", "mutable", "volatile", "atomic", 
-      "class", "struct", "union", "enum", "namespace", "private", "protected", "public", "friend", "this", "explicit", "using", "template", 
-      "extern", "inline", "static", "virtual", "override",
-      "asm", 
-      "typeof", "typeid", "typename", "alignas", "alignof", 
-      "return", "operator", "assert", "static_assert", "noexcept", 
-      "type_cast", "bit_cast", "safe_cast", "quick_cast", "const_cast", 
-      "if", "else", "for", "while", "do", "break", "continue", "switch", "case", "default", "goto", 
-      "try", "catch", "throw"
-   };
+// //!array of all Middle-C keywords
+// const char clef::KEYWORDS[][MAX_KEYWORD_LEN + 1] = {
+//       "uint", "ushort", "ulong", "sint", "sshort", "slong", "ubyte", "sbyte", "bool", "float", "char", "wchar", "wwchar", 
+//       "uint8", "uint16", "uint32", "uint64", "uint128", "uint256", 
+//       "sint8", "sint16", "sint32", "sint64", "sint128", "sint256", 
+//       "float16", "float32", "float64", "float128", "float256", 
+//       "half", "single", "double", "quad", "oct", 
+//       "void", "auto", 
+//       "true", "false", "nullptr", 
+//       "new", "delete", "sizeof", "arrsizeof", 
+//       "const", "constexpr", "immediate", "mutable", "volatile", "atomic", 
+//       "class", "struct", "union", "enum", "namespace", "private", "protected", "public", "friend", "this", "explicit", "using", "template", 
+//       "extern", "inline", "static", "virtual", "override",
+//       "asm", 
+//       "typeof", "typeid", "typename", "alignas", "alignof", 
+//       "return", "operator", "assert", "static_assert", "noexcept", 
+//       "type_cast", "bit_cast", "safe_cast", "quick_cast", "const_cast", 
+//       "if", "else", "for", "while", "do", "break", "continue", "switch", "case", "default", "goto", 
+//       "try", "catch", "throw"
+//    };
 
 //!array encoding which tokens each character is a legal member of
-byte clef::tokTypeArr[256] = {
+using enum clef::TokenType;
+#define CTMP (clef::TokenType)(0xA0)
+clef::TokenType clef::tokTypeArr[256] = {
 // NUL   SOH   STX   ETX   EOT   ENQ   ACK   BEL   BS    LF    VT    FF    CR    SO    SI    DLE
    NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE,
 
@@ -67,7 +79,7 @@ byte clef::tokTypeArr[256] = {
    NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE,
 
 // SPACE !     "     #     $     %     &     '     (     )     *     +     ,     -     .     /
-   NONE, OP,   PTXT, OP,   OP,   OP,   OP,   PTXT, BLOC, BLOC, 0xA0, OP,   OP,   OP, NUM,    OP,
+   NONE, OP,   PTXT, OP,   OP,   OP,   OP,   PTXT, BLOC, BLOC, CTMP, OP,   OP,   OP, NUM,    OP,
 
 // 0     1     2     3     4     5     6     7     8     9     :     ;     <     =     >     ?
    DGIT, DGIT, DGIT, DGIT, DGIT, DGIT, DGIT, DGIT, DGIT, DGIT, OP,   EOS,  DLIM, OP,   DLIM, OP,
@@ -108,5 +120,6 @@ byte clef::tokTypeArr[256] = {
 //	ð		ñ		ò		ó		ô		õ		ö		÷		ø		ù		ú		û		ü		ý		þ		ÿ
    CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR
 };
+#undef CTMP
 
 #endif //TOKEN_DATA_CPP

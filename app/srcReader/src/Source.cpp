@@ -3,7 +3,6 @@
 
 #include "Source.hpp"
 #include <cstdio>
-#include <cstring>
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -29,11 +28,11 @@ clef::Source clef::Source::readFile(const char* path) {
       lineCount += (_buf[i] == '\n');
    }
    //allocate array of lines
-   mcs::array<StrView> _lines(lineCount);
+   mcs::array<mcs::raw_str_span> _lines(lineCount);
    //find line breaks and fill array of lines
    char* current = _buf.begin();
    uint len;
-   for (uint i = 0; i < lineCount; current += len,++i) {
+   for (uint i = 0; i < lineCount; current += len, ++i) {
       len = std::strcspn(current, "\n") + 1;
       _lines.emplace(i, current, len);
    }

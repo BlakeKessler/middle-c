@@ -8,7 +8,6 @@
 
 namespace clef {
    class Source;
-   class StrView;
 
    class Token;
    class Tokenizer;

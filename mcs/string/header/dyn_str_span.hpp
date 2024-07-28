@@ -1,6 +1,6 @@
 #pragma once
-#ifndef STRING_SPAN_HPP
-#define STRING_SPAN_HPP
+#ifndef DYN_STRING_SPAN_HPP
+#define DYN_STRING_SPAN_HPP
 
 #include "MCS.hpp"
 #include "string.hpp"
@@ -41,6 +41,10 @@ class mcs::dyn_str_span {
 
       //properties
       uint size() const { return _size; }
+      dyn_str_span& set_begin(const sint i) { _size -= (i - _begin); _begin = i; return *this; }
+      dyn_str_span& inc_begin(const sint i) { _size -= i; _begin += i; return *this; }
+      dyn_str_span& set_size(const uint i) { _size = i; return *this; }
+      dyn_str_span& inc_size(const sint i) { _size += i; return *this; }
 
       //element access
       char* const* ptrToBuf() { return _ptrToBuf; }
@@ -52,7 +56,7 @@ class mcs::dyn_str_span {
       char& back() { return (*_ptrToBuf)[_begin + _size - 1]; }
 
       const char* const* ptrToBuf() const { return _ptrToBuf; }
-      const char* begin() const { return *_ptrToBuf; }
+      const char* begin() const { return (*_ptrToBuf) + _begin; }
       const char* end() const { return (*_ptrToBuf) + _begin  + _size; }
       const char& operator[](const uint i) const { return (*_ptrToBuf)[i + _begin]; }
       const char& at(const uint i) const;
@@ -64,4 +68,4 @@ class mcs::dyn_str_span {
       #pragma endregion charArray
 };
 
-#endif //STRING_SPAN_HPP
+#endif //DYN_STRING_SPAN_HPP

@@ -6,7 +6,7 @@
 using enum clef::OpType;
 
 namespace clef {
-   const Operator OPERATORS[] = {
+   const mcs::array<Operator> OPERATORS = {{
       Operator("#",     0,  LEFT_UN),   //invoke preprocessor
 
       Operator("\"",    1,  LEFT_SPEC), //string
@@ -97,22 +97,21 @@ namespace clef {
       Operator(",",     19, LEFT_SPEC)  //comma
 
       //not included in array: triangle (free/unspecified) operators
-   };
+   }};
 }
 
 //!find the length of the longest Middle C operator contained by the string
 uint clef::maxOpLen(const char* str, const uint len) {
    uint maxlen = 0;
-   for (uint i = 0; i < arrlen(OPERATORS); ++i) {
+   for (uint i = 0; i < OPERATORS.size(); ++i) {
       //check length
-      const uint oplen = strlen(OPERATORS[i].opStr);
-      if (oplen > len) {
+      if (len < OPERATORS[i].size) {
          continue;
       }
       //find first differing char
-      for (uint j = 0; j < oplen; ++j) {
+      for (uint j = 0; j < OPERATORS[i].size; ++j) {
          if (str[j] == OPERATORS[i].opStr[j]) {
-            maxlen =  j >= maxlen ? j + 1 : maxlen;
+            maxlen = j >= maxlen ? j + 1 : maxlen;
          }
          else {
             break;
@@ -121,12 +120,10 @@ uint clef::maxOpLen(const char* str, const uint len) {
    }
 
    //triangle-bracket-enclosed operators
-   maxlen = (((maxlen < 3 && len >= 3)
+   return (((maxlen < 3 && len >= 3)
          && (str[0] == '<' || str[0] == '>') && (str[2] == '<' || str[2] == '>'))
-         && (tokTypeArr[+str[1]] & TokenType::OP))
+         && +(tokTypeArr[+str[1]] & TokenType::OP))
       ? 3 : maxlen;
-
-   return maxlen;
 }
 
 //!find the length of the longest Middle C operator contained by the string

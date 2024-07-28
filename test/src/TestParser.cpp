@@ -30,18 +30,17 @@ int main(const int argc, char** argv) {
 
    //read and tokenize file
    clef::Tokenizer tokenizer = clef::TokenizeFile(argv[1]);
-   std::printf("%sTokens:%s\n%s", clef::BOLD, clef::NOT_BOLD, SMALL_HEADER);
+   std::printf("\033[1mTokens:\033[22m\n%s", SMALL_HEADER);
    tokenizer.printf();
    
    //abstract syntax tree
    clef::Parser parser{&tokenizer};
    // parser.runPasses(0x100);
    parser.runPass();
-   std::printf("\n%s%sAbstract Syntax Tree:%s\n%s", BIG_HEADER, clef::BOLD, clef::NOT_BOLD, SMALL_HEADER);
+   std::printf("\n%s\033[1mAbstract Syntax Tree:\033[22m\n%s", BIG_HEADER, SMALL_HEADER);
    parser.getTree()->printf();
    std::printf("\n%s\n", BIG_HEADER);
-
-   tokenizer.free();
+   // tokenizer.free();
 
    return EXIT_SUCCESS;
 }

@@ -3,15 +3,18 @@
 
 #include "Node.hpp"
 #include "Token.hpp"
-#include <iostream>
 
 //!recursive formatted print of AST node
 void clef::Node::printf(const uint indents) const {
    //print self
    for (uint i = indents; i; --i) {
-      std::cout << "   ";
+      std::printf("   ");
    }
-   std::cout << (short)_type << ": " << _token << std::endl;
+   std::printf("%u: ",+_type);
+   if (_token) {
+      _token->printf();
+   }
+   std::printf("\n");
 
    //print children
    for (uint i = 0; i < MAX_AST_CHILDREN; ++i) {
@@ -28,7 +31,7 @@ void clef::Node::printf(const uint indents) const {
 //!throw error for node
 void clef::Node::throwError(const ErrCode code) const {
    if (_token) {
-      clef::throwError(code, _token->lineNum(), "nodeType: %u, token: %.*s", _type, _token->size(), _token->data());
+      clef::throwError(code, _token->lineNum(), "nodeType: %u, token: %.*s", _type, _token->size(), _token->begin());
    }
    else {
       clef::throwError(code, "nodeType: %u", _type);

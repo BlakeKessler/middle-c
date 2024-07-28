@@ -3,13 +3,11 @@
 #define TOKENIZER_HPP
 
 #include "Token.hpp"
-#include "StrUtils.hpp"
 #include "Source.hpp"
-#include "dyn_arr.hpp"
+
 #include "array.hpp"
+#include "dyn_arr.hpp"
 #include "dyn_arr_span.hpp"
-#include "pair.hpp"
-#include <iosfwd>
 
 class clef::Tokenizer {
    protected:
@@ -22,7 +20,8 @@ class clef::Tokenizer {
       //constructors
       Tokenizer();
       Tokenizer(Source& src);
-      void free() const { _src.free();_tokens.free();_tokLines.free();}
+      ~Tokenizer() { this->free(); }
+      void free() const { _tokens.free();}
 
       static Tokenizer TokenizeFile(const char* path);
 
@@ -53,9 +52,6 @@ class clef::Tokenizer {
 };
 
 namespace clef {
-   std::ostream& operator<<(std::ostream& stream, const clef::Tokenizer& tokens);
-   std::ostream& operator<<(std::ostream& stream, const clef::Tokenizer* tokens);
-
    static Tokenizer (*TokenizeFile)(const char* path) = &Tokenizer::TokenizeFile;
 }
 

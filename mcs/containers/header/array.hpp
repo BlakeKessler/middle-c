@@ -2,11 +2,12 @@
 #ifndef MCS_ARRAY_HPP
 #define MCS_ARRAY_HPP
 
-#include <MCS.hpp>
+#include "MCS.hpp"
 #include <bit>
 #include <memory>
-#include <initializer_list>
 #include <cstring>
+
+#include <initializer_list>
 
 template <typename T> class mcs::array {
    private:
@@ -16,7 +17,8 @@ template <typename T> class mcs::array {
       array();
       array(const uint size);
       array(T* buf, const uint size);
-      array(const std::initializer_list<T> initList);
+      array(std::initializer_list<T>);
+      ~array() { this->free(); }
       void free() const { std::free(_buf); }
 
       //element access
@@ -62,9 +64,9 @@ template<typename T> mcs::array<T>::array(T* buf, const uint size):
 
 }
 //!constructor from initializer list
-template<typename T> mcs::array<T>::array(const std::initializer_list<T> initList):
-   _buf((T*)malloc(initList.size() * sizeof(T))),_size(initList.size()) {
-      std::memcpy(_buf,initList.data(),_size * sizeof(T));
+template<typename T> mcs::array<T>::array(std::initializer_list<T> initPair):
+   _buf((T*)malloc(initPair.size() * sizeof(T))),_size(initPair.size()) {
+      std::memcpy(_buf,initPair.begin(),_size * sizeof(T));
 }
 
 //!bounds-checked element access

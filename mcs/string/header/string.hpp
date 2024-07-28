@@ -19,24 +19,6 @@ class mcs::string {
       // string operator*(const uint repeatCount) const;
       string& operator*=(const uint repeatCount);
 
-      // //comparison
-      // bool operator==(const string& other) const;
-      // bool operator!=(const string& other) const;
-      // sint operator<=>(const string& other) const;
-      // sint operator-(const string& other) const;      //will be changed to <-> in Middle C
-      // // sint operator<|>(const string& other) const; //will be implemented in Middle C
-      // bool operator<(const string& other) const;
-      // bool operator>(const string& other) const;
-      // bool operator<=(const string& other) const;
-      // bool operator>=(const string& other) const;
-
-      // //length of longest initial substring of only chars in other (strspn)
-      // uint operator&(const string& other) const;
-      // //length of longest initial substring of only chars NOT in other (strcspn)
-      // uint operator^(const string& other) const;
-      // //largest n such that (other*n == this.substr(other.size()*n))
-      // uint operator%(const string& other) const;
-
       //case modification
       string& alter(char (*const transformer)(const char));       //maybe replace with a macro
       string altered(char (*const transformer)(const char)) const;//maybe replace with a macro

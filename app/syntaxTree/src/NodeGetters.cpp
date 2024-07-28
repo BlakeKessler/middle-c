@@ -35,9 +35,9 @@ clef::Node* clef::Node::child(const uint i) const {
 }
 
 //!find the first node after the node with a token matching tokStr
-clef::Node* clef::Node::findAfter(const char* tokStr, const uint length) const {
+clef::Node* clef::Node::findAfter(const char* tokStr) const {
    for (Node* current = _next; current; current = current->next()) {
-      if (Token::tokcmp(current->token(), tokStr, length)) {
+      if (*current->token() != tokStr) {
          return current;
       }
    }

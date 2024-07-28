@@ -9,7 +9,7 @@
 
 template <typename T, uint _size> class mcs::static_arr {
    private:
-      T* _buf;
+      T _buf[_size];
    public:
       static_arr();
       static_arr(T* buf);
@@ -36,7 +36,7 @@ template <typename T, uint _size> class mcs::static_arr {
 
       //MODIFIERS
       T* emplace(const uint i, auto... args);
-      T* release() { T* temp = _buf; _buf = nullptr; return temp; }
+      // T* release() { T* temp = _buf; _buf = nullptr; return temp; }
 
       //typecasts
       operator bool() { return (bool)_size; }
@@ -46,18 +46,20 @@ template <typename T, uint _size> class mcs::static_arr {
 
 #pragma region src
 //!default constructor
-template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr():
-   _buf((T*)malloc(_size * sizeof(T))) {
+template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr() {
 
 }
-template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr(T* buf):
-   _buf(buf) {
-
+template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr(T* buf) {
+   for (uint i = 0; i < _size; ++i) {
+      _buf[i] = buf[i];
+   }
 }
 //!constructor from initializer list
 template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr(T initList[_size]):
    _buf((T*)malloc(_size * sizeof(T))) {
-      std::memcpy(_buf,initList.data(),_size * sizeof(T));
+      for (uint i = 0; i < _size; ++i) {
+         _buf[i] = buf[i];
+      }
 }
 
 //!bounds-checked element access

@@ -76,7 +76,7 @@ class clef::Node {
       Node* pop();
 
       //search
-      Node* findAfter(const char* tokStr, const uint length) const;
+      Node* findAfter(const char* tokStr) const;
 
       //IO
       void printf(const uint indents) const;

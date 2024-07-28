@@ -4,6 +4,7 @@
 
 // #include "CLEF.hpp"
 #include "CLEF_DEFINES.hpp"
+#include <utility>
 
 namespace clef {
    //!enum of CLEF error codes
@@ -37,8 +38,9 @@ namespace clef {
       OPERATOR,            //MiddleC operator
       OP_OR_DELIM,         //not yet determined between OPERATOR and DELIM_GEN
    };
+   constexpr auto operator+(const NodeType t) noexcept { return std::to_underlying(t); }
    //!enum of token types
-   enum TokenType : byte {
+   enum class TokenType : byte {
       NONE = 0x00, //not a valid member of a token
       EOS  = 0x01, //end of line of code
       PTXT = 0x02, //plaintext segment delimiters (strings, comments)
@@ -56,7 +58,12 @@ namespace clef {
       CHAR = STRT | IDEN,
       XDGT = DGIT | CHAR,
    };
-   constexpr auto operator+(const TokenType t) noexcept;
+   constexpr auto operator+(const TokenType t) noexcept { return std::to_underlying(t); }
+   constexpr TokenType operator&(const TokenType lhs, const TokenType rhs) noexcept { return (TokenType)((+lhs) & (+rhs)); }
+   constexpr TokenType operator|(const TokenType lhs, const TokenType rhs) noexcept { return (TokenType)((+lhs) | (+rhs)); }
+   constexpr TokenType operator*(const TokenType lhs, const TokenType rhs) noexcept { return (TokenType)((+lhs) * (+rhs)); }
+   constexpr TokenType operator~(const TokenType lhs) noexcept { return (TokenType)(~+lhs); }
+   constexpr TokenType operator*(const TokenType lhs, const uint rhs) noexcept { return (TokenType)((+lhs) * rhs); }
 
    enum class OpType : byte {
       LEFT        = 0x10,
@@ -93,11 +100,12 @@ namespace clef {
       COMMENT_BLOCK,    //COMMENTED-OUT CODE
       COMMENT_LINE,     //COMMENTED OUT CODE
    };
+   constexpr auto operator+(const DelimPairType t) noexcept { return std::to_underlying(t); }
    //!literal type specification
    enum class LitType : byte {
       NONE = 0x00,
-      INT = TokenType::ILIT,
-      FLOAT = TokenType::FLIT,
+      INT = +TokenType::ILIT,
+      FLOAT = +TokenType::FLIT,
       CHAR = 0x03,
       STRING,
    };

@@ -4,10 +4,9 @@
 
 #include "CLEF.hpp"
 #include "MidC_Data.hpp"
-#include "StrView.hpp"
-#include <iosfwd>
+#include "raw_str_span.hpp"
 
-class clef::Token : public clef::StrView {
+class clef::Token : public mcs::raw_str_span {
    private:
       const uint _lineNum;
    public:
@@ -22,34 +21,26 @@ class clef::Token : public clef::StrView {
       uint lineNum() const { return _lineNum; }
 
       //!check if a token represents a block delimiter
-      inline DelimPairType blockDelimEval() const { return _str ? blockDelimType(_str, _size) : DelimPairType::NONE; }
+      inline DelimPairType blockDelimEval() const { return begin() ? blockDelimType(begin(), size()) : DelimPairType::NONE; }
       //!check if a token represents a MiddleC keyword
-      inline bool isKeyword() const { return _str ? clef::isKeyword(_str, _size) : false; }
-
-      //comparison
-      bool operator==(const std::string& other) const;
-      // bool operator==(const char* other) const { return (strlen(other) == _size) && tokcmp(this, other,_size); }
-      static bool tokcmp(const Token* tok, const char* str, const uint strlen);
+      inline bool isKeyword() const { return begin() ? clef::isKeyword(begin(), size()) : false; }
 
       //token type number calculation
-      byte typeNum() const;
-      bool isType(const TokenType t) const { return typeNum() & t; }
+      TokenType typeNum() const;
+      bool isType(const TokenType t) const { return +(typeNum() & t); }
       NodeType nodeType() const;
-      static byte typeNum(const char ch, const bool isstart);
-      static uint findTokEnd(char* const tokStr, const uint len);
-      static uint findTokEnd(const StrView& str) { return findTokEnd(str.begin(),str.size()); }
+      static TokenType typeNum(const char ch, const bool isstart);
+      static uint findTokEnd(const char* const tokStr, const uint len);
+      static uint findTokEnd(const mcs::raw_str_span& str) { return findTokEnd(str.begin(),str.size()); }
       
-      auto maxOpLen() { return clef::maxOpLen(_str, _size); }
-      auto getOpData() { return clef::getOpData(_str, _size); }
+      auto maxOpLen() { return clef::maxOpLen(begin(), size()); }
+      auto getOpData() { return clef::getOpData(begin(), size()); }
 
 
       void throwError(const ErrCode code) const;
-};
 
-//token IO
-namespace clef {
-   std::ostream& operator<<(std::ostream& stream, const clef::Token& token);
-   std::ostream& operator<<(std::ostream& stream, const clef::Token* token);
-}
+      //token IO
+      void printf() const { std::printf("%.*s", size(),begin()); }
+};
 
 #endif //TOKEN_HPP
