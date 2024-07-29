@@ -1,6 +1,6 @@
 #compiler
 COMPILER := clang++ -std=c++23
-FLAGS := -g -Wall -Wextra -ferror-limit=64
+FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name
 
 #compilation paths
 OUT_PATH := test/bin

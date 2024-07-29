@@ -13,15 +13,14 @@ class clef::Parser {
 
       //private helper functions
       bool runPass(Node* current);
-      bool evalUntyped(Node* current);
       bool evalDelimPair(Node* current);
 
       bool handleDelimPairs();
    public:
       //constructors and destructor
-      Parser() {_tree = nullptr;}
-      Parser(SyntaxTree* tree) {_tree = tree;}
-      Parser(Token* tokens, const uint count) {_tree = new SyntaxTree(tokens, count);}
+      Parser() { _tree = nullptr; }
+      Parser(SyntaxTree* tree) { _tree = tree; }
+      Parser(Token* tokens, const uint count) { _tree = new SyntaxTree(tokens, count); }
       Parser(Tokenizer* tokens) {_tree = new SyntaxTree(tokens->begin(), tokens->size());}
       ~Parser() {delete _tree;}
 
