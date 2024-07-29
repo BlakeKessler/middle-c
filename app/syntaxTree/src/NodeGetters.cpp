@@ -25,11 +25,10 @@ clef::Node* clef::Node::back() const {
 
 //!get the i'th child of the node
 clef::Node* clef::Node::child(const uint i) const {
-   if (i < MAX_AST_CHILDREN) {
+   if (i < _children.size()) {
       return _children[i];
-   }
-   else {
-      clef::throwError(clef::ErrCode::SEGFAULT, _token->lineNum(), "get child \033[4m%u\1xb[24m of an AST node (MAX_AST_CHILDREN = \033[4m%u\1xb[24m)", i, MAX_AST_CHILDREN);
+   } else {
+      clef::throwError(clef::ErrCode::SEGFAULT, _token->lineNum(), "get child \033[4m%u\1xb[24m of an AST node (MAX_AST_CHILDREN = \033[4m%u\1xb[24m)", i, _children.size());
       return nullptr;
    }
 }
@@ -61,7 +60,7 @@ mcs::dyn_arr<clef::Node*> clef::Node::extractByType(const NodeType type) const {
       }
       //push next and children to stack (in reverse order b/c stack)
       current->_next ? stack.push_back(current->_next) : false;
-      for (uint i = MAX_AST_CHILDREN; i;) {
+      for (uint i = _children.size(); i;) {
          current->_children[--i] ? stack.push_back(current->_children[i]) : false;
       }
    }

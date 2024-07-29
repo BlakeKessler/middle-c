@@ -11,13 +11,11 @@ void clef::Node::printf(const uint indents) const {
       std::printf("   ");
    }
    std::printf("%u: ",+_type);
-   if (_token) {
-      _token->printf();
-   }
+   if (_token) { _token->printf(); }
    std::printf("\n");
 
    //print children
-   for (uint i = 0; i < MAX_AST_CHILDREN; ++i) {
+   for (uint i = 0; i < _children.size(); ++i) {
       if (_children[i]) {
          _children[i]->printf(indents + 1);
       }
@@ -32,8 +30,7 @@ void clef::Node::printf(const uint indents) const {
 void clef::Node::throwError(const ErrCode code) const {
    if (_token) {
       clef::throwError(code, _token->lineNum(), "nodeType: %u, token: %.*s", _type, _token->size(), _token->begin());
-   }
-   else {
+   } else {
       clef::throwError(code, "nodeType: %u", _type);
    }
 }

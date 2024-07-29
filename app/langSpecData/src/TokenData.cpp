@@ -41,31 +41,31 @@ clef::DelimPairType clef::blockDelimType(const char* str, const uint length) {
    return DelimPairType::NONE;
 }
 
-// //!array of all Middle-C keywords
-// const char clef::KEYWORDS[][MAX_KEYWORD_LEN + 1] = {
-//       "uint", "ushort", "ulong", "sint", "sshort", "slong", "ubyte", "sbyte", "bool", "float", "char", "wchar", "wwchar", 
-//       "uint8", "uint16", "uint32", "uint64", "uint128", "uint256", 
-//       "sint8", "sint16", "sint32", "sint64", "sint128", "sint256", 
-//       "float16", "float32", "float64", "float128", "float256", 
-//       "half", "single", "double", "quad", "oct", 
-//       "void", "auto", 
-//       "true", "false", "nullptr", 
-//       "new", "delete", "sizeof", "arrsizeof", 
-//       "const", "constexpr", "immediate", "mutable", "volatile", "atomic", 
-//       "class", "struct", "union", "enum", "namespace", "private", "protected", "public", "friend", "this", "explicit", "using", "template", 
-//       "extern", "inline", "static", "virtual", "override",
-//       "asm", 
-//       "typeof", "typeid", "typename", "alignas", "alignof", 
-//       "return", "operator", "assert", "static_assert", "noexcept", 
-//       "type_cast", "bit_cast", "safe_cast", "quick_cast", "const_cast", 
-//       "if", "else", "for", "while", "do", "break", "continue", "switch", "case", "default", "goto", 
-//       "try", "catch", "throw"
-//    };
+//!array of all Middle-C keywords
+const mcs::array<mcs::string> clef::KEYWORDS = {
+   "uint", "ushort", "ulong", "sint", "sshort", "slong", "ubyte", "sbyte", "bool", "float", "char", "wchar", "wwchar", 
+   "uint8", "uint16", "uint32", "uint64", "uint128", "uint256", 
+   "sint8", "sint16", "sint32", "sint64", "sint128", "sint256", 
+   "float16", "float32", "float64", "float128", "float256", 
+   "half", "single", "double", "quad", "oct", 
+   "void", "auto", 
+   "true", "false", "nullptr", 
+   "new", "delete", "sizeof", "arrsizeof", 
+   "const", "constexpr", "immediate", "mutable", "volatile", "atomic", 
+   "class", "struct", "union", "enum", "namespace", "private", "protected", "public", "friend", "this", "explicit", "using", "template", 
+   "extern", "inline", "static", "virtual", "override",
+   "asm", 
+   "typeof", "typeid", "typename", "alignas", "alignof", 
+   "return", "operator", "assert", "static_assert", "noexcept", 
+   "type_cast", "bit_cast", "safe_cast", "quick_cast", "const_cast", 
+   "if", "else", "for", "while", "do", "break", "continue", "switch", "case", "default", "goto", 
+   "try", "catch", "throw"
+};
 
 //!array encoding which tokens each character is a legal member of
 using enum clef::TokenType;
 #define CTMP (clef::TokenType)(0xA0)
-clef::TokenType clef::tokTypeArr[256] = {
+const mcs::static_arr<clef::TokenType,256> clef::tokTypeArr{
 // NUL   SOH   STX   ETX   EOT   ENQ   ACK   BEL   BS    LF    VT    FF    CR    SO    SI    DLE
    NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE,
 

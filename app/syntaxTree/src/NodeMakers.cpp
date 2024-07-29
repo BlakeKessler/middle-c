@@ -18,11 +18,11 @@ clef::Node::Node() {
    _parent = nullptr;
    _indexInParent = 0;
 
-   std::fill_n(_children, MAX_AST_CHILDREN, nullptr);
+   std::memset(_children.begin(),0,_children.size());
 }
 //!construct from token and type
 clef::Node::Node(Token* tok, const NodeType type) {
-   _type = asint(type) ? type : tok ? tok->nodeType() : NodeType::NONE;
+   _type = +type ? type : tok ? tok->nodeType() : NodeType::NONE;
    _status = 0;
 
    _token = tok;
@@ -31,12 +31,12 @@ clef::Node::Node(Token* tok, const NodeType type) {
    _parent = nullptr;
    _indexInParent = 0;
 
-   std::fill_n(_children, MAX_AST_CHILDREN, nullptr);
+   std::memset(_children.begin(),0,_children.size());
 }
 //!construct from previous and type
 //!sets previous's next to be this
 clef::Node::Node(Node* previous, const NodeType type, Token* tok) {
-   _type = asint(type) ? type : tok ? tok->nodeType() : NodeType::NONE;
+   _type = +type ? type : tok ? tok->nodeType() : NodeType::NONE;
    _status = 0;
 
    _token = tok;
@@ -48,7 +48,7 @@ clef::Node::Node(Node* previous, const NodeType type, Token* tok) {
    _parent = nullptr;
    _indexInParent = 0;
 
-   std::fill_n(_children, MAX_AST_CHILDREN, nullptr);
+   std::memset(_children.begin(),0,_children.size());
 }
 #pragma endregion constructors
 
@@ -87,9 +87,9 @@ clef::Node* clef::Node::makeBlock(Node* open, Node* close, const DelimPairType t
    open->_type = NodeType::DELIM_OPEN;
    close->_type = NodeType::DELIM_CLOSE;
 
-   block->_status = asint(type);
-   open->_status = asint(type);
-   close->_status = asint(type);
+   block->_status = +type;
+   open->_status = +type;
+   close->_status = +type;
 
    //return new block node
    return block;
@@ -100,7 +100,8 @@ clef::Node* clef::Node::makeBlock(Node* open, Node* close, const DelimPairType t
 //!_children[1] -> first token of contents of block
 //!_children[2] -> closing delimiter 
 clef::Node* clef::Node::makeBlock(Node* open, Node* close) {
-   return makeBlock(open, close, open->token()->blockDelimEval());
+   assert(open && close);
+   return makeBlock(open, close, open->blockDelimEval());
 }
 
 //!maker function for statement nodes
@@ -111,9 +112,10 @@ clef::Node* clef::Node::makeStatement(Node* firstTok, Node* eosTok) {
       return nullptr;
    }
    //find first token in statement
+   //!NOTE: make more efficient
    Node* stmntStart = eosTok;
    while (stmntStart->_prev) {
-      if (stmntStart->_prev->type() == NodeType::STATEMENT ||
+      if (  stmntStart->_prev->type() == NodeType::STATEMENT ||
             stmntStart->_prev->type() == NodeType::EOS ||
             stmntStart->_prev->type() == NodeType::DELIM_CLOSE ||
             stmntStart->_prev->type() == NodeType::DELIM_OPEN ||

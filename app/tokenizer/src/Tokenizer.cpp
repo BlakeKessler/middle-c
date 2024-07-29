@@ -17,12 +17,12 @@ clef::Tokenizer::Tokenizer(Source& src):
 _src(src),_tokens(),_tokLines(src.lineCount()) {
    src.release();
    mcs::raw_str_span line;
-   uint counter;
+   uint tempCounter;
    
    for (uint i = 0; i < _src.lineCount(); ++i) {
       //initialize
       line = _src.line(i);
-      counter = 0;
+      tempCounter = 0;
 
       //skip leading whitespace
       while (line.size() && !+tokTypeArr[+line[0]]) { line.inc_begin(1); }
@@ -30,15 +30,15 @@ _src(src),_tokens(),_tokLines(src.lineCount()) {
       //process line
       while (line.size()) {
          //find bounds of token
-         counter = Token::findTokEnd(line);
+         tempCounter = Token::findTokEnd(line);
          //add to array of tokens
-         _tokens.emplace_back(line.begin(), counter, i);
-         line.inc_begin(counter);
+         _tokens.emplace_back(line.begin(), tempCounter, i);
+         line.inc_begin(tempCounter);
          
          //partition token if it is multiple operators
          if (_tokens.back().isType(TokenType::DLIM)) {
-            while (counter = _tokens.back().maxOpLen(), counter && counter < _tokens.back().size()) {
-               _tokens.emplace_back(_tokens.back().split(counter));
+            while (tempCounter = _tokens.back().maxOpLen(), tempCounter && tempCounter < _tokens.back().size()) {
+               _tokens.emplace_back(_tokens.back().split(tempCounter));
             }
          }
 
@@ -46,7 +46,7 @@ _src(src),_tokens(),_tokLines(src.lineCount()) {
          while (line.size() && !+tokTypeArr[+line[0]]) { line.inc_begin(1); }
       }
       //create token line & increment overall count
-      _tokLines.emplace(i, _tokens.ptrToBuf(), mcs::pair{i?_tokLines[i-1].lastIndex():0, _tokens.size()});
+      _tokLines.emplace(i, _tokens.ptrToBuf(), mcs::pair{i?_tokLines[i-1].lastIndex():0 , _tokens.size()});
    }
 }
 

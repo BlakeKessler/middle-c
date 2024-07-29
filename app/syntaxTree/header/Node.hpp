@@ -5,6 +5,7 @@
 #include "CLEF.hpp"
 #include "Token.hpp"
 #include "dyn_arr.hpp"
+#include "static_arr.hpp"
 
 class clef::Node {
    private:
@@ -13,7 +14,7 @@ class clef::Node {
       Node* _next;
       Node* _prev;
 
-      Node* _children[MAX_AST_CHILDREN];
+      mcs::static_arr<Node*,MAX_AST_CHILDREN> _children;
       Node* _parent;
       uint _indexInParent;
 

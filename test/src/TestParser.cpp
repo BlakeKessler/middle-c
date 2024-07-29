@@ -6,7 +6,6 @@
 #include "dyn_arr.hpp"
 #include <cstring>
 #include <cstdio>
-#include <iostream>
 
 #define BIG_HEADER "\033[;1m=======================\n\033[0m"
 #define SMALL_HEADER "\033[;1m-----------------------\n\033[0m"
@@ -26,12 +25,10 @@ int main(const int argc, char** argv) {
    
    //abstract syntax tree
    clef::Parser parser{&tokenizer};
-   // parser.runPasses(0x100);
    parser.runPass();
    std::printf("\n%s\033[1mAbstract Syntax Tree:\033[22m\n%s", BIG_HEADER, SMALL_HEADER);
    parser.getTree()->printf();
    std::printf("\n%s\n", BIG_HEADER);
-   // tokenizer.free();
 
    return EXIT_SUCCESS;
 }

@@ -7,18 +7,18 @@
 
 #include "string.hpp"
 #include "array.hpp"
+#include "static_arr.hpp"
 #include "pair.hpp"
 
 #include <cassert>
 #include <cstring>
 
 namespace clef {
-   extern TokenType tokTypeArr[256];
+   extern const mcs::static_arr<TokenType,256> tokTypeArr;
 
    extern const mcs::array<Operator> OPERATORS;
    extern const mcs::array<DelimPair> BLOCK_DELIMS;
-   // extern const char KEYWORDS[][MAX_KEYWORD_LEN + 1];
-   // extern const mcs::array<mcs::string> KEYWORDS;
+   extern const mcs::array<mcs::string> KEYWORDS;
    
    
    //block delims
@@ -55,14 +55,6 @@ struct clef::Operator {
 struct clef::DelimPair {
    char open[MAX_DELIM_LEN + 1];
    char close[MAX_DELIM_LEN + 1];
-
-   // DelimPair() {
-   //    std::memset(this,0,sizeof(DelimPair));
-   // }
-   // DelimPair(const char o[MAX_DELIM_LEN + 1], const char c[MAX_DELIM_LEN + 1]) {
-   //    std::memcpy(open,o,sizeof(open));
-   //    std::memcpy(close,c,sizeof(close));
-   // }
 };
 
 #endif //DATA_HPP

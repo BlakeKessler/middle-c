@@ -2,7 +2,6 @@
 #define PARSER_CPP
 
 #include "Parser.hpp"
-#include "dyn_arr.hpp"
 
 //!public function to run a single pass of the parser
 //!returns whether or not changes were made

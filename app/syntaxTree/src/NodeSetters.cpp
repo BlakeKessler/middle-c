@@ -2,7 +2,6 @@
 #define NODE_SETTERS_CPP
 
 #include "Node.hpp"
-#include <bit>
 
 //!replace next node
 //!returns the node that used to be next (sets its _next and _prev to nullptr)
@@ -61,8 +60,12 @@ inline clef::Node* clef::Node::unlinkPrev() {
 //!returns the replaced child
 clef::Node* clef::Node::setChild(const uint i, Node* newChild) {
    //bounds check
-   if (i >= MAX_AST_CHILDREN) {
-      clef::throwError(clef::ErrCode::SEGFAULT, _token->lineNum(), "set child \033[4m%u\1xb[24m of an AST node (MAX_AST_CHILDREN = \033[4m%u\1xb[24m)", i, MAX_AST_CHILDREN);
+   if (i >= _children.size()) {
+      if (_token) {
+         clef::throwError(clef::ErrCode::SEGFAULT, _token->lineNum(), "set child \033[4m%u\1xb[24m of an AST node (MAX_AST_CHILDREN = \033[4m%u\1xb[24m)", i, _children.size());
+      } else {
+         clef::throwError(clef::ErrCode::SEGFAULT, "set child \033[4m%u\1xb[24m of an AST node (MAX_AST_CHILDREN = \033[4m%u\1xb[24m)", i, _children.size());
+      }
       return nullptr;
    }
    //save replaced child

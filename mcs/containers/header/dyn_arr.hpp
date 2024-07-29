@@ -5,6 +5,7 @@
 #include <MCS.hpp>
 #include <bit>
 #include <memory>
+#include <initializer_list>
 #include <cstring>
 
 template <typename T> class mcs::dyn_arr {
@@ -16,6 +17,7 @@ template <typename T> class mcs::dyn_arr {
       dyn_arr();
       dyn_arr(const uint size);
       dyn_arr(const uint size, const uint bufSize);
+      dyn_arr(std::initializer_list<T>);
       dyn_arr(dyn_arr&& other);
       ~dyn_arr() { if(_buf) { this->free(); } }
       void free() const { std::free(_buf); }
@@ -75,6 +77,11 @@ template<typename T> mcs::dyn_arr<T>::dyn_arr(const uint size, const uint bufSiz
       else {
          _buf = (T*)std::calloc(_bufSize, sizeof(T));
       }
+}
+//!constructor from initializer list
+template<typename T> mcs::dyn_arr<T>::dyn_arr(std::initializer_list<T> initPair):
+   _bufSize(initPair.size()),_size(initPair.size()),_buf((T*)std::malloc(_bufSize * sizeof(T))) {
+      std::memcpy(_buf,initPair.begin(),_size * sizeof(T));
 }
 //!move constructor
 template<typename T> mcs::dyn_arr<T>::dyn_arr(dyn_arr&& other):

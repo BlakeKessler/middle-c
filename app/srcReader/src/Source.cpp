@@ -22,7 +22,6 @@ clef::Source clef::Source::readFile(const char* path) {
    FILE* srcFile = std::fopen(path, "r");
    const uint charsRead = std::fread(_buf.begin(), sizeof(char), fileSize, srcFile);
    std::fclose(srcFile);
-   std::printf("%u, %u\n",charsRead,_buf.size());
    assert(charsRead == _buf.size());
 
    //find number of lines

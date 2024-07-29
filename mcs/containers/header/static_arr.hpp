@@ -6,14 +6,16 @@
 #include <bit>
 #include <memory>
 #include <cstring>
+#include <cassert>
+#include <initializer_list>
 
 template <typename T, uint _size> class mcs::static_arr {
    private:
       T _buf[_size];
    public:
       static_arr();
-      static_arr(T* buf);
-      static_arr(T initList[_size]);
+      static_arr(T buf[_size]);
+      static_arr(std::initializer_list<T>);
       void free() const { std::free(_buf); }
 
       //element access
@@ -52,15 +54,18 @@ template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr() {
       _buf[i] = 0;
    }
 }
-template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr(T* buf) {
+//!constructor from raw array
+template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr(T buf[_size]) {
    for (uint i = 0; i < _size; ++i) {
       _buf[i] = buf[i];
    }
 }
-//!constructor from initializer list
-template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr(T initList[_size]) {
+//!constructor from raw array
+template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr(std::initializer_list<T> initList) {
+   assert(initList.size() == _size);
+   const T* list = initList.begin();
    for (uint i = 0; i < _size; ++i) {
-      _buf[i] = buf[i];
+      _buf[i] = list[i];
    }
 }
 

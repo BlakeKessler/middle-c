@@ -59,20 +59,18 @@ _bufSize(size+1),_size(0),_buf((char*)std::calloc(_bufSize,sizeof(char))) {
 }
 //!constructor from c-string and length
 mcs::string::string(const char* str, const uint strlen):
-_bufSize(std::bit_floor(strlen + 1)),_size(strlen),
+_bufSize(std::strlen(str) + 1),_size(strlen),
 _buf((char*)malloc(_bufSize * sizeof(char))) {
    assert(std::strlen(str) <= strlen);
    std::strncpy(_buf,str,strlen);
    _buf[_size] = '\0';
-   _buf[_bufSize] = '\0';
 }
 //!constructor from null-terminated c-string
 mcs::string::string(const char* str):
-_bufSize(std::bit_floor((uint)std::strlen(str) + 1)),_size(std::strlen(str)),
+_bufSize(std::strlen(str) + 1),_size(std::strlen(str)),
 _buf((char*)malloc(_bufSize * sizeof(char))) {
    std::strncpy(_buf,str,_size);
    _buf[_size] = '\0';
-   _buf[_bufSize] = '\0';
 }
 
 //!bounds-checked element access

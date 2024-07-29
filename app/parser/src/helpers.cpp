@@ -3,7 +3,6 @@
 
 #include "Parser.hpp"
 #include "MidC_Data.hpp"
-#include <cstring>
 
 //!public function to run multiple passes of the parser
 //!returns whether or not the final completed pass made any changes
