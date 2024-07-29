@@ -3,6 +3,7 @@
 #define MCS_ARRAY_HPP
 
 #include "MCS.hpp"
+#include "alloc.hpp"
 #include <bit>
 #include <memory>
 #include <cstring>
@@ -55,17 +56,17 @@ template<typename T> mcs::array<T>::array():
 }
 //!allocate array by size (in elements)
 template<typename T> mcs::array<T>::array(const uint size):
-   _buf((T*)std::calloc(size, sizeof(T))),_size(size) {
+   _buf(mcs::calloc<T>(size)),_size(size) {
 
 }
 //!copy constructor from raw pointer to buffer and size of buffer (in elements)
 template<typename T> mcs::array<T>::array(T* buf, const uint size):
-   _buf((T*)std::malloc(size * sizeof(T))),_size(size) {
+   _buf(mcs::malloc<T>(size)),_size(size) {
       std::memcpy(_buf,buf,_size * sizeof(T));
 }
 //!constructor from initializer list
 template<typename T> mcs::array<T>::array(std::initializer_list<T> initPair):
-   _buf((T*)std::malloc(initPair.size() * sizeof(T))),_size(initPair.size()) {
+   _buf(mcs::malloc<T>(initPair.size())),_size(initPair.size()) {
       std::memcpy(_buf,initPair.begin(),_size * sizeof(T));
 }
 

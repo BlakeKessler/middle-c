@@ -68,7 +68,7 @@ class mcs::string {
       
       //MODIFIERS
       bool resize(const uint i) { return (i < _bufSize) ? (_size = i), true : false; }
-      //!std::realloc buffer to at least the specified size
+      //!realloc buffer to at least the specified size
       bool realloc(const uint newSize) { return realloc_exact(std::bit_ceil(newSize)); }
       bool realloc_exact(const uint newSize);
       char* release() { char* temp = _buf; _buf = nullptr; _size = 0; _bufSize = 0; return temp; }

@@ -2,6 +2,7 @@
 #define STRING_CPP
 
 #include "string.hpp"
+#include "alloc.hpp"
 #include <bit>
 #include <cassert>
 #include <cstring>
@@ -54,13 +55,13 @@ _bufSize(0),_size(0),_buf(nullptr) {
 }
 //!construct with buffer size
 mcs::string::string(const uint size):
-_bufSize(size+1),_size(0),_buf((char*)std::calloc(_bufSize,sizeof(char))) {
+_bufSize(size+1),_size(0),_buf(mcs::calloc<char>(_bufSize)) {
    
 }
 //!constructor from c-string and length
 mcs::string::string(const char* str, const uint strlen):
 _bufSize(std::strlen(str) + 1),_size(strlen),
-_buf((char*)malloc(_bufSize * sizeof(char))) {
+_buf(mcs::malloc<char>(_bufSize)) {
    assert(std::strlen(str) <= strlen);
    std::strncpy(_buf,str,strlen);
    _buf[_size] = '\0';
@@ -68,7 +69,7 @@ _buf((char*)malloc(_bufSize * sizeof(char))) {
 //!constructor from null-terminated c-string
 mcs::string::string(const char* str):
 _bufSize(std::strlen(str) + 1),_size(std::strlen(str)),
-_buf((char*)malloc(_bufSize * sizeof(char))) {
+_buf(mcs::malloc<char>(_bufSize)) {
    std::strncpy(_buf,str,_size);
    _buf[_size] = '\0';
 }
@@ -89,9 +90,9 @@ const char& mcs::string::at(const uint i) const {
 }
 
 
-//!std::realloc buffer to the specified size
+//!realloc buffer to the specified size
 bool mcs::string::realloc_exact(const uint newSize) {
-   char* temp = (char*)std::realloc(_buf, (newSize + 1) * sizeof(char));
+   char* temp = mcs::realloc<char>(_buf, newSize + 1);
    if (!temp) {
       mcs_throw(ErrCode::ALLOC_FAIL, "failed string realloc (buffer size %u -> %u, string size %u)", _bufSize, newSize, _size);
       return false;

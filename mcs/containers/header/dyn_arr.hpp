@@ -2,7 +2,8 @@
 #ifndef MCS_DYN_ARR_HPP
 #define MCS_DYN_ARR_HPP
 
-#include <MCS.hpp>
+#include "MCS.hpp"
+#include "alloc.hpp"
 #include <bit>
 #include <memory>
 #include <initializer_list>
@@ -42,7 +43,7 @@ template <typename T> class mcs::dyn_arr {
       const T& back() const { return _buf[_size - 1]; }
 
       //MODIFIERS
-      //!std::realloc buffer to at least the specified size
+      //!realloc buffer to at least the specified size
       bool realloc(const uint newSize) { return realloc_exact(std::bit_ceil(newSize)); }
       bool realloc_exact(const uint newSize);
       T* release() { T* temp = _buf; _buf = nullptr; _size = 0; _bufSize = 0; return temp; }
@@ -64,7 +65,7 @@ template<typename T> mcs::dyn_arr<T>::dyn_arr():
 //!constructor from array size
 template<typename T> mcs::dyn_arr<T>::dyn_arr(const uint size):
    _bufSize(std::bit_ceil(size)), _size(size),
-   _buf((T*)std::calloc(_bufSize, sizeof(T))) {
+   _buf(mcs::calloc<T>(_bufSize)) {
 
 }
 //!constructor from array size and buffer size
@@ -75,12 +76,12 @@ template<typename T> mcs::dyn_arr<T>::dyn_arr(const uint size, const uint bufSiz
          _buf = nullptr;
       }
       else {
-         _buf = (T*)std::calloc(_bufSize, sizeof(T));
+         _buf = mcs::calloc<T>(_bufSize);
       }
 }
 //!constructor from initializer list
 template<typename T> mcs::dyn_arr<T>::dyn_arr(std::initializer_list<T> initPair):
-   _bufSize(initPair.size()),_size(initPair.size()),_buf((T*)std::malloc(_bufSize * sizeof(T))) {
+   _bufSize(initPair.size()),_size(initPair.size()),_buf(mcs::malloc<T>(_bufSize)) {
       std::memcpy(_buf,initPair.begin(),_size * sizeof(T));
 }
 //!move constructor
@@ -104,9 +105,9 @@ template<typename T> const T& mcs::dyn_arr<T>::at(const uint i) const {
    return _buf[i];
 }
 
-//!std::realloc buffer to the specified size
+//!realloc buffer to the specified size
 template<typename T> bool mcs::dyn_arr<T>::realloc_exact(const uint newSize) {
-   T* temp = (T*)std::realloc(_buf, newSize * sizeof(T));
+   T* temp = mcs::realloc<T>(_buf, newSize);
    if (!temp) {
       mcs_throw(ErrCode::ALLOC_FAIL, "failed dyn_arr realloc (buffer size %u -> %u, arr size %u)", _bufSize, newSize, _size);
       return false;
