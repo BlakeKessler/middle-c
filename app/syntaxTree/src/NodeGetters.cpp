@@ -3,8 +3,6 @@
 
 #include "Node.hpp"
 #include "dyn_arr.hpp"
-#include <cstdlib>
-#include <cassert>
 
 //!keep getting the previous node until there isn't one anymore
 clef::Node* clef::Node::front() const {
@@ -53,7 +51,6 @@ mcs::dyn_arr<clef::Node*> clef::Node::extractByType(const NodeType type) const {
    while (stack.size()) {
       //pop from stack
       current = stack.pop_back();
-      assert(current);
       //push current to results array if type matchs
       if (current->_type == type) {
          results.push_back(current);

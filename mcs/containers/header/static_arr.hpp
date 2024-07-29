@@ -16,7 +16,7 @@ template <typename T, uint _size> class mcs::static_arr {
       static_arr();
       static_arr(T buf[_size]);
       static_arr(std::initializer_list<T>);
-      void free() const { std::free(_buf); }
+      void free() const { mcs::free(_buf); }
 
       //element access
       uint size() const { return _size; }

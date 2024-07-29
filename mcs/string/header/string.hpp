@@ -3,6 +3,7 @@
 #define STRING_HPP
 
 #include "MCS.hpp"
+#include "alloc.hpp"
 #include "char_type.hpp"
 
 class mcs::string {
@@ -42,8 +43,8 @@ class mcs::string {
       string(const uint size);
       string(const char* str, const uint strlen);
       string(const char* str);
-      ~string() { if(_buf) { this->free(); } }
-      void free() const { std::free(_buf); }
+      ~string() { this->free(); }
+      void free() const { mcs::free(_buf); }
 
       //properties
       uint size() const { return _size; }

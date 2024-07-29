@@ -20,8 +20,8 @@ template <typename T> class mcs::dyn_arr {
       dyn_arr(const uint size, const uint bufSize);
       dyn_arr(std::initializer_list<T>);
       dyn_arr(dyn_arr&& other);
-      ~dyn_arr() { if(_buf) { this->free(); } }
-      void free() const { std::free(_buf); }
+      ~dyn_arr() { this->free(); }
+      void free() const { mcs::free(_buf); }
 
       //element access
       uint size() const { return _size; }

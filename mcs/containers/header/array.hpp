@@ -19,8 +19,8 @@ template <typename T> class mcs::array {
       array(const uint size);
       array(T* buf, const uint size);
       array(std::initializer_list<T>);
-      ~array() { if (_buf) { this->free(); } }
-      void free() const { std::free(_buf); }
+      ~array() { this->free(); }
+      void free() const { mcs::free(_buf); }
 
       //element access
       uint size() const { return _size; }
