@@ -40,7 +40,7 @@ class mcs::dyn_str_span {
       dyn_str_span(string& str, const uint begin, const uint size);
 
       //properties
-      uint size() const { return _size; }
+      constexpr uint size() const { return _size; }
       dyn_str_span& set_begin(const sint i) { _size -= (i - _begin); _begin = i; return *this; }
       dyn_str_span& inc_begin(const sint i) { _size -= i; _begin += i; return *this; }
       dyn_str_span& set_size(const uint i) { _size = i; return *this; }
@@ -55,13 +55,13 @@ class mcs::dyn_str_span {
       char& front() { return (*_ptrToBuf)[_begin]; }
       char& back() { return (*_ptrToBuf)[_begin + _size - 1]; }
 
-      const char* const* ptrToBuf() const { return _ptrToBuf; }
-      const char* begin() const { return (*_ptrToBuf) + _begin; }
-      const char* end() const { return (*_ptrToBuf) + _begin  + _size; }
-      const char& operator[](const uint i) const { return (*_ptrToBuf)[i + _begin]; }
-      const char& at(const uint i) const;
-      const char& front() const { return (*_ptrToBuf)[_begin]; }
-      const char& back() const { return (*_ptrToBuf)[_begin + _size - 1]; }
+      constexpr const char* const* ptrToBuf() const { return _ptrToBuf; }
+      constexpr const char* begin() const { return (*_ptrToBuf) + _begin; }
+      constexpr const char* end() const { return (*_ptrToBuf) + _begin  + _size; }
+      constexpr const char& operator[](const uint i) const { return (*_ptrToBuf)[i + _begin]; }
+      constexpr const char& at(const uint i) const;
+      constexpr const char& front() const { return (*_ptrToBuf)[_begin]; }
+      constexpr const char& back() const { return (*_ptrToBuf)[_begin + _size - 1]; }
 
       //typecasts
       operator bool() { return (bool)_size; }

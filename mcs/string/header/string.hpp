@@ -47,8 +47,8 @@ class mcs::string {
       void free() const { mcs::free(_buf); }
 
       //properties
-      uint size() const { return _size; }
-      uint capacity() const { return _bufSize - 1; }
+      constexpr uint size() const { return _size; }
+      constexpr uint capacity() const { return _bufSize - 1; }
 
       //element access
       char* const* ptrToBuf() { return &_buf; }
@@ -59,13 +59,13 @@ class mcs::string {
       char& front() { return _buf[0]; }
       char& back() { return _buf[_size - 1]; }
 
-      const char* const* ptrToBuf() const { return &_buf; }
-      const char* begin() const { return _buf; }
-      const char* end() const { return _buf + _size; }
-      const char& operator[](const uint i) const { return _buf[i]; }
-      const char& at(const uint i) const;
-      const char& front() const { return _buf[0]; }
-      const char& back() const { return _buf[_size - 1]; }
+      constexpr const char* const* ptrToBuf() const { return &_buf; }
+      constexpr const char* begin() const { return _buf; }
+      constexpr const char* end() const { return _buf + _size; }
+      constexpr const char& operator[](const uint i) const { return _buf[i]; }
+      constexpr const char& at(const uint i) const;
+      constexpr const char& front() const { return _buf[0]; }
+      constexpr const char& back() const { return _buf[_size - 1]; }
       
       //MODIFIERS
       bool resize(const uint i) { return (i < _bufSize) ? (_size = i), true : false; }

@@ -22,7 +22,7 @@ template <typename T> class mcs::dyn_arr_span {
       uint lastIndex() const { return _beginIndex + _size; }
       uint size() const { return _size; }
 
-      T* const* ptrToBuf() { return _ptrToBuf; }
+      constexpr T* const* ptrToBuf() { return _ptrToBuf; }
       T* begin() { return *_ptrToBuf + _beginIndex; }
       T* end() { return begin() + _size; }
       T& operator[](const uint i) { return begin()[i]; }
@@ -30,13 +30,13 @@ template <typename T> class mcs::dyn_arr_span {
       T& front() { return begin()[0]; }
       T& back() { return begin()[_size - 1]; }
 
-      const T* const* ptrToBuf() const { return _ptrToBuf; }
-      const T* begin() const { return *_ptrToBuf + _beginIndex; }
-      const T* end() const { return begin() + _size; }
-      const T& operator[](const uint i) const { return begin()[i]; }
-      const T& at(const uint i) const;
-      const T& front() const { return begin()[0]; }
-      const T& back() const { return begin()[_size - 1]; }
+      constexpr const T* const* ptrToBuf() const { return _ptrToBuf; }
+      constexpr const T* begin() const { return *_ptrToBuf + _beginIndex; }
+      constexpr const T* end() const { return begin() + _size; }
+      constexpr const T& operator[](const uint i) const { return begin()[i]; }
+      constexpr const T& at(const uint i) const;
+      constexpr const T& front() const { return begin()[0]; }
+      constexpr const T& back() const { return begin()[_size - 1]; }
 
       //MODIFIERS
       T* emplace(const uint i, auto... args);
@@ -69,7 +69,7 @@ template<typename T> T& mcs::dyn_arr_span<T>::at(const uint i) {
    return begin()[i];
 }
 //!bounds-checked element access
-template<typename T> const T& mcs::dyn_arr_span<T>::at(const uint i) const {
+template<typename T> constexpr const T& mcs::dyn_arr_span<T>::at(const uint i) const {
    if (i >= _size) {
       mcs_throw(ErrCode::SEGFAULT, "dyn_arr_span of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m");
    }

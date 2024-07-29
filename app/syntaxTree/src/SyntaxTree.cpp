@@ -5,6 +5,7 @@
 #include "dyn_arr.hpp"
 
 //constructor
+//!NOTE: rewrite to use a dyn_arr as a stack to ensure contiguitiy
 clef::SyntaxTree::SyntaxTree(Token* tokens, const uint count)
 :_root(new Node()){
    Node* current = _root;

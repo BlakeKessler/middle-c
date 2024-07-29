@@ -82,7 +82,7 @@ char& mcs::string::at(const uint i) {
    return _buf[i];
 }
 //!bounds-checked element access
-const char& mcs::string::at(const uint i) const {
+constexpr const char& mcs::string::at(const uint i) const {
    if (i >= _size) {
       mcs_throw(ErrCode::SEGFAULT, "string of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m");
    }
@@ -92,12 +92,7 @@ const char& mcs::string::at(const uint i) const {
 
 //!realloc buffer to the specified size
 bool mcs::string::realloc_exact(const uint newSize) {
-   char* temp = mcs::realloc<char>(_buf, newSize + 1);
-   if (!temp) {
-      mcs_throw(ErrCode::ALLOC_FAIL, "failed string realloc (buffer size %u -> %u, string size %u)", _bufSize, newSize, _size);
-      return false;
-   }
-   _buf = temp;
+   _buf = mcs::realloc<char>(_buf, newSize + 1);
    _bufSize = newSize + 1;
    _buf[_size] = '\0';
    return true;

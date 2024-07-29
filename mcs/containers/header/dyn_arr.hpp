@@ -24,8 +24,8 @@ template <typename T> class mcs::dyn_arr {
       void free() const { mcs::free(_buf); }
 
       //element access
-      uint size() const { return _size; }
-      uint capacity() const { return _bufSize; }
+      constexpr uint size() const { return _size; }
+      constexpr uint capacity() const { return _bufSize; }
       T* const* ptrToBuf() { return &_buf; }
       T* begin() { return _buf; }
       T* end() { return _buf + _size; }
@@ -34,13 +34,13 @@ template <typename T> class mcs::dyn_arr {
       T& front() { return _buf[0]; }
       T& back() { return _buf[_size - 1]; }
 
-      const T* const* ptrToBuf() const { return &_buf; }
-      const T* begin() const { return _buf; }
-      const T* end() const { return _buf + _size; }
-      const T& operator[](const uint i) const { return _buf[i]; }
-      const T& at(const uint i) const;
-      const T& front() const { return _buf[0]; }
-      const T& back() const { return _buf[_size - 1]; }
+      constexpr const T* const* ptrToBuf() const { return &_buf; }
+      constexpr const T* begin() const { return _buf; }
+      constexpr const T* end() const { return _buf + _size; }
+      constexpr const T& operator[](const uint i) const { return _buf[i]; }
+      constexpr const T& at(const uint i) const;
+      constexpr const T& front() const { return _buf[0]; }
+      constexpr const T& back() const { return _buf[_size - 1]; }
 
       //MODIFIERS
       //!realloc buffer to at least the specified size
@@ -98,7 +98,7 @@ template<typename T> T& mcs::dyn_arr<T>::at(const uint i) {
    return _buf[i];
 }
 //!bounds-checked element access
-template<typename T> const T& mcs::dyn_arr<T>::at(const uint i) const {
+template<typename T> constexpr const T& mcs::dyn_arr<T>::at(const uint i) const {
    if (i >= _size) {
       mcs_throw(ErrCode::SEGFAULT, "dyn_arr of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m");
    }
@@ -107,12 +107,7 @@ template<typename T> const T& mcs::dyn_arr<T>::at(const uint i) const {
 
 //!realloc buffer to the specified size
 template<typename T> bool mcs::dyn_arr<T>::realloc_exact(const uint newSize) {
-   T* temp = mcs::realloc<T>(_buf, newSize);
-   if (!temp) {
-      mcs_throw(ErrCode::ALLOC_FAIL, "failed dyn_arr realloc (buffer size %u -> %u, arr size %u)", _bufSize, newSize, _size);
-      return false;
-   }
-   _buf = temp;
+   _buf = mcs::realloc<T>(_buf, newSize);;
    _bufSize = newSize;
    return true;
 }

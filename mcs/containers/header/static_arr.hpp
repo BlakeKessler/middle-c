@@ -19,7 +19,7 @@ template <typename T, uint _size> class mcs::static_arr {
       void free() const { mcs::free(_buf); }
 
       //element access
-      uint size() const { return _size; }
+      constexpr uint size() const { return _size; }
       T* const* ptrToBuf() { return &_buf; }
       T* begin() { return _buf; }
       T* end() { return _buf + _size; }
@@ -28,13 +28,13 @@ template <typename T, uint _size> class mcs::static_arr {
       T& front() { return _buf[0]; }
       T& back() { return _buf[_size - 1]; }
 
-      const T* const* ptrToBuf() const { return &_buf; }
-      const T* begin() const { return _buf; }
-      const T* end() const { return _buf + _size; }
-      const T& operator[](const uint i) const { return _buf[i]; }
-      const T& at(const uint i) const;
-      const T& front() const { return _buf[0]; }
-      const T& back() const { return _buf[_size - 1]; }
+      constexpr const T* const* ptrToBuf() const { return &_buf; }
+      constexpr const T* begin() const { return _buf; }
+      constexpr const T* end() const { return _buf + _size; }
+      constexpr const T& operator[](const uint i) const { return _buf[i]; }
+      constexpr const T& at(const uint i) const;
+      constexpr const T& front() const { return _buf[0]; }
+      constexpr const T& back() const { return _buf[_size - 1]; }
 
       //MODIFIERS
       T* emplace(const uint i, auto... args);
@@ -77,7 +77,7 @@ template<typename T,uint _size> T& mcs::static_arr<T,_size>::at(const uint i) {
    return _buf[i];
 }
 //!bounds-checked element access
-template<typename T,uint _size> const T& mcs::static_arr<T,_size>::at(const uint i) const {
+template<typename T,uint _size> constexpr const T& mcs::static_arr<T,_size>::at(const uint i) const {
    if (i >= _size) {
       mcs_throw(ErrCode::SEGFAULT, "static_arr of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m");
    }

@@ -54,7 +54,7 @@ char& mcs::dyn_str_span::at(const uint i) {
    return (*_ptrToBuf)[_begin + i];
 }
 //!bounds-checked element access
-const char& mcs::dyn_str_span::at(const uint i) const {
+constexpr const char& mcs::dyn_str_span::at(const uint i) const {
    if (i >= _size) {
       mcs_throw(ErrCode::SEGFAULT, "dyn_str_span of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m");
    }
