@@ -2,41 +2,91 @@
 #define SYNTAX_TREE_CPP
 
 #include "SyntaxTree.hpp"
-#include "dyn_arr.hpp"
+#include "astIt.hpp"
+#include <typeinfo>
 
-//constructor
-//!NOTE: rewrite to use a dyn_arr as a stack to ensure contiguitiy
-clef::SyntaxTree::SyntaxTree(Token* tokens, const uint count)
-:_root(new Node()){
-   Node* current = _root;
-   const Token* const end = tokens + count;
-   //push tokens
-   for (Token* it = tokens ; it < end; ++it) {
-      current = new Node(current, NodeType::NONE, it);
-   }
+//!initialize syntax tree from tokens
+clef::SyntaxTree::SyntaxTree(mcs::dyn_arr<Token>&& tokens, mcs::array<mcs::dyn_arr_span<Token>>& lines):
+   _root(static_cast<NodeID_t>(1)),
+   _nodes(tokens.size()),
+   _tokens(std::move(tokens)),
+   _lineBounds(lines.size()) {
+      //initialize nodes
+      _nodes.emplace(0,TOK_NIL);
+      // std::memset(_nodes.begin(), 0, sizeof(Node));
+      for (uint i = 1; i < _tokens.size(); ++i) {
+         _nodes.emplace(i,static_cast<NodeID_t>(i+1),static_cast<NodeID_t>(i-1),_tokens[i].nodeType(),static_cast<TokenID_t>(i));
+      } _nodes.back().nextID = NODE_NIL;
+
+      //calculate line bounds
+      uint temp = 0;
+      for (uint i = 1; i < lines.size(); ++i) {
+         _lineBounds[i].first = temp;
+         temp += lines[i].size();
+         _lineBounds[i].second = temp;
+      }
 }
-//destructor - frees all nodes in the tree
-clef::SyntaxTree::~SyntaxTree() {
-   mcs::dyn_arr<Node*> stack{};
-   Node* scout = _root;
-   Node* backup;
-   while (scout) {
-      backup = scout->next();
-      //push children to stack
-      for (uint i = 0; i < MAX_AST_CHILDREN; ++i) {
-         if (scout->child(i)) {
-            stack.push_back(scout->child(i));
+
+//!print AST
+void clef::SyntaxTree::printf() const {
+   //allocate memory
+   mcs::dyn_arr<mcs::pair<NodeID_t, uint>> stack;
+   stack.push_back({_root,0});
+   astIt current;
+   uint indents;
+   uint i;
+   //iterate
+   while (stack.size()) {
+      //current
+      indents = stack.back().second;
+      current = it(stack.pop_back().first);
+      for (i = indents; i; --i) {
+         std::printf("   ");
+      }
+      std::printf("%3u: ", +current->type);
+      current.printf();
+      std::printf("\n");
+      //next
+      if (+current->nextID) {
+         stack.push_back({current->nextID,indents});
+      }
+      //children
+      ++indents;
+      for (i = current->childIDs.size() - 1; i; --i) {
+         if (+current->childIDs[i]) {
+            stack.push_back({current->childIDs[i],indents});
          }
       }
-      //free scout
-      delete scout;
-      scout = backup;
-
-      //pop from stack
-      if (!scout && stack.size()) {
-         scout = stack.pop_back();
-      }
    }
 }
+
+#pragma region DEBUG
+void clef::SyntaxTree::debug_printf() const {
+   for (uint i = 0; i < _nodes.size(); ++i) {
+      std::printf("%u <- %u(%u)[%u, %u, %u] -> %u\n",
+         +_nodes[i].prevID,
+         i,
+         +_nodes[i].tokenID,
+         +_nodes[i].childIDs[0],
+         +_nodes[i].childIDs[1],
+         +_nodes[i].childIDs[2],
+         +_nodes[i].nextID
+      );
+   }
+}
+#pragma endregion DEBUG
+
+
+
+#pragma region trivial
+clef::astIt clef::SyntaxTree::root() { return astIt(this,_root); }
+const clef::astIt clef::SyntaxTree::root() const { return astIt(this,_root); }
+clef::astIt clef::SyntaxTree::begin() { return astIt(this,NODE_NIL); }
+const clef::astIt clef::SyntaxTree::begin() const { return astIt(this,NODE_NIL); }
+clef::astIt clef::SyntaxTree::end() { return astIt(this, static_cast<NodeID_t>(_nodes.size())); }
+const clef::astIt clef::SyntaxTree::end() const { return astIt(this, static_cast<NodeID_t>(_nodes.size())); }
+clef::astIt clef::SyntaxTree::it(const NodeID_t i) { return astIt(this,i); }
+const clef::astIt clef::SyntaxTree::it(const NodeID_t i) const { return astIt(this,i); }
+#pragma endregion trivial
 
 #endif //SYNTAX_TREE_CPP

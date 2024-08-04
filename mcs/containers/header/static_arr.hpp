@@ -9,14 +9,16 @@
 #include <cassert>
 #include <initializer_list>
 
+#include <type_traits>
+
 template <typename T, uint _size> class mcs::static_arr {
    private:
       T _buf[_size];
    public:
-      static_arr();
-      static_arr(T buf[_size]);
-      static_arr(std::initializer_list<T>);
-      void free() const { mcs::free(_buf); }
+      constexpr static_arr();
+      constexpr static_arr(T buf[_size]);
+      constexpr static_arr(std::initializer_list<T>);
+      constexpr ~static_arr() {}
 
       //element access
       constexpr uint size() const { return _size; }
@@ -44,24 +46,26 @@ template <typename T, uint _size> class mcs::static_arr {
       operator bool() { return (bool)_size; }
 };
 
+#pragma region CTAD
 
+// template<typename T, uint _size> mcs::static_arr(T[_size]) -> mcs::static_arr<T,_size>;
+// template<typename T> mcs::static_arr(std::initializer_list<T>) -> mcs::static_arr<T,list.size()>;
+#pragma endregion CTAD
 
 #pragma region src
 //!default constructor
 //!NOTE: might be unreasonably slow for large _size
-template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr() {
-   for (uint i = 0; i < _size; ++i) {
-      _buf[i] = 0;
-   }
+template<typename T,uint _size> constexpr mcs::static_arr<T,_size>::static_arr() {
+   std::memset(_buf,0,_size*sizeof(T));
 }
 //!constructor from raw array
-template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr(T buf[_size]) {
+template<typename T,uint _size> constexpr mcs::static_arr<T,_size>::static_arr(T buf[_size]) {
    for (uint i = 0; i < _size; ++i) {
       _buf[i] = buf[i];
    }
 }
 //!constructor from raw array
-template<typename T,uint _size> mcs::static_arr<T,_size>::static_arr(std::initializer_list<T> initList) {
+template<typename T,uint _size> constexpr mcs::static_arr<T,_size>::static_arr(std::initializer_list<T> initList) {
    assert(initList.size() == _size);
    const T* list = initList.begin();
    for (uint i = 0; i < _size; ++i) {

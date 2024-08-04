@@ -13,6 +13,7 @@ class mcs::raw_str_span {
       uint _size;
    public:
       #pragma region string
+      static const bool string_like = true;
       //case modification
       raw_str_span& alter(char (*const transformer)(const char));       //maybe replace with a macro
       string altered(char (*const transformer)(const char)) const;//maybe replace with a macro
@@ -28,17 +29,12 @@ class mcs::raw_str_span {
       string substr(const uint stop) const;
       string substr(const uint start, const uint stop) const;
       string substr(const uint start, const uint stop, const uint step);
-
-
-      //comparison to C-style string
-      bool operator==(const char* str) const;
-
       #pragma endregion string
 
       #pragma region charArray
       //constructors
-      raw_str_span();
-      raw_str_span(char* str, const uint strlen);
+      constexpr raw_str_span(): _buf(nullptr),_size(0) {}
+      constexpr raw_str_span(char* str, const uint size):_buf(str),_size(size) {}
       raw_str_span(string& str);
       raw_str_span(string& str, const uint size);
       raw_str_span(string& str, const uint begin, const uint size);

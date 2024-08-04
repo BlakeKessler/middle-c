@@ -14,6 +14,7 @@ class mcs::dyn_str_span {
       uint _size;
    public:
       #pragma region string
+      static const bool string_like = true;
       //case modification
       dyn_str_span& alter(char (*const transformer)(const char));       //maybe replace with a macro
       string altered(char (*const transformer)(const char)) const;//maybe replace with a macro
@@ -33,7 +34,7 @@ class mcs::dyn_str_span {
 
       #pragma region charArray
       //constructors
-      dyn_str_span();
+      constexpr dyn_str_span():_ptrToBuf(nullptr),_begin(0),_size(0) {}
       dyn_str_span(char* const* str, const uint strlen);
       dyn_str_span(string& str);
       dyn_str_span(string& str, const uint size);

@@ -66,7 +66,7 @@ void clef::Token::throwError(const ErrCode code) const {
 }
 
 
-
+//!NOTE: re-write to not be a huge wall of if statements
 clef::NodeType clef::Token::nodeType() const {
    const TokenType type = typeNum();
    if (+(type & TokenType::EOS)) {
@@ -79,8 +79,10 @@ clef::NodeType clef::Token::nodeType() const {
       return NodeType::LITERAL;
    }
    if (+(type & TokenType::OP)) {
-      return +(type & (TokenType::BLOC | TokenType::PTXT)) ?
-         NodeType::OP_OR_DELIM : NodeType::OPERATOR;
+      return 
+         +(type & (TokenType::BLOC | TokenType::PTXT)) ?
+            NodeType::OP_OR_DELIM :
+         *this == "\\" ? NodeType::ESCAPE : NodeType::OPERATOR;
    }
    if (+(type & (TokenType::BLOC | TokenType::PTXT))) {
       return NodeType::DELIM_GEN;

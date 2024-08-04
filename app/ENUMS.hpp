@@ -30,6 +30,8 @@ namespace clef {
 
       STATEMENT,           //statement
 
+      ESCAPE,              //escape character
+
       DELIM_PAIR,          //opening and closing pair of block delimeter
       DELIM_GEN,           //general block delimiter
       DELIM_OPEN,          //opening block delimiter
@@ -50,7 +52,7 @@ namespace clef {
       IDEN = 0x20, //identifier (not first character)
       ILIT = 0x40, //integer literal
       FLIT = 0x80, //floating point literal
-                  //anything else -> interpret as bitmask
+                   //anything else -> interpret as bitmask
 
       DLIM = BLOC | OP,
       NUM  = ILIT | FLIT,

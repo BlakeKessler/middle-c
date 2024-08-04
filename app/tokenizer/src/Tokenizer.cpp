@@ -16,6 +16,7 @@ _src(),_tokens(),_tokLines() {
 clef::Tokenizer::Tokenizer(Source& src):
 _src(src),_tokens(),_tokLines(src.lineCount()) {
    src.release();
+   _tokens.emplace_back();
    mcs::raw_str_span line;
    uint tempCounter;
    
@@ -62,7 +63,7 @@ void clef::Tokenizer::printf() const {
       std::printf("line %u:", lineNum + 1);
       for (const Token& tok : _tokLines[lineNum]) {
          std::printf("\033[24m \033[4m");
-         tok.printf();
+         tok.size() ? tok.printf(),0 : std::printf("\033[31mNIL\033[39m");
       }
       std::printf("\033[24m\n");
    }

@@ -12,15 +12,15 @@ template <typename T> class mcs::dyn_arr_span {
       uint _beginIndex;
       uint _size;
    public:
-      dyn_arr_span();
-      dyn_arr_span(T* const* buf, const uint size);
-      dyn_arr_span(T* const* buf, const uint beginIndex, const uint size);
-      dyn_arr_span(T* const* buf, const mcs::pair<uint,uint> bounds);
+      constexpr dyn_arr_span();
+      constexpr dyn_arr_span(T* const* buf, const uint size);
+      constexpr dyn_arr_span(T* const* buf, const uint beginIndex, const uint size);
+      constexpr dyn_arr_span(T* const* buf, const mcs::pair<uint,uint> bounds);
 
       //element access
-      uint firstIndex() const { return _beginIndex; }
-      uint lastIndex() const { return _beginIndex + _size; }
-      uint size() const { return _size; }
+      constexpr uint firstIndex() const { return _beginIndex; }
+      constexpr uint lastIndex() const { return _beginIndex + _size; }
+      constexpr uint size() const { return _size; }
 
       constexpr T* const* ptrToBuf() { return _ptrToBuf; }
       T* begin() { return *_ptrToBuf + _beginIndex; }
@@ -44,19 +44,19 @@ template <typename T> class mcs::dyn_arr_span {
 
 #pragma region src
 //!default constructor
-template<typename T> mcs::dyn_arr_span<T>::dyn_arr_span():
+template<typename T> constexpr mcs::dyn_arr_span<T>::dyn_arr_span():
    _ptrToBuf(nullptr),_beginIndex(0),_size(0) {
 
 }
-template<typename T> mcs::dyn_arr_span<T>::dyn_arr_span(T* const* ptrToBuf, const uint size):
+template<typename T> constexpr mcs::dyn_arr_span<T>::dyn_arr_span(T* const* ptrToBuf, const uint size):
    _ptrToBuf(ptrToBuf),_beginIndex(0),_size(size) {
 
 }
-template<typename T> mcs::dyn_arr_span<T>::dyn_arr_span(T* const* ptrToBuf, const uint beginIndex, const uint size):
+template<typename T> constexpr mcs::dyn_arr_span<T>::dyn_arr_span(T* const* ptrToBuf, const uint beginIndex, const uint size):
    _ptrToBuf(ptrToBuf),_beginIndex(beginIndex),_size(size) {
 
 }
-template<typename T> mcs::dyn_arr_span<T>::dyn_arr_span(T* const* ptrToBuf, const mcs::pair<uint,uint> bounds):
+template<typename T> constexpr mcs::dyn_arr_span<T>::dyn_arr_span(T* const* ptrToBuf, const mcs::pair<uint,uint> bounds):
    _ptrToBuf(ptrToBuf),_beginIndex(bounds.first),_size(bounds.second - bounds.first) {
 
 }

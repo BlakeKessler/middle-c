@@ -13,8 +13,9 @@ namespace mcs {
    template<typename T> class dyn_arr_span;
 
    class string;
-   class raw_str_span;
    class dyn_str_span;
+   template<uint _size> class raw_str;
+   class raw_str_span;
 
    template<typename first_t, typename second_t = first_t> struct pair;
 }

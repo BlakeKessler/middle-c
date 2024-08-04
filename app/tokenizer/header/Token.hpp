@@ -10,6 +10,8 @@ class clef::Token : public mcs::raw_str_span {
    private:
       const uint _lineNum;
    public:
+      // bool operator==(const char* other) const;
+
       //constructors
       Token();
       Token(char* front, char* back, const uint line = 0);
@@ -21,9 +23,9 @@ class clef::Token : public mcs::raw_str_span {
       uint lineNum() const { return _lineNum; }
 
       //!check if a token represents a block delimiter
-      inline DelimPairType blockDelimEval() const { return begin() ? blockDelimType(begin(), size()) : DelimPairType::NONE; }
+      inline DelimPairType blockDelimEval() const { return begin() ? blockDelimType(*this) : DelimPairType::NONE; }
       //!check if a token represents a MiddleC keyword
-      inline bool isKeyword() const { return begin() ? clef::isKeyword(begin(), size()) : false; }
+      inline bool isKeyword() const { return begin() ? clef::isKeyword(*this) : false; }
 
       //token type number calculation
       TokenType typeNum() const;
@@ -33,14 +35,15 @@ class clef::Token : public mcs::raw_str_span {
       static uint findTokEnd(const char* const tokStr, const uint len);
       static uint findTokEnd(const mcs::raw_str_span& str) { return findTokEnd(str.begin(),str.size()); }
       
-      auto maxOpLen() { return clef::maxOpLen(begin(), size()); }
-      auto getOpData() { return clef::getOpData(begin(), size()); }
+      auto maxOpLen() const { return clef::maxOpLen(*this); }
+      const Operator* getOpData() const { return clef::getOpData(*this); }
+      const DelimPair* getDelimPairData() const { return &BLOCK_DELIMS[+clef::blockDelimType(*this)]; }
 
 
       void throwError(const ErrCode code) const;
 
       //token IO
-      void printf() const { std::printf("%.*s", size(),begin()); }
+      void printf() const { assert(size()); std::printf("%.*s", size(),begin()); }
 };
 
 #endif //TOKEN_HPP

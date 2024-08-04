@@ -10,6 +10,7 @@ namespace fs = std::filesystem;
 
 //!read Middle C source code file into vector of lines of code
 //!returns a Source object with the data
+//!NOTE: std::fgets to get a line
 clef::Source clef::Source::readFile(const char* path) {
    //get file size and allocate buffer
    //extra char allocated to ensure null-termination
@@ -20,7 +21,7 @@ clef::Source clef::Source::readFile(const char* path) {
 
    //open, read, close, back-fill file
    FILE* srcFile = std::fopen(path, "r");
-   const uint charsRead = std::fread(_buf.begin(), sizeof(char), fileSize, srcFile);
+   const uint charsRead = std::fread(_buf.begin(), 1, fileSize, srcFile);
    std::fclose(srcFile);
    assert(charsRead == _buf.size());
 

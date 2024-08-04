@@ -2,99 +2,54 @@
 #define PARSER_HELPERS_CPP
 
 #include "Parser.hpp"
-#include "MidC_Data.hpp"
+#include <cstring>
 
-//!public function to run multiple passes of the parser
-//!returns whether or not the final completed pass made any changes
-bool clef::Parser::runPasses(const uint maxPasses) {
-   bool isIncomplete = true;
-   for (uint i = maxPasses; i && isIncomplete; --i) {
-      isIncomplete &= runPass();
-   }
-   return isIncomplete;
+// //!NOTE: REWRITE (this and MidC_Data.hpp)
+// bool clef::Parser::isOpeningDelim(astIt& current) {
+//    auto& tok = current.token();
+//    if (!tok.size()) { return false; }
+//    return !std::strncmp(tok.begin(), BLOCK_DELIMS[+blockDelimType(tok)].open.begin(), MAX_DELIM_LEN);
+// }
+// //
+// bool clef::Parser::delimsMatch(astIt& open, astIt& close) {
+//    if (!open->tokenID || !close->tokenID) { return false; }
+//    auto t = BLOCK_DELIMS[+blockDelimType(open.token())];
+//    return !(!std::strncmp(open.token().begin(), t.open.begin(), open.token().size()) || !std::strncmp(close.token().begin(), t.close.begin(), close.token().size()));
+// }
+
+//!make a block delimiter pair
+clef::astIt clef::Parser::makeBlock(astIt& open, astIt& close) {
+   //assert that open and close are delims
+   assert(open->type == NodeType::DELIM_GEN);
+   assert(close->type == NodeType::DELIM_GEN);
+   //set open and close types
+   open->type = NodeType::DELIM_OPEN;
+   close->type = NodeType::DELIM_CLOSE;
+   //construct new node
+   // astIt block{&_tree, _tree.pushNode(Node{0, NodeType::DELIM_PAIR})};
+   astIt block{&_tree, _tree.emplaceNode(TOK_NIL, NodeType::DELIM_PAIR)};
+   //set status
+   block->status = +blockDelimType(_tree.token(open->tokenID));
+   open->status = block->status;
+   close->status = block->status;
+   assert(close->status == +blockDelimType(_tree.token(close->tokenID)));
+   //set up children
+   block.setChild(open,0);
+   block.setChild(open->nextID,1);
+   block.setChild(close,2);
+   //set previous and next
+   block.setPrev(open->prevID);
+   block.setNext(close->nextID);
+   //set parent
+   open.parent().setChild(block, open->indexInParent);
+   //disconnect open and close
+   open->prevID = NODE_NIL;
+   open.severNext();
+   close.severPrev();
+   close->nextID = NODE_NIL;
+   
+   //return
+   return block;
 }
-
-//!handle block delimiters
-//!NOTE: could be rewritten to not allocate duplicate memory for the stack and queue
-bool clef::Parser::handleDelimPairs() {
-   //allocate memory
-   mcs::dyn_arr<Node*> allDelims(_tree->getRoot()->extractByType(NodeType::DELIM_GEN));
-   mcs::dyn_arr<Node*> delimStack{0,1};
-   bool madeChanges = false;
-
-   //process
-   for (uint i = 0; i < allDelims.size(); ++i) {
-      //check for empty stack
-      if (!delimStack.size()) {
-         //ensure that first delim is opening
-         if (allDelims[i]->isOpening()) {
-            delimStack.push_back(allDelims[i]);
-            continue;
-         }
-         else {
-            allDelims[i]->throwError(ErrCode::UNCLOSED_BLOCK);
-            return false;
-         }
-      }
-      
-      //check for matching delims
-      if (delimStack.back()->checkDelimMatch(allDelims[i])) {
-         madeChanges |= (bool)Node::makeBlock(delimStack.back(), allDelims[i]);
-         delimStack.pop_back();
-         continue;
-      }
-
-      //push if opening delim
-      if (allDelims[i]->isOpening()) {
-         delimStack.push_back(allDelims[i]);
-         continue;
-      }
-
-      //illegal delim - throw error
-      allDelims[i]->throwError(ErrCode::UNCLOSED_BLOCK);
-      return false;
-   }
-
-   //check that all opening delims were closed
-   if (delimStack.size()) {
-      throwError(ErrCode::UNCLOSED_BLOCK, "\033[4m%u\033[24m unclosed delims", delimStack.size());
-      return false;
-   }
-
-   //clean up and return
-   return madeChanges;
-}
-
-#define caseMacro(delimType) case asint(DelimPairType::delimType):                           \
-   if (iden && iden->type() == NodeType::IDEN) {                                             \
-      current->pop();                                                                        \
-      iden->child(0) ? iden->child(0)->back()->setNext(current) : iden->setChild(0, current);\
-   }                                                                                         \
-   return true;
-//!parser function to evaluate a delimiter pair node
-bool clef::Parser::evalDelimPair(Node* const current) {
-   //check status (pair type)
-   Node* iden = current->prev();
-   switch (current->status()) {
-      //char or str
-      case asint(DelimPairType::QUOTES_CHAR):
-         current->setType(NodeType::LITERAL);
-         current->setStatus(asint(LitType::CHAR));
-         return true;
-      case asint(DelimPairType::QUOTES_STR):
-         current->setType(NodeType::LITERAL);
-         current->setStatus(asint(LitType::STRING));
-         return true;
-      //block delims
-      caseMacro(PARENS)
-      caseMacro(SUBSCRIPT)
-      caseMacro(INIT_LIST)
-      caseMacro(SPECIALIZER)
-
-   }
-
-   return false;
-}
-#undef caseMacro
 
 #endif //PARSER_HELPERS_CPP

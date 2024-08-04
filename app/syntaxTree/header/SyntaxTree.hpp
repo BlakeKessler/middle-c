@@ -5,16 +5,50 @@
 #include "CLEF.hpp"
 #include "Node.hpp"
 #include "Token.hpp"
+// #include "Tokenizer.hpp"
+#include "array.hpp"
+#include "dyn_arr.hpp"
+#include "dyn_arr_span.hpp"
+#include "pair.hpp"
 
 class clef::SyntaxTree {
    private:
-      Node* _root;
+      NodeID_t _root;
+      mcs::dyn_arr<Node> _nodes;
+      mcs::dyn_arr<Token> _tokens;
+      mcs::array<mcs::pair<uint>> _lineBounds;  //{index of start token, size}
    public:
-      SyntaxTree(Token* tokens, const uint count);
-      ~SyntaxTree();
+      SyntaxTree():_root(NODE_NIL),_nodes(),_tokens(),_lineBounds() {}
+      SyntaxTree(mcs::dyn_arr<Token>&& tokens, mcs::array<mcs::dyn_arr_span<Token>>& lines);
+      ~SyntaxTree() = default;
 
-      constexpr Node* getRoot() const {return _root ? (_root->next() ? _root->next() : _root) : nullptr;}
-      void printf() const { getRoot()->printf(0); }
+      NodeID_t emplaceNode(auto... args) { return static_cast<NodeID_t>(_nodes.emplace_back(args...) - _nodes.begin()); }
+      NodeID_t pushNode(Node& node) { return (NodeID_t)_nodes.push_back(node); }
+
+      astIt root();
+      const astIt root() const;
+
+      astIt begin();
+      astIt end();
+      const astIt begin() const;
+      const astIt end() const;
+
+      astIt it(const NodeID_t i);
+      // astIt it(const uint i) { return it(static_cast<NodeID_t>(i)); }
+      const astIt it(const NodeID_t i) const;
+      // const astIt it(const uint i) const { return it(static_cast<NodeID_t>(i)); }
+      Token& token(const TokenID_t i) { return _tokens[+i]; }
+      const Token& token(const TokenID_t i) const { return _tokens[+i]; }
+
+      void printf() const;
+      #pragma region DEBUG
+      void debug_printf() const;
+      #pragma endregion DEBUG
+
+      operator bool() const { return +_root; }
+
+
+   friend class astIt;
 };
 
 #endif //SYNTAX_TREE_HPP

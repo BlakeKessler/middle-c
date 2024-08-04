@@ -1,38 +1,62 @@
 #ifndef STRING_LIKE_HPP
 #define STRING_LIKE_HPP
-//use concepts
+//!NOTE: use concepts
 
 
 #include "string.hpp"
+#include "raw_str_span.hpp"
+#include "dyn_str_span.hpp"
+#include "raw_str.hpp"
 #include <cstring>
+#include <concepts>
+
+#pragma region types
+
+// template<typename T> struct string_like;
+// template<> struct string_like<mcs::string>{};
+// template<> struct string_like<mcs::raw_str_span>{};
+// template<> struct string_like<mcs::dyn_str_span>{};
+
+template<typename T> concept string_like = requires(T a) {
+   // std::derived_from<mcs::string,T> ||
+   // std::derived_from<mcs::dyn_str_span,T> ||
+   // std::derived_from<mcs::raw_str,T> ||
+   // std::derived_from<mcs::raw_str_span,T>
+   // a.substr(0,0);
+   T::string_like == true;
+};
+
+#pragma endregion types
 
 #pragma region cdef
 //concatenation
-template<typename lhs_str_t>
+template<string_like lhs_str_t>
 mcs::string operator+(const lhs_str_t& lhs, const char* rhs);
 
 //comparison
-template<typename lhs_str_t>
-bool operator!=(const lhs_str_t& lhs, const char* rhs);
-template<typename lhs_str_t>
+template<string_like lhs_str_t>
+constexpr bool operator!=(const lhs_str_t& lhs, const char* rhs);
+template<string_like lhs_str_t>
+constexpr bool operator==(const lhs_str_t& lhs, const char* rhs);
+template<string_like lhs_str_t>
 sint operator-(const lhs_str_t& lhs, const char* rhs);      //will be changed to <-> in Middle C
-// template<typename lhs_str_t, typename rhs_str_t>
+// template<string_like lhs_str_t, string_like rhs_str_t>
 // sint operator<|>(const lhs_str_t& lhs, const char* rhs); //will be implemented in Middle C
 
 //length of longest initial substring of only chars in rhs (strspn)
-template<typename lhs_str_t>
+template<string_like lhs_str_t>
 uint operator&(const lhs_str_t& lhs, const char* rhs);
-template<typename lhs_str_t>
+template<string_like lhs_str_t>
 //length of longest initial substring of only chars NOT in rhs (strcspn)
 uint operator^(const lhs_str_t& lhs, const char* rhs);
-template<typename lhs_str_t>
+template<string_like lhs_str_t>
 //largest n such that (rhs*n == lhs.substr(rhs.size()*n))
 uint operator%(const lhs_str_t& lhs, const char* rhs);
 #pragma endregion cdef
 
 #pragma region csrc
 //concatenation
-template<typename lhs_str_t>
+template<string_like lhs_str_t>
 mcs::string operator+(const lhs_str_t& lhs, const char* rhs) {
    const uint len = std::strlen(rhs);
    //copy lhs
@@ -45,8 +69,8 @@ mcs::string operator+(const lhs_str_t& lhs, const char* rhs) {
 }
 
 //comparison
-template<typename lhs_str_t>
-bool operator!=(const lhs_str_t& lhs, const char* rhs) {
+template<string_like lhs_str_t>
+constexpr bool operator!=(const lhs_str_t& lhs, const char* rhs) {
    //check size
    const uint len = std::strlen(rhs);
    if (lhs.size() != len) {
@@ -55,30 +79,34 @@ bool operator!=(const lhs_str_t& lhs, const char* rhs) {
    //compare
    return std::memcmp(lhs.begin(), rhs, lhs.size()*sizeof(char));
 }
-template<typename lhs_str_t>
+template<string_like lhs_str_t>
+constexpr bool operator==(const lhs_str_t& lhs, const char* rhs) {
+   return !(lhs != rhs);
+}
+template<string_like lhs_str_t>
 sint operator-(const lhs_str_t& lhs, const char* rhs);      //will be changed to <-> in Middle C
-// template<typename lhs_str_t, typename rhs_str_t>
+// template<string_like lhs_str_t, string_like rhs_str_t>
 // sint operator<|>(const lhs_str_t& lhs, const char* rhs); //will be implemented in Middle C
-template<typename lhs_str_t>
+template<string_like lhs_str_t>
 bool operator<(const lhs_str_t& lhs, const char* rhs);
-template<typename lhs_str_t>
+template<string_like lhs_str_t>
 bool operator>(const lhs_str_t& lhs, const char* rhs);
-template<typename lhs_str_t>
+template<string_like lhs_str_t>
 bool operator<=(const lhs_str_t& lhs, const char* rhs);
-template<typename lhs_str_t>
+template<string_like lhs_str_t>
 bool operator>=(const lhs_str_t& lhs, const char* rhs);
 
 //length of longest initial substring of only chars in rhs (strspn)
-template<typename lhs_str_t>
+template<string_like lhs_str_t>
 uint operator&(const lhs_str_t& lhs, const char* rhs) {
    return std::strspn(lhs.begin(),rhs);
 }
-template<typename lhs_str_t>
+template<string_like lhs_str_t>
 //length of longest initial substring of only chars NOT in rhs (strcspn)
 uint operator^(const lhs_str_t& lhs, const char* rhs) {
    return std::strcspn(lhs.begin(),rhs);
 }
-template<typename lhs_str_t>
+template<string_like lhs_str_t>
 //largest n such that (rhs*n == lhs.substr(rhs.size()*n))
 uint operator%(const lhs_str_t& lhs, const char* rhs) {
    const uint len = std::strlen(rhs);
@@ -102,39 +130,39 @@ uint operator%(const lhs_str_t& lhs, const char* rhs) {
 
 #pragma region def
 //concatenation
-template<typename lhs_str_t, typename rhs_str_t>
+template<string_like lhs_str_t, string_like rhs_str_t>
 mcs::string operator+(const lhs_str_t& lhs, const rhs_str_t& rhs);
 //self-repetition
-template<typename lhs_str_t>
+template<string_like lhs_str_t>
 mcs::string operator*(const lhs_str_t& str, const uint repeatCount);
 
 //comparison
-template<typename lhs_str_t, typename rhs_str_t>
-bool operator==(const lhs_str_t& lhs, const rhs_str_t& rhs);
-template<typename lhs_str_t, typename rhs_str_t>
-bool operator!=(const lhs_str_t& lhs, const rhs_str_t& rhs);
-template<typename lhs_str_t, typename rhs_str_t>
-sint operator<=>(const lhs_str_t& lhs, const rhs_str_t& rhs);
-template<typename lhs_str_t, typename rhs_str_t>
+template<string_like lhs_str_t, string_like rhs_str_t>
+constexpr bool operator==(const lhs_str_t& lhs, const rhs_str_t& rhs);
+template<string_like lhs_str_t, string_like rhs_str_t>
+constexpr bool operator!=(const lhs_str_t& lhs, const rhs_str_t& rhs);
+template<string_like lhs_str_t, string_like rhs_str_t>
+constexpr sint operator<=>(const lhs_str_t& lhs, const rhs_str_t& rhs);
+template<string_like lhs_str_t, string_like rhs_str_t>
 sint operator-(const lhs_str_t& lhs, const rhs_str_t& rhs);      //will be changed to <-> in Middle C
-// template<typename lhs_str_t, typename rhs_str_t>
+// template<string_like lhs_str_t, string_like rhs_str_t>
 // sint operator<|>(const lhs_str_t& lhs, const rhs_str_t& rhs); //will be implemented in Middle C
-template<typename lhs_str_t, typename rhs_str_t>
-bool operator<(const lhs_str_t& lhs, const rhs_str_t& rhs);
-template<typename lhs_str_t, typename rhs_str_t>
-bool operator>(const lhs_str_t& lhs, const rhs_str_t& rhs);
-template<typename lhs_str_t, typename rhs_str_t>
-bool operator<=(const lhs_str_t& lhs, const rhs_str_t& rhs);
-template<typename lhs_str_t, typename rhs_str_t>
-bool operator>=(const lhs_str_t& lhs, const rhs_str_t& rhs);
+template<string_like lhs_str_t, string_like rhs_str_t>
+constexpr bool operator<(const lhs_str_t& lhs, const rhs_str_t& rhs);
+template<string_like lhs_str_t, string_like rhs_str_t>
+constexpr bool operator>(const lhs_str_t& lhs, const rhs_str_t& rhs);
+template<string_like lhs_str_t, string_like rhs_str_t>
+constexpr bool operator<=(const lhs_str_t& lhs, const rhs_str_t& rhs);
+template<string_like lhs_str_t, string_like rhs_str_t>
+constexpr bool operator>=(const lhs_str_t& lhs, const rhs_str_t& rhs);
 
 //length of longest initial substring of only chars in rhs (strspn)
-template<typename lhs_str_t, typename rhs_str_t>
+template<string_like lhs_str_t, string_like rhs_str_t>
 uint operator&(const lhs_str_t& lhs, const rhs_str_t& rhs);
-template<typename lhs_str_t, typename rhs_str_t>
+template<string_like lhs_str_t, string_like rhs_str_t>
 //length of longest initial substring of only chars NOT in rhs (strcspn)
 uint operator^(const lhs_str_t& lhs, const rhs_str_t& rhs);
-template<typename lhs_str_t, typename rhs_str_t>
+template<string_like lhs_str_t, string_like rhs_str_t>
 //largest n such that (rhs*n == lhs.substr(rhs.size()*n))
 uint operator%(const lhs_str_t& lhs, const rhs_str_t& rhs);
 #pragma endregion def
@@ -148,7 +176,7 @@ uint operator%(const lhs_str_t& lhs, const rhs_str_t& rhs);
 
 #pragma region src
 //concatenation
-template<typename lhs_str_t, typename rhs_str_t>
+template<string_like lhs_str_t, string_like rhs_str_t>
 mcs::string operator+(const lhs_str_t& lhs, const rhs_str_t& rhs) {
    //copy lhs
    mcs::string outStr(lhs.data(),lhs.size() + rhs.size());
@@ -158,7 +186,7 @@ mcs::string operator+(const lhs_str_t& lhs, const rhs_str_t& rhs) {
    return outStr;
 }
 //self-repetition
-template<typename lhs_str_t>
+template<string_like lhs_str_t>
 mcs::string operator*(const lhs_str_t& str, const uint repeatCount) {
    mcs::string outStr{};
    outStr.realloc_exact(repeatCount * str.size());
@@ -170,12 +198,12 @@ mcs::string operator*(const lhs_str_t& str, const uint repeatCount) {
 }
 
 //comparison
-template<typename lhs_str_t, typename rhs_str_t>
-bool operator==(const lhs_str_t& lhs, const rhs_str_t& rhs) {
+template<string_like lhs_str_t, string_like rhs_str_t>
+constexpr bool operator==(const lhs_str_t& lhs, const rhs_str_t& rhs) {
    return !(lhs != rhs);
 }
-template<typename lhs_str_t, typename rhs_str_t>
-bool operator!=(const lhs_str_t& lhs, const rhs_str_t& rhs) {
+template<string_like lhs_str_t, string_like rhs_str_t>
+constexpr bool operator!=(const lhs_str_t& lhs, const rhs_str_t& rhs) {
    //check size
    if (lhs.size() != rhs.size()) {
       return true;
@@ -183,8 +211,8 @@ bool operator!=(const lhs_str_t& lhs, const rhs_str_t& rhs) {
    //compare
    return std::memcmp(lhs.begin(), rhs.begin(), lhs.size()*sizeof(char));
 }
-template<typename lhs_str_t, typename rhs_str_t>
-sint operator<=>(const lhs_str_t& lhs, const rhs_str_t& rhs) {
+template<string_like lhs_str_t, string_like rhs_str_t>
+constexpr sint operator<=>(const lhs_str_t& lhs, const rhs_str_t& rhs) {
    for (uint i = 0; i < lhs.size(); ++i) {
       if (lhs[i] != rhs[i]) {
          return i * signofdif(lhs[i], rhs[i]);
@@ -192,7 +220,7 @@ sint operator<=>(const lhs_str_t& lhs, const rhs_str_t& rhs) {
    }
    return 0;
 }
-template<typename lhs_str_t, typename rhs_str_t>
+template<string_like lhs_str_t, string_like rhs_str_t>
 sint operator-(const lhs_str_t& lhs, const rhs_str_t& rhs) {   //will be renamed to <-> in Middle C
    for (uint i = 0; i < lhs.size(); ++i) {
       if (rhs[i] != rhs[i]) {
@@ -203,8 +231,8 @@ sint operator-(const lhs_str_t& lhs, const rhs_str_t& rhs) {   //will be renamed
 }
 
 #define DEF_STR_COMPARE_TEMP(op)                               \
-template<typename lhs_str_t, typename rhs_str_t>               \
-bool operator op(const lhs_str_t& lhs, const rhs_str_t& rhs) { \
+template<string_like lhs_str_t, string_like rhs_str_t>               \
+constexpr bool operator op(const lhs_str_t& lhs, const rhs_str_t& rhs) { \
    return (lhs<=>rhs) op 0;                                    \
 }
 DEF_STR_COMPARE_TEMP(<)
@@ -214,17 +242,17 @@ DEF_STR_COMPARE_TEMP(>=)
 #undef DEF_STR_COMPARE_TEMP
 
 //length of longest initial substring of only chars in rhs (strspn)
-template<typename lhs_str_t, typename rhs_str_t>
+template<string_like lhs_str_t, string_like rhs_str_t>
 uint operator&(const lhs_str_t& lhs, const rhs_str_t& rhs) {
    return std::strspn(lhs.begin(), rhs.begin());
 }
-template<typename lhs_str_t, typename rhs_str_t>
+template<string_like lhs_str_t, string_like rhs_str_t>
 //length of longest initial substring of only chars NOT in rhs (strcspn)
 uint operator^(const lhs_str_t& lhs, const rhs_str_t& rhs) {
    return std::strcspn(lhs.begin(), rhs.begin());
 }
 //largest n such that (rhs*n == this.substr(rhs.size()*n))
-template<typename lhs_str_t, typename rhs_str_t>
+template<string_like lhs_str_t, string_like rhs_str_t>
 uint operator%(const lhs_str_t& lhs, const rhs_str_t& rhs) {
    if (lhs.size() < rhs.size()) {
       return 0;

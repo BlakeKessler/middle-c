@@ -15,8 +15,9 @@ namespace clef {
    struct Operator;
    struct DelimPair;
 
-   class Node;
+   struct Node;
    class SyntaxTree;
+   class astIt;
 
    class Parser;
    class Hash;

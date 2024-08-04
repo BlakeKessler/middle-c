@@ -10,9 +10,9 @@ template <typename T> class mcs::arr_span {
       T* _buf;
       uint _size;
    public:
-      arr_span();
-      arr_span(T* buf, const uint size);
-      arr_span(T* buf, T* end);
+      constexpr arr_span();
+      constexpr arr_span(T* buf, const uint size);
+      constexpr arr_span(T* buf, T* end);
 
       //element access
       constexpr uint size() const { return _size; }
@@ -39,15 +39,15 @@ template <typename T> class mcs::arr_span {
 
 #pragma region src
 //!default constructor
-template<typename T> mcs::arr_span<T>::arr_span():
+template<typename T> constexpr mcs::arr_span<T>::arr_span():
    _buf(nullptr),_size(0) {
 
 }
-template<typename T> mcs::arr_span<T>::arr_span(T* buf, const uint size):
+template<typename T> constexpr mcs::arr_span<T>::arr_span(T* buf, const uint size):
    _buf(buf),_size(size) {
 
 }
-template<typename T> mcs::arr_span<T>::arr_span(T* buf, T* end):
+template<typename T> constexpr mcs::arr_span<T>::arr_span(T* buf, T* end):
    _buf(buf),_size(buf - end) {
 
 }

@@ -5,8 +5,8 @@
 #include "CLEF.hpp"
 #include "Hash.hpp"
 
-#include "string.hpp"
-#include "array.hpp"
+#include "raw_str_span.hpp"
+#include "raw_str.hpp"
 #include "static_arr.hpp"
 #include "pair.hpp"
 
@@ -16,45 +16,45 @@
 namespace clef {
    extern const mcs::static_arr<TokenType,256> tokTypeArr;
 
-   extern const mcs::array<Operator> OPERATORS;
-   extern const mcs::array<DelimPair> BLOCK_DELIMS;
-   extern const mcs::array<mcs::string> KEYWORDS;
+   extern const mcs::static_arr<Operator,73> OPERATORS;
+   extern const mcs::static_arr<DelimPair,7> BLOCK_DELIMS;
+   // extern const mcs::static_arr<mcs::string> KEYWORDS;
    
    
    //block delims
-   DelimPairType blockDelimType(const char* str, const uint length);
+   DelimPairType blockDelimType(const mcs::raw_str_span& str);
 
    //operators
-   uint maxOpLen(const char* str, const uint len);
-   const Operator* getOpData(const char* str, const uint len);
+   uint maxOpLen(const mcs::raw_str_span& str);
+   const Operator* getOpData(const mcs::raw_str_span& str);
 
    //!function to determine if a string is a Middle-C keyword
-   inline bool isKeyword(const char* ch, const uint length) {return Hash::isKeyword(ch, length);}
+   inline bool isKeyword(const mcs::raw_str_span& str) {return Hash::isKeyword(str.begin(), str.size());}
 }
 
 //operator string + metadata
 struct clef::Operator {
-   char opStr[MAX_OP_LEN + 1];
+   mcs::raw_str<MAX_OP_LEN + 1> opStr;
    byte size;
    byte precedence;
    OpType opType; //unary/binary/special, left/right associative
 
-   Operator() {
+   constexpr Operator() {
       std::memset(this,0,sizeof(Operator));
    }
-   Operator(const char str[MAX_OP_LEN + 1], const byte prec, const OpType type) {
+   constexpr Operator(const char str[MAX_OP_LEN + 1], const byte prec, const OpType type) {
       size = std::strlen(str);
       assert(size < MAX_OP_LEN + 1);                  //bounds-checking
-      std::memcpy(opStr,str,size*sizeof(char));       //copy string
-      std::memset(opStr+size,0,sizeof(opStr)-size);   //null-initialize the rest of the string
+      std::memcpy(opStr.begin(),str,size*sizeof(char));       //copy string
+      std::memset(opStr.begin()+size,0,sizeof(opStr)-size);   //null-initialize the rest of the string
       precedence = prec;
       opType = type;
    }
 };
 //delimiter pair strings
 struct clef::DelimPair {
-   char open[MAX_DELIM_LEN + 1];
-   char close[MAX_DELIM_LEN + 1];
+   mcs::raw_str<MAX_OP_LEN + 1> open;
+   mcs::raw_str<MAX_OP_LEN + 1> close;
 };
 
 #endif //DATA_HPP

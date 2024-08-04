@@ -25,16 +25,16 @@ mcs::string mcs::raw_str_span::altered(char (*transformer)(const char)) const {
 #pragma endregion string_span
 
 #pragma region charArray
-//!default constructor
-mcs::raw_str_span::raw_str_span():
-_buf(nullptr),_size(0) {
+// //!default constructor
+// constexpr mcs::raw_str_span::raw_str_span():
+// _buf(nullptr),_size(0) {
 
-}
-//!constructor from c-raw_str_span and length
-mcs::raw_str_span::raw_str_span(char* str, const uint size):
-_buf(str),_size(size) {
+// }
+// //!constructor from c-raw_str_span and length
+// constexpr mcs::raw_str_span::raw_str_span(char* str, const uint size):
+// _buf(str),_size(size) {
    
-}
+// }
 //!constructor from c-raw_str_span and length
 mcs::raw_str_span::raw_str_span(string& str):
 _buf(str.begin()),_size(str.size()) {
@@ -54,14 +54,14 @@ _buf(str.begin()),_size(size) {
 //!bounds-checked element access
 char& mcs::raw_str_span::at(const uint i) {
    if (i >= _size) {
-      mcs_throw(ErrCode::SEGFAULT, "raw_str_span of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m");
+      mcs_throw(ErrCode::SEGFAULT, "raw_str_span of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m",_size,i);
    }
    return _buf[i];
 }
 //!bounds-checked element access
 constexpr const char& mcs::raw_str_span::at(const uint i) const {
    if (i >= _size) {
-      mcs_throw(ErrCode::SEGFAULT, "raw_str_span of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m");
+      mcs_throw(ErrCode::SEGFAULT, "raw_str_span of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m",_size,i);
    }
    return _buf[i];
 }

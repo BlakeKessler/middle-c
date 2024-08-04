@@ -48,11 +48,11 @@ mcs::string mcs::string::altered(char (*transformer)(const char)) const {
 #pragma endregion string
 
 #pragma region charArray
-//!default constructor
-mcs::string::string():
-_bufSize(0),_size(0),_buf(nullptr) {
+// //!default constructor
+// constexpr mcs::string::string():
+// _bufSize(0),_size(0),_buf(nullptr) {
 
-}
+// }
 //!construct with buffer size
 mcs::string::string(const uint size):
 _bufSize(size+1),_size(0),_buf(mcs::calloc<char>(_bufSize)) {
@@ -77,14 +77,14 @@ _buf(mcs::malloc<char>(_bufSize)) {
 //!bounds-checked element access
 char& mcs::string::at(const uint i) {
    if (i >= _size) {
-      mcs_throw(ErrCode::SEGFAULT, "string of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m");
+      mcs_throw(ErrCode::SEGFAULT, "string of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m",_size,i);
    }
    return _buf[i];
 }
 //!bounds-checked element access
 constexpr const char& mcs::string::at(const uint i) const {
    if (i >= _size) {
-      mcs_throw(ErrCode::SEGFAULT, "string of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m");
+      mcs_throw(ErrCode::SEGFAULT, "string of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m",_size,i);
    }
    return _buf[i];
 }

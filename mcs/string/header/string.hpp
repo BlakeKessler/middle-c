@@ -13,6 +13,7 @@ class mcs::string {
       char* _buf;
    public:
       #pragma region string
+      static const bool string_like = true;
       //concatenation
       // string operator+(const string& other) const;
       string& operator+=(const string& other);
@@ -39,7 +40,7 @@ class mcs::string {
 
       #pragma region charArray
       //constructors
-      string();
+      constexpr string():_bufSize(0),_size(0),_buf(nullptr) {}
       string(const uint size);
       string(const char* str, const uint strlen);
       string(const char* str);

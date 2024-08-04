@@ -12,8 +12,8 @@
 class clef::Tokenizer {
    protected:
       Source _src;
+
       mcs::dyn_arr<Token> _tokens;
-      
       mcs::array<mcs::dyn_arr_span<Token>> _tokLines;
 
    public:
@@ -21,6 +21,7 @@ class clef::Tokenizer {
       Tokenizer();
       Tokenizer(Source& src);
       void free() const { _tokens.free();}
+      void release() { _src.release(); _tokens.release(); _tokLines.release(); }
 
       static Tokenizer TokenizeFile(const char* path);
 
@@ -41,11 +42,14 @@ class clef::Tokenizer {
       Token* begin() { return _tokens.begin(); }
       Token* end() { return _tokens.end(); }
 
-      mcs::dyn_arr_span<Token>& row(const uint i) const;
+      auto& tokens() { return _tokens; }
+      const auto& tokens() const { return _tokens; }
+      auto& row(const uint i);
+      const auto& row(const uint i) const;
+      auto& allRows() { return _tokLines; }
+      const auto& allRows() const { return _tokLines; }
       const Source& source() const { return _src; }
       Source& source() { return _src; }
-      const auto& lineArr() const { return _tokLines; }
-      auto& lineArr() { return _tokLines; }
 
       void printf() const;
 };

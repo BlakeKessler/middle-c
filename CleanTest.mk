@@ -31,6 +31,8 @@ SrcReader	:	app/srcReader
 	$(BUILD_CMD)
 Tokenizer	:	app/tokenizer app/srcReader
 	$(BUILD_CMD)
+AST		:	app/syntaxTree app/srcReader app/tokenizer
+	$(BUILD_CMD)
 Parser		:	app/parser app/syntaxTree app/srcReader app/tokenizer
 	$(BUILD_CMD)
 
