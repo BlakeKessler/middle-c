@@ -42,10 +42,10 @@ class mcs::dyn_str_span {
 
       //properties
       constexpr uint size() const { return _size; }
-      constexpr dyn_str_span& set_begin(const sint i) { _size -= (i - _begin); _begin = i; return *this; }
-      constexpr dyn_str_span& inc_begin(const sint i) { _size -= i; _begin += i; return *this; }
-      constexpr dyn_str_span& set_size(const uint i) { _size = i; return *this; }
-      constexpr dyn_str_span& inc_size(const sint i) { _size += i; return *this; }
+      constexpr dyn_str_span& set_begin(const sint i) { _size -= (i - _begin); _begin = i; return self; }
+      constexpr dyn_str_span& inc_begin(const sint i) { _size -= i; _begin += i; return self; }
+      constexpr dyn_str_span& set_size(const uint i) { _size = i; return self; }
+      constexpr dyn_str_span& inc_size(const sint i) { _size += i; return self; }
 
       //element access
       constexpr char* const* ptrToBuf() { return _ptrToBuf; }

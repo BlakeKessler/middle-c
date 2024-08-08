@@ -9,15 +9,6 @@ clef::astIt::astIt(SyntaxTree const* tree, const NodeID_t index)
    :_tree(tree),_index(index) {
 
 }
-
-// clef::astIt& clef::astIt::operator=(const NodeID_t i) const {
-//    _index = i;
-//    return *const_cast<astIt*>(this);
-// }
-// clef::astIt& clef::astIt::operator=(const uint i) const {
-//    _index = static_cast<NodeID_t>(i);
-//    return *const_cast<astIt*>(this);
-// }
 #pragma endregion constructors
 
 #pragma region operators
@@ -36,35 +27,35 @@ const clef::Node* clef::astIt::operator->() const {
 
 clef::astIt& clef::astIt::operator++() {
    _index = _tree->_nodes[+_index].nextID;
-   return *this;
+   return self;
 }
 const clef::astIt& clef::astIt::operator++() const {
    _index = _tree->_nodes[+_index].nextID;
-   return *this;
+   return self;
 }
 clef::astIt& clef::astIt::operator--() {
    _index = _tree->_nodes[+_index].prevID;
-   return *this;
+   return self;
 }
 const clef::astIt& clef::astIt::operator--() const {
    _index = _tree->_nodes[+_index].prevID;
-   return *this;
+   return self;
 }
 clef::astIt& clef::astIt::operator>>=(const uint childIndex) {
    _index = _tree->_nodes[+_index].childIDs[childIndex];
-   return *this;
+   return self;
 }
 const clef::astIt& clef::astIt::operator>>=(const uint childIndex) const {
    _index = _tree->_nodes[+_index].childIDs[childIndex];
-   return *this;
+   return self;
 }
 clef::astIt& clef::astIt::toParent() {
    _index = _tree->_nodes[+_index].parentID;
-   return *this;
+   return self;
 }
 const clef::astIt& clef::astIt::toParent() const {
    _index = _tree->_nodes[+_index].parentID;
-   return *this;
+   return self;
 }
 
 #pragma endregion operators
@@ -100,41 +91,60 @@ clef::astIt& clef::astIt::setPrev(const NodeID_t other) {
       const_cast<SyntaxTree*>(_tree)->_nodes[+other].nextID = _index;
    }
    const_cast<SyntaxTree*>(_tree)->_nodes[+_index].prevID = other;
-   return *this;
+   return self;
 }
 //!set next and adjust tree to maintain consistency
 clef::astIt& clef::astIt::setNext(const NodeID_t other) {
    assert(_index);
-   // if (!_index) { return *this; }
+   // if (!_index) { return self; }
    if (+other) {
       const_cast<SyntaxTree*>(_tree)->_nodes[+other].prevID = _index;
    }
    const_cast<SyntaxTree*>(_tree)->_nodes[+_index].nextID = other;
-   return *this;
+   return self;
 }
 //!set ith child and adjust tree to maintain consistency
 clef::astIt& clef::astIt::setChild(const NodeID_t other, const byte i) {
    // assert(_index);
-   if (!_index) { return *this; }
+   if (!_index) { return self; }
    if (+other) {
       const_cast<SyntaxTree*>(_tree)->_nodes[+other].parentID = _index;
       const_cast<SyntaxTree*>(_tree)->_nodes[+other].indexInParent = i;
    }
    const_cast<SyntaxTree*>(_tree)->_nodes[+_index].childIDs[i] = other;
-   return *this;
+   return self;
 }
 
 //!break link between this and prev
 clef::astIt& clef::astIt::severPrev() {
    const_cast<SyntaxTree*>(_tree)->_nodes[+_tree->_nodes[+_index].prevID].nextID = NODE_NIL;
    const_cast<SyntaxTree*>(_tree)->_nodes[+_index].prevID = NODE_NIL;
-   return *this;
+   return self;
 }
 //!break link between this and next
 clef::astIt& clef::astIt::severNext() {
    const_cast<SyntaxTree*>(_tree)->_nodes[+_tree->_nodes[+_index].nextID].prevID = NODE_NIL;
    const_cast<SyntaxTree*>(_tree)->_nodes[+_index].nextID = NODE_NIL;
-   return *this;
+   return self;
+}
+
+//!adjust tree to be consistent with this node
+clef::astIt& clef::astIt::propegate() {
+   if (!+_index) { return self; }
+   Node* node = &const_cast<SyntaxTree*>(_tree)->_nodes[+_index];
+
+   if (+node->nextID) { next()->prevID = _index; }
+   if (+node->prevID) { prev()->nextID = _index; }
+   if (+node->parentID) { parent()->childIDs[+node->indexInParent] = _index; }
+
+   for (uint i = 0; i < MAX_AST_CHILDREN; ++i) {
+      if (+node->childIDs[i]) {
+         self[i]->parentID = _index;
+         self[i]->indexInParent = i;
+      }
+   }
+
+   return self;
 }
 #pragma endregion treeSet
 

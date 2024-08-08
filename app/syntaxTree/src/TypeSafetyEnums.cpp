@@ -3,22 +3,22 @@
 
 #include "TypeSafetyEnums.hpp"
 
-#define clefDefineEnumOp(T, op) T operator op(const T a, const T b) { return static_cast<T>((+a) op (+b)); }
-#define clefTypeSafetyEnum(T, B)                         \
-   uint operator+(const T a) { return static_cast<B>(a); }     \
-   clefDefineEnumOp(T,+)                                 \
-   clefDefineEnumOp(T,-)                                 \
-   clefDefineEnumOp(T,*)                                 \
-   clefDefineEnumOp(T,%)                                 \
-   clefDefineEnumOp(T,&)                                 \
-   clefDefineEnumOp(T,|)                                 \
-   clefDefineEnumOp(T,^)                                 \
-   clefDefineEnumOp(T,==)                                \
-   clefDefineEnumOp(T,!=)                                \
-   clefDefineEnumOp(T,<)                                 \
-   clefDefineEnumOp(T,<=)                                \
-   clefDefineEnumOp(T,>)                                 \
-   clefDefineEnumOp(T,>=)                                \
+#define clefDefineEnumOp(T, R, op) R operator op(const T a, const T b) { return static_cast<R>((+a) op (+b)); }
+#define clefTypeSafetyEnum(T, B)                            \
+   uint operator+(const T a) { return static_cast<B>(a); }  \
+   clefDefineEnumOp(T,T,+)                                  \
+   clefDefineEnumOp(T,T,-)                                  \
+   clefDefineEnumOp(T,T,*)                                  \
+   clefDefineEnumOp(T,T,%)                                  \
+   clefDefineEnumOp(T,T,&)                                  \
+   clefDefineEnumOp(T,T,|)                                  \
+   clefDefineEnumOp(T,T,^)                                  \
+   clefDefineEnumOp(T,bool,==)                              \
+   clefDefineEnumOp(T,bool,!=)                              \
+   clefDefineEnumOp(T,bool,<)                               \
+   clefDefineEnumOp(T,bool,<=)                              \
+   clefDefineEnumOp(T,bool,>)                               \
+   clefDefineEnumOp(T,bool,>=)                              \
    bool operator!(const T a) { return !+a; }
 
 namespace clef {

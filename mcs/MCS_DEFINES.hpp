@@ -4,6 +4,9 @@
 
 #include <cstdint>
 
+//self
+#define self (*this)
+
 //type macros
 using uint = uint32_t;
 using luint = uint64_t;

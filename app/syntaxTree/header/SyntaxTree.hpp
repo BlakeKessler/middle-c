@@ -22,7 +22,8 @@ class clef::SyntaxTree {
       SyntaxTree(mcs::dyn_arr<Token>&& tokens, mcs::array<mcs::dyn_arr_span<Token>>& lines);
       ~SyntaxTree() = default;
 
-      NodeID_t emplaceNode(auto... args) { return static_cast<NodeID_t>(_nodes.emplace_back(args...) - _nodes.begin()); }
+      template<typename... ParamPack>
+      NodeID_t emplaceNode(ParamPack... args) { return static_cast<NodeID_t>(_nodes.emplace_back(std::forward<ParamPack>(args)...) - _nodes.begin()); }
       NodeID_t pushNode(Node& node) { return (NodeID_t)_nodes.push_back(node); }
 
       astIt root();

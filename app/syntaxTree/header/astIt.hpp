@@ -57,13 +57,15 @@ class clef::astIt {
       astIt& setChild(const NodeID_t other, const byte i);
       astIt& severPrev();
       astIt& severNext();
+
+      astIt& propegate();
       #pragma endregion treeSet
 
       void printf() const;
 
       operator NodeID_t() const { return _index; }
       operator bool() const { return +_index; }
-      bool operator!() const { return !(bool)*this; } 
+      bool operator!() const { return !(bool)self; } 
       operator Node*() const { return &const_cast<SyntaxTree*>(_tree)->_nodes[+_index]; }
       
 

@@ -41,9 +41,9 @@ class mcs::raw_str_span {
 
       //properties
       constexpr uint size() const { return _size; }
-      constexpr raw_str_span& inc_begin(const sint i) { _size -= i; _buf += i; return *this; }
-      constexpr raw_str_span& set_size(const uint i) { _size = i; return *this; }
-      constexpr raw_str_span& inc_size(const sint i) { _size += i; return *this; }
+      constexpr raw_str_span& inc_begin(const sint i) { _size -= i; _buf += i; return self; }
+      constexpr raw_str_span& set_size(const uint i) { _size = i; return self; }
+      constexpr raw_str_span& inc_size(const sint i) { _size += i; return self; }
 
       //element access
       constexpr char* const* ptrToBuf() { return &_buf; }

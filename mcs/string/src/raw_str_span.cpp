@@ -11,7 +11,7 @@ mcs::raw_str_span& mcs::raw_str_span::alter(char (*transformer)(const char)) {
    for (uint i = 0; i < _size; ++i) {
       begin()[i] = transformer(begin()[i]);
    }
-   return *this;
+   return self;
 }
 //!transform a copy of the raw_str_span by passing each char through a function (char => char)
 mcs::string mcs::raw_str_span::altered(char (*transformer)(const char)) const {

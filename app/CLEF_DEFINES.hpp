@@ -5,6 +5,9 @@
 #include <cstdint>
 #include <type_traits>
 
+//self
+#define self (*this)
+
 //CLEF defines
 #define MAX_AST_CHILDREN 3
 #define MAX_DELIM_LEN 2

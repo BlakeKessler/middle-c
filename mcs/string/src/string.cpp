@@ -16,7 +16,7 @@ mcs::string& mcs::string::operator+=(const string& other) {
    //copy other
    std::memcpy(end(), other.begin(), other.size()*sizeof(char));
    //return
-   return *this;
+   return self;
 }
 //!repeat string
 mcs::string& mcs::string::operator*=(const uint repeatCount) {
@@ -26,7 +26,7 @@ mcs::string& mcs::string::operator*=(const uint repeatCount) {
       std::memcpy(_buf + pos, _buf, oldSize*sizeof(char));
    }
    _buf[_size] = '\0';
-   return *this;
+   return self;
 }
 
 //!transform the string by passing each char through a function (char => char)
@@ -34,7 +34,7 @@ mcs::string& mcs::string::alter(char (*transformer)(const char)) {
    for (uint i = 0; i < _size; ++i) {
       _buf[i] = transformer(_buf[i]);
    }
-   return *this;
+   return self;
 }
 //!transform a copy of the string by passing each char through a function (char => char)
 mcs::string mcs::string::altered(char (*transformer)(const char)) const {

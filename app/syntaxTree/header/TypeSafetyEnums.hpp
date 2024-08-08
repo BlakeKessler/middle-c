@@ -4,23 +4,23 @@
 
 #include "CLEF_DEFINES.hpp"
 
-#define clefDefineEnumOp(T, op) T operator op(const T a, const T b);
+#define clefDefineEnumOp(T, op) operator op(const T a, const T b);
 #define clefTypeSafetyEnum(T, B) \
    enum class T : B {};          \
    uint operator+(const T a);    \
-   clefDefineEnumOp(T,+)         \
-   clefDefineEnumOp(T,-)         \
-   clefDefineEnumOp(T,*)         \
-   clefDefineEnumOp(T,%)         \
-   clefDefineEnumOp(T,&)         \
-   clefDefineEnumOp(T,|)         \
-   clefDefineEnumOp(T,^)         \
-   clefDefineEnumOp(T,==)        \
-   clefDefineEnumOp(T,!=)        \
-   clefDefineEnumOp(T,<)         \
-   clefDefineEnumOp(T,<=)        \
-   clefDefineEnumOp(T,>)         \
-   clefDefineEnumOp(T,>=)        \
+   T clefDefineEnumOp(T,+)       \
+   T clefDefineEnumOp(T,-)       \
+   T clefDefineEnumOp(T,*)       \
+   T clefDefineEnumOp(T,%)       \
+   T clefDefineEnumOp(T,&)       \
+   T clefDefineEnumOp(T,|)       \
+   T clefDefineEnumOp(T,^)       \
+   bool clefDefineEnumOp(T,==)   \
+   bool clefDefineEnumOp(T,!=)   \
+   bool clefDefineEnumOp(T,<)    \
+   bool clefDefineEnumOp(T,<=)   \
+   bool clefDefineEnumOp(T,>)    \
+   bool clefDefineEnumOp(T,>=)   \
    bool operator!(const T a);
 
 namespace clef {

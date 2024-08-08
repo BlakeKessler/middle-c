@@ -68,7 +68,7 @@ const clef::DelimPair* clef::Token::getDelimPairData() const {
 
    //search array
    for (uint i = 1; i < BLOCK_DELIMS.size(); ++i) {
-      if ((*this) == BLOCK_DELIMS[i].open || (*this) == BLOCK_DELIMS[i].close) {
+      if (self == BLOCK_DELIMS[i].open || self == BLOCK_DELIMS[i].close) {
          return &BLOCK_DELIMS[i];
       }
    }
@@ -97,7 +97,7 @@ clef::NodeType clef::Token::nodeType() const {
       return 
          +(type & (TokenType::BLOC | TokenType::PTXT)) ?
             NodeType::OP_OR_DELIM :
-         *this == "\\" ? NodeType::ESCAPE : NodeType::OPERATOR;
+         self == "\\" ? NodeType::ESCAPE : NodeType::OPERATOR;
    }
    if (+(type & (TokenType::BLOC | TokenType::PTXT))) {
       return NodeType::DELIM_GEN;
