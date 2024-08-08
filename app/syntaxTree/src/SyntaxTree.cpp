@@ -52,8 +52,8 @@ void clef::SyntaxTree::printf() const {
       }
       //children
       ++indents;
-      for (i = current->childIDs.size() - 1; i; --i) {
-         if (+current->childIDs[i]) {
+      for (i = current->childIDs.size(); i;) {
+         if (+current->childIDs[--i]) {
             stack.push_back({current->childIDs[i],indents});
          }
       }
