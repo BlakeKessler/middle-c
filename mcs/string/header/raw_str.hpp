@@ -38,21 +38,24 @@ template<uint _size> class mcs::raw_str {
       #pragma endregion string
       #pragma region charArray
       //constructors
-      constexpr raw_str() { std::memset(_buf, 0, _size*sizeof(char)); }
-      raw_str(const char* str, const uint strlen);
-      raw_str(const char* str);
+      constexpr raw_str():_buf{0} {}
+      // constexpr raw_str() { std::memset(_buf, 0, _size*sizeof(char)); }
+      constexpr raw_str(const char* str, const uint strlen);
+      constexpr raw_str(const char* str);
 
       //properties
       constexpr uint size() const { return _size; }
+      constexpr uint strlen() const { const uint len = std::strlen(_buf); return (len <= _size) ? len : _size; }
+      // template<typename T> strcmp(T& other) const {}
 
       //element access
-      char* const* ptrToBuf() { return &_buf; }
-      char* begin() { return _buf; }
-      char* end() { return _buf + _size; }
-      char& operator[](const uint i) { return _buf[i]; }
-      char& at(const uint i);
-      char& front() { return _buf[0]; }
-      char& back() { return _buf[_size - 1]; }
+      constexpr char* const* ptrToBuf() { return &_buf; }
+      constexpr char* begin() { return _buf; }
+      constexpr char* end() { return _buf + _size; }
+      constexpr char& operator[](const uint i) { return _buf[i]; }
+      constexpr char& at(const uint i);
+      constexpr char& front() { return _buf[0]; }
+      constexpr char& back() { return _buf[_size - 1]; }
 
       constexpr const char* const* ptrToBuf() const { return &_buf; }
       constexpr const char* begin() const { return _buf; }
@@ -63,7 +66,7 @@ template<uint _size> class mcs::raw_str {
       constexpr const char& back() const { return _buf[_size - 1]; }
 
       //typecasts
-      operator bool() { return (bool)_size; }
+      constexpr operator bool() { return (bool)_size; }
       #pragma endregion charArray
 };
 
@@ -74,24 +77,22 @@ template<uint _size> class mcs::raw_str {
 
 #include "string_like.hpp"
 
-template<uint _size>mcs::raw_str<_size>::raw_str(const char* str, const uint strsize) {
+template<uint _size> constexpr mcs::raw_str<_size>::raw_str(const char* str, const uint strsize): _buf{0} {
    assert(strsize <= _size);
-   const uint len = std::strlen(str);
-   assert(len <= strsize);
-   std::memset(_buf,0,sizeof(_buf));
-   std::memcpy(_buf,str,strsize*sizeof(char));
-   _buf[_size] = '\0';
+   for (uint i = 0; i < strsize; ++i) {
+      if (!str[i]) { break; }
+      _buf[i] = str[i];
+   }
 }
-template<uint _size>mcs::raw_str<_size>::raw_str(const char* str) {
-   const uint len = std::strlen(str);
-   assert(len <= _size);
-   std::memset(_buf,0,sizeof(_buf));
-   std::memcpy(_buf,str,_size*sizeof(char));
-   _buf[_size] = '\0';
+template<uint _size> constexpr mcs::raw_str<_size>::raw_str(const char* str): _buf{0} {
+   for (uint i = 0; i < _size; ++i) {
+      if (!str[i]) { break; }
+      _buf[i] = str[i];
+   }
 }
 
 
-template<uint _size>char& mcs::raw_str<_size>::at(const uint i) {
+template<uint _size> constexpr char& mcs::raw_str<_size>::at(const uint i) {
    if (i >= _size) {
       mcs_throw(ErrCode::SEGFAULT, "raw_str of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m",_size,i);
    }

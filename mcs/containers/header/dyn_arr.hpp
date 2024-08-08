@@ -15,7 +15,7 @@ template <typename T> class mcs::dyn_arr {
       uint _size;
       T* _buf;
    public:
-      dyn_arr();
+      constexpr dyn_arr();
       dyn_arr(const uint size);
       dyn_arr(const uint size, const uint bufSize);
       dyn_arr(std::initializer_list<T>);
@@ -26,13 +26,13 @@ template <typename T> class mcs::dyn_arr {
       //element access
       constexpr uint size() const { return _size; }
       constexpr uint capacity() const { return _bufSize; }
-      T* const* ptrToBuf() { return &_buf; }
-      T* begin() { return _buf; }
-      T* end() { return _buf + _size; }
-      T& operator[](const uint i) { return _buf[i]; }
-      T& at(const uint i);
-      T& front() { return _buf[0]; }
-      T& back() { return _buf[_size - 1]; }
+      constexpr T* const* ptrToBuf() { return &_buf; }
+      constexpr T* begin() { return _buf; }
+      constexpr T* end() { return _buf + _size; }
+      constexpr T& operator[](const uint i) { return _buf[i]; }
+      constexpr T& at(const uint i);
+      constexpr T& front() { return _buf[0]; }
+      constexpr T& back() { return _buf[_size - 1]; }
 
       constexpr const T* const* ptrToBuf() const { return &_buf; }
       constexpr const T* begin() const { return _buf; }
@@ -58,7 +58,7 @@ template <typename T> class mcs::dyn_arr {
 
 #pragma region src
 //!default constructor
-template<typename T> mcs::dyn_arr<T>::dyn_arr():
+template<typename T> constexpr mcs::dyn_arr<T>::dyn_arr():
    _bufSize(0),_size(0),_buf(nullptr) {
 
 }
@@ -91,7 +91,7 @@ template<typename T> mcs::dyn_arr<T>::dyn_arr(dyn_arr&& other):
 }
 
 //!bounds-checked element access
-template<typename T> T& mcs::dyn_arr<T>::at(const uint i) {
+template<typename T> constexpr T& mcs::dyn_arr<T>::at(const uint i) {
    if (i >= _size) {
       mcs_throw(ErrCode::SEGFAULT, "dyn_arr of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m");
    }

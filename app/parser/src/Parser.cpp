@@ -50,16 +50,21 @@ bool clef::Parser::handleDelimPairs() {
          //    escape(current);
             break;
          case NodeType::DELIM_GEN:{
-               const DelimPair* delimData = current.token().getDelimPairData();
-               if (current == delimData->close) {
-                  if (ptxtDelims.size() && ptxtDelims.back() == delimData->open) {
-                     makeBlock(ptxtDelims.back(),current);
-                  }
-               } else if (current == delimData->open) {
-                  ptxtDelims.push_back(current);
-               }
-               break;
+            const DelimPair* delimData = current.token().getDelimPairData();
+            if (!delimData) {
+               clef::throwError(ErrCode::PARSER_UNSPEC, current.token().lineNum(), "Node %u marked as a block delimiter does not match any block delimiters",current.index());
+               continue;
             }
+            if (current == delimData->close) {
+               if (ptxtDelims.size() && ptxtDelims.back() == delimData->open) {
+                  current = makeBlock(ptxtDelims.back(),current);
+                  ptxtDelims.pop_back();
+               }
+            } else if (current == delimData->open) {
+               ptxtDelims.push_back(current);
+            }
+            break;
+         }
          default:
             break;
       }
@@ -67,6 +72,9 @@ bool clef::Parser::handleDelimPairs() {
    } while(++current);
 
    if (ptxtDelims.size()) {
+      // for (auto& i : ptxtDelims) {
+      //    i.printf(); std::printf("\n");
+      // }
       throwError(ErrCode::UNCLOSED_BLOCK, "%u excess delimiters", ptxtDelims.size());
    }
 

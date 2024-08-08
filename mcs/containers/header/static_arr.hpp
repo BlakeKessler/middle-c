@@ -2,7 +2,7 @@
 #ifndef MCS_STATIC_ARR_HPP
 #define MCS_STATIC_ARR_HPP
 
-#include <MCS.hpp>
+#include "MCS.hpp"
 #include <bit>
 #include <memory>
 #include <cstring>
@@ -17,18 +17,19 @@ template <typename T, uint _size> class mcs::static_arr {
    public:
       constexpr static_arr();
       constexpr static_arr(T buf[_size]);
-      constexpr static_arr(std::initializer_list<T>);
+      constexpr static_arr(std::initializer_list<T> init);
+      // constexpr static_arr(T... list);
       constexpr ~static_arr() {}
 
       //element access
       constexpr uint size() const { return _size; }
-      T* const* ptrToBuf() { return &_buf; }
-      T* begin() { return _buf; }
-      T* end() { return _buf + _size; }
-      T& operator[](const uint i) { return _buf[i]; }
-      T& at(const uint i);
-      T& front() { return _buf[0]; }
-      T& back() { return _buf[_size - 1]; }
+      constexpr T* const* ptrToBuf() { return &_buf; }
+      constexpr T* begin() { return _buf; }
+      constexpr T* end() { return _buf + _size; }
+      constexpr T& operator[](const uint i) { return _buf[i]; }
+      constexpr T& at(const uint i);
+      constexpr T& front() { return _buf[0]; }
+      constexpr T& back() { return _buf[_size - 1]; }
 
       constexpr const T* const* ptrToBuf() const { return &_buf; }
       constexpr const T* begin() const { return _buf; }
@@ -39,17 +40,19 @@ template <typename T, uint _size> class mcs::static_arr {
       constexpr const T& back() const { return _buf[_size - 1]; }
 
       //MODIFIERS
-      T* emplace(const uint i, auto... args);
+      constexpr T* emplace(const uint i, auto... args);
       // T* release() { T* temp = _buf; _buf = nullptr; return temp; }
 
       //typecasts
-      operator bool() { return (bool)_size; }
+      constexpr operator bool() { return (bool)_size; }
 };
 
 #pragma region CTAD
-
-// template<typename T, uint _size> mcs::static_arr(T[_size]) -> mcs::static_arr<T,_size>;
-// template<typename T> mcs::static_arr(std::initializer_list<T>) -> mcs::static_arr<T,list.size()>;
+namespace mcs {
+   template<typename T,typename ...U> static_arr(T, U...) -> static_arr<T,1+sizeof...(U)>;
+   // template<typename T, typename... U> static_arr(T, U...) -> static_arr<T, 1+sizeof...(U)>;
+   // template<typename T> static_arr(std::initializer_list<T> list) -> static_arr<T,list.size()>;
+}
 #pragma endregion CTAD
 
 #pragma region src
@@ -74,7 +77,7 @@ template<typename T,uint _size> constexpr mcs::static_arr<T,_size>::static_arr(s
 }
 
 //!bounds-checked element access
-template<typename T,uint _size> T& mcs::static_arr<T,_size>::at(const uint i) {
+template<typename T,uint _size> constexpr T& mcs::static_arr<T,_size>::at(const uint i) {
    if (i >= _size) {
       mcs_throw(ErrCode::SEGFAULT, "static_arr of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m");
    }
@@ -89,7 +92,7 @@ template<typename T,uint _size> constexpr const T& mcs::static_arr<T,_size>::at(
 }
 
 //!construct in place
-template<typename T,uint _size> T* mcs::static_arr<T,_size>::emplace(const uint i, auto... args) {
+template<typename T,uint _size> constexpr T* mcs::static_arr<T,_size>::emplace(const uint i, auto... args) {
    if (i >= _size) {
       mcs_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in static_arr of size \033[4m%u\033[24m", i,_size);
       return nullptr;

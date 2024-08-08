@@ -60,6 +60,21 @@ uint clef::Token::findTokEnd(const char* const tokStr, const uint len) {
    return i ? i : len;
 }
 
+//!
+const clef::DelimPair* clef::Token::getDelimPairData() const {
+   if (!size() || size() > MAX_DELIM_LEN) {
+      return nullptr;
+   }
+
+   //search array
+   for (uint i = 1; i < BLOCK_DELIMS.size(); ++i) {
+      if ((*this) == BLOCK_DELIMS[i].open || (*this) == BLOCK_DELIMS[i].close) {
+         return &BLOCK_DELIMS[i];
+      }
+   }
+   return nullptr;
+}
+
 //!throw error for token
 void clef::Token::throwError(const ErrCode code) const {
    clef::throwError(code, "token: \033[4m%.*s\033[24m", size(), begin());

@@ -31,23 +31,23 @@ mcs::string mcs::dyn_str_span::altered(char (*transformer)(const char)) const {
 
 // }
 //!constructor from c-dyn_str_span and length
-mcs::dyn_str_span::dyn_str_span(string& str):
+constexpr mcs::dyn_str_span::dyn_str_span(string& str):
 _ptrToBuf(str.ptrToBuf()),_begin(0),_size(str.size()) {
    
 }
 //!constructor from c-dyn_str_span and length
-mcs::dyn_str_span::dyn_str_span(string& str, const uint size):
+constexpr mcs::dyn_str_span::dyn_str_span(string& str, const uint size):
 _ptrToBuf(str.ptrToBuf()),_begin(0),_size(size) {
    assert(size <= str.size());
 }
 //!constructor from c-dyn_str_span and length
-mcs::dyn_str_span::dyn_str_span(string& str, const uint begin, const uint size):
+constexpr mcs::dyn_str_span::dyn_str_span(string& str, const uint begin, const uint size):
 _ptrToBuf(str.ptrToBuf()),_begin(begin),_size(size) {
    assert((begin + size) <= str.size());
 }
 
 //!bounds-checked element access
-char& mcs::dyn_str_span::at(const uint i) {
+constexpr char& mcs::dyn_str_span::at(const uint i) {
    if (i >= _size) {
       mcs_throw(ErrCode::SEGFAULT, "dyn_str_span of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m",_size,i);
    }

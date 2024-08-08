@@ -104,8 +104,8 @@ clef::astIt& clef::astIt::setPrev(const NodeID_t other) {
 }
 //!set next and adjust tree to maintain consistency
 clef::astIt& clef::astIt::setNext(const NodeID_t other) {
-   // assert(_index);
-   if (!_index) { return *this; }
+   assert(_index);
+   // if (!_index) { return *this; }
    if (+other) {
       const_cast<SyntaxTree*>(_tree)->_nodes[+other].prevID = _index;
    }
@@ -118,6 +118,7 @@ clef::astIt& clef::astIt::setChild(const NodeID_t other, const byte i) {
    if (!_index) { return *this; }
    if (+other) {
       const_cast<SyntaxTree*>(_tree)->_nodes[+other].parentID = _index;
+      const_cast<SyntaxTree*>(_tree)->_nodes[+other].indexInParent = i;
    }
    const_cast<SyntaxTree*>(_tree)->_nodes[+_index].childIDs[i] = other;
    return *this;

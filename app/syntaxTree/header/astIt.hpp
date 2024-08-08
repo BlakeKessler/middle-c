@@ -7,6 +7,8 @@
 #include "Node.hpp"
 #include "Token.hpp"
 
+#include "string_like.hpp"
+
 class clef::astIt {
    private:
       SyntaxTree const* _tree;
@@ -69,12 +71,14 @@ class clef::astIt {
 };
 
 template<uint _size> bool clef::astIt::operator==(const mcs::raw_str<_size>& str) const {
-   const uint len = std::strlen(str.begin());
-   assert(len <= _size);
-   if (len != token().size()) {
-      return false;
-   }
-   return !std::strncmp(token().begin(),str.begin(),_size);
+   return token() == str;
+   // const uint len = std::strlen(str.begin());
+   // assert(len <= _size);
+   // // std::printf("%.*s == ",_size,str.begin()); printf(); std::printf("\n");
+   // if (len != token().size()) {
+   //    return false;
+   // }
+   // return !std::strncmp(token().begin(),str.begin(),len);
 }
 
 #endif //AST_IT_HPP

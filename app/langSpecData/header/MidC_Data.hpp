@@ -13,11 +13,146 @@
 #include <cassert>
 #include <cstring>
 
+//operator string + metadata
+struct clef::Operator {
+   mcs::raw_str<MAX_OP_LEN + 1> opStr;
+   byte size;
+   byte precedence;
+   OpType opType; //unary/binary/special, left/right associative
+
+   constexpr Operator(): size(0),precedence(0),opType(static_cast<OpType>(0)) {}
+   constexpr Operator(const char str[MAX_OP_LEN + 1], const byte prec, const OpType type):
+      size(0),precedence(prec),opType(type) {
+         //strlen
+         for (; size < opStr.size(); ++size) {
+            if (!str[size]) { break; }
+         }
+         //bounds-check
+         assert(size < MAX_OP_LEN + 1);
+         
+         //copy string
+         for (uint i = 0; i < size; ++i) {
+            opStr[i] = str[i];
+         }
+   }
+};
+//delimiter pair strings
+struct clef::DelimPair {
+   mcs::raw_str<MAX_OP_LEN + 1> open;
+   mcs::raw_str<MAX_OP_LEN + 1> close;
+};
+
+using enum clef::OpType;
 namespace clef {
    extern const mcs::static_arr<TokenType,256> tokTypeArr;
 
-   extern const mcs::static_arr<Operator,73> OPERATORS;
-   extern const mcs::static_arr<DelimPair,7> BLOCK_DELIMS;
+   static constexpr const mcs::static_arr OPERATORS{
+      Operator("#",     0,  LEFT_UN),   //invoke preprocessor
+
+      Operator("\"",    1,  LEFT_SPEC), //string
+      Operator("\'",    1,  LEFT_SPEC), //char
+
+      Operator("::",    2,  LEFT_BIN),  //scope resolution
+
+      Operator("++",    3,  LEFT_UN),   //pre-increment
+      Operator("--",    3,  LEFT_UN),   //pre-decrement
+      Operator("(",     3,  RIGHT_SPEC),//function calls/functional casts
+      Operator("[",     3,  RIGHT_SPEC),//subscript
+      Operator("{",     3,  RIGHT_SPEC),//scope/functional casts
+      Operator("<",     3,  RIGHT_SPEC),//specifier
+      Operator(")",     3,  LEFT_SPEC), //function calls/functional casts
+      Operator("]",     3,  LEFT_SPEC), //subscript
+      Operator("}",     3,  LEFT_SPEC), //scope/functional casts
+      Operator(">",     3,  LEFT_SPEC), //specifier
+      Operator(".",     3,  LEFT_BIN),  //element access
+      Operator("->",    3,  LEFT_BIN),  //element access
+      Operator("?",     3,  LEFT_SPEC), //safe access modifier
+      Operator("..",    3,  LEFT_BIN),  //range
+      Operator("...",   3,  LEFT_BIN),  //array spread
+
+      Operator("++",    4,  RIGHT_UN),  //post-increment
+      Operator("--",    4,  RIGHT_UN),  //post-decrement
+      Operator("+",     4,  RIGHT_UN),  //unary plus
+      Operator("-",     4,  RIGHT_UN),  //integer negation
+      Operator("!",     4,  RIGHT_UN),  //logical negation
+      Operator("~",     4,  RIGHT_UN),  //bitwise negation
+      Operator("&",     4,  RIGHT_UN),  //reference/address of
+      Operator("*",     4,  RIGHT_UN),  //raw pointer/dereference
+      Operator("@",     4,  RIGHT_UN),  //unique pointer
+      Operator("$",     4,  RIGHT_UN),  //shared pointer
+      Operator("\\",    4,  RIGHT_UN),  //weak pointer
+      Operator("%",     4,  RIGHT_UN),  //iterator
+      
+      Operator(".*",    5,  LEFT_BIN),  //pointer to member
+      Operator("->*",   5,  LEFT_BIN),  //pointer to member
+
+      Operator("**",    6,  LEFT_BIN),  //exponentiation
+
+      Operator("*",     7,  LEFT_BIN),  //multiplication
+      Operator("/",     7,  LEFT_BIN),  //division
+      Operator("%",     7,  LEFT_BIN),  //modulo
+
+      Operator("+",     8,  LEFT_BIN),  //addition
+      Operator("-",     8,  LEFT_BIN),  //subtraction
+
+      Operator("<<",    9,  LEFT_BIN),  //left bit-shift
+      Operator(">>",    9,  LEFT_BIN),  //right bit-shift
+
+      Operator("<=>",   10, LEFT_BIN),  //three-way comparison
+
+      Operator(">",     11, LEFT_BIN),  //less than
+      Operator("<",     11, LEFT_BIN),  //greater than
+      Operator("<=",    11, LEFT_BIN),  //less than or equal to
+      Operator(">=",    11, LEFT_BIN),  //greather than or equal to
+
+      Operator("==",    12, LEFT_BIN),  //equality
+      Operator("!=",    12, LEFT_BIN),  //inequality
+      Operator("===",   12, LEFT_BIN),  //strict equality
+      Operator("!==",   12, LEFT_BIN),  //strict inequality
+
+      Operator("&",     13, LEFT_BIN),  //bitwise AND
+      Operator("^",     14, LEFT_BIN),  //bitwise XOR
+      Operator("|",     15, LEFT_BIN),  //bitwise OR
+      Operator("&&",    16, LEFT_BIN),  //logical AND
+      Operator("||",    17, LEFT_BIN),  //logical OR
+
+      Operator("\?\?",  18, RIGHT_BIN), //null coalescing
+      Operator("?",     18, RIGHT_BIN), //inline if
+      Operator(":",     18, RIGHT_BIN), //inline else
+      Operator("=",     18, RIGHT_BIN), //direct assignment
+      Operator(":=",    18, RIGHT_BIN), //const assignment
+      Operator("+=",    18, RIGHT_BIN), //compound assignment (add)
+      Operator("-=",    18, RIGHT_BIN), //compound assignment (sub)
+      Operator("*=",    18, RIGHT_BIN), //compound assignment (mul)
+      Operator("/=",    18, RIGHT_BIN), //compound assignment (div)
+      Operator("%=",    18, RIGHT_BIN), //compound assignment (mod)
+      Operator("**=",   18, RIGHT_BIN), //compound assignment (exp)
+      Operator("<<=",   18, RIGHT_BIN), //compound assignment (leftshift)
+      Operator(">>=",   18, RIGHT_BIN), //compound assignment (rightshift)
+      Operator("&=",    18, RIGHT_BIN), //compound assignment (AND)
+      Operator("^=",    18, RIGHT_BIN), //compound assignment (XOR)
+      Operator("|=",    18, RIGHT_BIN), //compound assignment (OR)
+      Operator("\?\?=", 18, RIGHT_BIN), //compound assignment (null coalescing)
+
+      Operator(",",     19, LEFT_SPEC)  //comma
+
+      //not included in array: triangle (free/unspecified) operators
+   };
+   static constexpr const mcs::static_arr BLOCK_DELIMS{
+      DelimPair{},           //NULL DELIM PAIR
+      DelimPair{"(", ")"},   //PARENS
+      DelimPair{"[", "]"},   //SUBSCRIPT
+      DelimPair{"{", "}"},   //INITIALIZER LIST
+      DelimPair{"<", ">"},   //SPECIALIZER
+
+      DelimPair{"\'", "\'"}, //CHARACTER
+      DelimPair{"\"", "\""}, //STRING
+
+      // DelimPair{"?\0", ":\0"},   //TERNARY STATEMENT
+      
+      DelimPair{"/*", "*/"},     //BLOCK COMMENT
+      // DelimPair{"//", "\n\0"},   //SINGLE-LINE COMMENT
+   };
    // extern const mcs::static_arr<mcs::string> KEYWORDS;
    
    
@@ -29,32 +164,7 @@ namespace clef {
    const Operator* getOpData(const mcs::raw_str_span& str);
 
    //!function to determine if a string is a Middle-C keyword
-   inline bool isKeyword(const mcs::raw_str_span& str) {return Hash::isKeyword(str.begin(), str.size());}
+   inline bool isKeyword(const mcs::raw_str_span& str) { return Hash::isKeyword(str.begin(), str.size()); }
 }
-
-//operator string + metadata
-struct clef::Operator {
-   mcs::raw_str<MAX_OP_LEN + 1> opStr;
-   byte size;
-   byte precedence;
-   OpType opType; //unary/binary/special, left/right associative
-
-   constexpr Operator() {
-      std::memset(this,0,sizeof(Operator));
-   }
-   constexpr Operator(const char str[MAX_OP_LEN + 1], const byte prec, const OpType type) {
-      size = std::strlen(str);
-      assert(size < MAX_OP_LEN + 1);                  //bounds-checking
-      std::memcpy(opStr.begin(),str,size*sizeof(char));       //copy string
-      std::memset(opStr.begin()+size,0,sizeof(opStr)-size);   //null-initialize the rest of the string
-      precedence = prec;
-      opType = type;
-   }
-};
-//delimiter pair strings
-struct clef::DelimPair {
-   mcs::raw_str<MAX_OP_LEN + 1> open;
-   mcs::raw_str<MAX_OP_LEN + 1> close;
-};
 
 #endif //DATA_HPP

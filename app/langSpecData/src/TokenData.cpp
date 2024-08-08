@@ -4,23 +4,6 @@
 #include "MidC_Data.hpp"
 #include <cassert>
 
-//!array of pairs of strings
-//!represents opening and closing block delimiters
-const mcs::static_arr<clef::DelimPair,7> clef::BLOCK_DELIMS{
-   {"(\0", ")\0"},   //PARENS
-   {"[\0", "]\0"},   //SUBSCRIPT
-   {"{\0", "}\0"},   //INITIALIZER LIST
-   {"<\0", ">\0"},   //SPECIALIZER
-
-   {"\'\0", "\'\0"}, //CHARACTER
-   {"\"\0", "\"\0"}, //STRING
-
-   // {"?\0", ":\0"},   //TERNARY STATEMENT
-   
-   {"/*", "*/"},     //BLOCK COMMENT
-   // {"//", "\n\0"},   //SINGLE-LINE COMMENT
-};
-
 //!check if a node is the opening delimiter of a block expression
 //!NOTE: REPLACE WITH HASHMAP
 clef::DelimPairType clef::blockDelimType(const mcs::raw_str_span& str) {
@@ -36,7 +19,6 @@ clef::DelimPairType clef::blockDelimType(const mcs::raw_str_span& str) {
          return static_cast<DelimPairType>(i);
       }
    }
-
    return DelimPairType::NONE;
 }
 

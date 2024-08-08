@@ -63,10 +63,11 @@ void clef::SyntaxTree::printf() const {
 #pragma region DEBUG
 void clef::SyntaxTree::debug_printf() const {
    for (uint i = 0; i < _nodes.size(); ++i) {
-      std::printf("%u <- %u(%u)[%u, %u, %u] -> %u\n",
+      std::printf("%u <- %u(%u)[%u][%u, %u, %u] -> %u\n",
          +_nodes[i].prevID,
          i,
          +_nodes[i].tokenID,
+         +_nodes[i].parentID,
          +_nodes[i].childIDs[0],
          +_nodes[i].childIDs[1],
          +_nodes[i].childIDs[2],

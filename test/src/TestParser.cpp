@@ -28,6 +28,8 @@ int main(const int argc, char** argv) {
    clef::Parser parser{std::move(tokenizer.tokens()),tokenizer.allRows()};
    parser.runPass();
    std::printf("\033[1mAbstract Syntax Tree:\033[22m\n%s", SMALL_HEADER);
+   parser.print();
+   std::printf("\n%s\n", BIG_HEADER);
    parser.printf();
    std::printf("\n%s\n", BIG_HEADER);
 

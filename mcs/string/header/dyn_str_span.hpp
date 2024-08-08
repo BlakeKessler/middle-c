@@ -14,7 +14,7 @@ class mcs::dyn_str_span {
       uint _size;
    public:
       #pragma region string
-      static const bool string_like = true;
+      constexpr static const bool string_like = true;
       //case modification
       dyn_str_span& alter(char (*const transformer)(const char));       //maybe replace with a macro
       string altered(char (*const transformer)(const char)) const;//maybe replace with a macro
@@ -35,26 +35,26 @@ class mcs::dyn_str_span {
       #pragma region charArray
       //constructors
       constexpr dyn_str_span():_ptrToBuf(nullptr),_begin(0),_size(0) {}
-      dyn_str_span(char* const* str, const uint strlen);
-      dyn_str_span(string& str);
-      dyn_str_span(string& str, const uint size);
-      dyn_str_span(string& str, const uint begin, const uint size);
+      constexpr dyn_str_span(char* const* str, const uint strlen);
+      constexpr dyn_str_span(string& str);
+      constexpr dyn_str_span(string& str, const uint size);
+      constexpr dyn_str_span(string& str, const uint begin, const uint size);
 
       //properties
       constexpr uint size() const { return _size; }
-      dyn_str_span& set_begin(const sint i) { _size -= (i - _begin); _begin = i; return *this; }
-      dyn_str_span& inc_begin(const sint i) { _size -= i; _begin += i; return *this; }
-      dyn_str_span& set_size(const uint i) { _size = i; return *this; }
-      dyn_str_span& inc_size(const sint i) { _size += i; return *this; }
+      constexpr dyn_str_span& set_begin(const sint i) { _size -= (i - _begin); _begin = i; return *this; }
+      constexpr dyn_str_span& inc_begin(const sint i) { _size -= i; _begin += i; return *this; }
+      constexpr dyn_str_span& set_size(const uint i) { _size = i; return *this; }
+      constexpr dyn_str_span& inc_size(const sint i) { _size += i; return *this; }
 
       //element access
-      char* const* ptrToBuf() { return _ptrToBuf; }
-      char* begin() { return (*_ptrToBuf) + _begin ; }
-      char* end() { return (*_ptrToBuf) + _begin  + _size; }
-      char& operator[](const uint i) { return (*_ptrToBuf)[i + _begin]; }
-      char& at(const uint i);
-      char& front() { return (*_ptrToBuf)[_begin]; }
-      char& back() { return (*_ptrToBuf)[_begin + _size - 1]; }
+      constexpr char* const* ptrToBuf() { return _ptrToBuf; }
+      constexpr char* begin() { return (*_ptrToBuf) + _begin ; }
+      constexpr char* end() { return (*_ptrToBuf) + _begin  + _size; }
+      constexpr char& operator[](const uint i) { return (*_ptrToBuf)[i + _begin]; }
+      constexpr char& at(const uint i);
+      constexpr char& front() { return (*_ptrToBuf)[_begin]; }
+      constexpr char& back() { return (*_ptrToBuf)[_begin + _size - 1]; }
 
       constexpr const char* const* ptrToBuf() const { return _ptrToBuf; }
       constexpr const char* begin() const { return (*_ptrToBuf) + _begin; }
@@ -65,7 +65,7 @@ class mcs::dyn_str_span {
       constexpr const char& back() const { return (*_ptrToBuf)[_begin + _size - 1]; }
 
       //typecasts
-      operator bool() { return (bool)_size; }
+      constexpr operator bool() { return (bool)_size; }
       #pragma endregion charArray
 };
 

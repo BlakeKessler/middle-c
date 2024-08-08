@@ -13,7 +13,7 @@ class mcs::raw_str_span {
       uint _size;
    public:
       #pragma region string
-      static const bool string_like = true;
+      constexpr static const bool string_like = true;
       //case modification
       raw_str_span& alter(char (*const transformer)(const char));       //maybe replace with a macro
       string altered(char (*const transformer)(const char)) const;//maybe replace with a macro
@@ -35,24 +35,24 @@ class mcs::raw_str_span {
       //constructors
       constexpr raw_str_span(): _buf(nullptr),_size(0) {}
       constexpr raw_str_span(char* str, const uint size):_buf(str),_size(size) {}
-      raw_str_span(string& str);
-      raw_str_span(string& str, const uint size);
-      raw_str_span(string& str, const uint begin, const uint size);
+      constexpr raw_str_span(string& str);
+      constexpr raw_str_span(string& str, const uint size);
+      constexpr raw_str_span(string& str, const uint begin, const uint size);
 
       //properties
       constexpr uint size() const { return _size; }
-      raw_str_span& inc_begin(const sint i) { _size -= i; _buf += i; return *this; }
-      raw_str_span& set_size(const uint i) { _size = i; return *this; }
-      raw_str_span& inc_size(const sint i) { _size += i; return *this; }
+      constexpr raw_str_span& inc_begin(const sint i) { _size -= i; _buf += i; return *this; }
+      constexpr raw_str_span& set_size(const uint i) { _size = i; return *this; }
+      constexpr raw_str_span& inc_size(const sint i) { _size += i; return *this; }
 
       //element access
-      char* const* ptrToBuf() { return &_buf; }
-      char* begin() { return _buf; }
-      char* end() { return _buf + _size; }
-      char& operator[](const uint i) { return _buf[i]; }
-      char& at(const uint i);
-      char& front() { return _buf[0]; }
-      char& back() { return _buf[_size - 1]; }
+      constexpr char* const* ptrToBuf() { return &_buf; }
+      constexpr char* begin() { return _buf; }
+      constexpr char* end() { return _buf + _size; }
+      constexpr char& operator[](const uint i) { return _buf[i]; }
+      constexpr char& at(const uint i);
+      constexpr char& front() { return _buf[0]; }
+      constexpr char& back() { return _buf[_size - 1]; }
 
       constexpr const char* const* ptrToBuf() const { return &_buf; }
       constexpr const char* begin() const { return _buf; }
@@ -63,7 +63,7 @@ class mcs::raw_str_span {
       constexpr const char& back() const { return _buf[_size - 1]; }
 
       //typecasts
-      operator bool() { return (bool)_size; }
+      constexpr operator bool() { return (bool)_size; }
       #pragma endregion charArray
 };
 

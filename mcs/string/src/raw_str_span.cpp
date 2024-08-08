@@ -36,23 +36,23 @@ mcs::string mcs::raw_str_span::altered(char (*transformer)(const char)) const {
    
 // }
 //!constructor from c-raw_str_span and length
-mcs::raw_str_span::raw_str_span(string& str):
+constexpr mcs::raw_str_span::raw_str_span(string& str):
 _buf(str.begin()),_size(str.size()) {
    
 }
 //!constructor from c-raw_str_span and length
-mcs::raw_str_span::raw_str_span(string& str, const uint size):
+constexpr mcs::raw_str_span::raw_str_span(string& str, const uint size):
 _buf(str.begin()),_size(size) {
    assert(size <= str.size());
 }
 //!constructor from c-raw_str_span and length
-mcs::raw_str_span::raw_str_span(string& str, const uint begin, const uint size):
+constexpr mcs::raw_str_span::raw_str_span(string& str, const uint begin, const uint size):
 _buf(str.begin()),_size(size) {
    assert((begin + size) <= str.size());
 }
 
 //!bounds-checked element access
-char& mcs::raw_str_span::at(const uint i) {
+constexpr char& mcs::raw_str_span::at(const uint i) {
    if (i >= _size) {
       mcs_throw(ErrCode::SEGFAULT, "raw_str_span of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m",_size,i);
    }

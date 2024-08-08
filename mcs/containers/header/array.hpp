@@ -15,7 +15,7 @@ template <typename T> class mcs::array {
       T* _buf;
       const uint _size;
    public:
-      array();
+      constexpr array();
       array(const uint size);
       array(T* buf, const uint size);
       array(std::initializer_list<T>);
@@ -24,13 +24,13 @@ template <typename T> class mcs::array {
 
       //element access
       constexpr uint size() const { return _size; }
-      T* const* ptrToBuf() { return &_buf; }
-      T* begin() { return _buf; }
-      T* end() { return _buf + _size; }
-      T& operator[](const uint i) { return _buf[i]; }
-      T& at(const uint i);
-      T& front() { return _buf[0]; }
-      T& back() { return _buf[_size - 1]; }
+      constexpr T* const* ptrToBuf() { return &_buf; }
+      constexpr T* begin() { return _buf; }
+      constexpr T* end() { return _buf + _size; }
+      constexpr T& operator[](const uint i) { return _buf[i]; }
+      constexpr T& at(const uint i);
+      constexpr T& front() { return _buf[0]; }
+      constexpr T& back() { return _buf[_size - 1]; }
 
       constexpr const T* const* ptrToBuf() const { return &_buf; }
       constexpr const T* begin() const { return _buf; }
@@ -41,7 +41,7 @@ template <typename T> class mcs::array {
       constexpr const T& back() const { return _buf[_size - 1]; }
 
       //MODIFIERS
-      T* emplace(const uint i, auto... args);
+      constexpr T* emplace(const uint i, auto... args);
       T* release() { T* temp = _buf; _buf = nullptr; return temp; }
 
       //typecasts
@@ -50,7 +50,7 @@ template <typename T> class mcs::array {
 
 #pragma region src
 //!default constructor
-template<typename T> mcs::array<T>::array():
+template<typename T> constexpr mcs::array<T>::array():
    _buf(nullptr),_size(0) {
 
 }
@@ -71,7 +71,7 @@ template<typename T> mcs::array<T>::array(std::initializer_list<T> initPair):
 }
 
 //!bounds-checked element access
-template<typename T> T& mcs::array<T>::at(const uint i) {
+template<typename T> constexpr T& mcs::array<T>::at(const uint i) {
    if (i >= _size) {
       mcs_throw(ErrCode::SEGFAULT, "array of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m");
    }
@@ -86,7 +86,7 @@ template<typename T> constexpr const T& mcs::array<T>::at(const uint i) const {
 }
 
 //!construct in place
-template<typename T> T* mcs::array<T>::emplace(const uint i, auto... args) {
+template<typename T> constexpr T* mcs::array<T>::emplace(const uint i, auto... args) {
    if (i >= _size) {
       mcs_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in array of size \033[4m%u\033[24m", i,_size);
       return nullptr;

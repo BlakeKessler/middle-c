@@ -18,12 +18,12 @@ template <typename T> class mcs::arr_span {
       constexpr uint size() const { return _size; }
 
       constexpr T* const* ptrToBuf() { return &_buf; }
-      T* begin() { return _buf; }
-      T* end() { return _buf + _size; }
-      T& operator[](const uint i) { return _buf[i]; }
-      T& at(const uint i);
-      T& front() { return _buf[0]; }
-      T& back() { return _buf[_size - 1]; }
+      constexpr T* begin() { return _buf; }
+      constexpr T* end() { return _buf + _size; }
+      constexpr T& operator[](const uint i) { return _buf[i]; }
+      constexpr T& at(const uint i);
+      constexpr T& front() { return _buf[0]; }
+      constexpr T& back() { return _buf[_size - 1]; }
 
       constexpr const T* const* ptrToBuf() const { return &_buf; }
       constexpr const T* begin() const { return _buf; }
@@ -34,7 +34,7 @@ template <typename T> class mcs::arr_span {
       constexpr const T& back() const { return _buf[_size - 1]; }
 
       //MODIFIERS
-      T* emplace(const uint i, auto... args);
+      constexpr T* emplace(const uint i, auto... args);
 };
 
 #pragma region src
@@ -53,7 +53,7 @@ template<typename T> constexpr mcs::arr_span<T>::arr_span(T* buf, T* end):
 }
 
 //!bounds-checked element access
-template<typename T> T& mcs::arr_span<T>::at(const uint i) {
+template<typename T> constexpr T& mcs::arr_span<T>::at(const uint i) {
    if (i >= _size) {
       mcs_throw(ErrCode::SEGFAULT, "arr_span of size \033[4m%u\033[24m accessed at index \033[4m%u\033[24m");
    }
@@ -68,7 +68,7 @@ template<typename T> constexpr const T& mcs::arr_span<T>::at(const uint i) const
 }
 
 //!construct in place
-template<typename T> T* mcs::arr_span<T>::emplace(const uint i, auto... args) {
+template<typename T> constexpr T* mcs::arr_span<T>::emplace(const uint i, auto... args) {
    if (i >= _size) {
       mcs_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in arr_span of size \033[4m%u\033[24m", i,_size);
       return nullptr;

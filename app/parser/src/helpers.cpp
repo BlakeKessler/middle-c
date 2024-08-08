@@ -4,19 +4,6 @@
 #include "Parser.hpp"
 #include <cstring>
 
-// //!NOTE: REWRITE (this and MidC_Data.hpp)
-// bool clef::Parser::isOpeningDelim(astIt& current) {
-//    auto& tok = current.token();
-//    if (!tok.size()) { return false; }
-//    return !std::strncmp(tok.begin(), BLOCK_DELIMS[+blockDelimType(tok)].open.begin(), MAX_DELIM_LEN);
-// }
-// //
-// bool clef::Parser::delimsMatch(astIt& open, astIt& close) {
-//    if (!open->tokenID || !close->tokenID) { return false; }
-//    auto t = BLOCK_DELIMS[+blockDelimType(open.token())];
-//    return !(!std::strncmp(open.token().begin(), t.open.begin(), open.token().size()) || !std::strncmp(close.token().begin(), t.close.begin(), close.token().size()));
-// }
-
 //!make a block delimiter pair
 clef::astIt clef::Parser::makeBlock(astIt& open, astIt& close) {
    //assert that open and close are delims
@@ -26,7 +13,6 @@ clef::astIt clef::Parser::makeBlock(astIt& open, astIt& close) {
    open->type = NodeType::DELIM_OPEN;
    close->type = NodeType::DELIM_CLOSE;
    //construct new node
-   // astIt block{&_tree, _tree.pushNode(Node{0, NodeType::DELIM_PAIR})};
    astIt block{&_tree, _tree.emplaceNode(TOK_NIL, NodeType::DELIM_PAIR)};
    //set status
    block->status = +blockDelimType(_tree.token(open->tokenID));
@@ -43,10 +29,10 @@ clef::astIt clef::Parser::makeBlock(astIt& open, astIt& close) {
    //set parent
    open.parent().setChild(block, open->indexInParent);
    //disconnect open and close
-   open->prevID = NODE_NIL;
+   open->prevID = NODE_NIL;   //pointers to the block should already be handled
    open.severNext();
    close.severPrev();
-   close->nextID = NODE_NIL;
+   close->nextID = NODE_NIL;  //pointers to the block should already be handled
    
    //return
    return block;
