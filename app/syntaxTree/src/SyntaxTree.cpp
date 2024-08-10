@@ -13,7 +13,6 @@ clef::SyntaxTree::SyntaxTree(mcs::dyn_arr<Token>&& tokens, mcs::array<mcs::dyn_a
    _lineBounds(lines.size()) {
       //initialize nodes
       _nodes.emplace(0,TOK_NIL);
-      // std::memset(_nodes.begin(), 0, sizeof(Node));
       for (uint i = 1; i < _tokens.size(); ++i) {
          _nodes.emplace(i,static_cast<NodeID_t>(i+1),static_cast<NodeID_t>(i-1),_tokens[i].nodeType(),static_cast<TokenID_t>(i));
       } _nodes.back().nextID = NODE_NIL;

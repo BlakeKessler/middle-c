@@ -39,7 +39,6 @@ template<uint _size> class mcs::raw_str {
       #pragma region charArray
       //constructors
       constexpr raw_str():_buf{0} {}
-      // constexpr raw_str() { std::memset(_buf, 0, _size*sizeof(char)); }
       constexpr raw_str(const char* str, const uint strlen);
       constexpr raw_str(const char* str);
 

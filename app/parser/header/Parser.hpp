@@ -12,8 +12,9 @@ class clef::Parser {
       SyntaxTree _tree;
 
       //sections of parsing
+      bool escape();
       bool removePtxt();
-      bool handleDelimPairs();
+      bool handleBlockDelims();
       //helper functions for parsing
       uint escape(astIt& it);
       astIt makeBlock(astIt& open, astIt& close);

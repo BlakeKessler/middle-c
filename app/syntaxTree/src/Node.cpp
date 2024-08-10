@@ -11,8 +11,8 @@ clef::Node::Node(const TokenID_t tok, const NodeType t):
    type(t),
    status(0),
    parentID(NODE_NIL) ,
-   childIDs() {  
-      // std::memset(childIDs.begin(),0,sizeof(childIDs));
+   childIDs() {
+      
 }
 clef::Node::Node(const NodeID_t previous, const NodeType t, const TokenID_t tok):
    nextID(NODE_NIL),
@@ -23,7 +23,7 @@ clef::Node::Node(const NodeID_t previous, const NodeType t, const TokenID_t tok)
    status(0),
    parentID(NODE_NIL) ,
    childIDs() {
-      // std::memset(childIDs.begin(),0,sizeof(childIDs));
+      
 }
 clef::Node::Node(const NodeID_t next, const NodeID_t previous, const NodeType t, const TokenID_t tok):
    nextID(next),
@@ -34,7 +34,7 @@ clef::Node::Node(const NodeID_t next, const NodeID_t previous, const NodeType t,
    status(0),
    parentID(NODE_NIL) ,
    childIDs() {
-   //   std::memset(childIDs.begin(),0,sizeof(childIDs));
+      
 }
 clef::Node::Node(NodeID_t next, NodeID_t prev, TokenID_t tok, byte IIP, NodeType t, unsigned short s, NodeID_t parent, mcs::static_arr<NodeID_t,MAX_AST_CHILDREN> children):
    nextID(next),
@@ -45,7 +45,7 @@ clef::Node::Node(NodeID_t next, NodeID_t prev, TokenID_t tok, byte IIP, NodeType
    status(s),
    parentID(parent) ,
    childIDs(children) {
-   //   std::memset(childIDs.begin(),0,sizeof(childIDs));
+      
 }
 
 #endif //AST_NODE_CPP

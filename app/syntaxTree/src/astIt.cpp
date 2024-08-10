@@ -84,6 +84,31 @@ clef::astIt clef::astIt::operator[](const uint i) const {
 }
 #pragma endregion treeGet
 #pragma region treeSet
+//!pop a node from the AST
+//!undefined behavior if this has children
+clef::astIt& clef::astIt::pop() {
+   //pop from list
+   if (+self->nextID) {
+      next()->prevID = self->prevID;
+   }
+   if (+self->prevID) {
+      prev()->nextID = self->nextID;
+   }
+   if (+self->parentID) {
+      parent()->childIDs[self->indexInParent] = NODE_NIL;
+   }
+
+   //check that all children are null
+   for (NodeID_t i : self->childIDs) {
+      assert(!+i);
+   }
+
+   //clear entry
+   std::memset(&(*self),0,sizeof(Node));
+
+   //return
+   return self;
+}
 //!set previous and adjust tree to maintain consistency
 clef::astIt& clef::astIt::setPrev(const NodeID_t other) {
    assert(_index);

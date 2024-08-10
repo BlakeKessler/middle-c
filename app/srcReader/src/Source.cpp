@@ -25,6 +25,9 @@ clef::Source clef::Source::readFile(const char* path) {
    std::fclose(srcFile);
    assert(charsRead == _buf.size());
 
+   //validate file encoding (UTF-8)
+
+
    //find number of lines
    uint lineCount = 1;
    for (uint i = 0; i < charsRead; ++i) {

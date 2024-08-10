@@ -48,11 +48,6 @@ mcs::string mcs::string::altered(char (*transformer)(const char)) const {
 #pragma endregion string
 
 #pragma region charArray
-// //!default constructor
-// constexpr mcs::string::string():
-// _bufSize(0),_size(0),_buf(nullptr) {
-
-// }
 //!construct with buffer size
 mcs::string::string(const uint size):
 _bufSize(size+1),_size(0),_buf(mcs::calloc<char>(_bufSize)) {

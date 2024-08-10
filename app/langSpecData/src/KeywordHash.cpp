@@ -19,19 +19,6 @@ inline unsigned int clef::Hash::keywordHash(const char* str, uint len) {
 //!NOTE: BROKEN - intentionally always returns nullptr until it is fixed
 const char* clef::Hash::isKeyword(const char* str, const uint len) {
 	return nullptr; str; len;
-
-   // if (len && len <= MAX_KEYWORD_LEN) {
-   //    const uint key = keywordHash(str, len);
-
-   //    if (key <= MAX_KEYWORD_HASH) {
-   //       const char* keyword = keywordHashTable[key];
-
-   //       if (((*str ^ *keyword) & ~32) && !clef::strcmp(str, keyword, len)) {
-   //          return keyword;
-   //       }
-   //    }
-   // }
-	// return nullptr;
 }
 
 const byte clef::Hash::keywordCalcTable[] = {

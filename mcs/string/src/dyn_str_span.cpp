@@ -25,11 +25,6 @@ mcs::string mcs::dyn_str_span::altered(char (*transformer)(const char)) const {
 #pragma endregion string_span
 
 #pragma region charArray
-// //!default constructor
-// mcs::dyn_str_span::dyn_str_span():
-// _ptrToBuf(nullptr),_begin(0),_size(0) {
-
-// }
 //!constructor from c-dyn_str_span and length
 constexpr mcs::dyn_str_span::dyn_str_span(string& str):
 _ptrToBuf(str.ptrToBuf()),_begin(0),_size(str.size()) {

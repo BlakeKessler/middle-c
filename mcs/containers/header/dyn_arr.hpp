@@ -136,7 +136,6 @@ template<typename T> T* mcs::dyn_arr<T>::emplace(const uint i, auto... args) {
       mcs_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in dyn_arr of size \033[4m%u\033[24m", i,_size);
       return nullptr;
    }
-   // _buf[i] = T{args...};
    std::construct_at(_buf + i, args...);
    return _buf + i;
 }

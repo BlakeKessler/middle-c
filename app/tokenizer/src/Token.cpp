@@ -56,6 +56,10 @@ uint clef::Token::findTokEnd(const char* const tokStr, const uint len) {
    while (+typeNum && (++i < len)) {
       typeNum = typeNum & Token::typeNum(tokStr[i], false);
    }
+   //skip chars that can't be the start of a token if tokStr starts with them 
+   if (!i) {
+      while ((++i < len) && !+Token::typeNum(tokStr[i],true)) {}
+   }
    //return pointer to end char if it doesn't create a null token
    return i ? i : len;
 }

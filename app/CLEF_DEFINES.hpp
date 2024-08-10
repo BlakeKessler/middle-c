@@ -25,7 +25,6 @@ using real = float;
 
 //type macro properties
 #define CLEF_TMAX(type) ((std::make_unsigned_t<type>)(~0) >> std::is_signed<type>()) //function macro to calculate max value of integer types - assumes Two's Complement
-// #define CLEF_TMAX(type) ((1 << (8 * sizeof(type) - (0 > (type)(~0)))) - 1)
 constexpr luint UINT_MAX = CLEF_TMAX(uint);
 constexpr luint SINT_MAX = CLEF_TMAX(sint);
 constexpr luint LUINT_MAX = CLEF_TMAX(luint);

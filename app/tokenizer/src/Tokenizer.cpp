@@ -26,7 +26,7 @@ _src(src),_tokens(),_tokLines(src.lineCount()) {
       tempCounter = 0;
 
       //skip leading whitespace
-      while (line.size() && !+tokTypeArr[+line[0]]) { line.inc_begin(1); }
+      while (line.size() && !+Token::typeNum(line[0],false)) { line.inc_begin(1); }
 
       //process line
       while (line.size()) {
@@ -44,7 +44,7 @@ _src(src),_tokens(),_tokLines(src.lineCount()) {
          }
 
          //skip leading whitespace
-         while (line.size() && !+tokTypeArr[+line[0]]) { line.inc_begin(1); }
+      while (line.size() && !+Token::typeNum(line[0],false)) { line.inc_begin(1); }
       }
       //create token line & increment overall count
       _tokLines.emplace(i, _tokens.ptrToBuf(), mcs::pair{i?_tokLines[i-1].lastIndex():0 , _tokens.size()});

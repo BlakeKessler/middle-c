@@ -25,16 +25,6 @@ mcs::string mcs::raw_str_span::altered(char (*transformer)(const char)) const {
 #pragma endregion string_span
 
 #pragma region charArray
-// //!default constructor
-// constexpr mcs::raw_str_span::raw_str_span():
-// _buf(nullptr),_size(0) {
-
-// }
-// //!constructor from c-raw_str_span and length
-// constexpr mcs::raw_str_span::raw_str_span(char* str, const uint size):
-// _buf(str),_size(size) {
-   
-// }
 //!constructor from c-raw_str_span and length
 constexpr mcs::raw_str_span::raw_str_span(string& str):
 _buf(str.begin()),_size(str.size()) {
