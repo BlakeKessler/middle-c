@@ -38,7 +38,7 @@ class clef::Token : public mcs::raw_str_span {
       auto maxOpLen() const { return clef::maxOpLen(self); }
       const Operator* getOpData() const { return clef::getOpData(self); }
       const DelimPair* getDelimPairData() const;
-      // const DelimPair* getDelimPairData() const { return &BLOCK_DELIMS[+clef::blockDelimType(self)]; }
+      const DelimPair* getPtxtData() const;
 
       //operators
       template<uint capacity> constexpr bool operator==(const mcs::raw_str<capacity>& str) const { const uint len = std::strlen(str.begin()); return (size() == len) && !std::memcmp(begin(),str.begin(),len*sizeof(char)); }

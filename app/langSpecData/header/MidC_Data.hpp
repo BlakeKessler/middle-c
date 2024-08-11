@@ -145,13 +145,15 @@ namespace clef {
       DelimPair{"{", "}"},   //INITIALIZER LIST
       DelimPair{"<", ">"},   //SPECIALIZER
 
+      // DelimPair{"?\0", ":\0"},   //TERNARY STATEMENT
+   };
+   static constexpr const mcs::static_arr PTXT_DELIMS{
+      DelimPair{},           //NULL DELIM PAIR
       DelimPair{"\'", "\'"}, //CHARACTER
       DelimPair{"\"", "\""}, //STRING
-
-      // DelimPair{"?\0", ":\0"},   //TERNARY STATEMENT
       
       DelimPair{"/*", "*/"},     //BLOCK COMMENT
-      // DelimPair{"//", "\n\0"},   //SINGLE-LINE COMMENT
+      DelimPair{"//", "\n\0"},   //SINGLE-LINE COMMENT
    };
    // extern const mcs::static_arr<mcs::string> KEYWORDS;
    

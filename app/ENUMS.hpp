@@ -36,6 +36,10 @@ namespace clef {
       DELIM_GEN,           //general block delimiter
       DELIM_OPEN,          //opening block delimiter
       DELIM_CLOSE,         //closing block delimiter
+
+      PTXT_SEG,            //plaintext segment
+      PTXT_DELIM,          //plaintext delimiter
+
       LITERAL,             //numeric or string literal
       OPERATOR,            //MiddleC operator
       OP_OR_DELIM,         //not yet determined between OPERATOR and DELIM_GEN

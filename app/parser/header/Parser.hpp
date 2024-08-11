@@ -18,6 +18,7 @@ class clef::Parser {
       //helper functions for parsing
       uint escape(astIt& it);
       astIt makeBlock(astIt& open, astIt& close);
+      astIt makePtxtSeg(astIt& open, astIt& close);
    public:
       //constructors and destructor
       Parser() = default;

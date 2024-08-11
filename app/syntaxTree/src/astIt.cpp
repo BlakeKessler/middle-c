@@ -26,19 +26,27 @@ const clef::Node* clef::astIt::operator->() const {
 }
 
 clef::astIt& clef::astIt::operator++() {
-   _index = _tree->_nodes[+_index].nextID;
+   do {
+      _index = _tree->_nodes[+_index].nextID;
+   } while (self->type == NodeType::PTXT_SEG);
    return self;
 }
 const clef::astIt& clef::astIt::operator++() const {
-   _index = _tree->_nodes[+_index].nextID;
+   do {
+      _index = _tree->_nodes[+_index].nextID;
+   } while (self->type == NodeType::PTXT_SEG);
    return self;
 }
 clef::astIt& clef::astIt::operator--() {
-   _index = _tree->_nodes[+_index].prevID;
+   do {
+      _index = _tree->_nodes[+_index].prevID;
+   } while (self->type == NodeType::PTXT_SEG);
    return self;
 }
 const clef::astIt& clef::astIt::operator--() const {
-   _index = _tree->_nodes[+_index].prevID;
+   do {
+      _index = _tree->_nodes[+_index].prevID;
+   } while (self->type == NodeType::PTXT_SEG);
    return self;
 }
 clef::astIt& clef::astIt::operator>>=(const uint childIndex) {

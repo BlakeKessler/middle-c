@@ -13,8 +13,8 @@ clef::Parser::Parser(mcs::dyn_arr<Token>&& tokens, mcs::array<mcs::dyn_arr_span<
 bool clef::Parser::runPass() {
    bool madeChanges = false;
 
-   // madeChanges |= escape();
-   // madeChanges |= removePtxt();
+   madeChanges |= escape();
+   madeChanges |= removePtxt();
    madeChanges |= handleBlockDelims();
 
    assert(!_tree.it(NODE_NIL)->nextID && !_tree.it(NODE_NIL)->prevID && !_tree.it(NODE_NIL)->parentID);
@@ -56,7 +56,7 @@ bool clef::Parser::escape() {
          if (+(nextTok->typeNum() & TokenType::NUM)) {
             tok->inc_end(nextTok->size());
             nextTok->inc_begin(nextTok->size());
-            current->status = 0;
+            current->status = +TokenType::NUM;
          }
          //next token is not numeric
          else {
@@ -74,6 +74,49 @@ bool clef::Parser::escape() {
 
    return madeChanges;
 }
+
+//!handle plaintext segments
+bool clef::Parser::removePtxt() {
+   astIt current = _tree.root();
+   if (!current) {
+      return false;
+   }
+
+   const DelimPair* data = nullptr;
+   astIt open;
+   do {
+      //skip if not block delimiter
+      if (current->type != NodeType::PTXT_DELIM) {
+         continue;
+      }
+
+      //closing delim
+      if (data) {
+         if (current == data->close) {
+            current = makePtxtSeg(open,current);
+            data = nullptr;
+         }
+         continue;
+      }
+
+      //opening delim
+      open = current;
+      data = current.token().getPtxtData();
+      //verify validity
+      if (!data) { 
+         clef::throwError(ErrCode::PARSER_UNSPEC, current.token().lineNum(), "Node %u marked as a plaintext delimiter does not match any plaintext delimiters",current.index());
+         continue;
+      }
+   } while(++current);
+
+   //check that all delims were consumed
+   if (data) {
+      throwError(ErrCode::UNCLOSED_BLOCK, "plaintext delimiter %.*s %.*s",data->open.size(),data->open.begin(),data->close.size(),data->close.begin());
+   }
+
+   return true;
+}
+
 //!handle block delimiter pairs
 //!returns whether or not changes were made
 bool clef::Parser::handleBlockDelims() {

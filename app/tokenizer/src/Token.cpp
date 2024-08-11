@@ -64,7 +64,7 @@ uint clef::Token::findTokEnd(const char* const tokStr, const uint len) {
    return i ? i : len;
 }
 
-//!
+//!get delimiter pair data block
 const clef::DelimPair* clef::Token::getDelimPairData() const {
    if (!size() || size() > MAX_DELIM_LEN) {
       return nullptr;
@@ -74,6 +74,20 @@ const clef::DelimPair* clef::Token::getDelimPairData() const {
    for (uint i = 1; i < BLOCK_DELIMS.size(); ++i) {
       if (self == BLOCK_DELIMS[i].open || self == BLOCK_DELIMS[i].close) {
          return &BLOCK_DELIMS[i];
+      }
+   }
+   return nullptr;
+}
+//!get plaintext delimiter pair data block
+const clef::DelimPair* clef::Token::getPtxtData() const {
+   if (!size() || size() > MAX_DELIM_LEN) {
+      return nullptr;
+   }
+
+   //search array
+   for (uint i = 1; i < PTXT_DELIMS.size(); ++i) {
+      if (self == PTXT_DELIMS[i].open || self == PTXT_DELIMS[i].close) {
+         return &PTXT_DELIMS[i];
       }
    }
    return nullptr;
@@ -103,8 +117,11 @@ clef::NodeType clef::Token::nodeType() const {
             NodeType::OP_OR_DELIM :
          self == "\\" ? NodeType::ESCAPE : NodeType::OPERATOR;
    }
-   if (+(type & (TokenType::BLOC | TokenType::PTXT))) {
+   if (+(type & TokenType::BLOC)) {
       return NodeType::DELIM_GEN;
+   }
+   if (+(type & TokenType::PTXT)) {
+      return NodeType::PTXT_DELIM;
    }
    return NodeType::NONE;
 }
