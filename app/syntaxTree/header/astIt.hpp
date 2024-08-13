@@ -59,6 +59,7 @@ class clef::astIt {
       astIt& severPrev();
       astIt& severNext();
 
+      astIt& swap(astIt& other);
       astIt& propegate();
       #pragma endregion treeSet
 

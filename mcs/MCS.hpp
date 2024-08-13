@@ -12,6 +12,9 @@ namespace mcs {
    template<typename T> class arr_span;
    template<typename T> class dyn_arr_span;
 
+   // template<typename T> class node;
+   // template<typename T, cmpfunc(T)> class prio_queue;
+
    class string;
    class dyn_str_span;
    template<uint _size> class raw_str;

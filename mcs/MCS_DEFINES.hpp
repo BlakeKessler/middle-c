@@ -32,4 +32,7 @@ namespace mcs {
 //char/string const
 constexpr byte CASE_DIF = 'a' - 'A';
 
+// //comparison macros
+// #define cmpfunc(T) bool cmp(const T& a, const T& b)
+
 #endif //MCS_DEFINES_HPP

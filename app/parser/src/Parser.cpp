@@ -17,6 +17,7 @@ bool clef::Parser::runPass() {
    madeChanges |= removePtxt();
    madeChanges |= handleBlockDelims();
    madeChanges |= handleStatements();
+   madeChanges |= handleOperators();
 
    assert(!_tree.it(NODE_NIL)->nextID && !_tree.it(NODE_NIL)->prevID && !_tree.it(NODE_NIL)->parentID);
    return madeChanges;
@@ -198,6 +199,34 @@ bool clef::Parser::handleStatements() {
       }
    }
 
+   updateRoot();
+   return madeChanges;
+}
+
+//!handle operators
+//!returns whether or not changes were made
+bool clef::Parser::handleOperators() {
+   bool madeChanges = false;
+   astIt current = _tree.root();
+   mcs::dyn_arr<NodeID_t> stack{};
+
+   while (current) {
+      //push children
+      for (NodeID_t i : current->childIDs) {
+         if (+i) {
+            stack.push_back(i);
+         }
+      }
+      //check for operator
+      if (current->type == NodeType::OPERATOR || current->type == NodeType::OP_OR_DELIM) {
+         current = makeOpNode(current);
+         madeChanges = true;
+      }
+      //increment
+      if (!++current && stack.size()) {
+         current.setIndex(stack.pop_back());
+      }
+   }
    updateRoot();
    return madeChanges;
 }

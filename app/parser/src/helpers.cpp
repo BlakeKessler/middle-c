@@ -11,8 +11,8 @@ clef::astIt clef::Parser::makeBlock(astIt& open, astIt& close) {
    assert(close->type == NodeType::DELIM_GEN);
    //construct new node
    astIt block{&_tree, _tree.emplaceNode(
-      close.next(),                                //next
-      open.prev(),                                 //prev
+      close->nextID,                               //next
+      open->prevID,                                //prev
       TOK_NIL,                                     //token
       open->indexInParent,                         //index in parent
       NodeType::DELIM_PAIR,                        //type
@@ -52,8 +52,8 @@ clef::astIt clef::Parser::makePtxtSeg(astIt& open, astIt& close) {
    assert(close->type == NodeType::PTXT_DELIM);
    //construct new node
    astIt block{&_tree, _tree.emplaceNode(
-      close.next(),                                //next
-      open.prev(),                                 //prev
+      close->nextID,                               //next
+      open->prevID,                                //prev
       TOK_NIL,                                     //token
       open->indexInParent,                         //index in parent
       NodeType::PTXT_SEG,                          //type
@@ -115,5 +115,53 @@ clef::astIt clef::Parser::makeStatement(astIt& open, astIt& close) {
 
    //return
    return block;
+}
+
+//!make an operator
+clef::astIt clef::Parser::makeOpNode(astIt& op) {
+   //assert that passed node is an operator node with no children
+   assert(op->type == NodeType::OPERATOR || op->type == NodeType::OP_OR_DELIM);
+   for (NodeID_t i : op->childIDs) {
+      assert(!i);
+   }
+
+   //setup
+   const Operator* data = getOpData(op.token());
+   op->status = data->precedence;
+   astIt retval = op;
+
+   //right-associative or binary → has an RHS
+   if (+(data->opType & OpType::RIGHT_BIN)) {
+      std::printf("right or bin\n");
+      astIt rhs = op.next();
+      if (rhs->parentID != op->parentID) { rhs.parent().setChild(op,rhs->indexInParent); }
+      op.setChild(rhs.index(), 1);
+      op.setNext(rhs->nextID);
+      rhs->prevID = NODE_NIL;
+   }
+   //left-associative or binary → has an LHS
+   if (+(data->opType & OpType::LEFT_BIN)) {
+      std::printf("left or bin\n");
+      astIt lhs = op.prev();
+      //lhs is an operator → op is part of operator tree
+      if (lhs->type == NodeType::OPERATOR && data->precedence > lhs->status) {
+         retval.setIndex(lhs.index());
+         lhs.setNext(op->nextID);
+         //find location in tree
+         do {
+            lhs >>= 1;
+         } while (lhs->type == NodeType::OPERATOR && data->precedence > lhs->status);
+         //swap
+         lhs.swap(op);
+         op.setChild(lhs,0);
+      }
+      else {
+         lhs.parent().setChild(op, lhs->indexInParent);
+         op.setChild(lhs,0);
+         op.setPrev(lhs->prevID);
+      }
+   }
+   std::printf("\n");
+   return retval;
 }
 #endif //PARSER_HELPERS_CPP

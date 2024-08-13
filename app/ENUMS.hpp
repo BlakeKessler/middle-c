@@ -89,6 +89,12 @@ namespace clef {
       FREE        = 0x00,        //unused (available for any purpose for the user)
 
    };
+   constexpr auto operator+(const OpType t) noexcept { return std::to_underlying(t); }
+   constexpr OpType operator&(const OpType lhs, const OpType rhs) noexcept { return (OpType)((+lhs) & (+rhs)); }
+   constexpr OpType operator|(const OpType lhs, const OpType rhs) noexcept { return (OpType)((+lhs) | (+rhs)); }
+   constexpr OpType operator*(const OpType lhs, const OpType rhs) noexcept { return (OpType)((+lhs) * (+rhs)); }
+   constexpr OpType operator~(const OpType lhs) noexcept { return (OpType)(~+lhs); }
+   constexpr OpType operator*(const OpType lhs, const uint rhs) noexcept { return (OpType)((+lhs) * rhs); }
 
    //delimiter pair specification
    enum class DelimPairType : byte {

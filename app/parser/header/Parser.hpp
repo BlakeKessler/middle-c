@@ -16,11 +16,13 @@ class clef::Parser {
       bool removePtxt();
       bool handleBlockDelims();
       bool handleStatements();
+      bool handleOperators();
       //helper functions for parsing
       uint escape(astIt& it);
       astIt makeBlock(astIt& open, astIt& close);
       astIt makePtxtSeg(astIt& open, astIt& close);
       astIt makeStatement(astIt& open, astIt& close);
+      astIt makeOpNode(astIt& op);
 
       inline bool updateRoot() { return _tree.updateRoot(); }
    public:

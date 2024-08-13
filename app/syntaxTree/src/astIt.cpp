@@ -161,6 +161,29 @@ clef::astIt& clef::astIt::severNext() {
    return self;
 }
 
+#define tmpSwap(a,b) temp = a; a = b; b = temp;
+//!swap parent, previous, and next
+clef::astIt& clef::astIt::swap(astIt& other) {
+   NodeID_t temp;
+
+   tmpSwap(prev()->nextID, other.prev()->nextID);
+   tmpSwap(next()->prevID, other.next()->prevID);
+   tmpSwap(self->nextID, other->nextID);
+   tmpSwap(self->prevID, other->prevID);
+
+   temp = self->parentID;
+   auto iip = self->indexInParent;
+   if (+other->parentID) {
+      other.parent().setChild(_index,other->indexInParent);
+   }
+   if (+temp) {
+      const_cast<SyntaxTree*>(_tree)->it(temp).setChild(other._index,iip);
+   }
+
+   return self;
+}
+#undef tmpSwap
+
 //!adjust tree to be consistent with this node
 clef::astIt& clef::astIt::propegate() {
    if (!+_index) { return self; }
