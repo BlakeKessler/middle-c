@@ -16,6 +16,7 @@ bool clef::Parser::runPass() {
    madeChanges |= escape();
    madeChanges |= removePtxt();
    madeChanges |= handleBlockDelims();
+   madeChanges |= handleStatements();
 
    assert(!_tree.it(NODE_NIL)->nextID && !_tree.it(NODE_NIL)->prevID && !_tree.it(NODE_NIL)->parentID);
    return madeChanges;
@@ -72,10 +73,12 @@ bool clef::Parser::escape() {
       }
    } while(++current);
 
+   updateRoot();
    return madeChanges;
 }
 
 //!handle plaintext segments
+//!returns whether or not changes were made
 bool clef::Parser::removePtxt() {
    astIt current = _tree.root();
    if (!current) {
@@ -114,6 +117,7 @@ bool clef::Parser::removePtxt() {
       throwError(ErrCode::UNCLOSED_BLOCK, "plaintext delimiter %.*s %.*s",data->open.size(),data->open.begin(),data->close.size(),data->close.begin());
    }
 
+   updateRoot();
    return true;
 }
 
@@ -161,7 +165,41 @@ bool clef::Parser::handleBlockDelims() {
       throwError(ErrCode::UNCLOSED_BLOCK, "%u excess delimiters", delims.size());
    }
 
+   updateRoot();
    return true;
+}
+
+//!handle statements
+//!returns whether or not changes were made
+bool clef::Parser::handleStatements() {
+   bool madeChanges = false;
+
+   astIt current = _tree.root();
+   astIt statementStart = current;
+   mcs::dyn_arr<NodeID_t> stack{};
+
+   while (current) {
+      //push children
+      for (NodeID_t i : current->childIDs) {
+         if (+i) {
+            stack.push_back(i);
+         }
+      }
+      //check for EOS
+      if (current->type == NodeType::EOS) {
+         current = makeStatement(statementStart, current);
+         statementStart.setIndex(current->nextID);
+         madeChanges = true;
+      }
+      //iterate
+      if (!++current && stack.size()) {
+         current.setIndex(stack.pop_back());
+         statementStart = current;
+      }
+   }
+
+   updateRoot();
+   return madeChanges;
 }
 #pragma endregion parsing
 

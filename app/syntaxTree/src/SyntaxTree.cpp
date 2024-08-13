@@ -59,6 +59,25 @@ void clef::SyntaxTree::printf() const {
    }
 }
 
+//!update the root
+//!parents, then predecessors
+bool clef::SyntaxTree::updateRoot() {
+   astIt root = this->root();
+   while (+root->parentID || +root->prevID) {
+      while (+root->parentID) {
+         root.toParent();
+      }
+      if (+root->prevID) {
+         --root;
+      }
+   }
+   if (root.index() == this->root().index()) {
+      return false;
+   }
+   _root = root.index();
+   return true;
+}
+
 #pragma region DEBUG
 void clef::SyntaxTree::debug_printf() const {
    for (uint i = 0; i < _nodes.size(); ++i) {

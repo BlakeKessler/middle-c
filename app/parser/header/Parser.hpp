@@ -15,10 +15,14 @@ class clef::Parser {
       bool escape();
       bool removePtxt();
       bool handleBlockDelims();
+      bool handleStatements();
       //helper functions for parsing
       uint escape(astIt& it);
       astIt makeBlock(astIt& open, astIt& close);
       astIt makePtxtSeg(astIt& open, astIt& close);
+      astIt makeStatement(astIt& open, astIt& close);
+
+      inline bool updateRoot() { return _tree.updateRoot(); }
    public:
       //constructors and destructor
       Parser() = default;

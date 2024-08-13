@@ -10,8 +10,6 @@ class clef::Token : public mcs::raw_str_span {
    private:
       const uint _lineNum;
    public:
-      // bool operator==(const char* other) const;
-
       //constructors
       Token();
       Token(char* front, char* back, const uint line = 0);
@@ -47,7 +45,7 @@ class clef::Token : public mcs::raw_str_span {
       void throwError(const ErrCode code) const;
 
       //token IO
-      void printf() const { /*assert(size());*/ std::printf("%.*s", size(),begin()); }
+      void printf() const { std::printf("%.*s", size(),begin()); }
 };
 
 #endif //TOKEN_HPP
