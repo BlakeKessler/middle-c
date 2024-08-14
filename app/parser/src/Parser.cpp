@@ -207,26 +207,15 @@ bool clef::Parser::handleStatements() {
 //!returns whether or not changes were made
 bool clef::Parser::handleOperators() {
    bool madeChanges = false;
-   astIt current = _tree.root();
-   mcs::dyn_arr<NodeID_t> stack{};
 
-   while (current) {
-      //push children
-      for (NodeID_t i : current->childIDs) {
-         if (+i) {
-            stack.push_back(i);
-         }
-      }
+   for (astIt i = _tree.begin(); +i.index() < _tree.size(); i.incIndex()) {
       //check for operator
-      if (current->type == NodeType::OPERATOR || current->type == NodeType::OP_OR_DELIM) {
-         current = makeOpNode(current);
+      if (i->type == NodeType::OPERATOR || i->type == NodeType::OP_OR_DELIM) {
+         makeOpNode(i);
          madeChanges = true;
       }
-      //increment
-      if (!++current && stack.size()) {
-         current.setIndex(stack.pop_back());
-      }
    }
+   
    updateRoot();
    return madeChanges;
 }

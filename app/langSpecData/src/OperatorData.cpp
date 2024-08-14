@@ -30,10 +30,14 @@ uint clef::maxOpLen(const mcs::raw_str_span& str) {
 }
 
 //!find the length of the longest Middle C operator contained by the string
-const clef::Operator* clef::getOpData(const mcs::raw_str_span& str) {
+//!NOTE: replace with hash map
+const clef::Operator* clef::getOpData(const mcs::raw_str_span& str, bool banBinary) {
    uint maxlen = 0;
    const Operator* op;
    for (uint i = 0; i < OPERATORS.size(); ++i) {
+      if (banBinary && !+(OPERATORS[i].opType & OpType::BIN)) {
+         continue;
+      }
       //check length
       if (OPERATORS[i].size > str.size()) {
          continue;

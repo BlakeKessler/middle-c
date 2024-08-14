@@ -37,6 +37,9 @@ class clef::astIt {
       const astIt& operator>>=(const uint childIndex) const;
       const astIt& toParent() const;
 
+      astIt& incIndex() { ++_index; return self; }
+      const astIt& incIndex() const { ++_index; return self; }
+
       template<uint _size> bool operator==(const mcs::raw_str<_size>& str) const;
       #pragma endregion operators
 

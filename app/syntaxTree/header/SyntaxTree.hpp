@@ -27,6 +27,8 @@ class clef::SyntaxTree {
       NodeID_t emplaceNode(ParamPack... args) { return static_cast<NodeID_t>(_nodes.emplace_back(std::forward<ParamPack>(args)...) - _nodes.begin()); }
       NodeID_t pushNode(Node& node) { return (NodeID_t)_nodes.push_back(node); }
 
+      uint size() const { return _nodes.size(); }
+
       astIt root();
       const astIt root() const;
 

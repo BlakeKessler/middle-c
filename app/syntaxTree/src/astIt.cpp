@@ -205,6 +205,7 @@ clef::astIt& clef::astIt::propegate() {
 #pragma endregion treeSet
 
 void clef::astIt::printf() const {
+   if (+_index >= _tree->_tokens.size()) { return; }
    _tree->_tokens[+_tree->_nodes[+_index].tokenID].printf();
 }
 

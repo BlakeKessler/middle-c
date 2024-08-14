@@ -100,8 +100,8 @@ void clef::SyntaxTree::debug_printf() const {
 #pragma region trivial
 clef::astIt clef::SyntaxTree::root() { return astIt(this,_root); }
 const clef::astIt clef::SyntaxTree::root() const { return astIt(this,_root); }
-clef::astIt clef::SyntaxTree::begin() { return astIt(this,NODE_NIL); }
-const clef::astIt clef::SyntaxTree::begin() const { return astIt(this,NODE_NIL); }
+clef::astIt clef::SyntaxTree::begin() { return astIt(this,static_cast<NodeID_t>(1)); }
+const clef::astIt clef::SyntaxTree::begin() const { return astIt(this,static_cast<NodeID_t>(1)); }
 clef::astIt clef::SyntaxTree::end() { return astIt(this, static_cast<NodeID_t>(_nodes.size())); }
 const clef::astIt clef::SyntaxTree::end() const { return astIt(this, static_cast<NodeID_t>(_nodes.size())); }
 clef::astIt clef::SyntaxTree::it(const NodeID_t i) { return astIt(this,i); }

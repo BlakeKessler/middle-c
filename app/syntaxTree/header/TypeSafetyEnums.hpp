@@ -21,6 +21,8 @@
    bool clefDefineEnumOp(T,<=)   \
    bool clefDefineEnumOp(T,>)    \
    bool clefDefineEnumOp(T,>=)   \
+   T& operator++(T& a);          \
+   T& operator--(T& a);          \
    bool operator!(const T a);
 
 namespace clef {

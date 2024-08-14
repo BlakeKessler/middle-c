@@ -163,7 +163,7 @@ namespace clef {
 
    //operators
    uint maxOpLen(const mcs::raw_str_span& str);
-   const Operator* getOpData(const mcs::raw_str_span& str);
+   const Operator* getOpData(const mcs::raw_str_span& str, bool allowUnary = true);
 
    //!function to determine if a string is a Middle-C keyword
    inline bool isKeyword(const mcs::raw_str_span& str) { return Hash::isKeyword(str.begin(), str.size()); }
