@@ -64,6 +64,7 @@ namespace clef {
       CHAR = STRT | IDEN,
       XDGT = DGIT | CHAR,
       UNCD = CHAR | OP,
+      CMNT = PTXT | OP,
    };
    constexpr auto operator+(const TokenType t) noexcept { return std::to_underlying(t); }
    constexpr TokenType operator&(const TokenType lhs, const TokenType rhs) noexcept { return (TokenType)((+lhs) & (+rhs)); }

@@ -51,6 +51,9 @@ namespace clef {
 
       Operator("\"",    1,  LEFT_SPEC), //string
       Operator("\'",    1,  LEFT_SPEC), //char
+      Operator("//",    1,  RIGHT_SPEC),//line comment
+      Operator("/*",    1,  RIGHT_SPEC),//block comment
+      Operator("*/",    1,  LEFT_SPEC), //block comment
 
       Operator("::",    2,  LEFT_BIN),  //scope resolution
 
