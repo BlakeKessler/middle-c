@@ -132,27 +132,53 @@ clef::astIt clef::Parser::makeOpNode(astIt& op) {
    //get operands
    astIt lhs = op.prev();
    astIt rhs = op.next();
-   astIt ret = op;
+   astIt root = op;
 
-   //set operator parent - will be overwritten if needed
+   //handle lhs
    if (+(data->opType & OpType::LEFT_BIN)) {
+      //merge into operator tree
+      if (lhs->type == NodeType::OPERATOR && data->precedence <= lhs->status) {
+         root = lhs;
+         do {
+            //go to child
+            lhs >>= 1;
+         } while (lhs->type == NodeType::OPERATOR && data->precedence <= lhs->status);
+      }
+      //no operator tree to merge into
+      else {
+         //re-link root
+         root.setPrev(lhs->prevID);
+      }
+
+      //parent
       if (+lhs->parentID) {
          lhs.parent().setChild(op, lhs->indexInParent);
       }
+
+      //move lhs
+      op.setChild(lhs,0);
+      lhs->nextID = NODE_NIL;
+      lhs->prevID = NODE_NIL;
+   }
+   //handle rhs
+   if (+(data->opType & OpType::RIGHT_BIN)) {
+      //merge into rhs operator tree
+      while (rhs->type == NodeType::OPERATOR && data->precedence <= rhs->status) {
+         //go to child
+         rhs >>= 0;
+      }
+
+      //move rhs
+      op.setChild(rhs,1);
+      op.setNext(rhs->nextID);
+      root.setNext(rhs->nextID);
+
+      //unlink rhs
+      rhs->nextID = NODE_NIL;
+      rhs->prevID = NODE_NIL;
    }
 
-   //handle operands
-   op.setChild(op->prevID,0);
-   op.setChild(op->nextID,1);
-   op.setPrev(lhs->prevID);
-   op.setNext(rhs->nextID);
-
-   lhs->nextID = NODE_NIL;
-   lhs->prevID = NODE_NIL;
-   rhs->nextID = NODE_NIL;
-   rhs->prevID = NODE_NIL;
-
    //return
-   return ret;
+   return op;
 }
 #endif //PARSER_HELPERS_CPP
