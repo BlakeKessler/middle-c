@@ -19,7 +19,7 @@ bool clef::Parser::runPass() {
    madeChanges |= handleStatements();
    madeChanges |= handleOperators();
 
-   assert(!_tree.it(NODE_NIL)->nextID && !_tree.it(NODE_NIL)->prevID && !_tree.it(NODE_NIL)->parentID);
+   assert(!_tree.null()->nextID && !_tree.null()->prevID && !_tree.null()->parentID);
    return madeChanges;
 }
 

@@ -61,6 +61,7 @@ class clef::astIt {
       astIt& setChild(const NodeID_t other, const byte i);
       astIt& severPrev();
       astIt& severNext();
+      inline astIt& sever() { severPrev(); return severNext(); }
 
       astIt& swap(astIt& other);
       astIt& propegate();
