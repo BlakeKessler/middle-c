@@ -125,11 +125,12 @@ clef::astIt clef::Parser::makeOpNode(astIt& op) {
       assert(!i);
    }
 
-
-         //ASSUMING SIMPLE CASE!!!
    //setup
    const Operator* data = getOpData(op.token(), +op->prevID);
-   assert(data);
+   if (!data) {
+      throwError(ErrCode::PARSER_UNSPEC, "WARNING: operator %.*s not found in operator data",op.token().size(),op.token().begin());
+      return op;
+   }
 
    astIt lhs = +(data->opType & LEFT_BIN ) ? op.prev() : _tree.null();
    astIt rhs = +(data->opType & RIGHT_BIN) ? op.next() : _tree.null();
@@ -159,16 +160,19 @@ clef::astIt clef::Parser::makeOpNode(astIt& op) {
    rhs.sever();
 
 
-   //place operator
+   //place operator and operands
    lhs.parent().setChild(op,lhs->indexInParent);
-   //add operands as children
    op.setChild(lhs, 0);
    op.setChild(rhs, 1);
 
 
    //adjust tree around root
-   root.setPrev(prev);
-   root.setNext(next);
+   if (+data->opType & +LEFT_BIN) {
+      root.setPrev(prev);
+   }
+   if (+data->opType & +RIGHT_BIN) {
+      root.setNext(next);
+   }
    parent.setChild(root, iip);
 
    return root;

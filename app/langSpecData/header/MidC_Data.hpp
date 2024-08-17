@@ -59,17 +59,17 @@ namespace clef {
 
       Operator("++",    3,  LEFT_UN),   //pre-increment
       Operator("--",    3,  LEFT_UN),   //pre-decrement
-      Operator("(",     3,  RIGHT_SPEC),//function calls/functional casts
-      Operator("[",     3,  RIGHT_SPEC),//subscript
-      Operator("{",     3,  RIGHT_SPEC),//scope/functional casts
-      Operator("<",     3,  RIGHT_SPEC),//specifier
-      Operator(")",     3,  LEFT_SPEC), //function calls/functional casts
-      Operator("]",     3,  LEFT_SPEC), //subscript
-      Operator("}",     3,  LEFT_SPEC), //scope/functional casts
-      Operator(">",     3,  LEFT_SPEC), //specifier
+      Operator("(",     3,  RIGHT_SPEC | UN),//function calls/functional casts
+      Operator("[",     3,  RIGHT_SPEC | UN),//subscript
+      Operator("{",     3,  RIGHT_SPEC | UN),//scope/functional casts
+      Operator("<",     3,  RIGHT_SPEC | UN),//specifier
+      Operator(")",     3,  LEFT_SPEC | UN), //function calls/functional casts
+      Operator("]",     3,  LEFT_SPEC | UN), //subscript
+      Operator("}",     3,  LEFT_SPEC | UN), //scope/functional casts
+      Operator(">",     3,  LEFT_SPEC | UN), //specifier
       Operator(".",     3,  LEFT_BIN),  //element access
       Operator("->",    3,  LEFT_BIN),  //element access
-      Operator("?",     3,  LEFT_SPEC), //safe access modifier
+      Operator("?",     3,  LEFT_SPEC | BIN), //safe access modifier
       Operator("..",    3,  LEFT_BIN),  //range
       Operator("...",   3,  LEFT_BIN),  //array spread
 
@@ -137,7 +137,7 @@ namespace clef {
       Operator("|=",    18, RIGHT_BIN), //compound assignment (OR)
       Operator("\?\?=", 18, RIGHT_BIN), //compound assignment (null coalescing)
 
-      Operator(",",     19, LEFT_SPEC)  //comma
+      Operator(",",     19, LEFT_SPEC | BIN)  //comma
 
       //not included in array: triangle (free/unspecified) operators
    };

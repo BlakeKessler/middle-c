@@ -33,7 +33,7 @@ uint clef::maxOpLen(const mcs::raw_str_span& str) {
 //!NOTE: replace with hash map
 const clef::Operator* clef::getOpData(const mcs::raw_str_span& str, bool banBinary) {
    uint maxlen = 0;
-   const Operator* op;
+   const Operator* op = nullptr;
    for (uint i = 0; i < OPERATORS.size(); ++i) {
       //handle unary vs. binary
       if (banBinary && !+(OPERATORS[i].opType & OpType::BIN)) {
