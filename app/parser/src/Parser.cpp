@@ -189,12 +189,12 @@ bool clef::Parser::handleStatements() {
       //check for EOS
       if (current->type == NodeType::EOS) {
          current = makeStatement(statementStart, current);
-         statementStart.setIndex(current->nextID);
+         statementStart.goTo(current->nextID);
          madeChanges = true;
       }
       //iterate
       if (!++current && stack.size()) {
-         current.setIndex(stack.pop_back());
+         current.goTo(stack.pop_back());
          statementStart = current;
       }
    }

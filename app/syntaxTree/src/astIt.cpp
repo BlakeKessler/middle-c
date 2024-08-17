@@ -68,7 +68,7 @@ const clef::astIt& clef::astIt::toParent() const {
 
 #pragma endregion operators
 
-bool clef::astIt::setIndex(const NodeID_t i) const {
+bool clef::astIt::goTo(const NodeID_t i) const {
    assert(+i < _tree->_nodes.size());
    _index = i;
    return true;
@@ -162,13 +162,13 @@ clef::astIt& clef::astIt::severNext() {
 }
 
 #define tmpSwap(a,b) temp = a; a = b; b = temp;
-//!swap parent, previous, and next
+//!swap parent and previous
 clef::astIt& clef::astIt::swap(astIt& other) {
    NodeID_t temp;
 
    tmpSwap(prev()->nextID, other.prev()->nextID);
-   tmpSwap(next()->prevID, other.next()->prevID);
-   tmpSwap(self->nextID, other->nextID);
+   // tmpSwap(next()->prevID, other.next()->prevID);
+   // tmpSwap(self->nextID, other->nextID);
    tmpSwap(self->prevID, other->prevID);
 
    temp = self->parentID;

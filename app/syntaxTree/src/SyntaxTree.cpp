@@ -104,6 +104,8 @@ clef::astIt clef::SyntaxTree::begin() { return astIt(this,static_cast<NodeID_t>(
 const clef::astIt clef::SyntaxTree::begin() const { return astIt(this,static_cast<NodeID_t>(1)); }
 clef::astIt clef::SyntaxTree::end() { return astIt(this, static_cast<NodeID_t>(_nodes.size())); }
 const clef::astIt clef::SyntaxTree::end() const { return astIt(this, static_cast<NodeID_t>(_nodes.size())); }
+clef::astIt clef::SyntaxTree::null() { return astIt(this, NODE_NIL); }
+const clef::astIt clef::SyntaxTree::null() const { return astIt(this, NODE_NIL); }
 clef::astIt clef::SyntaxTree::it(const NodeID_t i) { return astIt(this,i); }
 const clef::astIt clef::SyntaxTree::it(const NodeID_t i) const { return astIt(this,i); }
 #pragma endregion trivial

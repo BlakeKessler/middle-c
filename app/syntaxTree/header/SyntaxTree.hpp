@@ -37,6 +37,9 @@ class clef::SyntaxTree {
       const astIt begin() const;
       const astIt end() const;
 
+      astIt null();
+      const astIt null() const;
+
       astIt it(const NodeID_t i);
       // astIt it(const uint i) { return it(static_cast<NodeID_t>(i)); }
       const astIt it(const NodeID_t i) const;

@@ -125,60 +125,110 @@ clef::astIt clef::Parser::makeOpNode(astIt& op) {
       assert(!i);
    }
 
+
+/* the Sliding Operands algorithm:
+   PSEUDOCODE:
+      find leftmost node of lhs
+      find leftmost node of rhs
+
+
+      swap lhs and op
+      move lhs to op[0]
+      move rhs to op[1]
+
+      recursively slide rhs ancestors onto the operator tree until a non-operator node is reached
+         go to parent (P)
+         find its location on the LHS tree (by precedence as always)
+         move P to that location
+         move the node that used to be at that location to P[0]
+*/
+
    //setup
+   astIt opRoot;
+   astIt lhs;
+   astIt rhs;
+
    const Operator* data = getOpData(op.token(), +op->prevID);
+   assert(data);
    op->status = data->precedence;
 
-   //get operands
-   astIt lhs = op.prev();
-   astIt rhs = op.next();
-   astIt root = op;
-
    //handle lhs
-   if (+(data->opType & OpType::LEFT_BIN)) {
-      //merge into operator tree
-      if (lhs->type == NodeType::OPERATOR && data->precedence <= lhs->status) {
-         root = lhs;
-         do {
-            //go to child
-            lhs >>= 1;
-         } while (lhs->type == NodeType::OPERATOR && data->precedence <= lhs->status);
+   if (+data->opType & +OpType::LEFT_BIN) {
+      lhs = op.prev();
+      if (+lhs->parentID) { lhs.parent().setChild(op,lhs->indexInParent); }
+
+      //handle simple case (non-operator operands)
+      if (lhs->type != NodeType::OPERATOR || lhs->status > data->precedence) {
+         opRoot = op;
+
+         op.setPrev(lhs->prevID);
+         lhs.setNext(NODE_NIL);
       }
-      //no operator tree to merge into
+      //slide op down the right side of lhs
       else {
-         //re-link root
-         root.setPrev(lhs->prevID);
+         opRoot = lhs; 
+         while (lhs->type == NodeType::OPERATOR && lhs->status < data->precedence) {
+            lhs >>= 1;
+         }
+         assert(lhs);
+         op.setNext(NODE_NIL);
+         lhs.setChild(op,1);
       }
-
-      //parent
-      if (+lhs->parentID) {
-         lhs.parent().setChild(op, lhs->indexInParent);
-      }
-
-      //move lhs
       op.setChild(lhs,0);
-      lhs->nextID = NODE_NIL;
-      lhs->prevID = NODE_NIL;
-   }
+   } else { opRoot = op; }
+
    //handle rhs
-   if (+(data->opType & OpType::RIGHT_BIN)) {
-      //merge into rhs operator tree
-      while (rhs->type == NodeType::OPERATOR && data->precedence <= rhs->status) {
-         //go to child
-         rhs >>= 0;
+   if (+data->opType & +OpType::RIGHT_BIN) {
+      rhs = op.next();
+      opRoot.setNext(rhs->nextID);
+      //handle simple case (non-operator operands)
+      if (rhs->type != NodeType::OPERATOR || rhs->status <= data->precedence) {
+         op.setChild(rhs,1);
+         rhs->nextID = NODE_NIL;
+         rhs->prevID = NODE_NIL;
+      }
+      //slide rhs down the tree
+      else {
+         //handle initial slide
+         NodeID_t temp;
+         lhs = op;
+         while (rhs->type == NodeType::OPERATOR && rhs->status > data->precedence) {
+            rhs >>= 0;
+         }
+         temp = rhs->parentID;
+         op.setChild(rhs,1);
+         rhs.goTo(temp);
+
+         //handle rest of slide
+         while (true) {
+            lhs = opRoot;
+            while (lhs->type == NodeType::OPERATOR && lhs->status > rhs->status) {
+               lhs >>= 1;
+            }
+            temp = lhs->parentID;
+            rhs.setChild(lhs,0);
+            lhs.goTo(temp);
+            if (!lhs) {
+               break;
+            }
+            temp = rhs->parentID;
+            lhs.setChild(rhs,1);
+            rhs.goTo(temp);
+            
+            while (rhs->type == NodeType::OPERATOR && lhs->status > rhs->status) {
+               rhs.toParent();
+            }
+            if (rhs->type != NodeType::OPERATOR) { break; }
+            // rhs->nextID = NODE_NIL;
+            // rhs->prevID = NODE_NIL;
+            temp = rhs->parentID;
+            lhs.setChild(rhs, 1);
+            rhs.goTo(temp);
+         }
       }
 
-      //move rhs
-      op.setChild(rhs,1);
-      op.setNext(rhs->nextID);
-      root.setNext(rhs->nextID);
-
-      //unlink rhs
-      rhs->nextID = NODE_NIL;
-      rhs->prevID = NODE_NIL;
+      
    }
-
-   //return
    return op;
 }
 #endif //PARSER_HELPERS_CPP

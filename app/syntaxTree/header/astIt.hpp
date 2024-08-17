@@ -45,7 +45,7 @@ class clef::astIt {
 
 
       NodeID_t index() const { return _index; }
-      bool setIndex(const NodeID_t i) const;
+      bool goTo(const NodeID_t i) const;
 
       #pragma region treeGet
       const Token& token() const;
