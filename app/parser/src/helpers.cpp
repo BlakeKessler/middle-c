@@ -28,15 +28,8 @@ clef::astIt clef::Parser::makeBlock(astIt& open, astIt& close) {
    open->type = NodeType::DELIM_OPEN;
    close->type = NodeType::DELIM_CLOSE;
    //unlink contents
-   open.prev()->nextID = NODE_NIL;
-   open.next()->prevID = NODE_NIL;
-   close.prev()->nextID = NODE_NIL;
-   close.next()->prevID = NODE_NIL;
-   
-   open->nextID = NODE_NIL;
-   open->prevID = NODE_NIL;
-   close->nextID = NODE_NIL;
-   close->prevID = NODE_NIL;
+   open.sever();
+   close.sever();
 
    //other adjustments
    block.propegate();
@@ -66,15 +59,8 @@ clef::astIt clef::Parser::makePtxtSeg(astIt& open, astIt& close) {
       }
    )};
    //unlink contents
-   open.prev()->nextID = NODE_NIL;
-   open.next()->prevID = NODE_NIL;
-   close.prev()->nextID = NODE_NIL;
-   close.next()->prevID = NODE_NIL;
-   
-   open->nextID = NODE_NIL;
-   open->prevID = NODE_NIL;
-   close->nextID = NODE_NIL;
-   close->prevID = NODE_NIL;
+   open.sever();
+   close.sever();
 
    //other adjustments
    block.propegate();
@@ -102,14 +88,9 @@ clef::astIt clef::Parser::makeStatement(astIt& open, astIt& close) {
          close                                        //closing delim
       }
    )};
-   block.next()->prevID = +block->nextID ? block.index() : NODE_NIL;
-   block.prev()->nextID = +block->prevID ? block.index() : NODE_NIL;
    //unlink contents
-   close.prev()->nextID = NODE_NIL;
-   close.next()->prevID = NODE_NIL;
-   close->prevID = NODE_NIL;
-   close->nextID = NODE_NIL;
-   open->prevID = NODE_NIL;
+   close.sever();
+   open.severPrev();
 
    //other adjustments
    block.propegate();
@@ -132,7 +113,7 @@ clef::astIt clef::Parser::makeOpNode(astIt& op) {
       throwError(ErrCode::PARSER_UNSPEC, "WARNING: operator %.*s not found in operator data",op.token().size(),op.token().begin());
       return op;
    }
-   if (+data->opType & +SPEC) { return op; }
+   if (+data->opType & +SPEC) { std::printf("NOTE: special operator being skipped\n"); return op; }
 
    astIt lhs = +(data->opType & LEFT_BIN ) ? op.prev() : _tree.null();
    astIt rhs = +(data->opType & RIGHT_BIN) ? op.next() : _tree.null();
@@ -144,6 +125,7 @@ clef::astIt clef::Parser::makeOpNode(astIt& op) {
    byte iip = lhs->indexInParent;
 
    //go down lhs op tree
+   //!NOTE: make precedence comparison determine between < and <= based on operator associativity
    if (lhs->type == NodeType::OPERATOR && lhs->status < data->precedence && lhs[1]) {
       root = lhs;
       do {
@@ -155,15 +137,13 @@ clef::astIt clef::Parser::makeOpNode(astIt& op) {
       rhs >>= 0;
    }
 
-   
-
    //unlink operands
    lhs.sever();
    rhs.sever();
 
 
    //place operator and operands
-   if (+data->opType & +LEFT_BIN) { lhs.parent().setChild(op,lhs->indexInParent); }
+   lhs.parent().setChild(op,lhs->indexInParent);
    op.setChild(lhs, 0);
    op.setChild(rhs, 1);
 
