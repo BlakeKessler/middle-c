@@ -109,6 +109,7 @@ clef::astIt clef::Parser::makeStatement(astIt& open, astIt& close) {
    close.next()->prevID = NODE_NIL;
    close->prevID = NODE_NIL;
    close->nextID = NODE_NIL;
+   open->prevID = NODE_NIL;
 
    //other adjustments
    block.propegate();
@@ -131,13 +132,14 @@ clef::astIt clef::Parser::makeOpNode(astIt& op) {
       throwError(ErrCode::PARSER_UNSPEC, "WARNING: operator %.*s not found in operator data",op.token().size(),op.token().begin());
       return op;
    }
+   if (+data->opType & +SPEC) { return op; }
 
    astIt lhs = +(data->opType & LEFT_BIN ) ? op.prev() : _tree.null();
    astIt rhs = +(data->opType & RIGHT_BIN) ? op.next() : _tree.null();
    
    astIt root = op;
-   astIt prev = +(data->opType & LEFT_BIN ) ? lhs.prev() : op.prev();
-   astIt next = +(data->opType & RIGHT_BIN) ? rhs.next() : op.next();
+   astIt prev = +(data->opType & LEFT_BIN ) ? lhs.prev() : _tree.null();
+   astIt next = +(data->opType & RIGHT_BIN) ? rhs.next() : _tree.null();
    astIt parent = lhs.parent();
    byte iip = lhs->indexInParent;
 
@@ -153,7 +155,7 @@ clef::astIt clef::Parser::makeOpNode(astIt& op) {
       rhs >>= 0;
    }
 
-
+   
 
    //unlink operands
    lhs.sever();
@@ -161,18 +163,14 @@ clef::astIt clef::Parser::makeOpNode(astIt& op) {
 
 
    //place operator and operands
-   lhs.parent().setChild(op,lhs->indexInParent);
+   if (+data->opType & +LEFT_BIN) { lhs.parent().setChild(op,lhs->indexInParent); }
    op.setChild(lhs, 0);
    op.setChild(rhs, 1);
 
 
    //adjust tree around root
-   if (+data->opType & +LEFT_BIN) {
-      root.setPrev(prev);
-   }
-   if (+data->opType & +RIGHT_BIN) {
-      root.setNext(next);
-   }
+   root.setPrev(prev);
+   root.setNext(next);
    parent.setChild(root, iip);
 
    return root;

@@ -81,7 +81,7 @@ bool clef::SyntaxTree::updateRoot() {
 #pragma region DEBUG
 void clef::SyntaxTree::debug_printf() const {
    for (uint i = 0; i < _nodes.size(); ++i) {
-      std::printf("%u <- %u(%u)[%u][%u, %u, %u] -> %u\n",
+      std::printf("%u <- %u(%u)[%u][%u, %u, %u] -> %u",
          +_nodes[i].prevID,
          i,
          +_nodes[i].tokenID,
@@ -91,6 +91,10 @@ void clef::SyntaxTree::debug_printf() const {
          +_nodes[i].childIDs[2],
          +_nodes[i].nextID
       );
+      if (+_nodes[i].tokenID) {
+         std::printf("\t\t\t%.*s",_tokens[+_nodes[i].tokenID].size(),_tokens[+_nodes[i].tokenID].begin());
+      }
+      std::printf("\n");
    }
 }
 #pragma endregion DEBUG
