@@ -16,7 +16,8 @@ bool clef::Parser::runPass() {
    madeChanges |= escape();
    madeChanges |= removePtxt();
    madeChanges |= handleBlockDelims();
-   madeChanges |= handleStatements();
+   // madeChanges |= findFunctions();
+   madeChanges |= createStatements();
    madeChanges |= handleOperators();
 
    assert(!_tree.null()->nextID && !_tree.null()->prevID && !_tree.null()->parentID);
@@ -169,10 +170,29 @@ bool clef::Parser::handleBlockDelims() {
    updateRoot();
    return true;
 }
+#include "raw_str_span.hpp"
+// //!identify functions
+// //!returns whether or not changes were made
+// bool clef::Parser::findFunctions() {
+//    bool madeChanges = false;
+//    astIt temp;
+//    for (astIt i = _tree.begin(); +i.index() < _tree.size(); i.incIndex()) {
+//       if (i->type == NodeType::IDEN) {
+//          temp = i.next();
+//          if (temp->type == NodeType::DELIM_PAIR && temp->status == +DelimPairType::PARENS) {
+//             makeFunction(i,temp);
+//             madeChanges = true;
+//          }
+//       }
+//    }
+   
+//    updateRoot();
+//    return madeChanges;
+// }
 
 //!handle statements
 //!returns whether or not changes were made
-bool clef::Parser::handleStatements() {
+bool clef::Parser::createStatements() {
    bool madeChanges = false;
 
    astIt current = _tree.root();

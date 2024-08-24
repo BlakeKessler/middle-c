@@ -6,6 +6,7 @@
 
 //!check if a node is the opening delimiter of a block expression
 //!NOTE: REPLACE WITH HASHMAP
+//!NOTE: NOT WORKING
 clef::DelimPairType clef::blockDelimType(const mcs::raw_str_span& str) {
    if (!str.size() || str.size() > MAX_DELIM_LEN) {
       return DelimPairType::NONE;

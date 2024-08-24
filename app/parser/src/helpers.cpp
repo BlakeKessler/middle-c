@@ -69,6 +69,21 @@ clef::astIt clef::Parser::makePtxtSeg(astIt& open, astIt& close) {
    return block;
 }
 
+// //!make a function
+// clef::astIt clef::Parser::makeFunction(astIt& iden, astIt& operands) {
+//    //assert that iden is an identifier without operands and operands is a parens block
+//    assert(iden->type == NodeType::IDEN);
+//    assert(iden->childIDs[1] == NODE_NIL);
+//    assert(operands->type == NodeType::DELIM_PAIR);
+//    assert(operands->status == +DelimPairType::PARENS);
+
+//    //adjust tree
+//    iden.setChild(operands.pop(),1);
+   
+//    return iden;
+   
+// }
+
 //!make a statement
 clef::astIt clef::Parser::makeStatement(astIt& open, astIt& close) {
    //assert that EOS is an EOS
@@ -115,24 +130,24 @@ clef::astIt clef::Parser::makeOpNode(astIt& op) {
    }
    if (+data->opType & +SPEC) { std::printf("NOTE: special operator being skipped\n"); return op; }
 
-   astIt lhs = +(data->opType & LEFT_BIN ) ? op.prev() : _tree.null();
-   astIt rhs = +(data->opType & RIGHT_BIN) ? op.next() : _tree.null();
+   //operands
+   astIt lhs{&_tree, +data->opType & +LEFT_BIN  ? op->prevID : NODE_NIL};
+   astIt rhs{&_tree, +data->opType & +RIGHT_BIN ? op->nextID : NODE_NIL};
    
-   astIt root = op;
-   astIt prev = +(data->opType & LEFT_BIN ) ? lhs.prev() : _tree.null();
-   astIt next = +(data->opType & RIGHT_BIN) ? rhs.next() : _tree.null();
+   //misc
+   astIt root{&_tree, (lhs->type == NodeType::OPERATOR && lhs->status < data->precedence && lhs[1]) ? lhs.index() : op.index()};
+   NodeID_t prev = +data->opType & +LEFT_BIN  ? lhs->prevID : NODE_NIL;
+   NodeID_t next = +data->opType & +RIGHT_BIN ? rhs->nextID : NODE_NIL;
    astIt parent = lhs.parent();
    byte iip = lhs->indexInParent;
 
    //go down lhs op tree
    //!NOTE: make precedence comparison determine between < and <= based on operator associativity
-   if (lhs->type == NodeType::OPERATOR && lhs->status < data->precedence && lhs[1]) {
-      root = lhs;
-      do {
-         lhs >>= 1;
-      } while (lhs->type == NodeType::OPERATOR && lhs->status < data->precedence && lhs[1]);
+   while (lhs->type == NodeType::OPERATOR && lhs->status < data->precedence && lhs[1]) {
+      lhs >>= 1;
    }
    //go down rhs op tree
+   //!NOTE: make precedence comparison determine between < and <= based on operator associativity
    while (rhs->type == NodeType::OPERATOR && rhs->status < data->precedence && rhs[0]) {
       rhs >>= 0;
    }
@@ -141,12 +156,10 @@ clef::astIt clef::Parser::makeOpNode(astIt& op) {
    lhs.sever();
    rhs.sever();
 
-
    //place operator and operands
    lhs.parent().setChild(op,lhs->indexInParent);
    op.setChild(lhs, 0);
    op.setChild(rhs, 1);
-
 
    //adjust tree around root
    root.setPrev(prev);

@@ -99,9 +99,9 @@ namespace clef {
 
    //delimiter pair specification
    enum class DelimPairType : byte {
-      NONE = 0xFF,      //not a block type
+      NONE = 0x00,      //not a block type
 
-      PARENS = 0x00,    //PARENTHESES
+      PARENS = 0x01,    //PARENTHESES
       SUBSCRIPT,        //SQUARE BRACKETS
       INIT_LIST,        //CURLY BRACKETS
       SPECIALIZER,      //TRIANGLE BRACKETS

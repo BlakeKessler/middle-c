@@ -7,23 +7,21 @@
 #include "raw_str_span.hpp"
 #include "dyn_str_span.hpp"
 #include "raw_str.hpp"
+#include "raw_buf_str.hpp"
 #include <cstring>
 #include <concepts>
 
 #pragma region types
 
-// template<typename T> struct string_like;
-// template<> struct string_like<mcs::string>{};
-// template<> struct string_like<mcs::raw_str_span>{};
-// template<> struct string_like<mcs::dyn_str_span>{};
-
 template<typename T> concept string_like = requires(T a) {
-   // std::derived_from<mcs::string,T> ||
-   // std::derived_from<mcs::dyn_str_span,T> ||
-   // std::derived_from<mcs::raw_str,T> ||
-   // std::derived_from<mcs::raw_str_span,T>
-   // a.substr(0,0);
    T::string_like == true;
+};
+
+struct mcs::str_hash_func {
+   using hash_func_t = struct {};
+   using is_transparent = void;
+
+   //!NOTE: INCOMPLETE
 };
 
 #pragma endregion types

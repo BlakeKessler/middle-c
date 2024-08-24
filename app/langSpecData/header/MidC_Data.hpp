@@ -3,19 +3,20 @@
 #define DATA_HPP
 
 #include "CLEF.hpp"
-#include "Hash.hpp"
 
 #include "raw_str_span.hpp"
 #include "raw_str.hpp"
+#include "raw_buf_str.hpp"
 #include "static_arr.hpp"
 #include "pair.hpp"
 
+#include <unordered_set>
 #include <cassert>
 #include <cstring>
 
 //operator string + metadata
 struct clef::Operator {
-   mcs::raw_str<MAX_OP_LEN + 1> opStr;
+   mcs::raw_str<MAX_OP_LEN> opStr;
    byte size;
    byte precedence;
    OpType opType; //unary/binary/special, left/right associative
@@ -28,7 +29,7 @@ struct clef::Operator {
             if (!str[size]) { break; }
          }
          //bounds-check
-         assert(size < MAX_OP_LEN + 1);
+         assert(size <= MAX_OP_LEN);
          
          //copy string
          for (uint i = 0; i < size; ++i) {
@@ -38,8 +39,8 @@ struct clef::Operator {
 };
 //delimiter pair strings
 struct clef::DelimPair {
-   mcs::raw_str<MAX_OP_LEN + 1> open;
-   mcs::raw_str<MAX_OP_LEN + 1> close;
+   mcs::raw_buf_str<MAX_OP_LEN, byte> open;
+   mcs::raw_buf_str<MAX_OP_LEN, byte> close;
 };
 
 using enum clef::OpType;
@@ -159,7 +160,40 @@ namespace clef {
       DelimPair{"//", "\n\0"},   //SINGLE-LINE COMMENT
    };
    // extern const mcs::static_arr<mcs::string> KEYWORDS;
-   
+   static const std::unordered_set<mcs::string> KEYWORDS{
+      "void", "auto",
+      "uint", "ushort", "ulong", "ubyte",
+      "sint", "sshort", "slong", "sbyte",
+      "bool", "float", "num",
+      "char", "char_utf8", "char_utf16", "char_utf32",
+      "uint8", "uint16", "uint32", "uint64", "uint128", "uint256",
+      "sint8", "sint16", "sint32", "sint64", "sint128", "sint256",
+      "float16", "float32", "float64", "float128", "float256",
+      "half", "single", "double", "quad", "oct",
+      "num8", "num16", "num32", "num64", "num128", "num256",
+      
+      "true", "false", "nullptr",
+
+      "const", "constexpr", "immediate", "mutable", "volatile", "atomic",
+      "class", "struct", "union", "enum", "namespace",
+      "private", "protected", "public", "friend",
+      "extern", "inline", "static", "virtual", "override", "explicit", "noexcept",
+      "this", "self",
+
+      "new", "delete", "sizeof", "arrsizeof",
+      "typeof", "typeid", "typename", "alignas", "alignof",
+      "template",
+      "using",
+
+      "asm",
+      "return",
+      "operator",
+      "assert", "static_assert",
+      "type_cast", "bit_cast", "safe_cast", "quick_cast", "const_cast",
+
+      "if", "else", "for", "while", "do", "break", "continue", "switch", "match", "case", "default", "goto",
+      "try", "catch", "throw"
+   };
    
    //block delims
    DelimPairType blockDelimType(const mcs::raw_str_span& str);
@@ -169,7 +203,7 @@ namespace clef {
    const Operator* getOpData(const mcs::raw_str_span& str, bool allowUnary = true);
 
    //!function to determine if a string is a Middle-C keyword
-   inline bool isKeyword(const mcs::raw_str_span& str) { return Hash::isKeyword(str.begin(), str.size()); }
+   inline bool isKeyword(const mcs::raw_str_span& str) { return false; /*return KEYWORDS.contains(str);*/ }
 }
 
 #endif //DATA_HPP

@@ -106,13 +106,18 @@ clef::astIt& clef::astIt::pop() {
       parent()->childIDs[self->indexInParent] = NODE_NIL;
    }
 
-   //check that all children are null
-   for (NodeID_t i : self->childIDs) {
-      assert(!+i);
-   }
+   self->nextID = NODE_NIL;
+   self->prevID = NODE_NIL;
+   self->parentID = NODE_NIL;
+   self->indexInParent = 0;
 
-   //clear entry
-   std::memset(&(*self),0,sizeof(Node));
+   // //check that all children are null
+   // for (NodeID_t i : self->childIDs) {
+   //    assert(!+i);
+   // }
+
+   // //clear entry
+   // std::memset(&(*self),0,sizeof(Node));
 
    //return
    return self;

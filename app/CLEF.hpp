@@ -20,7 +20,7 @@ namespace clef {
    class astIt;
 
    class Parser;
-   class Hash;
+   
    class ErrorHandler;
 }
 

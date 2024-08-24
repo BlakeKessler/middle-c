@@ -40,6 +40,7 @@ class clef::Token : public mcs::raw_str_span {
 
       //operators
       template<uint capacity> constexpr bool operator==(const mcs::raw_str<capacity>& str) const { const uint len = std::strlen(str.begin()); return (size() == len) && !std::memcmp(begin(),str.begin(),len*sizeof(char)); }
+      template<uint capacity> constexpr bool operator==(const mcs::raw_buf_str<capacity,byte>& str) const { return (size() == str.size()) && !std::memcmp(begin(),str.begin(),str.size()*sizeof(char)); }
 
 
       void throwError(const ErrCode code) const;
