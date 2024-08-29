@@ -7,14 +7,14 @@ OUT_PATH := test/bin
 TEST_SRC_DIR := test/src
 
 #directories with code to compile
-MODULES := mcs/ app/
+MODULES := mcsl/ app/
 INC_DIRS := $(foreach root,$(wildcard $(MODULES)),-I$(root) $(foreach dir,$(wildcard $(root)*/),-I$(dir)header))
 
 #expand source code paths
 EXPAND_SRCS = $(foreach source,$(wildcard $^),$(source)/src/*.cpp)
 
 #source code that is always included
-FORCE_DIRS := app/_lib/ app/langSpecData/ mcs/*/
+FORCE_DIRS := app/_lib/ app/langSpecData/ mcsl/*/
 FORCE_INC := $(foreach src,$(wildcard $(FORCE_DIRS)),$(src)src/*.cpp)
 
 #compilation command units
@@ -37,11 +37,11 @@ Parser		:	app/parser app/syntaxTree app/srcReader app/tokenizer
 	$(BUILD_CMD)
 
 #MIDDLE-C STANDARD LIBRARY TARGETS
-MCS			:	mcs/*/src/*
+MCS			:	mcsl/*/src/*
 	rm -f $(OUT_PATH)/*.o										\
 	&& $(COMPILER) $(FLAGS) -c $^ -Imcs						\
-		$(foreach dir,$(wildcard mcs/*/),-I$(dir)header)\
+		$(foreach dir,$(wildcard mcsl/*/),-I$(dir)header)\
 	&& mv ./*.o $(OUT_PATH)										\
-	&& ar rcsv mcs/mcs.a $(OUT_PATH)/*.o					\
+	&& ar rcsv mcsl/mcs.a $(OUT_PATH)/*.o					\
 	&& rm -f $(OUT_PATH)/*.o									\
 	|| rm -f ./*.o

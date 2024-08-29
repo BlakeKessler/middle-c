@@ -16,14 +16,14 @@
 
 //operator string + metadata
 struct clef::Operator {
-   mcs::raw_str<MAX_OP_LEN> opStr;
+   mcsl::raw_str<MAX_OP_LEN> opStr;
    byte size;
    byte precedence;
    OpType opType; //unary/binary/special, left/right associative
 
-   constexpr Operator(): size(0),precedence(0),opType(static_cast<OpType>(0)) {}
+   constexpr Operator(): opStr(""),size(0),precedence(0),opType(static_cast<OpType>(0)) {}
    constexpr Operator(const char str[MAX_OP_LEN + 1], const byte prec, const OpType type):
-      size(0),precedence(prec),opType(type) {
+      opStr(""),size(0),precedence(prec),opType(type) {
          //strlen
          for (; size < opStr.size(); ++size) {
             if (!str[size]) { break; }
@@ -39,15 +39,15 @@ struct clef::Operator {
 };
 //delimiter pair strings
 struct clef::DelimPair {
-   mcs::raw_buf_str<MAX_OP_LEN, byte> open;
-   mcs::raw_buf_str<MAX_OP_LEN, byte> close;
+   mcsl::raw_buf_str<MAX_OP_LEN, byte> open;
+   mcsl::raw_buf_str<MAX_OP_LEN, byte> close;
 };
 
 using enum clef::OpType;
 namespace clef {
-   extern const mcs::static_arr<TokenType,256> tokTypeArr;
+   extern const mcsl::static_arr<TokenType,256> tokTypeArr;
 
-   static constexpr const mcs::static_arr OPERATORS{
+   static constexpr const mcsl::static_arr OPERATORS{
       Operator("#",     0,  LEFT_UN),   //invoke preprocessor
 
       Operator("\"",    1,  LEFT_SPEC), //string
@@ -142,7 +142,7 @@ namespace clef {
 
       //not included in array: triangle (free/unspecified) operators
    };
-   static constexpr const mcs::static_arr BLOCK_DELIMS{
+   static constexpr const mcsl::static_arr BLOCK_DELIMS{
       DelimPair{},           //NULL DELIM PAIR
       DelimPair{"(", ")"},   //PARENS
       DelimPair{"[", "]"},   //SUBSCRIPT
@@ -151,7 +151,7 @@ namespace clef {
 
       // DelimPair{"?\0", ":\0"},   //TERNARY STATEMENT
    };
-   static constexpr const mcs::static_arr PTXT_DELIMS{
+   static constexpr const mcsl::static_arr PTXT_DELIMS{
       DelimPair{},           //NULL DELIM PAIR
       DelimPair{"\'", "\'"}, //CHARACTER
       DelimPair{"\"", "\""}, //STRING
@@ -159,51 +159,51 @@ namespace clef {
       DelimPair{"/*", "*/"},     //BLOCK COMMENT
       DelimPair{"//", "\n\0"},   //SINGLE-LINE COMMENT
    };
-   // extern const mcs::static_arr<mcs::string> KEYWORDS;
-   static const std::unordered_set<mcs::string> KEYWORDS{
-      "void", "auto",
-      "uint", "ushort", "ulong", "ubyte",
-      "sint", "sshort", "slong", "sbyte",
-      "bool", "float", "num",
-      "char", "char_utf8", "char_utf16", "char_utf32",
-      "uint8", "uint16", "uint32", "uint64", "uint128", "uint256",
-      "sint8", "sint16", "sint32", "sint64", "sint128", "sint256",
-      "float16", "float32", "float64", "float128", "float256",
-      "half", "single", "double", "quad", "oct",
-      "num8", "num16", "num32", "num64", "num128", "num256",
+   // // extern const mcsl::static_arr<mcsl::string> KEYWORDS;
+   // static const std::unordered_set<mcsl::string> KEYWORDS{
+   //    "void", "auto",
+   //    "uint", "ushort", "ulong", "ubyte",
+   //    "sint", "sshort", "slong", "sbyte",
+   //    "bool", "float", "num",
+   //    "char", "char_utf8", "char_utf16", "char_utf32",
+   //    "uint8", "uint16", "uint32", "uint64", "uint128", "uint256",
+   //    "sint8", "sint16", "sint32", "sint64", "sint128", "sint256",
+   //    "float16", "float32", "float64", "float128", "float256",
+   //    "half", "single", "double", "quad", "oct",
+   //    "num8", "num16", "num32", "num64", "num128", "num256",
       
-      "true", "false", "nullptr",
+   //    "true", "false", "nullptr",
 
-      "const", "constexpr", "immediate", "mutable", "volatile", "atomic",
-      "class", "struct", "union", "enum", "namespace",
-      "private", "protected", "public", "friend",
-      "extern", "inline", "static", "virtual", "override", "explicit", "noexcept",
-      "this", "self",
+   //    "const", "constexpr", "immediate", "mutable", "volatile", "atomic",
+   //    "class", "struct", "union", "enum", "namespace",
+   //    "private", "protected", "public", "friend",
+   //    "extern", "inline", "static", "virtual", "override", "explicit", "noexcept",
+   //    "this", "self",
 
-      "new", "delete", "sizeof", "arrsizeof",
-      "typeof", "typeid", "typename", "alignas", "alignof",
-      "template",
-      "using",
+   //    "new", "delete", "sizeof", "arrsizeof",
+   //    "typeof", "typeid", "typename", "alignas", "alignof",
+   //    "template",
+   //    "using",
 
-      "asm",
-      "return",
-      "operator",
-      "assert", "static_assert",
-      "type_cast", "bit_cast", "safe_cast", "quick_cast", "const_cast",
+   //    "asm",
+   //    "return",
+   //    "operator",
+   //    "assert", "static_assert",
+   //    "type_cast", "bit_cast", "safe_cast", "quick_cast", "const_cast",
 
-      "if", "else", "for", "while", "do", "break", "continue", "switch", "match", "case", "default", "goto",
-      "try", "catch", "throw"
-   };
+   //    "if", "else", "for", "while", "do", "break", "continue", "switch", "match", "case", "default", "goto",
+   //    "try", "catch", "throw"
+   // };
    
    //block delims
-   DelimPairType blockDelimType(const mcs::raw_str_span& str);
+   DelimPairType blockDelimType(const mcsl::raw_str_span& str);
 
    //operators
-   uint maxOpLen(const mcs::raw_str_span& str);
-   const Operator* getOpData(const mcs::raw_str_span& str, bool allowUnary = true);
+   uint maxOpLen(const mcsl::raw_str_span& str);
+   const Operator* getOpData(const mcsl::raw_str_span& str, bool allowUnary = true);
 
    //!function to determine if a string is a Middle-C keyword
-   inline bool isKeyword(const mcs::raw_str_span& str) { return false; /*return KEYWORDS.contains(str);*/ }
+   inline bool isKeyword(const mcsl::raw_str_span& str) { return false; /*return KEYWORDS.contains(str);*/ }
 }
 
 #endif //DATA_HPP

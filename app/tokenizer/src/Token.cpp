@@ -9,15 +9,15 @@
 
 //constructors
 clef::Token::Token():
-mcs::raw_str_span(),_lineNum(0) {
+mcsl::raw_str_span(),_lineNum(0) {
 
 }
 clef::Token::Token(char* front, char* back, const uint line):
-mcs::raw_str_span(front, back - front),_lineNum(line) {
+mcsl::raw_str_span(front, back - front),_lineNum(line) {
 
 }
 clef::Token::Token(char* front, const uint length, const uint line):
-mcs::raw_str_span(front, length),_lineNum(line) {
+mcsl::raw_str_span(front, length),_lineNum(line) {
 
 }
 

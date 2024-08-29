@@ -16,8 +16,8 @@ clef::Source clef::Source::readFile(const char* path) {
    //extra char allocated to ensure null-termination
    const uint fileSize = fs::file_size(fs::path(path));
 
-   mcs::string _buf{fileSize};
-   _buf.resize(fileSize);
+   mcsl::string _buf{fileSize};
+   _buf.realloc_exact(fileSize);
 
    //open, read, close, back-fill file
    FILE* srcFile = std::fopen(path, "r");
@@ -34,7 +34,7 @@ clef::Source clef::Source::readFile(const char* path) {
       lineCount += (_buf[i] == '\n');
    }
    //allocate array of lines
-   mcs::array<mcs::raw_str_span> _lines(lineCount);
+   mcsl::array<mcsl::raw_str_span> _lines(lineCount);
    //find line breaks and fill array of lines
    char* current = _buf.begin();
    uint len;

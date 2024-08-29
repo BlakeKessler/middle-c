@@ -18,7 +18,7 @@ clef::astIt clef::Parser::makeBlock(astIt& open, astIt& close) {
       NodeType::DELIM_PAIR,                        //type
       +blockDelimType(open.token()),               //status
       open->parentID,                              //parent
-      mcs::static_arr<NodeID_t,MAX_AST_CHILDREN>{  //children
+      mcsl::static_arr<NodeID_t,MAX_AST_CHILDREN>{  //children
          open,                                        //opening delim
          (open->nextID == close.index() ? NODE_NIL : open->nextID),//block contents
          close                                        //closing delim
@@ -52,7 +52,7 @@ clef::astIt clef::Parser::makePtxtSeg(astIt& open, astIt& close) {
       NodeType::PTXT_SEG,                          //type
       +blockDelimType(open.token()),               //status
       open->parentID,                              //parent
-      mcs::static_arr<NodeID_t,MAX_AST_CHILDREN>{  //children
+      mcsl::static_arr<NodeID_t,MAX_AST_CHILDREN>{  //children
          open,                                        //opening delim
          (open->nextID == close.index() ? NODE_NIL : open->nextID),//block contents
          close                                        //closing delim
@@ -97,7 +97,7 @@ clef::astIt clef::Parser::makeStatement(astIt& open, astIt& close) {
       NodeType::STATEMENT,                         //type
       0,                                           //status
       open->parentID,                              //parent
-      mcs::static_arr<NodeID_t,MAX_AST_CHILDREN>{  //children
+      mcsl::static_arr<NodeID_t,MAX_AST_CHILDREN>{  //children
          open,                                        //opening delim
          NODE_NIL,                                    //block contents
          close                                        //closing delim

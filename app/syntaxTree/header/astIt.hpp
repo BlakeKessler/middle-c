@@ -7,8 +7,6 @@
 #include "Node.hpp"
 #include "Token.hpp"
 
-#include "string_like.hpp"
-
 class clef::astIt {
    private:
       SyntaxTree const* _tree;
@@ -40,8 +38,8 @@ class clef::astIt {
       astIt& incIndex() { ++_index; return self; }
       const astIt& incIndex() const { ++_index; return self; }
 
-      template<uint _size> bool operator==(const mcs::raw_buf_str<_size,byte>& str) const;
-      template<uint _size> bool operator==(const mcs::raw_str<_size>& str) const;
+      template<uint _size> bool operator==(const mcsl::raw_buf_str<_size,byte>& str) const;
+      template<uint _size> bool operator==(const mcsl::raw_str<_size>& str) const;
       #pragma endregion operators
 
 
@@ -79,10 +77,10 @@ class clef::astIt {
    friend class SyntaxTree;
 };
 
-template<uint _size> bool clef::astIt::operator==(const mcs::raw_str<_size>& str) const {
+template<uint _size> bool clef::astIt::operator==(const mcsl::raw_str<_size>& str) const {
    return token() == str;
 }
-template<uint _size> bool clef::astIt::operator==(const mcs::raw_buf_str<_size,byte>& str) const {
+template<uint _size> bool clef::astIt::operator==(const mcsl::raw_buf_str<_size,byte>& str) const {
    return token() == str;
 }
 

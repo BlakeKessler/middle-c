@@ -6,7 +6,7 @@
 #include "MidC_Data.hpp"
 #include "raw_str_span.hpp"
 
-class clef::Token : public mcs::raw_str_span {
+class clef::Token : public mcsl::raw_str_span {
    private:
       const uint _lineNum;
    public:
@@ -31,7 +31,7 @@ class clef::Token : public mcs::raw_str_span {
       NodeType nodeType() const;
       static TokenType typeNum(const char ch, const bool isstart);
       static uint findTokEnd(const char* const tokStr, const uint len);
-      static uint findTokEnd(const mcs::raw_str_span& str) { return findTokEnd(str.begin(),str.size()); }
+      static uint findTokEnd(const mcsl::raw_str_span& str) { return findTokEnd(str.begin(),str.size()); }
       
       auto maxOpLen() const { return clef::maxOpLen(self); }
       const Operator* getOpData() const { return clef::getOpData(self); }
@@ -39,8 +39,8 @@ class clef::Token : public mcs::raw_str_span {
       const DelimPair* getPtxtData() const;
 
       //operators
-      template<uint capacity> constexpr bool operator==(const mcs::raw_str<capacity>& str) const { const uint len = std::strlen(str.begin()); return (size() == len) && !std::memcmp(begin(),str.begin(),len*sizeof(char)); }
-      template<uint capacity> constexpr bool operator==(const mcs::raw_buf_str<capacity,byte>& str) const { return (size() == str.size()) && !std::memcmp(begin(),str.begin(),str.size()*sizeof(char)); }
+      template<uint capacity> constexpr bool operator==(const mcsl::raw_str<capacity>& str) const { const uint len = std::strlen(str.begin()); return (size() == len) && !std::memcmp(begin(),str.begin(),len*sizeof(char)); }
+      template<uint capacity> constexpr bool operator==(const mcsl::raw_buf_str<capacity,byte>& str) const { return (size() == str.size()) && !std::memcmp(begin(),str.begin(),str.size()*sizeof(char)); }
 
 
       void throwError(const ErrCode code) const;

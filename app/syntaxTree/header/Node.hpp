@@ -20,7 +20,7 @@ struct clef::Node {
 
    //parent and children
    NodeID_t parentID;
-   mcs::static_arr<NodeID_t,MAX_AST_CHILDREN> childIDs;
+   mcsl::static_arr<NodeID_t,MAX_AST_CHILDREN> childIDs;
 
 
    //constructors
@@ -28,7 +28,7 @@ struct clef::Node {
    Node(const TokenID_t tok, const NodeType t = NodeType::NONE);
    Node(const NodeID_t previous, const NodeType type = NodeType::NONE, const TokenID_t tok = TOK_NIL);
    Node(const NodeID_t next, const NodeID_t previous, const NodeType type = NodeType::NONE, const TokenID_t tok = TOK_NIL);
-   Node(NodeID_t,NodeID_t,TokenID_t,byte,NodeType,unsigned short,NodeID_t,mcs::static_arr<NodeID_t,MAX_AST_CHILDREN>);
+   Node(NodeID_t,NodeID_t,TokenID_t,byte,NodeType,unsigned short,NodeID_t,mcsl::static_arr<NodeID_t,MAX_AST_CHILDREN>);
    // Node(const Node& other) = default;
 
    inline bool is(const NodeType t) const { return type == t; }

@@ -17,7 +17,7 @@ clef::Tokenizer::Tokenizer(Source& src):
 _src(src),_tokens(),_tokLines(src.lineCount()) {
    src.release();
    _tokens.emplace_back();
-   mcs::raw_str_span line;
+   mcsl::raw_str_span line;
    uint tempCounter;
    
    for (uint i = 0; i < _src.lineCount(); ++i) {
@@ -47,7 +47,7 @@ _src(src),_tokens(),_tokLines(src.lineCount()) {
       while (line.size() && !+Token::typeNum(line[0],false)) { line.inc_begin(1); }
       }
       //create token line & increment overall count
-      _tokLines.emplace(i, _tokens.ptrToBuf(), mcs::pair{i?_tokLines[i-1].lastIndex():0 , _tokens.size()});
+      _tokLines.emplace(i, _tokens.ptr_to_buf(), mcsl::pair{i?_tokLines[i-1].last_index():0 , _tokens.size()});
    }
 }
 

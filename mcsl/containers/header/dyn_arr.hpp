@@ -1,0 +1,131 @@
+#pragma once
+#ifndef MCSL_DYN_ARR_HPP
+#define MCSL_DYN_ARR_HPP
+
+#include "MCSL.hpp"
+#include "alloc.hpp"
+#include "contig_base.hpp"
+#include "raw_str.hpp"
+#include <bit>
+#include <memory>
+#include <initializer_list>
+#include <cstring>
+
+template <typename T> class mcsl::dyn_arr : public contig_base<T, dyn_arr<T>> {
+   private:
+      uint _bufSize;
+      uint _size;
+      T* _buf;
+   public:
+      constexpr dyn_arr();
+      dyn_arr(const uint size);
+      dyn_arr(const uint size, const uint bufSize);
+      dyn_arr(std::initializer_list<T>);
+      dyn_arr(dyn_arr&& other);
+      ~dyn_arr() { this->free(); }
+      void free() const { mcsl::free(_buf); }
+
+      static constexpr raw_str<7> _name = "dyn_arr";
+
+      constexpr uint size() const { return _size; }
+      constexpr uint capacity() const { return _bufSize; }
+      constexpr auto& name() const { return _name; }
+
+      //element access
+      constexpr T* const* ptr_to_buf() { return &_buf; }
+      constexpr T* data() { return _buf; }
+
+      constexpr const T* const* ptr_to_buf() const { return &_buf; }
+      constexpr const T* data() const { return _buf; }
+
+      //MODIFIERS
+      //!realloc buffer to at least the specified size
+      bool realloc(const uint newSize) { return realloc_exact(std::bit_ceil(newSize)); }
+      bool realloc_exact(const uint newSize);
+      T* release() { T* temp = _buf; _buf = nullptr; _size = 0; _bufSize = 0; return temp; }
+      bool push_back(const T& obj);
+      T pop_back();
+      T* emplace(const uint i, auto... args);
+      T* emplace_back(auto... args);
+};
+
+#pragma region src
+//!default constructor
+template<typename T> constexpr mcsl::dyn_arr<T>::dyn_arr():
+   _bufSize(0),_size(0),_buf(nullptr) {
+
+}
+//!constructor from array size
+template<typename T> mcsl::dyn_arr<T>::dyn_arr(const uint size):
+   _bufSize(std::bit_ceil(size)), _size(size),
+   _buf(mcsl::calloc<T>(_bufSize)) {
+
+}
+//!constructor from array size and buffer size
+template<typename T> mcsl::dyn_arr<T>::dyn_arr(const uint size, const uint bufSize):
+   _bufSize(bufSize), _size(size) {
+      if (_bufSize < _size) {
+         mcsl_throw(ErrCode::SEGFAULT, "cannot construct %s with array size greater than buffer size (\033[4m%u\033[24m < \033[4m%u\033[24m)",name(),_bufSize,_size);
+         _buf = nullptr;
+      }
+      else {
+         _buf = mcsl::calloc<T>(_bufSize);
+      }
+}
+//!constructor from initializer list
+template<typename T> mcsl::dyn_arr<T>::dyn_arr(std::initializer_list<T> initPair):
+   _bufSize(initPair.size()),_size(initPair.size()),_buf(mcsl::malloc<T>(_bufSize)) {
+      std::memcpy(_buf,initPair.begin(),_size * sizeof(T));
+}
+//!move constructor
+template<typename T> mcsl::dyn_arr<T>::dyn_arr(dyn_arr&& other):
+   _bufSize(other._bufSize),_size(other._size),_buf(other._buf) {
+      other.release();
+}
+
+//!realloc buffer to the specified size
+template<typename T> bool mcsl::dyn_arr<T>::realloc_exact(const uint newSize) {
+   _buf = mcsl::realloc<T>(_buf, newSize);;
+   _bufSize = newSize;
+   return true;
+}
+
+//!push to the back of the the array
+//!returns if a reallocation was required
+template<typename T> bool mcsl::dyn_arr<T>::push_back(const T& obj) {
+   bool realloced = false;
+   if (_size >= _bufSize) {
+      realloced = realloc(_size ? std::bit_floor(_size) << 1 : 1);
+   }
+   _buf[_size++] = obj;
+   return realloced;
+}
+//!remove last element of array
+//!returns the removed element
+//!zeroes out the index in the array
+template<typename T> T mcsl::dyn_arr<T>::pop_back() {
+   T temp = _buf[--_size];
+   std::memset(_buf + _size, 0, sizeof(T));
+   return temp;
+}
+//!construct in place
+template<typename T> T* mcsl::dyn_arr<T>::emplace(const uint i, auto... args) {
+   if (i >= _size) {
+      mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i,name(),_size);
+      return nullptr;
+   }
+   std::construct_at(_buf + i, args...);
+   return _buf + i;
+}
+//!construct in place at back of array
+template<typename T> T* mcsl::dyn_arr<T>::emplace_back(auto... args) {
+   if (_size >= _bufSize) {
+      realloc(_size ? std::bit_floor(_size) << 1 : 1);
+   }
+   return emplace(_size++, args...);
+}
+
+#pragma endregion src
+
+
+#endif //MCSL_DYN_ARR_HPP

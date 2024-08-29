@@ -7,7 +7,7 @@
 //!check if a node is the opening delimiter of a block expression
 //!NOTE: REPLACE WITH HASHMAP
 //!NOTE: NOT WORKING
-clef::DelimPairType clef::blockDelimType(const mcs::raw_str_span& str) {
+clef::DelimPairType clef::blockDelimType(const mcsl::raw_str_span& str) {
    if (!str.size() || str.size() > MAX_DELIM_LEN) {
       return DelimPairType::NONE;
    }
@@ -24,7 +24,7 @@ clef::DelimPairType clef::blockDelimType(const mcs::raw_str_span& str) {
 //!array encoding which tokens each character is a legal member of
 using enum clef::TokenType;
 #define CTMP (clef::TokenType)(0x88)
-const mcs::static_arr<clef::TokenType,256> clef::tokTypeArr{
+const mcsl::static_arr<clef::TokenType,256> clef::tokTypeArr{
 // NUL   SOH   STX   ETX   EOT   ENQ   ACK   BEL   BS    LF    VT    FF    CR    SO    SI    DLE
    NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE,
 

@@ -13,8 +13,8 @@ class clef::Tokenizer {
    protected:
       Source _src;
 
-      mcs::dyn_arr<Token> _tokens;
-      mcs::array<mcs::dyn_arr_span<Token>> _tokLines;
+      mcsl::dyn_arr<Token> _tokens;
+      mcsl::array<mcsl::dyn_arr_span<Token>> _tokLines;
 
    public:
       //constructors
@@ -42,12 +42,12 @@ class clef::Tokenizer {
       Token* begin() { return _tokens.begin(); }
       Token* end() { return _tokens.end(); }
 
-      auto& tokens() { return _tokens; }
-      const auto& tokens() const { return _tokens; }
-      auto& row(const uint i);
-      const auto& row(const uint i) const;
-      auto& allRows() { return _tokLines; }
-      const auto& allRows() const { return _tokLines; }
+      mcsl::dyn_arr<Token>& tokens() { return _tokens; }
+      const mcsl::dyn_arr<Token>& tokens() const { return _tokens; }
+      mcsl::dyn_arr_span<Token>& row(const uint i) { return _tokLines[i]; }
+      const mcsl::dyn_arr_span<Token>& row(const uint i) const { return _tokLines[i]; }
+      mcsl::array<mcsl::dyn_arr_span<Token>>& allRows() { return _tokLines; }
+      const mcsl::array<mcsl::dyn_arr_span<Token>>& allRows() const { return _tokLines; }
       const Source& source() const { return _src; }
       Source& source() { return _src; }
 

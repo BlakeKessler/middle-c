@@ -13,12 +13,12 @@
 class clef::SyntaxTree {
    private:
       NodeID_t _root;
-      mcs::dyn_arr<Node> _nodes;
-      mcs::dyn_arr<Token> _tokens;
-      mcs::array<mcs::pair<uint>> _lineBounds;  //{index of start token, size}
+      mcsl::dyn_arr<Node> _nodes;
+      mcsl::dyn_arr<Token> _tokens;
+      mcsl::array<mcsl::pair<uint>> _lineBounds;  //{index of start token, size}
    public:
       SyntaxTree():_root(NODE_NIL),_nodes(),_tokens(),_lineBounds() {}
-      SyntaxTree(mcs::dyn_arr<Token>&& tokens, mcs::array<mcs::dyn_arr_span<Token>>& lines);
+      SyntaxTree(mcsl::dyn_arr<Token>&& tokens, mcsl::array<mcsl::dyn_arr_span<Token>>& lines);
       ~SyntaxTree() = default;
 
       bool updateRoot();

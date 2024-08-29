@@ -6,7 +6,7 @@
 #include <typeinfo>
 
 //!initialize syntax tree from tokens
-clef::SyntaxTree::SyntaxTree(mcs::dyn_arr<Token>&& tokens, mcs::array<mcs::dyn_arr_span<Token>>& lines):
+clef::SyntaxTree::SyntaxTree(mcsl::dyn_arr<Token>&& tokens, mcsl::array<mcsl::dyn_arr_span<Token>>& lines):
    _root(static_cast<NodeID_t>(1)),
    _nodes(tokens.size()),
    _tokens(std::move(tokens)),
@@ -29,7 +29,7 @@ clef::SyntaxTree::SyntaxTree(mcs::dyn_arr<Token>&& tokens, mcs::array<mcs::dyn_a
 //!print AST
 void clef::SyntaxTree::printf() const {
    //allocate memory
-   mcs::dyn_arr<mcs::pair<NodeID_t, uint>> stack;
+   mcsl::dyn_arr<mcsl::pair<NodeID_t, uint>> stack;
    stack.push_back({_root,0});
    astIt current;
    uint indents;

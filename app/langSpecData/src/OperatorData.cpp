@@ -4,7 +4,7 @@
 #include "MidC_Data.hpp"
 
 //!find the length of the longest Middle C operator contained by the string
-uint clef::maxOpLen(const mcs::raw_str_span& str) {
+uint clef::maxOpLen(const mcsl::raw_str_span& str) {
    uint maxlen = 0;
    for (uint i = 0; i < OPERATORS.size(); ++i) {
       //check length
@@ -31,7 +31,7 @@ uint clef::maxOpLen(const mcs::raw_str_span& str) {
 
 //!find the length of the longest Middle C operator contained by the string
 //!NOTE: replace with hash map
-const clef::Operator* clef::getOpData(const mcs::raw_str_span& str, bool banBinary) {
+const clef::Operator* clef::getOpData(const mcsl::raw_str_span& str, bool banBinary) {
    uint maxlen = 0;
    const Operator* op = nullptr;
    for (uint i = 0; i < OPERATORS.size(); ++i) {

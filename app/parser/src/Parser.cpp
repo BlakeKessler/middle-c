@@ -3,7 +3,7 @@
 
 #include "Parser.hpp"
 
-clef::Parser::Parser(mcs::dyn_arr<Token>&& tokens, mcs::array<mcs::dyn_arr_span<Token>>& lines):
+clef::Parser::Parser(mcsl::dyn_arr<Token>&& tokens, mcsl::array<mcsl::dyn_arr_span<Token>>& lines):
    _tree(std::move(tokens),lines) {
 
 }
@@ -131,7 +131,7 @@ bool clef::Parser::handleBlockDelims() {
       return false;
    }
 
-   mcs::dyn_arr<astIt> delims{};
+   mcsl::dyn_arr<astIt> delims{};
    do {
       //skip if not block delimiter
       if (current->type != NodeType::DELIM_GEN) {
@@ -197,7 +197,7 @@ bool clef::Parser::createStatements() {
 
    astIt current = _tree.root();
    astIt statementStart = current;
-   mcs::dyn_arr<NodeID_t> stack{};
+   mcsl::dyn_arr<NodeID_t> stack{};
 
    while (current) {
       //push children
