@@ -23,19 +23,7 @@ struct clef::Operator {
 
    constexpr Operator(): opStr(""),size(0),precedence(0),opType(static_cast<OpType>(0)) {}
    constexpr Operator(const char str[MAX_OP_LEN + 1], const byte prec, const OpType type):
-      opStr(""),size(0),precedence(prec),opType(type) {
-         //strlen
-         for (; size < opStr.size(); ++size) {
-            if (!str[size]) { break; }
-         }
-         //bounds-check
-         assert(size <= MAX_OP_LEN);
-         
-         //copy string
-         for (uint i = 0; i < size; ++i) {
-            opStr[i] = str[i];
-         }
-   }
+      opStr(str),size(0),precedence(prec),opType(type) {}
 };
 //delimiter pair strings
 struct clef::DelimPair {
@@ -196,14 +184,76 @@ namespace clef {
    // };
    
    //block delims
-   DelimPairType blockDelimType(const mcsl::raw_str_span& str);
+   template<typename strT> requires mcsl::str_t<strT,char> DelimPairType blockDelimType(const strT& str) {
+      if (!str.size() || str.size() > MAX_DELIM_LEN) {
+         return DelimPairType::NONE;
+      }
+
+      //search array
+      for (uint i = 0; i < BLOCK_DELIMS.size(); ++i) {
+         if (str == BLOCK_DELIMS[i].open || str == BLOCK_DELIMS[i].close) {
+            return static_cast<DelimPairType>(i);
+         }
+      }
+      return DelimPairType::NONE;
+   }
 
    //operators
-   uint maxOpLen(const mcsl::raw_str_span& str);
-   const Operator* getOpData(const mcsl::raw_str_span& str, bool allowUnary = true);
+   template<typename strT> requires mcsl::str_t<strT,char> uint maxOpLen(const strT& str) {
+      uint maxlen = 0;
+      for (uint i = 0; i < OPERATORS.size(); ++i) {
+         //check length
+         if (str.size() < OPERATORS[i].size) {
+            continue;
+         }
+         //find first differing char
+         for (uint j = 0; j < OPERATORS[i].size; ++j) {
+            if (str[j] == OPERATORS[i].opStr[j]) {
+               maxlen = j >= maxlen ? j + 1 : maxlen;
+            }
+            else {
+               break;
+            }
+         }
+      }
+
+      //triangle-bracket-enclosed operators
+      return (((maxlen < 3 && str.size() >= 3)
+            && (str[0] == '<' || str[0] == '>') && (str[2] == '<' || str[2] == '>'))
+            && +(tokTypeArr[+str[1]] & TokenType::OP))
+         ? 3 : maxlen;
+   }
+   template<typename strT> requires mcsl::str_t<strT,char> const Operator* getOpData(const strT& str, bool banBinary = true) {
+      uint maxlen = 0;
+      const Operator* op = nullptr;
+      for (uint i = 0; i < OPERATORS.size(); ++i) {
+         //handle unary vs. binary
+         if (banBinary && !+(OPERATORS[i].opType & OpType::BIN)) {
+            continue;
+         }
+         //check length
+         if (OPERATORS[i].size > str.size()) {
+            continue;
+         }
+         //find first differing char
+         for (uint j = 0; j < OPERATORS[i].size; ++j) {
+            if (str[j] == OPERATORS[i].opStr[j]) {
+               if (j >= maxlen) {
+                  maxlen = j + 1;
+                  op = &OPERATORS[i];
+               }
+            }
+            else {
+               break;
+            }
+         }
+      }
+
+      return op;
+   }
 
    //!function to determine if a string is a Middle-C keyword
-   inline bool isKeyword(const mcsl::raw_str_span& str) { return false; /*return KEYWORDS.contains(str);*/ }
+   template<typename strT> requires mcsl::str_t<strT,char> inline bool isKeyword(const strT& str) { return str != str; /*return KEYWORDS.contains(str);*/ }
 }
 
 #endif //DATA_HPP

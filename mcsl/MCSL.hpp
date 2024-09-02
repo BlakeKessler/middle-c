@@ -8,7 +8,7 @@
 #include <concepts>
 
 namespace mcsl {
-   template<typename T> concept contig_t = requires(T a) {
+   template<typename T> concept contig_container_t = requires(T a) {
       a.data();
       a.size();
       std::is_pointer(a.data());
@@ -24,8 +24,8 @@ namespace mcsl {
       T::is_hash;
    };
 
-   template<typename T, typename container_t> struct container_base;
-   template<typename T, typename container_t> struct contig_base;
+   template<typename T> struct container_base;
+   template<typename T> struct contig_base;
    template<typename T, uint _size> class static_arr;
    template<typename T> class array;
    template<typename T> class dyn_arr;
@@ -37,12 +37,12 @@ namespace mcsl {
 
    template<typename T> struct hash_func;
    template<container_t T> struct container_hash_func;
-   template<contig_t T> struct contig_hash_func;
+   template<contig_container_t T> struct contig_hash_func;
 
    // template<typename T> class node;
    // template<typename T, cmpfunc(T)> class prio_queue;
 
-   template<typename str_t, typename char_t> struct str_base;
+   template<typename char_t> struct str_base;
    class string;
    class dyn_str_span;
    template<uint _size> class raw_str;
@@ -56,7 +56,7 @@ namespace mcsl {
 
 
 
-//for name() functins
-#include "raw_str.hpp"
+// //for name() functins
+// #include "raw_str.hpp"
 
 #endif //MCSL_HPP

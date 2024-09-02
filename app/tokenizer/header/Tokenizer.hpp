@@ -19,7 +19,7 @@ class clef::Tokenizer {
    public:
       //constructors
       Tokenizer();
-      Tokenizer(Source& src);
+      Tokenizer(Source&& src);
       void free() const { _tokens.free();}
       void release() { _src.release(); _tokens.release(); _tokLines.release(); }
 
@@ -30,9 +30,9 @@ class clef::Tokenizer {
 
       //element access
       const Token& operator[](const uint i) const { return _tokens[i]; }
-      const Token& at(const uint i) const { return _tokens.at(i); }
+      // const Token& at(const uint i) const { return _tokens.at(i); }
       Token& operator[](const uint i) { return _tokens[i]; }
-      Token& at(const uint i) { return _tokens.at(i); }
+      // Token& at(const uint i) { return _tokens.at(i); }
 
       const Token& front() const { return _tokens.front(); }
       const Token& back() const { return _tokens.back(); }

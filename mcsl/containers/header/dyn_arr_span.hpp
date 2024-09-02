@@ -5,34 +5,33 @@
 #include "MCSL.hpp"
 #include "contig_base.hpp"
 #include "pair.hpp"
-#include "raw_str.hpp"
 #include <memory>
 
-template <typename T> class mcsl::dyn_arr_span : public contig_base<T, dyn_arr_span<T>> {
+template <typename T> class mcsl::dyn_arr_span : public contig_base<T> {
    private:
       T* const* _ptrToBuf;
       uint _beginIndex;
       uint _size;
+
+      // static constexpr raw_str<12> _name = "dyn_arr_span";
+      static constexpr char _name[] = "dyn_arr_span";
    public:
       constexpr dyn_arr_span();
       constexpr dyn_arr_span(T* const* buf, const uint size);
       constexpr dyn_arr_span(T* const* buf, const uint beginIndex, const uint size);
       constexpr dyn_arr_span(T* const* buf, const mcsl::pair<uint,uint> bounds);
 
-      static constexpr raw_str<12> _name = "dyn_arr_span";
-
       constexpr uint size() const { return _size; }
-      constexpr auto& name() const { return _name; }
 
       //element access
-      constexpr uint first_index() const { return _beginIndex; }
-      constexpr uint last_index() const { return _beginIndex + _size; }
-
       constexpr T* const* ptr_to_buf() { return _ptrToBuf; }
       constexpr T* data() { return *_ptrToBuf; }
-
+      
       constexpr const T* const* ptr_to_buf() const { return _ptrToBuf; }
       constexpr const T* data() const { return *_ptrToBuf; }
+
+      constexpr uint first_index() const { return _beginIndex; }
+      constexpr uint last_index() const { return _beginIndex + _size; }
 
       //MODIFIERS
       constexpr T* emplace(const uint i, auto... args);

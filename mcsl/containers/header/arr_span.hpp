@@ -4,30 +4,26 @@
 
 #include "MCSL.hpp"
 #include "contig_base.hpp"
-#include "raw_str.hpp"
 #include <memory>
 
 //!non-owning array
-template <typename T> class mcsl::arr_span : public contig_base<T, arr_span<T>> {
+template <typename T> class mcsl::arr_span : public contig_base<T> {
    private:
       T* _buf;
       uint _size;
+
+      // static constexpr raw_str<8> _name = "arr_span";
+      static constexpr char _name[] = "arr_span";
    public:
       constexpr arr_span();
       constexpr arr_span(T* buf, const uint size);
       constexpr arr_span(T* buf, T* end);
 
-      static constexpr raw_str<8> _name = "arr_span";
-
       constexpr uint size() const { return _size; }
-      constexpr auto& name() const { return _name; }
 
-      //element access
-      constexpr T* const* ptr_to_buf() { return &_buf; }
-      constexpr T* data() { return _buf; }
-
-      constexpr const T* const* ptr_to_buf() const { return &_buf; }
-      constexpr const T* data() const { return _buf; }
+      //member access
+      constexpr char* const* ptr_to_buf(this auto&& obj) { return &obj._buf; }
+      constexpr char* data(this auto&& obj) { return obj._buf; }
 
       //MODIFIERS
       constexpr T* emplace(const uint i, auto... args);

@@ -17,7 +17,7 @@ clef::Source clef::Source::readFile(const char* path) {
    const uint fileSize = fs::file_size(fs::path(path));
 
    mcsl::string _buf{fileSize};
-   _buf.realloc_exact(fileSize);
+   _buf.resize_exact(fileSize);
 
    //open, read, close, back-fill file
    FILE* srcFile = std::fopen(path, "r");
@@ -44,7 +44,7 @@ clef::Source clef::Source::readFile(const char* path) {
    }
 
    //return
-   return Source(_buf,_lines);
+   return Source(std::move(_buf),std::move(_lines));
 }
 
 #endif //SOURCE_CPP

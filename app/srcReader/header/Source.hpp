@@ -13,7 +13,8 @@ class clef::Source {
       mcsl::array<mcsl::raw_str_span> _lines;
    public:
       Source():_buf(),_lines() {}
-      Source(mcsl::string& buf,mcsl::array<mcsl::raw_str_span>& lines):_buf(buf),_lines(lines) { buf.release(); lines.release(); }
+      Source(Source&& other):_buf(other._buf),_lines(other._lines) { other.release(); }
+      Source(mcsl::string&& buf,mcsl::array<mcsl::raw_str_span>&& lines):_buf(buf),_lines(lines) { buf.release(); lines.release(); }
       void free() const {_buf.free();_lines.free();}
       void release() {_buf.release();_lines.release();}
       

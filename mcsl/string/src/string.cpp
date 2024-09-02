@@ -9,9 +9,9 @@
 
 
 //!concatenate other onto the end of this
-template<typename s,typename c> mcsl::string& mcsl::string::operator+=(const str_base<s,c>& other) {
+mcsl::string& mcsl::string::operator+=(const str_base<char>& other) {
    char* addr = end();
-   realloc(size() + other.size());
+   resize(size() + other.size());
    //copy other
    std::memcpy(addr, other.begin(), other.size()*sizeof(char));
    //return
@@ -20,7 +20,7 @@ template<typename s,typename c> mcsl::string& mcsl::string::operator+=(const str
 //!repeat string
 mcsl::string& mcsl::string::operator*=(const uint repeatCount) {
    const uint oldSize = size();
-   realloc_exact(repeatCount * size());
+   resize_exact(repeatCount * size());
    for (uint pos = oldSize; pos < size(); pos+=oldSize) {
       std::memcpy(begin() + pos, begin(), oldSize*sizeof(char));
    }

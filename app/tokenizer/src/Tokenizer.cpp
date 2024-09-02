@@ -13,8 +13,8 @@ _src(),_tokens(),_tokLines() {
    
 }
 //!constructor from results of file reader
-clef::Tokenizer::Tokenizer(Source& src):
-_src(src),_tokens(),_tokLines(src.lineCount()) {
+clef::Tokenizer::Tokenizer(Source&& src):
+_src(std::move(src)),_tokens(),_tokLines(src.lineCount()) {
    src.release();
    _tokens.emplace_back();
    mcsl::raw_str_span line;
@@ -54,7 +54,7 @@ _src(src),_tokens(),_tokLines(src.lineCount()) {
 //!read and tokenize file
 clef::Tokenizer clef::Tokenizer::TokenizeFile(const char* path) {
    Source src = Source::readFile(path);
-   return Tokenizer{src};
+   return Tokenizer{std::move(src)};
 }
 
 //!formatted print of tokenizer

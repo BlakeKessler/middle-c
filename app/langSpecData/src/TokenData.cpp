@@ -4,22 +4,23 @@
 #include "MidC_Data.hpp"
 #include <cassert>
 
-//!check if a node is the opening delimiter of a block expression
-//!NOTE: REPLACE WITH HASHMAP
-//!NOTE: NOT WORKING
-clef::DelimPairType clef::blockDelimType(const mcsl::raw_str_span& str) {
-   if (!str.size() || str.size() > MAX_DELIM_LEN) {
-      return DelimPairType::NONE;
-   }
+// //!check if a node is the opening delimiter of a block expression
+// //!NOTE: REPLACE WITH HASHMAP
+// //!NOTE: NOT WORKING
+// template<typename strT> requires mcsl::str_t<strT,char>
+// clef::DelimPairType clef::blockDelimType(const strT& str) {
+//    if (!str.size() || str.size() > MAX_DELIM_LEN) {
+//       return DelimPairType::NONE;
+//    }
 
-   //search array
-   for (uint i = 0; i < BLOCK_DELIMS.size(); ++i) {
-      if (str == BLOCK_DELIMS[i].open || str == BLOCK_DELIMS[i].close) {
-         return static_cast<DelimPairType>(i);
-      }
-   }
-   return DelimPairType::NONE;
-}
+//    //search array
+//    for (uint i = 0; i < BLOCK_DELIMS.size(); ++i) {
+//       if (str == BLOCK_DELIMS[i].open || str == BLOCK_DELIMS[i].close) {
+//          return static_cast<DelimPairType>(i);
+//       }
+//    }
+//    return DelimPairType::NONE;
+// }
 
 //!array encoding which tokens each character is a legal member of
 using enum clef::TokenType;

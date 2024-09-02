@@ -4,12 +4,13 @@
 
 #include "MCSL.hpp"
 #include "alloc.hpp"
-#include "raw_str.hpp"
 
-#define THIS static_cast<arr_t*>(this)
-#define const_THIS static_cast<const arr_t*>(this)
-#define SELF (*static_cast<arr_t*>(this))
-#define const_SELF (*static_cast<const arr_t*>(this))
+#include <typeinfo>
+
+namespace mcsl{
+   template<typename arr_t, typename T> concept contig_t = requires { std::is_base_of_v<arr_t, contig_base<T>>; };
+}
+
 
 //!IMPLEMENTATION GUIDE:
 //!    create member variables and template params (buffer,size)
@@ -18,40 +19,30 @@
 //!    implement ptr_to_buf()
 //!    implement size()
 //!    implement name()
-template<typename T, typename arr_t> struct mcsl::contig_base {
+template<typename T> struct mcsl::contig_base {
+   static constexpr const char temp[] = "temp";
    //properties
-   constexpr uint size() const { return const_SELF.size(); }
+   template<typename Self_t> requires contig_t<Self_t,T> constexpr uint size(this Self_t&& obj) { return obj.size(); }
 
    //element access
-          constexpr T* const* ptr_to_buf()   { return SELF.ptr_to_buf(); }
-          constexpr T* data()   { return SELF.data(); }
-   inline constexpr T* begin()   { return data(); }
-   inline constexpr T* end()   { return data() + size(); }
-   inline constexpr T& operator[](const uint i)   { return data()[i]; }
-   inline constexpr T& at(const uint i)   { if (i >= size()) { mcsl_throw(ErrCode::SEGFAULT, "%s of size %u accessed at index %u", SELF.name(), size(), i); } return self[i]; }
-   inline constexpr T& front()   { return data()[0]; }
-   inline constexpr T& back()   { return data()[size()-1]; }
-
-          constexpr const T* const* ptr_to_buf() const   { return const_SELF.ptr_to_buf(); }
-          constexpr const T* data() const   { return const_SELF.data(); }
-   inline constexpr const T* begin() const   { return data(); }
-   inline constexpr const T* end() const   { return data() + size(); }
-   inline constexpr const T& operator[](const uint i) const   { return data()[i]; }
-   inline constexpr const T& at(const uint i) const   { if (i >= size()) { mcsl_throw(ErrCode::SEGFAULT, "%s of size %u accessed at index %u", const_SELF.name(), size(), i); } return self[i]; }
-   inline constexpr const T& front() const   { return data()[0]; }
-   inline constexpr const T& back() const   { return data()[size()-1]; }
+   template<typename Self_t> requires contig_t<Self_t,T> constexpr T* const* ptr_to_buf(this Self_t&& obj)   { return obj.ptr_to_buf(); }
+   template<typename Self_t> requires contig_t<Self_t,T> constexpr T* data(this Self_t&& obj)   { return obj.data(); }
+   template<typename Self_t> requires contig_t<Self_t,T> constexpr const char* name(this Self_t&&) { return temp; }
+   // template<contig_t Self_t,typename char_t = char> constexpr const str_base<char_t>& name(this Self_t&&) { return Self_t::_name; }
+   
+   template<typename Self_t> requires contig_t<Self_t,T> inline constexpr auto begin(this Self_t&& obj) -> decltype(auto)   { return obj.data(); }
+   template<typename Self_t> requires contig_t<Self_t,T> inline constexpr auto end(this Self_t&& obj) -> decltype(auto)   { return obj.data() + obj.size(); }
+   template<typename Self_t> requires contig_t<Self_t,T> inline constexpr auto operator[](this Self_t&& obj, const uint i) -> decltype(auto)   { return obj.data()[i]; }
+   template<typename Self_t> requires contig_t<Self_t,T> inline constexpr auto at(this Self_t&& obj, const uint i) -> decltype(auto)   { if (i >= obj.size()) { mcsl_throw(ErrCode::SEGFAULT, "%s of size %u accessed at index %u", obj.name(), obj.size(), i); } return obj[i]; }
+   template<typename Self_t> requires contig_t<Self_t,T> inline constexpr auto front(this Self_t&& obj) -> decltype(auto)   { return obj.data()[0]; }
+   template<typename Self_t> requires contig_t<Self_t,T> inline constexpr auto back(this Self_t&& obj) -> decltype(auto)   { return obj.data()[obj.size()-1]; }
 
    //slicing
-   inline arr_t slice(const uint stop) const { return slice(0, stop); }
-   arr_t slice(const uint start, const uint stop) const;
-   arr_t slice(const uint start, const uint stop, const uint step) const;
+   inline auto slice(this const auto&& obj, const uint stop) { return obj.slice(0, stop); }
+   auto slice(this const auto&& obj, const uint start, const uint stop);
+   auto slice(this const auto&& obj, const uint start, const uint stop, const uint step);
 
-   inline operator bool() { return static_cast<bool>(size()); }
+   template<typename Self_t> requires contig_t<Self_t,T> inline operator bool() const { return static_cast<bool>(size()); }
 };
-
-#undef THIS
-#undef const_THIS
-#undef SELF
-#undef const_SELF
 
 #endif //MCSL_CONTIG_BASE_HPP

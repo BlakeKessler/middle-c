@@ -5,17 +5,19 @@
 #include "MCSL.hpp"
 #include "alloc.hpp"
 #include "contig_base.hpp"
-#include "raw_str.hpp"
 #include <bit>
 #include <memory>
 #include <initializer_list>
 #include <cstring>
 
-template <typename T> class mcsl::dyn_arr : public contig_base<T, dyn_arr<T>> {
+template <typename T> class mcsl::dyn_arr : public contig_base<T> {
    private:
       uint _bufSize;
       uint _size;
       T* _buf;
+
+      // static constexpr raw_str<7> _name = "dyn_arr";
+      static constexpr char _name[] = "dyn_arr";
    public:
       constexpr dyn_arr();
       dyn_arr(const uint size);
@@ -25,23 +27,17 @@ template <typename T> class mcsl::dyn_arr : public contig_base<T, dyn_arr<T>> {
       ~dyn_arr() { this->free(); }
       void free() const { mcsl::free(_buf); }
 
-      static constexpr raw_str<7> _name = "dyn_arr";
-
       constexpr uint size() const { return _size; }
       constexpr uint capacity() const { return _bufSize; }
-      constexpr auto& name() const { return _name; }
 
-      //element access
-      constexpr T* const* ptr_to_buf() { return &_buf; }
-      constexpr T* data() { return _buf; }
-
-      constexpr const T* const* ptr_to_buf() const { return &_buf; }
-      constexpr const T* data() const { return _buf; }
+      //member access
+      constexpr T* const* ptr_to_buf(this auto&& obj) { return &obj._buf; }
+      constexpr T* data(this auto&& obj) { return obj._buf; }
 
       //MODIFIERS
       //!realloc buffer to at least the specified size
-      bool realloc(const uint newSize) { return realloc_exact(std::bit_ceil(newSize)); }
-      bool realloc_exact(const uint newSize);
+      bool resize(const uint newSize) { return resize_exact(std::bit_ceil(newSize)); }
+      bool resize_exact(const uint newSize);
       T* release() { T* temp = _buf; _buf = nullptr; _size = 0; _bufSize = 0; return temp; }
       bool push_back(const T& obj);
       T pop_back();
@@ -65,7 +61,7 @@ template<typename T> mcsl::dyn_arr<T>::dyn_arr(const uint size):
 template<typename T> mcsl::dyn_arr<T>::dyn_arr(const uint size, const uint bufSize):
    _bufSize(bufSize), _size(size) {
       if (_bufSize < _size) {
-         mcsl_throw(ErrCode::SEGFAULT, "cannot construct %s with array size greater than buffer size (\033[4m%u\033[24m < \033[4m%u\033[24m)",name(),_bufSize,_size);
+         mcsl::mcsl_throw(ErrCode::SEGFAULT, "cannot construct %s with array size greater than buffer size (\033[4m%u\033[24m < \033[4m%u\033[24m)", _name,_bufSize,_size);
          _buf = nullptr;
       }
       else {
@@ -84,7 +80,7 @@ template<typename T> mcsl::dyn_arr<T>::dyn_arr(dyn_arr&& other):
 }
 
 //!realloc buffer to the specified size
-template<typename T> bool mcsl::dyn_arr<T>::realloc_exact(const uint newSize) {
+template<typename T> bool mcsl::dyn_arr<T>::resize_exact(const uint newSize) {
    _buf = mcsl::realloc<T>(_buf, newSize);;
    _bufSize = newSize;
    return true;
@@ -95,7 +91,7 @@ template<typename T> bool mcsl::dyn_arr<T>::realloc_exact(const uint newSize) {
 template<typename T> bool mcsl::dyn_arr<T>::push_back(const T& obj) {
    bool realloced = false;
    if (_size >= _bufSize) {
-      realloced = realloc(_size ? std::bit_floor(_size) << 1 : 1);
+      realloced = resize(_size ? std::bit_floor(_size) << 1 : 1);
    }
    _buf[_size++] = obj;
    return realloced;
@@ -111,7 +107,7 @@ template<typename T> T mcsl::dyn_arr<T>::pop_back() {
 //!construct in place
 template<typename T> T* mcsl::dyn_arr<T>::emplace(const uint i, auto... args) {
    if (i >= _size) {
-      mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i,name(),_size);
+      mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i, self.name(), _size);
       return nullptr;
    }
    std::construct_at(_buf + i, args...);
@@ -120,7 +116,7 @@ template<typename T> T* mcsl::dyn_arr<T>::emplace(const uint i, auto... args) {
 //!construct in place at back of array
 template<typename T> T* mcsl::dyn_arr<T>::emplace_back(auto... args) {
    if (_size >= _bufSize) {
-      realloc(_size ? std::bit_floor(_size) << 1 : 1);
+      resize(_size ? std::bit_floor(_size) << 1 : 1);
    }
    return emplace(_size++, args...);
 }
