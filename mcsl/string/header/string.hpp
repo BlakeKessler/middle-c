@@ -33,10 +33,12 @@ class mcsl::string : public str_base<char> {
       inline constexpr uint capacity() const { return _buf.capacity() - 1; }
       constexpr static const auto& name() { return _name; }
 
-      inline constexpr char* data() { return _buf.data(); }
-      inline constexpr const char* data() const { return _buf.data(); }
       inline constexpr char* const* ptr_to_buf() { return _buf.ptr_to_buf(); }
+      inline constexpr char* data() { return _buf.data(); }
+      constexpr char* begin() { return _buf.begin(); }
       inline constexpr const char* const* ptr_to_buf() const { return _buf.ptr_to_buf(); }
+      inline constexpr const char* data() const { return _buf.data(); }
+      constexpr const char* begin() const { return _buf.begin(); }
       
       //MODIFIERS
       //!realloc buffer to at least the specified size

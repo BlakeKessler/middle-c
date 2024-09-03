@@ -31,8 +31,10 @@ template<uint _size> class mcsl::raw_str : public str_base<char> {
       //member access
       constexpr char* const* ptr_to_buf() { return reinterpret_cast<char**>(&_buf); }
       constexpr char* data() { return _buf; }
+      constexpr char* begin() { return _buf; }
       constexpr const char* const* ptr_to_buf() const { return reinterpret_cast<char**>(&_buf); }
       constexpr const char* data() const { return _buf; }
+      constexpr const char* begin() const { return _buf; }
 };
 
 template<uint _size> constexpr mcsl::raw_str<_size>::raw_str(const char* str, const uint strsize): _buf{} {

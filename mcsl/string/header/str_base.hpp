@@ -7,6 +7,8 @@
 #include "char_type.hpp"
 #include "dyn_arr.hpp"
 
+#include <cstdio>
+
 
 namespace mcsl{
    template<typename T, typename char_t> concept str_t = requires (T obj) { std::is_base_of_v<str_base<char_t>,T>; { obj.size() } -> std::convertible_to<luint>; };
@@ -25,7 +27,7 @@ struct mcsl::str_base : public contig_base<char_t> {
    // static constexpr const raw_str _name = "str_base";
    static constexpr const char _name[] = "str_base";
    constexpr static const auto& name() { return _name; }
-   // const raw_str_span name(this const auto&& obj) { return raw_str_span(obj._name); }
+   void printf(this auto&& obj) { std::printf("%.*s", obj.size(), obj.begin()); }
    
    
    

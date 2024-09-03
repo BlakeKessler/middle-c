@@ -30,9 +30,11 @@ template <typename T> class mcsl::dyn_arr_span : public contig_base<T> {
       //element access
       constexpr T* const* ptr_to_buf() { return _ptrToBuf; }
       constexpr T* data() { return *_ptrToBuf; }
+      constexpr T* begin() { return *_ptrToBuf + _beginIndex; }
       
       constexpr const T* const* ptr_to_buf() const { return _ptrToBuf; }
       constexpr const T* data() const { return *_ptrToBuf; }
+      constexpr const T* begin() const { return *_ptrToBuf + _beginIndex; }
 
       constexpr uint first_index() const { return _beginIndex; }
       constexpr uint last_index() const { return _beginIndex + _size; }

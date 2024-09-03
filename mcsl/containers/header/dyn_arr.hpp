@@ -36,8 +36,13 @@ template <typename T> class mcsl::dyn_arr : public contig_base<T> {
       constexpr uint capacity() const { return _bufSize; }
 
       //member access
-      constexpr T* const* ptr_to_buf(this auto&& obj) { return &obj._buf; }
-      constexpr T* data(this auto&& obj) { return obj._buf; }
+      constexpr T* const* ptr_to_buf() { return &_buf; }
+      constexpr T* data() { return _buf; }
+      constexpr T* begin() { return _buf; }
+      constexpr const T* const* ptr_to_buf() const { return &_buf; }
+      constexpr const T* data() const { return _buf; }
+      constexpr const T* begin() const { return _buf; }
+
 
       //MODIFIERS
       //!realloc buffer to at least the specified size

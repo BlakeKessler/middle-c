@@ -30,13 +30,13 @@ template<typename T> struct mcsl::contig_base {
    //element access
    MCSL_SELF_T constexpr T* const* ptr_to_buf(this Self_t&& obj)   { return obj.ptr_to_buf(); }
    MCSL_SELF_T constexpr T* data(this Self_t&& obj)   { return obj.data(); }
-   
-   MCSL_SELF_T inline constexpr auto begin(this Self_t&& obj) -> decltype(auto)   { return obj.data(); }
-   MCSL_SELF_T inline constexpr auto end(this Self_t&& obj) -> decltype(auto)   { return obj.data() + obj.size(); }
-   MCSL_SELF_T inline constexpr auto operator[](this Self_t&& obj, const uint i) -> decltype(auto)   { return obj.data()[i]; }
+   MCSL_SELF_T constexpr T* begin(this Self_t&& obj)   { return obj.begin(); }
+
+   MCSL_SELF_T inline constexpr auto end(this Self_t&& obj) -> decltype(auto)   { return obj.begin() + obj.size(); }
+   MCSL_SELF_T inline constexpr auto operator[](this Self_t&& obj, const uint i) -> decltype(auto)   { return obj.begin()[i]; }
    MCSL_SELF_T inline constexpr auto at(this Self_t&& obj, const uint i) -> decltype(auto)   { if (i >= obj.size()) { mcsl_throw(ErrCode::SEGFAULT, "%s of size %u accessed at index %u", obj.name(), obj.size(), i); } return obj[i]; }
-   MCSL_SELF_T inline constexpr auto front(this Self_t&& obj) -> decltype(auto)   { return obj.data()[0]; }
-   MCSL_SELF_T inline constexpr auto back(this Self_t&& obj) -> decltype(auto)   { return obj.data()[obj.size()-1]; }
+   MCSL_SELF_T inline constexpr auto front(this Self_t&& obj) -> decltype(auto)   { return obj.begin()[0]; }
+   MCSL_SELF_T inline constexpr auto back(this Self_t&& obj) -> decltype(auto)   { return obj.begin()[obj.size()-1]; }
 
    //slicing
    inline auto slice(this const auto&& obj, const uint stop) { return obj.slice(0, stop); }

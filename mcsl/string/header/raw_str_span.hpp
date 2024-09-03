@@ -35,8 +35,10 @@ class mcsl::raw_str_span : public str_base<char> {
       //member access
       constexpr char* const* ptr_to_buf() { return &_buf; }
       constexpr char* data() { return _buf; }
+      constexpr char* begin() { return _buf; }
       constexpr const char* const* ptr_to_buf() const { return &_buf; }
       constexpr const char* data() const { return _buf; }
+      constexpr const char* begin() const { return _buf; }
 };
 
 #endif //MCSL_RAW_STRING_SPAN_HPP

@@ -31,10 +31,12 @@ template <typename T, uint _size> class mcsl::static_arr : public contig_base<T>
       constexpr uint size() const { return _size; }
 
       //member access
-      constexpr T* const* ptr_to_buf() { return _buf; }
+      constexpr T* const* ptr_to_buf() { return &_buf; }
       constexpr T* data() { return _buf; }
-      constexpr const T* const* ptr_to_buf() const { return _buf; }
+      constexpr T* begin() { return _buf; }
+      constexpr const T* const* ptr_to_buf() const { return &_buf; }
       constexpr const T* data() const { return _buf; }
+      constexpr const T* begin() const { return _buf; }
 
       //MODIFIERS
       constexpr T* emplace(const uint i, auto&&... args);

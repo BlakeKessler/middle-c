@@ -44,9 +44,6 @@ class clef::Token : public mcsl::raw_str_span {
       const DelimPair* getPtxtData() const;
 
       void throwError(const ErrCode code) const;
-
-      //token IO
-      void printf() const { std::printf("%.*s", size(),begin()); }
 };
 
 #endif //TOKEN_HPP
