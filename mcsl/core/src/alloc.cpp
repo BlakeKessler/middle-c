@@ -3,9 +3,10 @@
 
 #include "alloc.hpp"
 
-void mcsl::free(void* ptr) {
+void mcsl::free(void* &&ptr) {
    if(ptr) {
       std::free(ptr);
+      ptr = nullptr;
    }
 }
 

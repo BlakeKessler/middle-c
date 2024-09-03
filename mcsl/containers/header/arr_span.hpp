@@ -23,8 +23,10 @@ template <typename T> class mcsl::arr_span : public contig_base<T> {
       constexpr uint size() const { return _size; }
 
       //member access
-      constexpr char* const* ptr_to_buf(this auto&& obj) { return &obj._buf; }
-      constexpr char* data(this auto&& obj) { return obj._buf; }
+      constexpr char* const* ptr_to_buf() { return &_buf; }
+      constexpr char* data() { return _buf; }
+      constexpr const char* const* ptr_to_buf() const { return &_buf; }
+      constexpr const char* data() const { return _buf; }
 
       //MODIFIERS
       constexpr T* emplace(const uint i, auto&&... args);

@@ -26,6 +26,7 @@ template <typename T> class mcsl::array : public contig_base<T> {
       array(T* buf, const uint size);
       array(std::initializer_list<T>);
       array(array&& other);
+      array(std::convertible_to<T> auto... initList) requires requires { sizeof...(initList) == _size; }:_buf{std::forward<decltype(initList)>(initList)...} {}
       ~array() { this->free(); }
       void free() const { mcsl::free(_buf); }
 

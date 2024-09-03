@@ -21,7 +21,6 @@ class clef::Tokenizer {
       Tokenizer();
       Tokenizer(Source&& src);
       Tokenizer(Tokenizer&& other);
-      void free() const { _tokens.free();}
       void release() { _src.release(); _tokens.release(); _tokLines.release(); }
 
       static Tokenizer TokenizeFile(const char* path);

@@ -12,7 +12,7 @@ namespace mcsl {
    template<typename T> T* malloc(const uint itemCount);
    template<typename T> T* calloc(const uint itemCount);
    template<typename T> T* realloc(T* buf, const uint newItemCount);
-   void free(void* ptr);
+   void free(void* &&ptr);
 
 #pragma endregion def
 #pragma region src

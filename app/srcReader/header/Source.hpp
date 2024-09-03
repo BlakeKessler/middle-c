@@ -15,7 +15,6 @@ class clef::Source {
       Source():_buf(),_lines() {}
       Source(Source&& other):_buf(std::move(other._buf)),_lines(std::move(other._lines)) { other.release(); }
       Source(mcsl::string&& buf,mcsl::array<mcsl::raw_str_span>&& lines):_buf(std::move(buf)),_lines(std::move(lines)) { buf.release(); lines.release(); }
-      void free() const {_buf.free();_lines.free();}
       void release() {_buf.release();_lines.release();}
       
       static Source readFile(const char* path);

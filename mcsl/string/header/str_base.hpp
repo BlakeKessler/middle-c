@@ -11,7 +11,7 @@
 namespace mcsl{
    template<typename T, typename char_t> concept str_t = requires (T obj) { std::is_base_of_v<str_base<char_t>,T>; { obj.size() } -> std::convertible_to<luint>; };
 }
-
+#define CLEF_STR_T template<typename strT> requires str_t<strT,char_t>
 
 //!IMPLEMENTATION GUIDE:
 //!   consider null-termination
@@ -23,16 +23,16 @@ namespace mcsl{
 template<typename char_t>
 struct mcsl::str_base : public contig_base<char_t> {
    //operations
-   template<typename Self_t> requires str_t<Self_t,char_t> Self_t copy(this const Self_t&& obj);
+   CLEF_STR_T strT copy(this const strT&& obj);
 
    // str_t& operator+=(const str_base& other);
    auto operator+(this const auto&& obj, const auto& other);
    
    // str_t& operator*=(const uint i);
-   template<typename Self_t> requires str_t<Self_t,char_t> Self_t operator*(this Self_t&& obj, const uint i);
+   CLEF_STR_T strT operator*(this strT&& obj, const uint i);
    
-   template<typename Self_t> requires str_t<Self_t,char_t> Self_t&& alter(this Self_t&& obj, char (*const transformer)(const char));
-   template<typename Self_t> requires str_t<Self_t,char_t> Self_t altered(this const Self_t&& obj, char (*const transformer)(const char));
+   CLEF_STR_T strT&& alter(this strT&& obj, char (*const transformer)(const char));
+   CLEF_STR_T strT altered(this const strT&& obj, char (*const transformer)(const char));
    
    inline auto&& operator+() { return alter(mcsl::to_upper); }
    inline auto&& operator-() { return alter(mcsl::to_lower); }
@@ -43,36 +43,23 @@ struct mcsl::str_base : public contig_base<char_t> {
    uint operator^(this const auto&& obj, const auto& other); //strcspn
    uint operator/(this const auto&& obj, const auto& other); //largest n : other*n ⊇ self
 
-   template<typename Self_t> requires str_t<Self_t,char_t> dyn_arr<Self_t> tokenize(this const Self_t&& obj, const str_base& delimChars);
-   template<typename Self_t> requires str_t<Self_t,char_t> dyn_arr<Self_t> tokenize(this const Self_t&& obj, const container_base<str_base>& delimStrs);
+   CLEF_STR_T dyn_arr<strT> tokenize(this const strT&& obj, const str_base& delimChars);
+   CLEF_STR_T dyn_arr<strT> tokenize(this const strT&& obj, const container_base<str_base>& delimStrs);
 
    //comparison
-   template<typename strT> requires str_t<strT,char_t> inline constexpr bool operator==(this auto&& s, const strT& other) { if (s.size() != other.size()) { return false; } return !(s <=> other); }
-   template<typename strT> requires str_t<strT,char_t> inline constexpr bool operator!=(this auto&& s, const strT& other) { if (s.size() != other.size()) { return true;  } return   s <=> other;  }
+   CLEF_STR_T inline constexpr bool operator==(this auto&& s, const strT& other) { if (s.size() != other.size()) { return false; } return !(s <=> other); }
+   CLEF_STR_T inline constexpr bool operator!=(this auto&& s, const strT& other) { if (s.size() != other.size()) { return true;  } return   s <=> other;  }
 
-   template<typename strT> requires str_t<strT,char_t> inline constexpr bool operator<(this auto&& s, const strT& other) { return (s <=> other) < 0; }
-   template<typename strT> requires str_t<strT,char_t> inline constexpr bool operator<=(this auto&& s, const strT& other) { return (s <=> other) <= 0; }
-
-   template<typename strT> requires str_t<strT,char_t> inline constexpr bool operator>(this auto&& s, const strT& other) { return (s <=> other) > 0; }
-   template<typename strT> requires str_t<strT,char_t> inline constexpr bool operator>=(this auto&& s, const strT& other) { return (s <=> other) >= 0; }
-
-   template<typename strT> requires str_t<strT,char_t> inline constexpr sint operator<=>(this auto&& s, const strT& other) { return s.strcmp(other); }
+   CLEF_STR_T inline constexpr sint operator<=>(this auto&& s, const strT& other) { return s.strcmp(other); }
 
 
+   template<uint len> inline constexpr bool operator==(this auto&& s, const char_t other[len]) { return s == raw_str_span(other); }
+   template<uint len> inline constexpr bool operator!=(this auto&& s, const char_t other[len]) { return s != raw_str_span(other); }
 
-   template<uint len> inline constexpr bool operator==(this auto&& s, const char_t other[len]) { return s == raw_str<len>(other); }
-   template<uint len> inline constexpr bool operator!=(this auto&& s, const char_t other[len]) { return s != raw_str<len>(other); }
-
-   template<uint len> inline constexpr bool operator<(this auto&& s, const char_t other[len]) { return s < raw_str<len>(other); }
-   template<uint len> inline constexpr bool operator<=(this auto&& s, const char_t other[len]) { return s <= raw_str<len>(other); }
-
-   template<uint len> inline constexpr bool operator>(this auto&& s, const char_t other[len]) { return s > raw_str<len>(other); }
-   template<uint len> inline constexpr bool operator>=(this auto&& s, const char_t other[len]) { return s >= raw_str<len>(other); }
-
-   template<uint len> inline constexpr sint operator<=>(this auto&& s, const char_t other[len]) { return s <=> raw_str<len>(other); }
+   template<uint len> inline constexpr sint operator<=>(this auto&& s, const char_t other[len]) { return s <=> raw_str_span(other); }
 
 
-   template<typename strT> requires str_t<strT,char_t> constexpr sint strcmp(this auto&& s, const strT& other) {
+   CLEF_STR_T constexpr sint strcmp(this auto&& s, const strT& other) {
       uint len = s.size() < other.size() ? s.size() : other.size();
       for (uint i = 0; i < len; ++i) {
          if (s[i] != other[i]) {
@@ -90,7 +77,7 @@ struct mcsl::str_base : public contig_base<char_t> {
       }
       return 0;
    }
-   template<typename strT> requires str_t<strT,char_t> constexpr sint substrcmp(this auto&& s, const strT& other) {
+   CLEF_STR_T constexpr sint substrcmp(this auto&& s, const strT& other) {
       uint len = s.size() < other.size() ? s.size() : other.size();
       for (uint i = 0; i < len; ++i) {
          if (s[i] != other[i]) {
@@ -101,9 +88,13 @@ struct mcsl::str_base : public contig_base<char_t> {
    }
 
    //typecasts
-   template<typename strT> requires str_t<strT,char_t> inline constexpr operator bool(this strT&& obj) { return obj.size(); }
-   template<typename strT> requires str_t<strT,char_t> inline constexpr operator const char_t*(this const strT&& obj) { return obj.data(); }
-   template<typename strT> requires str_t<strT,char_t> inline constexpr operator char_t*(this strT&& obj) { return obj.data(); }
+   CLEF_STR_T inline constexpr operator bool(this strT&& obj) { return obj.size(); }
+   CLEF_STR_T inline constexpr operator const char_t*(this const strT&& obj) { return obj.data(); }
+   CLEF_STR_T inline constexpr operator char_t*(this strT&& obj) { return obj.data(); }
 };
+
+#undef CLEF_STR_T
+
+#include "raw_str_span.hpp"
 
 #endif //MCSL_STR_BASE_HPP

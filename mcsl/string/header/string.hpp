@@ -28,9 +28,6 @@ class mcsl::string : public str_base<char> {
       template<class str> requires requires { std::is_base_of_v<str_base<char>,str>; }
          string(const str& other): string(other.data(),other.size()) {}
 
-      ~string() { self.free(); }
-      inline void free() const { _buf.free(); }
-
       //properties
       inline constexpr uint size() const { return _buf.size() - 1; }
       inline constexpr uint capacity() const { return _buf.capacity() - 1; }
