@@ -14,6 +14,7 @@ class clef::Token : public mcsl::raw_str_span {
       Token();
       Token(char* front, char* back, const uint line = 0);
       Token(char* front, const uint length, const uint line = 0);
+      Token(Token&&);
 
       Token split(const uint len);
 

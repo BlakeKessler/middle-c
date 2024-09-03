@@ -25,6 +25,7 @@ class mcsl::raw_buf_str : public str_base<char> {
 
       //properties
       constexpr size_t size() const { return _size; }
+      constexpr size_t capacity() const { return _capacity; }
 
       //member access
       constexpr char* const* ptr_to_buf() { return &_buf; }

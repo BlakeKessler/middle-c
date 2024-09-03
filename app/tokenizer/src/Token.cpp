@@ -20,6 +20,8 @@ clef::Token::Token(char* front, const uint length, const uint line):
 mcsl::raw_str_span(front, length),_lineNum(line) {
 
 }
+clef::Token::Token(Token&& other):
+mcsl::raw_str_span(std::move(other)),_lineNum(other._lineNum) {}
 
 clef::Token clef::Token::split(const uint i) {
    assert(i <= size());

@@ -6,6 +6,7 @@
 #include "contig_base.hpp"
 #include "pair.hpp"
 #include <memory>
+#include <utility>
 
 template <typename T> class mcsl::dyn_arr_span : public contig_base<T> {
    private:
@@ -34,7 +35,7 @@ template <typename T> class mcsl::dyn_arr_span : public contig_base<T> {
       constexpr uint last_index() const { return _beginIndex + _size; }
 
       //MODIFIERS
-      constexpr T* emplace(const uint i, auto... args);
+      constexpr T* emplace(const uint i, auto&&... args);
 };
 
 #pragma region src
@@ -57,12 +58,12 @@ template<typename T> constexpr mcsl::dyn_arr_span<T>::dyn_arr_span(T* const* ptr
 }
 
 //!construct in place
-template<typename T> constexpr T* mcsl::dyn_arr_span<T>::emplace(const uint i, auto... args) {
+template<typename T> constexpr T* mcsl::dyn_arr_span<T>::emplace(const uint i, auto&&... args) {
    if (i >= _size) {
       mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i,self.name(),_size);
       return nullptr;
    }
-   std::construct_at(self.begin() + i, args...);
+   std::construct_at(self.begin() + i, std::forward<decltype(args)>(args)...);
    return self.begin() + i;
 }
 

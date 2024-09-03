@@ -5,6 +5,7 @@
 #include "MCSL.hpp"
 #include "contig_base.hpp"
 #include <memory>
+#include <utility>
 
 //!non-owning array
 template <typename T> class mcsl::arr_span : public contig_base<T> {
@@ -26,7 +27,7 @@ template <typename T> class mcsl::arr_span : public contig_base<T> {
       constexpr char* data(this auto&& obj) { return obj._buf; }
 
       //MODIFIERS
-      constexpr T* emplace(const uint i, auto... args);
+      constexpr T* emplace(const uint i, auto&&... args);
 };
 
 #pragma region src
@@ -45,12 +46,12 @@ template<typename T> constexpr mcsl::arr_span<T>::arr_span(T* buf, T* end):
 }
 
 //!construct in place
-template<typename T> constexpr T* mcsl::arr_span<T>::emplace(const uint i, auto... args) {
+template<typename T> constexpr T* mcsl::arr_span<T>::emplace(const uint i, auto&&... args) {
    if (i >= _size) {
       mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i,name(),_size);
       return nullptr;
    }
-   std::construct_at(_buf + i, args...);
+   std::construct_at(_buf + i, std::forward<decltype(args)>(args)...);
    return _buf + i;
 }
 

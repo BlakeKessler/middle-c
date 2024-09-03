@@ -14,16 +14,26 @@
 #include <cassert>
 #include <cstring>
 
+constexpr uint testStrlen(const char str[MAX_OP_LEN + 1]) {
+   for (uint i = 0; i <= MAX_OP_LEN; ++i) {
+      if (!str[i]) {
+         return i;
+      }
+   }
+   return MAX_OP_LEN;
+}
+
 //operator string + metadata
 struct clef::Operator {
-   mcsl::raw_str<MAX_OP_LEN> opStr;
-   byte size;
+   mcsl::raw_buf_str<MAX_OP_LEN,byte> opStr;
    byte precedence;
    OpType opType; //unary/binary/special, left/right associative
 
-   constexpr Operator(): opStr(""),size(0),precedence(0),opType(static_cast<OpType>(0)) {}
+   constexpr Operator(): opStr(""),precedence(0),opType(static_cast<OpType>(0)) {}
    constexpr Operator(const char str[MAX_OP_LEN + 1], const byte prec, const OpType type):
-      opStr(str),size(0),precedence(prec),opType(type) {}
+      opStr(str),precedence(prec),opType(type) {}
+   
+   constexpr byte size() const { return opStr.size(); }
 };
 //delimiter pair strings
 struct clef::DelimPair {
@@ -203,11 +213,11 @@ namespace clef {
       uint maxlen = 0;
       for (uint i = 0; i < OPERATORS.size(); ++i) {
          //check length
-         if (str.size() < OPERATORS[i].size) {
+         if (str.size() < OPERATORS[i].size()) {
             continue;
          }
          //find first differing char
-         for (uint j = 0; j < OPERATORS[i].size; ++j) {
+         for (uint j = 0; j < OPERATORS[i].size(); ++j) {
             if (str[j] == OPERATORS[i].opStr[j]) {
                maxlen = j >= maxlen ? j + 1 : maxlen;
             }
@@ -232,11 +242,11 @@ namespace clef {
             continue;
          }
          //check length
-         if (OPERATORS[i].size > str.size()) {
+         if (OPERATORS[i].size() > str.size()) {
             continue;
          }
          //find first differing char
-         for (uint j = 0; j < OPERATORS[i].size; ++j) {
+         for (uint j = 0; j < OPERATORS[i].size(); ++j) {
             if (str[j] == OPERATORS[i].opStr[j]) {
                if (j >= maxlen) {
                   maxlen = j + 1;

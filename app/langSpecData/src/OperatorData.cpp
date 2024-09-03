@@ -9,11 +9,11 @@
 //    uint maxlen = 0;
 //    for (uint i = 0; i < OPERATORS.size(); ++i) {
 //       //check length
-//       if (str.size() < OPERATORS[i].size) {
+//       if (str.size() < OPERATORS[i].size()) {
 //          continue;
 //       }
 //       //find first differing char
-//       for (uint j = 0; j < OPERATORS[i].size; ++j) {
+//       for (uint j = 0; j < OPERATORS[i].size(); ++j) {
 //          if (str[j] == OPERATORS[i].opStr[j]) {
 //             maxlen = j >= maxlen ? j + 1 : maxlen;
 //          }
@@ -42,11 +42,11 @@
 //          continue;
 //       }
 //       //check length
-//       if (OPERATORS[i].size > str.size()) {
+//       if (OPERATORS[i].size() > str.size()) {
 //          continue;
 //       }
 //       //find first differing char
-//       for (uint j = 0; j < OPERATORS[i].size; ++j) {
+//       for (uint j = 0; j < OPERATORS[i].size(); ++j) {
 //          if (str[j] == OPERATORS[i].opStr[j]) {
 //             if (j >= maxlen) {
 //                maxlen = j + 1;

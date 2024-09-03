@@ -22,9 +22,6 @@ namespace mcsl{
 //!   write constructors
 template<typename char_t>
 struct mcsl::str_base : public contig_base<char_t> {
-   // using contig_base<char_t>::size;
-   // using contig_base<char_t>::data;
-   // using contig_base<char_t>::ptr_to_buf;
    //operations
    template<typename Self_t> requires str_t<Self_t,char_t> Self_t copy(this const Self_t&& obj);
 

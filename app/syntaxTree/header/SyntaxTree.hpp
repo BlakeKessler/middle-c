@@ -19,7 +19,9 @@ class clef::SyntaxTree {
    public:
       SyntaxTree():_root(NODE_NIL),_nodes(),_tokens(),_lineBounds() {}
       SyntaxTree(mcsl::dyn_arr<Token>&& tokens, mcsl::array<mcsl::dyn_arr_span<Token>>& lines);
+      SyntaxTree(SyntaxTree&& other);
       ~SyntaxTree() = default;
+      void release();
 
       bool updateRoot();
 

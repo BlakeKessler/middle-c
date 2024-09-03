@@ -50,11 +50,17 @@ _src(std::move(src)),_tokens(),_tokLines(src.lineCount()) {
       _tokLines.emplace(i, _tokens.ptr_to_buf(), mcsl::pair{i?_tokLines[i-1].last_index():0 , _tokens.size()});
    }
 }
+//!move constructor
+clef::Tokenizer::Tokenizer(Tokenizer&& other):
+   _src(std::move(other._src)),
+   _tokens(std::move(other._tokens)),
+   _tokLines(std::move(other._tokLines)) {
+      other.release();
+}
 
 //!read and tokenize file
 clef::Tokenizer clef::Tokenizer::TokenizeFile(const char* path) {
-   Source src = Source::readFile(path);
-   return Tokenizer{std::move(src)};
+   return Tokenizer{Source::readFile(path)};
 }
 
 //!formatted print of tokenizer

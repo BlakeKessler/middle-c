@@ -45,5 +45,10 @@ mcsl::string::string(const char* str):
 string(str,std::strlen(str)) {
    
 }
+//!move constructor
+mcsl::string::string(string&& other):
+   _buf(std::move(other._buf)) {
+      other.release();
+}
 
 #endif //MCSL_STRING_CPP

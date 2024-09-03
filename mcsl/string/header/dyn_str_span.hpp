@@ -36,9 +36,9 @@ class mcsl::dyn_str_span : public str_base<char> {
 
       //member access
       constexpr char* const* ptr_to_buf() { return _ptrToBuf; }
-      constexpr char* data() { return *_ptrToBuf; }
+      constexpr char* data() { return *_ptrToBuf + _begin; }
       constexpr const char* const* ptr_to_buf() const { return _ptrToBuf; }
-      constexpr const char* data() const { return *_ptrToBuf; }
+      constexpr const char* data() const { return *_ptrToBuf + _begin; }
 };
 
 #endif //MCSL_DYN_STRING_SPAN_HPP

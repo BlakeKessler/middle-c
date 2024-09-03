@@ -25,6 +25,21 @@ clef::SyntaxTree::SyntaxTree(mcsl::dyn_arr<Token>&& tokens, mcsl::array<mcsl::dy
          _lineBounds[i].second = temp;
       }
 }
+//!move constructor
+clef::SyntaxTree::SyntaxTree(SyntaxTree&& other):
+   _root(other._root),
+   _nodes(std::move(other._nodes)),
+   _tokens(std::move(other._tokens)),
+   _lineBounds(std::move(other._lineBounds)) {
+      other.release();
+}
+
+void clef::SyntaxTree::release() {
+   _root = NODE_NIL;
+   _nodes.release();
+   _tokens.release();
+   _lineBounds.release();
+}
 
 //!print AST
 void clef::SyntaxTree::printf() const {

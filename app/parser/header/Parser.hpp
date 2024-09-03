@@ -31,7 +31,9 @@ class clef::Parser {
       //constructors and destructor
       Parser() = default;
       Parser(mcsl::dyn_arr<Token>&& tokens, mcsl::array<mcsl::dyn_arr_span<Token>>& lines);
+      Parser(Parser&& other): _tree(std::move(other._tree)) { other.release(); }
       ~Parser() = default;
+      void release() { _tree.release(); }
 
       //parse
       bool runPass();

@@ -20,6 +20,7 @@ class clef::Tokenizer {
       //constructors
       Tokenizer();
       Tokenizer(Source&& src);
+      Tokenizer(Tokenizer&& other);
       void free() const { _tokens.free();}
       void release() { _src.release(); _tokens.release(); _tokLines.release(); }
 
@@ -30,9 +31,9 @@ class clef::Tokenizer {
 
       //element access
       const Token& operator[](const uint i) const { return _tokens[i]; }
-      // const Token& at(const uint i) const { return _tokens.at(i); }
+      const Token& at(const uint i) const { return _tokens.at(i); }
       Token& operator[](const uint i) { return _tokens[i]; }
-      // Token& at(const uint i) { return _tokens.at(i); }
+      Token& at(const uint i) { return _tokens.at(i); }
 
       const Token& front() const { return _tokens.front(); }
       const Token& back() const { return _tokens.back(); }
@@ -48,8 +49,8 @@ class clef::Tokenizer {
       const mcsl::dyn_arr_span<Token>& row(const uint i) const { return _tokLines[i]; }
       mcsl::array<mcsl::dyn_arr_span<Token>>& allRows() { return _tokLines; }
       const mcsl::array<mcsl::dyn_arr_span<Token>>& allRows() const { return _tokLines; }
-      const Source& source() const { return _src; }
       Source& source() { return _src; }
+      const Source& source() const { return _src; }
 
       void printf() const;
 };

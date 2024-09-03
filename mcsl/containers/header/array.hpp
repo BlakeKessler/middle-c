@@ -10,6 +10,7 @@
 #include <bit>
 #include <cstring>
 #include <initializer_list>
+#include <utility>
 
 //!owning array with automatic scope
 template <typename T> class mcsl::array : public contig_base<T> {
@@ -24,6 +25,7 @@ template <typename T> class mcsl::array : public contig_base<T> {
       array(const uint size);
       array(T* buf, const uint size);
       array(std::initializer_list<T>);
+      array(array&& other);
       ~array() { this->free(); }
       void free() const { mcsl::free(_buf); }
 
@@ -34,7 +36,7 @@ template <typename T> class mcsl::array : public contig_base<T> {
       constexpr T* data(this auto&& obj) { return obj._buf; }
 
       //MODIFIERS
-      constexpr T* emplace(const uint i, auto... args);
+      constexpr T* emplace(const uint i, auto&&... args);
       T* release() { T* temp = _buf; _buf = nullptr; return temp; }
 };
 
@@ -59,14 +61,19 @@ template<typename T> mcsl::array<T>::array(std::initializer_list<T> initPair):
    _buf(mcsl::malloc<T>(initPair.size())),_size(initPair.size()) {
       std::memcpy(_buf,initPair.begin(),_size * sizeof(T));
 }
+//!move constructor
+template<typename T> mcsl::array<T>::array(array&& other):
+   _buf(other._buf),_size(other._size) {
+      other.release();
+}
 
 //!construct in place
-template<typename T> constexpr T* mcsl::array<T>::emplace(const uint i, auto... args) {
+template<typename T> constexpr T* mcsl::array<T>::emplace(const uint i, auto&&... args) {
    if (i >= _size) {
       mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i, self.name(), _size);
       return nullptr;
    }
-   std::construct_at(_buf + i, args...);
+   std::construct_at(_buf + i, std::forward<decltype(args)>(args)...);
    return _buf + i;
 }
 
