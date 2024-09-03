@@ -117,7 +117,7 @@ clef::NodeType clef::Token::nodeType() const {
       return 
          +(type & (TokenType::BLOC | TokenType::PTXT)) ?
             NodeType::OP_OR_DELIM :
-         self == mcsl::raw_str<2>("\\") ? NodeType::ESCAPE : NodeType::OPERATOR;
+         self == mcsl::raw_str("\\") ? NodeType::ESCAPE : NodeType::OPERATOR;
    }
    if (+(type & TokenType::BLOC)) {
       return NodeType::DELIM_GEN;
