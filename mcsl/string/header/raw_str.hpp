@@ -12,7 +12,7 @@ template<uint _size> class mcsl::raw_str : public str_base<char> {
    private:
       char _buf[_size + 1];
 
-      // static constexpr raw_str<7> _name = "raw_str";
+      // static constexpr const raw_str<7> _name = "raw_str";
       static constexpr char _name[] = "raw_str";
    public:
       //constructors
@@ -24,6 +24,7 @@ template<uint _size> class mcsl::raw_str : public str_base<char> {
 
       //properties
       constexpr uint size() const { return sizeof(_buf) - 1; }
+      constexpr static const auto& name() { return _name; }
       // constexpr uint size() const { return _size; }
       // constexpr auto& name() const { return _name; }
 
@@ -47,5 +48,11 @@ template<uint _size> constexpr mcsl::raw_str<_size>::raw_str(const char* str): _
       _buf[i] = str[i];
    }
 }
+
+#pragma region CTAD
+namespace mcsl {
+   template<uint len> requires (len > 0) raw_str(const char (&str)[len]) -> raw_str<len-1>;
+}
+#pragma endregion CTAD
 
 #endif //MCSL_RAW_STR_HPP

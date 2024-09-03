@@ -16,7 +16,10 @@ class clef::Tokenizer {
       mcsl::dyn_arr<Token> _tokens;
       mcsl::array<mcsl::dyn_arr_span<Token>> _tokLines;
 
+      static constexpr const mcsl::raw_str _name = "Tokenizer";
    public:
+      static constexpr const auto& name() { return _name; }
+
       //constructors
       Tokenizer();
       Tokenizer(Source&& src);

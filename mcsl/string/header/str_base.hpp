@@ -22,6 +22,13 @@ namespace mcsl{
 //!   write constructors
 template<typename char_t>
 struct mcsl::str_base : public contig_base<char_t> {
+   // static constexpr const raw_str _name = "str_base";
+   static constexpr const char _name[] = "str_base";
+   constexpr static const auto& name() { return _name; }
+   // const raw_str_span name(this const auto&& obj) { return raw_str_span(obj._name); }
+   
+   
+   
    //operations
    CLEF_STR_T strT copy(this const strT&& obj);
 
@@ -94,7 +101,5 @@ struct mcsl::str_base : public contig_base<char_t> {
 };
 
 #undef CLEF_STR_T
-
-#include "raw_str_span.hpp"
 
 #endif //MCSL_STR_BASE_HPP

@@ -3,8 +3,14 @@
 #define MCSL_PAIR_HPP
 
 #include "MCSL.hpp"
+#include "raw_str.hpp"
 
 template<typename first_t, typename second_t> struct mcsl::pair {
+   static constexpr const raw_str _name = "pair";
+   static constexpr const auto& name() { return _name; }
+
+
+   
    first_t first;
    second_t second;
    

@@ -11,7 +11,11 @@ class clef::astIt {
    private:
       SyntaxTree const* _tree;
       mutable NodeID_t _index;
+
+      static constexpr const mcsl::raw_str _name = "astIt";
    public:
+      static constexpr const auto& name() { return _name; }
+
       #pragma region constructors
       astIt();
       astIt(SyntaxTree const* tree, const NodeID_t index);

@@ -6,6 +6,8 @@
 #include "ENUMS.hpp"
 #include "CLEF_ERR.hpp"
 
+#include "raw_str.hpp"
+
 namespace clef {
    class Source;
 

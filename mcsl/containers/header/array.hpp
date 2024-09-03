@@ -5,6 +5,7 @@
 #include "MCSL.hpp"
 #include "contig_base.hpp"
 #include "alloc.hpp"
+#include "raw_str.hpp"
 
 #include <memory>
 #include <bit>
@@ -18,9 +19,10 @@ template <typename T> class mcsl::array : public contig_base<T> {
       T* _buf;
       const uint _size;
 
-      // static constexpr raw_str<5> _name = "array";
-      static constexpr char _name[] = "array";
+      static constexpr const raw_str _name = "array";
    public:
+      static constexpr const auto& name() { return _name; }
+
       constexpr array();
       array(const uint size);
       array(T* buf, const uint size);

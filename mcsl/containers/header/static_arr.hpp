@@ -4,6 +4,8 @@
 
 #include "MCSL.hpp"
 #include "contig_base.hpp"
+#include "raw_str.hpp"
+
 #include <bit>
 #include <memory>
 #include <cstring>
@@ -15,9 +17,10 @@ template <typename T, uint _size> class mcsl::static_arr : public contig_base<T>
    private:
       T _buf[_size];
 
-      // static constexpr raw_str<10> _name = "static_arr";
-      static constexpr char _name[] = "static_arr";
+      static constexpr const raw_str _name = "static_arr";
    public:
+      static constexpr const auto& name() { return _name; }
+
       constexpr static_arr();
       constexpr static_arr(const contig_base<T>& buf) requires requires{ buf.size() >= _size; } { for (uint i = 0; i < _size; ++i) { _buf[i] = buf[i]; }}
       constexpr static_arr(T (&buf)[_size]);

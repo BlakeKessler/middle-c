@@ -5,6 +5,8 @@
 #include "MCSL.hpp"
 #include "contig_base.hpp"
 #include "pair.hpp"
+#include "raw_str.hpp"
+
 #include <memory>
 #include <utility>
 
@@ -14,9 +16,10 @@ template <typename T> class mcsl::dyn_arr_span : public contig_base<T> {
       uint _beginIndex;
       uint _size;
 
-      // static constexpr raw_str<12> _name = "dyn_arr_span";
-      static constexpr char _name[] = "dyn_arr_span";
+      static constexpr const raw_str _name = "dyn_arr_span";
    public:
+      static constexpr const auto& name() { return _name; }
+
       constexpr dyn_arr_span();
       constexpr dyn_arr_span(T* const* buf, const uint size);
       constexpr dyn_arr_span(T* const* buf, const uint beginIndex, const uint size);

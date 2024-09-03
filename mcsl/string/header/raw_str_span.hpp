@@ -15,8 +15,7 @@ class mcsl::raw_str_span : public str_base<char> {
       char* _buf;
       uint _size;
 
-      // static constexpr raw_str<12> _name = "raw_str_span";
-      static constexpr char _name[] = "raw_str_span";
+      static constexpr const raw_str _name = "raw_str_span";
    public:
       //constructors
       constexpr raw_str_span(): _buf(nullptr),_size(0) {}
@@ -27,6 +26,8 @@ class mcsl::raw_str_span : public str_base<char> {
 
       //properties
       constexpr uint size() const { return _size; }
+      constexpr static const auto& name() { return _name; }
+      
       constexpr raw_str_span& inc_begin(const sint i) { _size -= i; _buf += i; return self; }
       constexpr raw_str_span& set_size(const uint i) { _size = i; return self; }
       constexpr raw_str_span& inc_end(const sint i) { _size += i; return self; }

@@ -5,6 +5,7 @@
 #include "MCSL.hpp"
 #include "str_base.hpp"
 #include "dyn_arr.hpp"
+#include "raw_str.hpp"
 
 //!null-terminated dynamically-sized string
 //!NOTE: tiny inefficienies caused by using a dyn_arr instead of re-implementing it with minor modifications
@@ -12,8 +13,7 @@ class mcsl::string : public str_base<char> {
    private:
       dyn_arr<char> _buf;
 
-      // static constexpr raw_str<6> _name = "string";
-      static constexpr char _name[] = "string";
+      static constexpr const raw_str _name = "string";
    public:
       //constructors
       constexpr string():_buf() {}
@@ -31,6 +31,8 @@ class mcsl::string : public str_base<char> {
       //properties
       inline constexpr uint size() const { return _buf.size() - 1; }
       inline constexpr uint capacity() const { return _buf.capacity() - 1; }
+      constexpr static const auto& name() { return _name; }
+
       inline constexpr char* data() { return _buf.data(); }
       inline constexpr const char* data() const { return _buf.data(); }
       inline constexpr char* const* ptr_to_buf() { return _buf.ptr_to_buf(); }

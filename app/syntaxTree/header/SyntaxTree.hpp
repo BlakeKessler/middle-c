@@ -16,7 +16,11 @@ class clef::SyntaxTree {
       mcsl::dyn_arr<Node> _nodes;
       mcsl::dyn_arr<Token> _tokens;
       mcsl::array<mcsl::pair<uint>> _lineBounds;  //{index of start token, size}
+
+      static constexpr const mcsl::raw_str _name = "SyntaxTree";
    public:
+      static constexpr const auto& name() { return _name; }
+
       SyntaxTree():_root(NODE_NIL),_nodes(),_tokens(),_lineBounds() {}
       SyntaxTree(mcsl::dyn_arr<Token>&& tokens, mcsl::array<mcsl::dyn_arr_span<Token>>& lines);
       SyntaxTree(SyntaxTree&& other);

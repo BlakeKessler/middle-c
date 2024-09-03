@@ -13,9 +13,10 @@ template <typename T> class mcsl::arr_span : public contig_base<T> {
       T* _buf;
       uint _size;
 
-      // static constexpr raw_str<8> _name = "arr_span";
-      static constexpr char _name[] = "arr_span";
+      static constexpr const raw_str _name = "arr_span";
    public:
+      static constexpr const auto& name() { return _name; }
+
       constexpr arr_span();
       constexpr arr_span(T* buf, const uint size);
       constexpr arr_span(T* buf, T* end);

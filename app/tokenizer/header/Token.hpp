@@ -9,7 +9,11 @@
 class clef::Token : public mcsl::raw_str_span {
    private:
       const uint _lineNum;
+
+      static constexpr const mcsl::raw_str _name = "Token";
    public:
+      static constexpr const auto& name() { return _name; }
+
       //constructors
       Token();
       Token(char* front, char* back, const uint line = 0);

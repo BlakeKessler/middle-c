@@ -7,6 +7,10 @@
 #include "static_arr.hpp"
 
 struct clef::Node {
+   static constexpr const mcsl::raw_str _name = "Node";
+   static constexpr const auto& name() { return _name; }
+
+
    //next and prev
    NodeID_t nextID;
    NodeID_t prevID;

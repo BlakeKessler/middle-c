@@ -11,6 +11,8 @@ class clef::Parser {
    private:
       SyntaxTree _tree;
 
+      static constexpr const mcsl::raw_str _name = "Parser";
+
       //sections of parsing
       bool escape();
       bool removePtxt();
@@ -28,6 +30,8 @@ class clef::Parser {
 
       inline bool updateRoot() { return _tree.updateRoot(); }
    public:
+      static constexpr const auto& name() { return _name; }
+
       //constructors and destructor
       Parser() = default;
       Parser(mcsl::dyn_arr<Token>&& tokens, mcsl::array<mcsl::dyn_arr_span<Token>>& lines);

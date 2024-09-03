@@ -3,8 +3,9 @@
 #define MCSL_DYN_ARR_HPP
 
 #include "MCSL.hpp"
-#include "alloc.hpp"
 #include "contig_base.hpp"
+#include "alloc.hpp"
+
 #include <bit>
 #include <memory>
 #include <initializer_list>
@@ -17,9 +18,11 @@ template <typename T> class mcsl::dyn_arr : public contig_base<T> {
       uint _size;
       T* _buf;
 
-      // static constexpr raw_str<7> _name = "dyn_arr";
-      static constexpr char _name[] = "dyn_arr";
+      // static constexpr const raw_str _name = "dyn_arr";
+      static constexpr const char _name[] = "dyn_arr";
    public:
+      static constexpr const auto& name() { return _name; }
+
       constexpr dyn_arr();
       dyn_arr(const uint size);
       dyn_arr(const uint size, const uint bufSize);
