@@ -9,12 +9,6 @@
 
 #include <cstdio>
 
-
-namespace mcsl{
-   template<typename T, typename char_t> concept str_t = requires (T obj) { std::is_base_of_v<str_base<char_t>,T>; { obj.size() } -> std::convertible_to<luint>; };
-}
-#define CLEF_STR_T template<typename strT> requires str_t<strT,char_t>
-
 //!IMPLEMENTATION GUIDE:
 //!   consider null-termination
 //!      if possible, owning string classes should maintain null-termination
@@ -32,16 +26,16 @@ struct mcsl::str_base : public contig_base<char_t> {
    
    
    //operations
-   CLEF_STR_T strT copy(this const strT&& obj);
+   template<str_t strT> strT copy(this const strT&& obj);
 
    // str_t& operator+=(const str_base& other);
    auto operator+(this const auto&& obj, const auto& other);
    
    // str_t& operator*=(const uint i);
-   CLEF_STR_T strT operator*(this strT&& obj, const uint i);
+   template<str_t strT> strT operator*(this strT&& obj, const uint i);
    
-   CLEF_STR_T strT&& alter(this strT&& obj, char (*const transformer)(const char));
-   CLEF_STR_T strT altered(this const strT&& obj, char (*const transformer)(const char));
+   template<str_t strT> strT&& alter(this strT&& obj, char (*const transformer)(const char));
+   template<str_t strT> strT altered(this const strT&& obj, char (*const transformer)(const char));
    
    inline auto&& operator+() { return alter(mcsl::to_upper); }
    inline auto&& operator-() { return alter(mcsl::to_lower); }
@@ -52,14 +46,14 @@ struct mcsl::str_base : public contig_base<char_t> {
    uint operator^(this const auto&& obj, const auto& other); //strcspn
    uint operator/(this const auto&& obj, const auto& other); //largest n : other*n ⊇ self
 
-   CLEF_STR_T dyn_arr<strT> tokenize(this const strT&& obj, const str_base& delimChars);
-   CLEF_STR_T dyn_arr<strT> tokenize(this const strT&& obj, const container_base<str_base>& delimStrs);
+   template<str_t strT> dyn_arr<strT> tokenize(this const strT&& obj, const str_base& delimChars);
+   template<str_t strT> dyn_arr<strT> tokenize(this const strT&& obj, const container_base<str_base>& delimStrs);
 
    //comparison
-   CLEF_STR_T inline constexpr bool operator==(this auto&& s, const strT& other) { if (s.size() != other.size()) { return false; } return !(s <=> other); }
-   CLEF_STR_T inline constexpr bool operator!=(this auto&& s, const strT& other) { if (s.size() != other.size()) { return true;  } return   s <=> other;  }
+   template<str_t strT> inline constexpr bool operator==(this auto&& s, const strT& other) { if (s.size() != other.size()) { return false; } return !(s <=> other); }
+   template<str_t strT> inline constexpr bool operator!=(this auto&& s, const strT& other) { if (s.size() != other.size()) { return true;  } return   s <=> other;  }
 
-   CLEF_STR_T inline constexpr sint operator<=>(this auto&& s, const strT& other) { return s.strcmp(other); }
+   template<str_t strT> inline constexpr sint operator<=>(this auto&& s, const strT& other) { return s.strcmp(other); }
 
 
    template<uint len> inline constexpr bool operator==(this auto&& s, const char_t other[len]) { return s == raw_str_span(other); }
@@ -68,7 +62,7 @@ struct mcsl::str_base : public contig_base<char_t> {
    template<uint len> inline constexpr sint operator<=>(this auto&& s, const char_t other[len]) { return s <=> raw_str_span(other); }
 
 
-   CLEF_STR_T constexpr sint strcmp(this auto&& s, const strT& other) {
+   template<str_t strT> constexpr sint strcmp(this auto&& s, const strT& other) {
       uint len = s.size() < other.size() ? s.size() : other.size();
       for (uint i = 0; i < len; ++i) {
          if (s[i] != other[i]) {
@@ -86,7 +80,7 @@ struct mcsl::str_base : public contig_base<char_t> {
       }
       return 0;
    }
-   CLEF_STR_T constexpr sint substrcmp(this auto&& s, const strT& other) {
+   template<str_t strT> constexpr sint substrcmp(this auto&& s, const strT& other) {
       uint len = s.size() < other.size() ? s.size() : other.size();
       for (uint i = 0; i < len; ++i) {
          if (s[i] != other[i]) {
@@ -97,11 +91,9 @@ struct mcsl::str_base : public contig_base<char_t> {
    }
 
    //typecasts
-   CLEF_STR_T inline constexpr operator bool(this strT&& obj) { return obj.size(); }
-   CLEF_STR_T inline constexpr operator const char_t*(this const strT&& obj) { return obj.data(); }
-   CLEF_STR_T inline constexpr operator char_t*(this strT&& obj) { return obj.data(); }
+   inline constexpr operator bool(this auto&& obj) { return obj.size(); }
+   inline constexpr operator const char_t*(this const auto&& obj) { return obj.data(); }
+   inline constexpr operator char_t*(this auto&& obj) { return obj.data(); }
 };
-
-#undef CLEF_STR_T
 
 #endif //MCSL_STR_BASE_HPP

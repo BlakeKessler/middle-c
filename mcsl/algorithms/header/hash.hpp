@@ -30,7 +30,7 @@ template<typename T> struct hash_func {
 
 //!transparent FNV hashing for arbitrary object
 //!not recommended for most containers (including strings)
-struct transparent_hash_func {
+struct universal_hash_func {
    using is_hash = void;
 
    template<typename T> luint operator()(const T& key) const {
@@ -45,6 +45,27 @@ struct transparent_hash_func {
       return hash;
    }
 };
+
+//!transparent FNV hashing for arbitrary object of specified types
+//!not recommended for most containers (including strings)
+template<typename ...Types> struct transparent_hash_func {
+   using is_hash = void;
+
+   luint operator()(const Types& key) const {
+      const byte* bytes = reinterpret_cast<byte*>(&key);
+
+      luint hash = FNV_offset;
+      for (uint i = 0; i < sizeof(key); ++i) {
+         hash ^= bytes[i];
+         hash *= FNV_prime;
+      }
+
+      return hash;
+   }
+};
+
+
+
 
 
 //!FNV hashing for arbitrary contiguous container
@@ -66,7 +87,7 @@ template<typename T> struct contig_hash_func {
 };
 
 //!transparent FNV hashing for arbitrary contiguous container
-struct transparent_contig_hash_func {
+struct universal_contig_hash_func {
    using is_hash = void;
 
    template<typename T> luint operator()(const T& key) const {

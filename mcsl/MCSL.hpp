@@ -4,26 +4,9 @@
 
 #include "MCSL_DEFINES.hpp"
 #include "mcsl_throw.hpp"
-
-#include <concepts>
+#include "concepts.hpp"
 
 namespace mcsl {
-   template<typename T> concept contig_container_t = requires(T a) {
-      a.data();
-      a.size();
-      std::is_pointer(a.data());
-      std::is_integral(a.size());
-   };
-   template<typename T> concept container_t = requires(T a) {
-      a.begin();
-      a.end();
-      std::is_pointer(a.begin());
-      std::is_same(a.begin(), a.end());
-   };
-   template<typename T> concept hashing_class = requires(T a) {
-      T::is_hash;
-   };
-
    template<typename T> struct container_base;
    template<typename T> struct contig_base;
    template<typename T, uint _size> class static_arr;
@@ -32,8 +15,12 @@ namespace mcsl {
    template<typename T> class arr_span;
    template<typename T> class dyn_arr_span;
 
-   template<typename T, typename hash_func> class set;
-   template<typename key_t, typename val_t, typename hash_func> class map;
+   template<typename T, typename eq, typename hash> class set;       //set using extendible hashing
+   template<typename T, typename eq, typename hash> class dyn_set;   //set using dynamic perfect hashing
+   template<typename T, uint _size, typename hash> class static_set; //set using FKS perfect hashing
+   template<typename key_t, typename val_t, typename eq, typename hash> class map;        //map using extendible hashing
+   template<typename key_t, typename val_t, typename eq, typename hash> class dyn_map;    //map using dynamic perfect hashing
+   template<typename key_t, typename val_t, uint _size, typename hash> class static_map;  //map using FKS perfect hashing
 
    template<typename T> struct hash_func;
    template<container_t T> struct container_hash_func;

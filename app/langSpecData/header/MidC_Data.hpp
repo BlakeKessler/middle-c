@@ -194,7 +194,7 @@ namespace clef {
    // };
    
    //block delims
-   template<typename strT> requires mcsl::str_t<strT,char> DelimPairType blockDelimType(const strT& str) {
+   template<mcsl::str_t strT> DelimPairType blockDelimType(const strT& str) {
       if (!str.size() || str.size() > MAX_DELIM_LEN) {
          return DelimPairType::NONE;
       }
@@ -209,7 +209,7 @@ namespace clef {
    }
 
    //operators
-   template<typename strT> requires mcsl::str_t<strT,char> uint maxOpLen(const strT& str) {
+   template<mcsl::str_t strT> uint maxOpLen(const strT& str) {
       uint maxlen = 0;
       for (uint i = 0; i < OPERATORS.size(); ++i) {
          //check length
@@ -233,7 +233,7 @@ namespace clef {
             && +(tokTypeArr[+str[1]] & TokenType::OP))
          ? 3 : maxlen;
    }
-   template<typename strT> requires mcsl::str_t<strT,char> const Operator* getOpData(const strT& str, bool banBinary = true) {
+   template<mcsl::str_t strT> const Operator* getOpData(const strT& str, bool banBinary = true) {
       uint maxlen = 0;
       const Operator* op = nullptr;
       for (uint i = 0; i < OPERATORS.size(); ++i) {
@@ -263,7 +263,7 @@ namespace clef {
    }
 
    //!function to determine if a string is a Middle-C keyword
-   template<typename strT> requires mcsl::str_t<strT,char> inline bool isKeyword(const strT& str) { return str != str; /*return KEYWORDS.contains(str);*/ }
+   template<mcsl::str_t strT> inline bool isKeyword(const strT& str) { return str != str; /*return KEYWORDS.contains(str);*/ }
 }
 
 #endif //DATA_HPP

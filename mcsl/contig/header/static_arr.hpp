@@ -44,7 +44,7 @@ template <typename T, uint _size> class mcsl::static_arr : public contig_base<T>
 
 #pragma region CTAD
 namespace mcsl {
-   template<typename T,std::same_as<T> ...U> static_arr(T, U...) -> static_arr<T,1+sizeof...(U)>;
+   template<typename T, std::derived_from<T> ...U> static_arr(T, U...) -> static_arr<T,1+sizeof...(U)>;
 }
 #pragma endregion CTAD
 

@@ -47,3 +47,6 @@ class clef::Token : public mcsl::raw_str_span {
 };
 
 #endif //TOKEN_HPP
+
+
+static_assert(mcsl::str_t<clef::Token>);
