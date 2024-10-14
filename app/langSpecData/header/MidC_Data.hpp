@@ -9,8 +9,9 @@
 #include "raw_buf_str.hpp"
 #include "static_arr.hpp"
 #include "pair.hpp"
+#include "string.hpp"
 
-#include <unordered_set>
+#include <set>
 #include <cassert>
 #include <cstring>
 
@@ -158,41 +159,67 @@ namespace clef {
       DelimPair{"//", "\n\0"},   //SINGLE-LINE COMMENT
    };
    // // extern const mcsl::static_arr<mcsl::string> KEYWORDS;
-   // static const std::unordered_set<mcsl::string> KEYWORDS{
-   //    "void", "auto",
-   //    "uint", "ushort", "ulong", "ubyte",
-   //    "sint", "sshort", "slong", "sbyte",
-   //    "bool", "float", "num",
-   //    "char", "char_utf8", "char_utf16", "char_utf32",
-   //    "uint8", "uint16", "uint32", "uint64", "uint128", "uint256",
-   //    "sint8", "sint16", "sint32", "sint64", "sint128", "sint256",
-   //    "float16", "float32", "float64", "float128", "float256",
-   //    "half", "single", "double", "quad", "oct",
-   //    "num8", "num16", "num32", "num64", "num128", "num256",
+   static const std::set<mcsl::string> KEYWORDS{
+      "void", "auto",
+      "uint", "ushort", "ulong", "ubyte",
+      "sint", "sshort", "slong", "sbyte",
+      "bool", "float", "num",
+      "char", "char_utf8", "char_utf16", "char_utf32",
+      "uint8", "uint16", "uint32", "uint64", "uint128", "uint256",
+      "sint8", "sint16", "sint32", "sint64", "sint128", "sint256",
+      "float16", "float32", "float64", "float128", "float256",
+      "half", "single", "double", "quad", "oct",
+      "num8", "num16", "num32", "num64", "num128", "num256",
       
-   //    "true", "false", "nullptr",
+      "true", "false", "nullptr", "null",
 
-   //    "const", "constexpr", "immediate", "mutable", "volatile", "atomic",
-   //    "class", "struct", "union", "enum", "namespace",
-   //    "private", "protected", "public", "friend",
-   //    "extern", "inline", "static", "virtual", "override", "explicit", "noexcept",
-   //    "this", "self",
+      "const", "constexpr", "immediate", "final", "mutable", "volatile", "atomic",
+      "class", "struct", "union", "enum", "namespace",
+      "private", "protected", "public", "friend",
+      "extern", "inline", "static", "virtual", "override", "explicit", "noexcept",
+      "this", "self",
 
-   //    "new", "delete", "sizeof", "arrsizeof",
-   //    "typeof", "typeid", "typename", "alignas", "alignof",
-   //    "template",
-   //    "using",
+      "new", "delete", "sizeof", "arrsizeof",
+      "typeof", "typeid", "typename", "alignas", "alignof",
+      "template",
+      "using",
 
-   //    "asm",
-   //    "return",
-   //    "operator",
-   //    "assert", "static_assert",
-   //    "type_cast", "bit_cast", "safe_cast", "quick_cast", "const_cast",
+      "asm",
+      "return",
+      "operator",
+      "assert", "static_assert",
+      "type_cast", "bit_cast", "safe_cast", "quick_cast", "const_cast",
 
-   //    "if", "else", "for", "while", "do", "break", "continue", "switch", "match", "case", "default", "goto",
-   //    "try", "catch", "throw"
-   // };
-   
+      "if", "else", "for", "while", "do", "break", "continue", "switch", "match", "case", "default", "goto",
+      "try", "catch", "throw"
+   };
+   static const std::set<mcsl::string> TYPE_KEYWORDS{
+      "void", "auto",
+      "uint", "ushort", "ulong", "ubyte",
+      "sint", "sshort", "slong", "sbyte",
+      "bool", "float", "num",
+      "char", "char_utf8", "char_utf16", "char_utf32",
+      "uint8", "uint16", "uint32", "uint64", "uint128", "uint256",
+      "sint8", "sint16", "sint32", "sint64", "sint128", "sint256",
+      "float16", "float32", "float64", "float128", "float256",
+      "half", "single", "double", "quad", "oct",
+      "num8", "num16", "num32", "num64", "num128", "num256"
+   };
+   static const std::set<mcsl::string> TYPE_QUAL_KEYWORDS{
+      "const", "constexpr", "immediate", "final", "mutable", "volatile", "atomic", "static"
+   };
+   static const std::set<mcsl::string> OBJ_TYPE_KEYWORDS{
+      "class", "struct", "union", "enum"
+   };
+   static const std::set<mcsl::string> OBJ_SCOPE_SPEC_KEYWORDS{
+      "private", "protected", "public"
+   };
+   static const std::set<mcsl::string> CAST_KEYWORDS{
+      "type_cast", "bit_cast", "safe_cast", "quick_cast", "const_cast"
+   };
+
+
+
    //block delims
    template<mcsl::str_t strT> DelimPairType blockDelimType(const strT& str) {
       if (!str.size() || str.size() > MAX_DELIM_LEN) {
@@ -263,7 +290,7 @@ namespace clef {
    }
 
    //!function to determine if a string is a Middle-C keyword
-   template<mcsl::str_t strT> inline bool isKeyword(const strT& str) { return str != str; /*return KEYWORDS.contains(str);*/ }
+   template<mcsl::str_t strT> inline bool isKeyword(const strT& str) { return KEYWORDS.contains(str); }
 }
 
 #endif //DATA_HPP

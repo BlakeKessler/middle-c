@@ -20,6 +20,8 @@ class clef::Parser {
       // bool findFunctions();
       bool createStatements();
       bool handleOperators();
+      bool handleTypes();
+
       //helper functions for parsing
       uint escape(astIt& it);
       astIt makeBlock(astIt& open, astIt& close);

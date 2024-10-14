@@ -29,7 +29,7 @@ template <typename T> class mcsl::dyn_arr : public contig_base<T> {
       dyn_arr(std::initializer_list<T>);
       dyn_arr(std::convertible_to<T> auto... initList) requires requires { sizeof...(initList) == _size; }:_buf{std::forward<decltype(initList)>(initList)...} {}
       dyn_arr(dyn_arr&& other);
-      ~dyn_arr() { this->free(); }
+      ~dyn_arr() { self.free(); }
       void free() const { mcsl::free(_buf); }
 
       constexpr uint size() const { return _size; }

@@ -50,5 +50,12 @@ mcsl::string::string(string&& other):
    _buf(std::move(other._buf)) {
       other.release();
 }
-
+//!copy constructor
+//!NOTE: will be removed if possible
+mcsl::string::string(const string& other):
+   string(other.size()) {
+      for (uint i = 0; i < other.size(); ++i) {
+         _buf[i] = other[i];
+      }
+}
 #endif //MCSL_STRING_CPP

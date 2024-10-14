@@ -77,7 +77,7 @@ void clef::SyntaxTree::printf() const {
 //!update the root
 //!parents, then predecessors
 bool clef::SyntaxTree::updateRoot() {
-   astIt root = this->root();
+   astIt root = self.root();
    while (+root->parentID || +root->prevID) {
       while (+root->parentID) {
          root.toParent();
@@ -86,7 +86,7 @@ bool clef::SyntaxTree::updateRoot() {
          --root;
       }
    }
-   if (root.index() == this->root().index()) {
+   if (root.index() == self.root().index()) {
       return false;
    }
    _root = root.index();

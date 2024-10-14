@@ -21,6 +21,7 @@ class mcsl::string : public str_base<char> {
       string(const char* str, const uint strlen);
       string(const char* str);
       string(string&& other);
+      string(const string& other);
 
       template<class str> requires requires(str s) { std::is_base_of_v<str_base<char>,str>; s.release(); }
          string(str&& other): string(other.data(),other.size()) { other.release(); }

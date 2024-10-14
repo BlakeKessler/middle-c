@@ -35,4 +35,6 @@ constexpr byte CASE_DIF = 'a' - 'A';
 // //comparison macros
 // #define cmpfunc(T) bool cmp(const T& a, const T& b)
 
+constexpr const uint DEFAULT_BUCKET_SIZE = 4;
+
 #endif //MCSL_DEFINES_HPP
