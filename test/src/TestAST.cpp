@@ -16,7 +16,7 @@ int main(const int argc, char** argv) {
 
    //read and tokenize file
    printf("%s", BIG_HEADER);
-   clef::Tokenizer tokenizer = clef::TokenizeFile(argv[1]);
+   clef::Lexer tokenizer = clef::TokenizeFile(argv[1]);
    std::printf("\033[1mTokens:\033[22m\n%s", SMALL_HEADER);
    tokenizer.printf();
    std::printf("\n%s\n", BIG_HEADER);

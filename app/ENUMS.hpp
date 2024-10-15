@@ -10,44 +10,41 @@ namespace clef {
    //!enum of CLEF error codes
    enum class ErrCode {
       UNSPEC = 0,
+
+      LEXER_UNSPEC,
+
       PARSER_UNSPEC,
+      //syntax errors
       UNCLOSED_BLOCK,
-      SEGFAULT,
-      ALLOC_FAIL,
+      INVALID_LIT
    };
    
    //!enum of AST node type codes
    enum class NodeType : byte {
       ERROR = 0xFF,        //CLEF INTERNAL ERROR
       NONE = 0x00,         //to-be determined
-      COMMENT,             //commented out code
 
-      KEYWORD,             //MiddleC keyword
+      COMMENT,             //commented out code
+      LITERAL,             //numeric, string, or character literal
+
+      TYPE,                //fundamental or object type
+      OBJ,                 //instantiation of a type
+      QUAL,                //type qualifier (EX: const, static, &, *)
       IDEN,                //identifier
       DECL,                //declaration
-      DEF,                 //definition
-      EOS,                 //end of statement
+      DEF,                 //definition  
+      
+      STATEMENT,           //statement (AKA: line of code)
+      
+      BLOCK,               //block-delimiter delimited block
 
-      STATEMENT,           //statement
-
-      ESCAPE,              //escape character
-
-      DELIM_PAIR,          //opening and closing pair of block delimeter
-      DELIM_GEN,           //general block delimiter
-      DELIM_OPEN,          //opening block delimiter
-      DELIM_CLOSE,         //closing block delimiter
-
-      PTXT_SEG,            //plaintext segment
-      PTXT_DELIM,          //plaintext delimiter
-
-      LITERAL,             //numeric or string literal
-      OPERATOR,            //MiddleC operator
-      OP_OR_DELIM,         //not yet determined between OPERATOR and DELIM_GEN
+      OPERATOR             //MiddleC operator (binary infix, unary prefix, or unary postfix)
    };
    constexpr auto operator+(const NodeType t) noexcept { return std::to_underlying(t); }
+   
    //!enum of token types
    enum class TokenType : byte {
-      NONE = 0x00, //not a valid member of a token
+      NONE = 0x00, //not a valid member of a token (whitespace)
       EOS  = 0x01, //end of line of code
       PTXT = 0x02, //plaintext segment delimiters (strings, comments)
       BLOC = 0x04, //general block delimiter
@@ -63,7 +60,6 @@ namespace clef {
       DGIT = IDEN | NUM,
       CHAR = STRT | IDEN,
       XDGT = DGIT | CHAR,
-      UNCD = CHAR | OP,
       CMNT = PTXT | OP,
    };
    constexpr auto operator+(const TokenType t) noexcept { return std::to_underlying(t); }
@@ -74,20 +70,27 @@ namespace clef {
    constexpr TokenType operator*(const TokenType lhs, const uint rhs) noexcept { return (TokenType)((+lhs) * rhs); }
 
    enum class OpType : byte {
-      LEFT        = 0x10,
-      RIGHT       = 0x20,
-      UN          = 0x01,
-      BIN         = 0x02,
-      SPEC        = 0x08,
+      //!bitmask atoms
+      //unused (available for user-definition)
+      FREE        =          0,
+      //associativity
+      LEFT_ASSOC  =        0b1,
+      RIGHT_ASSOC =       0b10,
+
+      //operand count
+      UNARY       =      0b100,
+      BINARY      =     0b1000,
+
+      //other
+      BLOCK_DELIM =   0b100000,
+      TYPE_MOD    =  0b1000000,
 
 
-      LEFT_UN     =  LEFT | UN,  //left-associative, unary
-      LEFT_BIN    =  LEFT | BIN, //left-associative, binary
-      LEFT_SPEC   =  LEFT | SPEC,//left-associative, special
-      RIGHT_UN    = RIGHT | UN,  //right-associative, unary
-      RIGHT_BIN   = RIGHT | BIN, //right-associative, binary
-      RIGHT_SPEC  = RIGHT | SPEC,//right-associative, special
-      FREE        = 0x00,        //unused (available for any purpose for the user)
+      //!full operator types
+      PREFIX      = UNARY  | RIGHT_ASSOC,
+      POSTFIX     = UNARY  | LEFT_ASSOC,
+      INFIX_LEFT  = BINARY | LEFT_ASSOC,
+      INFIX_RIGHT = BINARY | RIGHT_ASSOC,
 
    };
    constexpr auto operator+(const OpType t) noexcept { return std::to_underlying(t); }

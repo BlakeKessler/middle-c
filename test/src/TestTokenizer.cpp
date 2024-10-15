@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
 
 
    //tokenize
-   clef::Tokenizer tokenizer(linesArr, lineCount);
+   clef::Lexer tokenizer(linesArr, lineCount);
 
    //print tokens
    printf("\nPrinting tokens (%u tokens)\n%s", tokenizer.size(), fileDelim);
