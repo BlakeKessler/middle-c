@@ -16,9 +16,9 @@ class clef::SourceTokens {
       mcsl::dyn_arr<Token> _tokens;
       mcsl::array<mcsl::dyn_arr_span<Token>> _tokLines;
 
-      static constexpr const mcsl::raw_str _name = "SourceTokens";
+      static constexpr const mcsl::raw_str _nameof = "SourceTokens";
    public:
-      static constexpr const auto& name() { return _name; }
+      static constexpr const auto& nameof() { return _nameof; }
 
       //constructors
       SourceTokens();

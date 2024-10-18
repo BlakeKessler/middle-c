@@ -10,9 +10,9 @@
 
 class clef::Parser {
    private:
-      static constexpr const mcsl::raw_str _name = "Parser";
+      static constexpr const mcsl::raw_str _nameof = "Parser";
    public:
-      static constexpr const auto& name() { return _name; }
+      static constexpr const auto& nameof() { return _nameof; }
 
       //parse tokenized source code
       static SyntaxTree parse(const SourceTokens& src);

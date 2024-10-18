@@ -2,12 +2,12 @@
 #define SYNTAX_TREE_HPP
 
 #include "CLEF.hpp"
-#include "NameTable.hpp"
+#include "SymbolTable.hpp"
 #include "astNode.hpp"
 
 struct clef::SyntaxTree {
    private:
-      NameTable _names;
+      SymbolTable _names;
       astNode* _root;
    public:
 };

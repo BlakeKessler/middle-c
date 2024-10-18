@@ -42,7 +42,7 @@ namespace clef {
    };
    constexpr auto operator+(const NodeType t) noexcept { return std::to_underlying(t); }
    
-   //!enum of token types
+   //!token types bitmask
    enum class TokenType : byte {
       NONE = 0x00, //not a valid member of a token (whitespace)
       EOS  = 0x01, //end of line of code
@@ -62,13 +62,14 @@ namespace clef {
       XDGT = DGIT | CHAR,
       CMNT = PTXT | OP,
    };
-   constexpr auto operator+(const TokenType t) noexcept { return std::to_underlying(t); }
+   constexpr auto      operator+(const TokenType t) noexcept { return std::to_underlying(t); }
    constexpr TokenType operator&(const TokenType lhs, const TokenType rhs) noexcept { return (TokenType)((+lhs) & (+rhs)); }
    constexpr TokenType operator|(const TokenType lhs, const TokenType rhs) noexcept { return (TokenType)((+lhs) | (+rhs)); }
    constexpr TokenType operator*(const TokenType lhs, const TokenType rhs) noexcept { return (TokenType)((+lhs) * (+rhs)); }
    constexpr TokenType operator~(const TokenType lhs) noexcept { return (TokenType)(~+lhs); }
    constexpr TokenType operator*(const TokenType lhs, const uint rhs) noexcept { return (TokenType)((+lhs) * rhs); }
 
+   //operator properties bitmask
    enum class OpType : byte {
       //!bitmask atoms
       //unused (available for user-definition)
@@ -93,7 +94,7 @@ namespace clef {
       INFIX_RIGHT = BINARY | RIGHT_ASSOC,
 
    };
-   constexpr auto operator+(const OpType t) noexcept { return std::to_underlying(t); }
+   constexpr auto   operator+(const OpType t) noexcept { return std::to_underlying(t); }
    constexpr OpType operator&(const OpType lhs, const OpType rhs) noexcept { return (OpType)((+lhs) & (+rhs)); }
    constexpr OpType operator|(const OpType lhs, const OpType rhs) noexcept { return (OpType)((+lhs) | (+rhs)); }
    constexpr OpType operator*(const OpType lhs, const OpType rhs) noexcept { return (OpType)((+lhs) * (+rhs)); }
@@ -126,6 +127,64 @@ namespace clef {
       CHAR = 0x03,
       STRING,
    };
+
+   //!symbol properties bitmask
+   enum class SymbolProp {
+      NIL = 0,
+      
+      HAS_NAME_TABLE = 1 << 0,
+
+      KEYWORD        = 1 << 1,   //symbol is a keyword
+
+      FUNDAMENTAL    = 1 << 2,   //fundamental type
+      STRUCT         = 1 << 3,   //class or struct type
+      UNION          = 1 << 4,   //union-like type
+      ENUM           = 1 << 5,   //enum type
+      MASK           = 1 << 6,   //bitmask type
+      INTERFACE      = 1 << 7,   //interface type
+      FUNCTION       = 1 << 8,   //C-style function
+
+      OBJECT         = 1 << 0,   //symbol represents an instantiation of a type
+      TYPE           = 1 << 10,   //symbol names a type
+      NAMESPACE      = 1 << 11,  //symbol names a namespace
+      LABEL          = 1 << 12,  //symbol names an asm-like label
+      DIRECTIVE      = 1 << 13,  //symbol represents a preprocessor directive
+
+      CALLABLE       = 1 << 14,  //can be called like a function
+      DEREFABLE      = 1 << 15,  //can be dereferenced like a pointer
+      INDEXABLE      = 1 << 16,  //can be indexed like an array
+
+      INITIALIZED    = 1 << 17,  //symbol refers to initialized memory
+      IN_SCOPE       = 1 << 18,  //symbol is in currently in scope
+      COMPLETE       = 1 << 19,  //symbol refers to a complete type
+
+      //type qualifiers
+      CONST          = 1 << 20,
+      CONSTEXPR      = 1 << 21,
+      IMMEDIATE      = 1 << 22,
+      FINAL          = 1 << 23,
+      MUTABLE        = 1 << 24,
+      VOLATILE       = 1 << 25,
+      ATOMIC         = 1 << 26,
+      EXTERN         = 1 << 27,
+      INLINE         = 1 << 28,
+      STATIC         = 1 << 29,
+
+      //pointer qualifiers
+      POINTER        = 1 << 30,  //C-style raw pointer
+      SHARED         = 1 << 31,  //shared pointer
+      UNIQUE         = 1 << 32,  //unique pointer (owning)
+      WEAK           = 1 << 33,  //weak pointer
+      REFERENCE      = 1 << 34,  //C++-style reference
+      ITERATOR       = 1 << 35,  //iterator (similar to C++ iterators)
+   };
+   constexpr auto   operator+(const SymbolProp t) noexcept { return std::to_underlying(t); }
+   constexpr SymbolProp operator&(const SymbolProp lhs, const SymbolProp rhs) noexcept { return (SymbolProp)((+lhs) & (+rhs)); }
+   constexpr SymbolProp operator|(const SymbolProp lhs, const SymbolProp rhs) noexcept { return (SymbolProp)((+lhs) | (+rhs)); }
+   constexpr SymbolProp operator^(const SymbolProp lhs, const SymbolProp rhs) noexcept { return (SymbolProp)((+lhs) ^ (+rhs)); }
+   constexpr SymbolProp operator~(const SymbolProp lhs) noexcept { return (SymbolProp)(~+lhs); }
+   constexpr SymbolProp operator*(const SymbolProp lhs, const uint rhs) noexcept { return (SymbolProp)((+lhs) * rhs); }
+
 }
 
 #endif //ENUMS_HPP

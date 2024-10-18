@@ -10,9 +10,9 @@ class clef::Token : public mcsl::raw_str_span {
    private:
       const uint _lineNum;
 
-      static constexpr const mcsl::raw_str _name = "Token";
+      static constexpr const mcsl::raw_str _nameof = "Token";
    public:
-      static constexpr const auto& name() { return _name; }
+      static constexpr const auto& nameof() { return _nameof; }
 
       //constructors
       Token();

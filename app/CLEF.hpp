@@ -23,15 +23,18 @@ namespace clef {
       struct Identifier;
       struct Literal;
       struct Object;
+      struct Scope;
       struct Operator;
       struct Statement;
       struct Type;
       struct TypeQualifier;
+   struct SymbolData;
+   struct Symbol;
 
    //containers for atomic compilation elements
    class Source;
    struct SourceTokens;
-   struct NameTable;
+   struct SymbolTable;
    struct SyntaxTree;
 
    //classes for phases of compilation
