@@ -22,7 +22,7 @@ struct clef::SymbolData {
       SymbolProp props() const { return _props; }
 
       SymbolProp setProps(const SymbolProp props) { _props = _props | props; return _props; }
-      SymbolProp unsetProps(const SymbolProp props) { _props = _props | ~props; return _props; }
+      SymbolProp unsetProps(const SymbolProp props) { _props = _props & ~props; return _props; }
       SymbolProp maskProps(const SymbolProp props) { _props = _props & props; return _props; }
       SymbolProp toggleProps(const SymbolProp props) { _props = _props ^ props; return _props; }
 

@@ -3,8 +3,8 @@
 
 #include "SymbolData.hpp"
 
-template <mcsl::str_t str_t> clef::SymbolData::SymbolData(const str_t& name, const SymbolProp props, SymbolTable* internalSymbols)
-:_name(name),_props(props),_table(internalSymbols) {
+template <mcsl::str_t str_t> clef::SymbolData::SymbolData(const str_t& name, const SymbolProp props, SymbolTable* internalSymbols):
+_name(name),_props(props),_table(internalSymbols) {
    //if no table is provided, but the props indicate there should be one, allocate and initialize one
    if (!_table && (_props & SymbolProp::HAS_NAME_TABLE)) {
       _table = mcsl::malloc<SymbolTable>(1);
@@ -35,12 +35,14 @@ bool clef::SymbolData::update_alloc() {
    return false;
 }
 
+//!access internal name table
 template<mcsl::str_t str_t> clef::SymbolData& clef::SymbolData::operator[](const str_t& str) {
    if (!(_props & SymbolProp::HAS_NAME_TABLE)) {
       mcsl::mcsl_throw(mcsl::ErrCode::SEGFAULT, "Symbol Table Entry for '%.*s' does not have a Symbol Table", str.size(), str.begin());
    }
    return (*_table)[str];
 }
+//!access internal name table
 template<mcsl::str_t str_t> const clef::SymbolData& clef::SymbolData::operator[](const str_t& str) const {
    if (!(_props & SymbolProp::HAS_NAME_TABLE)) {
       mcsl::mcsl_throw(mcsl::ErrCode::SEGFAULT, "Symbol Table Entry for '%.*s' does not have a Symbol Table", str.size(), str.begin());
