@@ -6,8 +6,8 @@
 #include "raw_str.hpp"
 
 template<typename first_t, typename second_t> struct mcsl::pair {
-   static constexpr const raw_str _name = "pair";
-   static constexpr const auto& name() { return _name; }
+   static constexpr const raw_str _nameof = "pair";
+   static constexpr const auto& nameof() { return _nameof; }
 
 
    

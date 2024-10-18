@@ -17,9 +17,9 @@ template <typename T, uint _size> class mcsl::static_arr : public contig_base<T>
    private:
       T _buf[_size];
 
-      static constexpr const raw_str _name = "static_arr";
+      static constexpr const raw_str _nameof = "static_arr";
    public:
-      static constexpr const auto& name() { return _name; }
+      static constexpr const auto& nameof() { return _nameof; }
 
       constexpr static_arr();
       constexpr static_arr(const contig_base<T>& buf) requires requires{ buf.size() >= _size; } { for (uint i = 0; i < _size; ++i) { _buf[i] = buf[i]; }}
@@ -64,7 +64,7 @@ template<typename T,uint _size> constexpr mcsl::static_arr<T,_size>::static_arr(
 //!construct in place
 template<typename T,uint _size> constexpr T* mcsl::static_arr<T,_size>::emplace(const uint i, auto&&... args) {
    if (i >= _size) {
-      mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i, self.name(), _size);
+      mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i, self.nameof(), _size);
       return nullptr;
    }
    std::construct_at(_buf + i, std::forward<decltype(args)>(args)...);

@@ -13,11 +13,11 @@
 //!    implement data()
 //!    implement ptr_to_buf()
 //!    implement size()
-//!    implement name()
+//!    implement nameof()
 template<typename T> struct mcsl::contig_base {
    static constexpr const bool is_contig = true;
-   static constexpr const char _name[] = "contig_base";
-   static constexpr const auto& name() { return _name; }
+   static constexpr const char _nameof[] = "contig_base";
+   static constexpr const auto& nameof() { return _nameof; }
 
    //properties
    constexpr uint size(this auto&& obj) { return obj.size(); }
@@ -29,7 +29,7 @@ template<typename T> struct mcsl::contig_base {
 
    inline constexpr auto end(this auto&& obj) -> decltype(auto)   { return obj.begin() + obj.size(); }
    inline constexpr auto operator[](this auto&& obj, const uint i) -> decltype(auto)   { return obj.begin()[i]; }
-   inline constexpr auto at(this auto&& obj, const uint i) -> decltype(auto)   { if (i >= obj.size()) { mcsl_throw(ErrCode::SEGFAULT, "%s of size %u accessed at index %u", obj.name(), obj.size(), i); } return obj[i]; }
+   inline constexpr auto at(this auto&& obj, const uint i) -> decltype(auto)   { if (i >= obj.size()) { mcsl_throw(ErrCode::SEGFAULT, "%s of size %u accessed at index %u", obj.nameof(), obj.size(), i); } return obj[i]; }
    inline constexpr auto front(this auto&& obj) -> decltype(auto)   { return obj.begin()[0]; }
    inline constexpr auto back(this auto&& obj) -> decltype(auto)   { return obj.begin()[obj.size()-1]; }
 

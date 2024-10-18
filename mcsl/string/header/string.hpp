@@ -13,7 +13,7 @@ class mcsl::string : public str_base<char> {
    private:
       dyn_arr<char> _buf;
 
-      static constexpr const raw_str _name = "string";
+      static constexpr const raw_str _nameof = "string";
    public:
       //constructors
       constexpr string():_buf() {}
@@ -32,7 +32,7 @@ class mcsl::string : public str_base<char> {
       //properties
       inline constexpr uint size() const { return _buf.size() - 1; }
       inline constexpr uint capacity() const { return _buf.capacity() - 1; }
-      constexpr static const auto& name() { return _name; }
+      constexpr static const auto& nameof() { return _nameof; }
 
       inline constexpr char* const* ptr_to_buf() { return _buf.ptr_to_buf(); }
       inline constexpr char* data() { return _buf.data(); }

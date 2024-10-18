@@ -19,9 +19,9 @@ template <typename T> class mcsl::array : public contig_base<T> {
       T* _buf;
       const uint _size;
 
-      static constexpr const raw_str _name = "array";
+      static constexpr const raw_str _nameof = "array";
    public:
-      static constexpr const auto& name() { return _name; }
+      static constexpr const auto& nameof() { return _nameof; }
 
       constexpr array();
       array(const uint size);
@@ -77,7 +77,7 @@ template<typename T> mcsl::array<T>::array(array&& other):
 //!construct in place
 template<typename T> constexpr T* mcsl::array<T>::emplace(const uint i, auto&&... args) {
    if (i >= _size) {
-      mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i, self.name(), _size);
+      mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i, self.nameof(), _size);
       return nullptr;
    }
    std::construct_at(_buf + i, std::forward<decltype(args)>(args)...);

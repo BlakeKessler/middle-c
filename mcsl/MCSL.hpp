@@ -57,7 +57,7 @@ namespace mcsl {
 
 
 
-// //for name() functins
+// //for nameof() functins
 // #include "raw_str.hpp"
 
 #endif //MCSL_HPP

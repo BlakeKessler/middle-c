@@ -13,9 +13,9 @@ template <typename T> class mcsl::arr_span : public contig_base<T> {
       T* _buf;
       uint _size;
 
-      static constexpr const raw_str _name = "arr_span";
+      static constexpr const raw_str _nameof = "arr_span";
    public:
-      static constexpr const auto& name() { return _name; }
+      static constexpr const auto& nameof() { return _nameof; }
 
       constexpr arr_span();
       constexpr arr_span(T* buf, const uint size);
@@ -53,7 +53,7 @@ template<typename T> constexpr mcsl::arr_span<T>::arr_span(T* buf, T* end):
 //!construct in place
 template<typename T> constexpr T* mcsl::arr_span<T>::emplace(const uint i, auto&&... args) {
    if (i >= _size) {
-      mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i,name(),_size);
+      mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i,nameof(),_size);
       return nullptr;
    }
    std::construct_at(_buf + i, std::forward<decltype(args)>(args)...);

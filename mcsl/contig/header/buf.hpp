@@ -12,9 +12,9 @@ template<typename T, uint _capacity> class mcsl::buf : mcsl::contig_base<T> {
       T _buf[_capacity];
       uint _size;
 
-      static constexpr const char _name[] = "buf";
+      static constexpr const char _nameof[] = "buf";
    public:
-      static constexpr const auto& name() { return _name; }
+      static constexpr const auto& nameof() { return _nameof; }
       
       constexpr buf():_buf{0},_size(0) {}
       template<contig_t other_t> constexpr buf(const other_t& other);
@@ -72,7 +72,7 @@ template<typename T, uint _capacity> bool mcsl::buf<T,_capacity>::pop_back() {
 }
 template<typename T, uint _capacity> T* mcsl::buf<T,_capacity>::emplace(const uint i, auto&&... args) {
    if (i >= _size) {
-      mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i, name(), _size);
+      mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i, nameof(), _size);
       return nullptr;
    }
    std::construct_at(_buf + i, std::forward<decltype(args)>(args)...);

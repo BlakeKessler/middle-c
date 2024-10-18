@@ -12,8 +12,8 @@ template<uint _size> class mcsl::raw_str : public str_base<char> {
    private:
       char _buf[_size + 1];
 
-      // static constexpr const raw_str<7> _name = "raw_str";
-      static constexpr char _name[] = "raw_str";
+      // static constexpr const raw_str<7> _nameof = "raw_str";
+      static constexpr char _nameof[] = "raw_str";
    public:
       //constructors
       constexpr raw_str() = default;
@@ -24,9 +24,9 @@ template<uint _size> class mcsl::raw_str : public str_base<char> {
 
       //properties
       constexpr uint size() const { return sizeof(_buf) - 1; }
-      constexpr static const auto& name() { return _name; }
+      constexpr static const auto& nameof() { return _nameof; }
       // constexpr uint size() const { return _size; }
-      // constexpr auto& name() const { return _name; }
+      // constexpr auto& nameof() const { return _nameof; }
 
       //member access
       constexpr char* const* ptr_to_buf() { return reinterpret_cast<char**>(&_buf); }

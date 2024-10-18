@@ -13,9 +13,9 @@ template<typename T, uint _capacity> class mcsl::heap_buf : mcsl::contig_base<T>
       T* _buf;
       uint _size;
 
-      static constexpr const char _name[] = "heap_buf";
+      static constexpr const char _nameof[] = "heap_buf";
    public:
-      static constexpr const auto& name() { return _name; }
+      static constexpr const auto& nameof() { return _nameof; }
       
       constexpr heap_buf():_buf(nullptr),_size(0) {}
       heap_buf():_buf(mcsl::calloc<T>(_capacity)),_size(0) {}
@@ -81,7 +81,7 @@ template<typename T, uint _capacity> bool mcsl::heap_buf<T,_capacity>::pop_back(
 }
 template<typename T, uint _capacity> T* mcsl::heap_buf<T,_capacity>::emplace(const uint i, auto&&... args) {
    if (i >= _size) {
-      mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i, name(), _size);
+      mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i, nameof(), _size);
       return nullptr;
    }
    std::construct_at(_buf + i, std::forward<decltype(args)>(args)...);

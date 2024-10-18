@@ -17,7 +17,7 @@ class mcsl::dyn_str_span : public str_base<char> {
       uint _begin;
       uint _size;
 
-      static constexpr const raw_str _name = "dyn_str_span";
+      static constexpr const raw_str _nameof = "dyn_str_span";
    public:
       //constructors
       constexpr dyn_str_span():_ptrToBuf(nullptr),_begin(0),_size(0) {}
@@ -28,7 +28,7 @@ class mcsl::dyn_str_span : public str_base<char> {
 
       //properties
       constexpr uint size() const { return _size; }
-      constexpr static const auto& name() { return _name; }
+      constexpr static const auto& nameof() { return _nameof; }
       
       constexpr dyn_str_span& set_begin(const uint i) { _size += _begin; _size -= i; _begin = i; return self; }
       constexpr dyn_str_span& inc_begin(const sint i) { _size -= i; _begin += i; return self; }

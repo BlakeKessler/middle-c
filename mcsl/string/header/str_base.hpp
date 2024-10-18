@@ -18,9 +18,9 @@
 //!   write constructors
 template<typename char_t>
 struct mcsl::str_base : public contig_base<char_t> {
-   // static constexpr const raw_str _name = "str_base";
-   static constexpr const char _name[] = "str_base";
-   constexpr static const auto& name() { return _name; }
+   // static constexpr const raw_str _nameof = "str_base";
+   static constexpr const char _nameof[] = "str_base";
+   constexpr static const auto& nameof() { return _nameof; }
    void printf(this auto&& obj) { std::printf("%.*s", obj.size(), obj.begin()); }
    
    

@@ -18,10 +18,10 @@ template <typename T> class mcsl::dyn_arr : public contig_base<T> {
       uint _size;
       T* _buf;
 
-      // static constexpr const raw_str _name = "dyn_arr";
-      static constexpr const char _name[] = "dyn_arr";
+      // static constexpr const raw_str _nameof = "dyn_arr";
+      static constexpr const char _nameof[] = "dyn_arr";
    public:
-      static constexpr const auto& name() { return _name; }
+      static constexpr const auto& nameof() { return _nameof; }
 
       constexpr dyn_arr();
       dyn_arr(const uint size);
@@ -71,7 +71,7 @@ template<typename T> mcsl::dyn_arr<T>::dyn_arr(const uint size):
 template<typename T> mcsl::dyn_arr<T>::dyn_arr(const uint size, const uint bufSize):
    _bufSize(bufSize), _size(size) {
       if (_bufSize < _size) {
-         mcsl::mcsl_throw(ErrCode::SEGFAULT, "cannot construct %s with array size greater than buffer size (\033[4m%u\033[24m < \033[4m%u\033[24m)", _name,_bufSize,_size);
+         mcsl::mcsl_throw(ErrCode::SEGFAULT, "cannot construct %s with array size greater than buffer size (\033[4m%u\033[24m < \033[4m%u\033[24m)", _nameof,_bufSize,_size);
          _buf = nullptr;
       }
       else {
@@ -117,7 +117,7 @@ template<typename T> T mcsl::dyn_arr<T>::pop_back() {
 //!construct in place
 template<typename T> T* mcsl::dyn_arr<T>::emplace(const uint i, auto&&... args) {
    if (i >= _size) {
-      mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i, self.name(), _size);
+      mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i, self.nameof(), _size);
       return nullptr;
    }
    std::construct_at(_buf + i, std::forward<decltype(args)>(args)...);

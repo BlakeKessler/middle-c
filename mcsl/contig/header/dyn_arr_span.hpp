@@ -16,9 +16,9 @@ template <typename T> class mcsl::dyn_arr_span : public contig_base<T> {
       uint _beginIndex;
       uint _size;
 
-      static constexpr const raw_str _name = "dyn_arr_span";
+      static constexpr const raw_str _nameof = "dyn_arr_span";
    public:
-      static constexpr const auto& name() { return _name; }
+      static constexpr const auto& nameof() { return _nameof; }
 
       constexpr dyn_arr_span();
       constexpr dyn_arr_span(T* const* buf, const uint size);
@@ -65,7 +65,7 @@ template<typename T> constexpr mcsl::dyn_arr_span<T>::dyn_arr_span(T* const* ptr
 //!construct in place
 template<typename T> constexpr T* mcsl::dyn_arr_span<T>::emplace(const uint i, auto&&... args) {
    if (i >= _size) {
-      mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i,self.name(),_size);
+      mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i,self.nameof(),_size);
       return nullptr;
    }
    std::construct_at(self.begin() + i, std::forward<decltype(args)>(args)...);

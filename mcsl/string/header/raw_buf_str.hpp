@@ -14,7 +14,7 @@ class mcsl::raw_buf_str : public str_base<char> {
       char _buf[_capacity];
       size_t _size;
 
-      static constexpr const raw_str _name = "raw_buf_str";
+      static constexpr const raw_str _nameof = "raw_buf_str";
    public:
       //constructors
       constexpr raw_buf_str():_buf{0},_size{_capacity} {}
@@ -25,7 +25,7 @@ class mcsl::raw_buf_str : public str_base<char> {
       //properties
       constexpr size_t size() const { return _size; }
       constexpr size_t capacity() const { return _capacity; }
-      constexpr static const auto& name() { return _name; }
+      constexpr static const auto& nameof() { return _nameof; }
 
       //member access
       constexpr char* const* ptr_to_buf() { return &_buf; }
