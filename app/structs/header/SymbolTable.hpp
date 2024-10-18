@@ -4,7 +4,6 @@
 
 #include "CLEF.hpp"
 #include "Symbol.hpp"
-#include "SymbolData.hpp"
 #include "Token.hpp"
 #include "astNode.hpp"
 

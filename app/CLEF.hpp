@@ -28,7 +28,7 @@ namespace clef {
       struct Statement;
       struct Type;
       struct TypeQualifier;
-   struct SymbolData;
+   struct Symbol;
    struct Symbol;
 
    //containers for atomic compilation elements
