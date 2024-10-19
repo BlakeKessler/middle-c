@@ -3,7 +3,6 @@
 #define SYMBOL_HPP
 
 #include "CLEF.hpp"
-#include "SymbolTable.hpp"
 
 #include "string.hpp"
 
@@ -31,8 +30,10 @@ struct clef::Symbol {
       bool operator<=>(const Symbol& other) { return _name <=> other._name; }
       template <mcsl::str_t str_t> bool operator<=>(const str_t& otherName) { return _name <=> otherName; }
 
-      template<mcsl::str_t str_t> Symbol& operator[](const str_t& str);
-      template<mcsl::str_t str_t> const Symbol& operator[](const str_t& str) const;
+      template<mcsl::str_t str_t> Symbol& operator[](const str_t& str) { return (*_table)[str]; }
+      template<mcsl::str_t str_t> const Symbol& operator[](const str_t& str) const { return (*_table)[str]; }
+      template<mcsl::str_t str_t> Symbol& at(const str_t& str);
+      template<mcsl::str_t str_t> const Symbol& at(const str_t& str) const;
 };
 
 #endif //SYMBOL_HPP
