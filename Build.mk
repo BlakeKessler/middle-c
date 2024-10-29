@@ -27,17 +27,13 @@ COMPILE_CMD = $(COMPILE_OBJ_CMD) $(OUT_PATH) && $(COMPILE_OUT_CMD)
 BUILD_CMD = $(CLEAN_CMD) && $(COMPILE_CMD) && $(CLEAN_CMD)
 
 #CLEF TARGETS
-SrcReader	:	app/srcReader
+Lexer		:	app/phases app/structs app/elements app/data
 	$(BUILD_CMD)
-Tokenizer	:	app/tokenizer app/srcReader
-	$(BUILD_CMD)
-AST		:	app/syntaxTree app/srcReader app/tokenizer
-	$(BUILD_CMD)
-Parser		:	app/parser app/syntaxTree app/srcReader app/tokenizer
+Parser	:	app/phases app/structs app/elements app/data
 	$(BUILD_CMD)
 
 #MIDDLE-C STANDARD LIBRARY TARGETS
-MCS			:	mcsl/*/src/*
+MCSL			:	mcsl/*/src/*
 	rm -f $(OUT_PATH)/*.o										\
 	&& $(COMPILER) $(FLAGS) -c $^ -Imcs						\
 		$(foreach dir,$(wildcard mcsl/*/),-I$(dir)header)\
