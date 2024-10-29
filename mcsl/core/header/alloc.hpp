@@ -3,7 +3,7 @@
 #define MCSL_ALLOC_HPP
 
 #include "MCSL.hpp"
-#include <typeinfo>
+#include "concepts.hpp"
 #include <cassert>
 #include <cstdlib>
 
@@ -20,33 +20,36 @@ namespace mcsl {
    template<typename T> T* malloc(const uint itemCount) {
       if (!itemCount) { return nullptr; }
       T* ptr;
-      if constexpr (typeid(T) == typeid(void)) {
+      if constexpr (is_t<T,void*>) {
          ptr = std::malloc(itemCount * sizeof(byte));
       } else {
          ptr = static_cast<T*>(std::malloc(itemCount * sizeof(T)));
-      } assert(ptr);
+      }
+      assert(ptr);
       return ptr;
    }
    //!allocate and null-intitialize a contiguous array large enough to hold itemCount items of type T
    template<typename T> T* calloc(const uint itemCount) {
       if (!itemCount) { return nullptr; }
       T* ptr;
-      if constexpr (typeid(T) == typeid(void)) {
+      if constexpr (is_t<T,void*>) {
          ptr = std::calloc(itemCount, sizeof(byte));
       } else {
          ptr = static_cast<T*>(std::calloc(itemCount, sizeof(T)));
-      } assert(ptr);
+      }
+      assert(ptr);
       return ptr;
    }
    //!allocate and null-intitialize a contiguous array large enough to hold itemCount items of type T
    template<typename T> T* realloc(T* buf, const uint newItemCount) {
       if (!newItemCount) { return nullptr; }
       T* ptr;
-      if constexpr (typeid(T) == typeid(void)) {
+      if constexpr (is_t<T,void*>) {
          ptr = std::realloc(buf, newItemCount * sizeof(byte));
       } else {
          ptr = static_cast<T*>(std::realloc(buf, newItemCount * sizeof(T)));
-      } assert(ptr);
+      }
+      assert(ptr);
       return ptr;
    }
 

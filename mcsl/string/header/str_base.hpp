@@ -50,19 +50,19 @@ struct mcsl::str_base : public contig_base<char_t> {
    template<str_t strT> dyn_arr<strT> tokenize(this const strT&& obj, const container_base<str_base>& delimStrs);
 
    //comparison
-   template<str_t strT> inline constexpr bool operator==(this auto&& s, const strT& other) { if (s.size() != other.size()) { return false; } return !(s <=> other); }
-   template<str_t strT> inline constexpr bool operator!=(this auto&& s, const strT& other) { if (s.size() != other.size()) { return true;  } return   s <=> other;  }
+   template<str_t strT> inline constexpr bool operator==(this const auto& s, const strT& other) { if (s.size() != other.size()) { return false; } return !(s <=> other); }
+   template<str_t strT> inline constexpr bool operator!=(this const auto& s, const strT& other) { if (s.size() != other.size()) { return true;  } return   s <=> other;  }
 
-   template<str_t strT> inline constexpr sint operator<=>(this auto&& s, const strT& other) { return s.strcmp(other); }
-
-
-   template<uint len> inline constexpr bool operator==(this auto&& s, const char_t other[len]) { return s == raw_str_span(other); }
-   template<uint len> inline constexpr bool operator!=(this auto&& s, const char_t other[len]) { return s != raw_str_span(other); }
-
-   template<uint len> inline constexpr sint operator<=>(this auto&& s, const char_t other[len]) { return s <=> raw_str_span(other); }
+   template<str_t strT> inline constexpr sint operator<=>(this const auto& s, const strT& other) { return s.strcmp(other); }
 
 
-   template<str_t strT> constexpr sint strcmp(this auto&& s, const strT& other) {
+   template<uint len> inline constexpr bool operator==(this const auto& s, const char_t other[len]) { return s == raw_str_span(other); }
+   template<uint len> inline constexpr bool operator!=(this const auto& s, const char_t other[len]) { return s != raw_str_span(other); }
+
+   template<uint len> inline constexpr sint operator<=>(this const auto& s, const char_t other[len]) { return s <=> raw_str_span(other); }
+
+
+   template<str_t strT> constexpr sint strcmp(this const auto& s, const strT& other) {
       uint len = s.size() < other.size() ? s.size() : other.size();
       for (uint i = 0; i < len; ++i) {
          if (s[i] != other[i]) {
@@ -80,7 +80,7 @@ struct mcsl::str_base : public contig_base<char_t> {
       }
       return 0;
    }
-   template<str_t strT> constexpr sint substrcmp(this auto&& s, const strT& other) {
+   template<str_t strT> constexpr sint substrcmp(this const auto& s, const strT& other) {
       uint len = s.size() < other.size() ? s.size() : other.size();
       for (uint i = 0; i < len; ++i) {
          if (s[i] != other[i]) {
@@ -91,9 +91,23 @@ struct mcsl::str_base : public contig_base<char_t> {
    }
 
    //typecasts
-   inline constexpr operator bool(this auto&& obj) { return obj.size(); }
-   inline constexpr operator const char_t*(this const auto&& obj) { return obj.data(); }
-   inline constexpr operator char_t*(this auto&& obj) { return obj.data(); }
+   inline constexpr operator bool(this const auto& obj) { return obj.size(); }
+   inline constexpr operator const char_t*(this const auto& obj) { return obj.data(); }
+   inline constexpr operator char_t*(this auto& obj) { return obj.data(); }
+};
+
+
+//hashing
+template<mcsl::str_t str_t> struct std::hash<str_t> {
+   luint operator()(const str_t& str) const noexcept { //FNV HASH
+      luint hash = 0;
+      for (uint i = str.size(); i;) {
+         --i;
+         hash = (hash << 8) + (uint8_t)(str[i]);
+         // hash = (hash << 8) + (byte)(str[i]);
+      }
+      return hash;
+   }
 };
 
 #endif //MCSL_STR_BASE_HPP

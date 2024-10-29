@@ -91,7 +91,7 @@ template<typename T> mcsl::dyn_arr<T>::dyn_arr(dyn_arr&& other):
 
 //!realloc buffer to the specified size
 template<typename T> bool mcsl::dyn_arr<T>::resize_exact(const uint newSize) {
-   _buf = mcsl::realloc<T>(_buf, newSize);;
+   _buf = mcsl::realloc<T>(_buf, newSize);
    _bufSize = newSize;
    return true;
 }

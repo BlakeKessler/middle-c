@@ -23,11 +23,9 @@ class mcsl::string : public str_base<char> {
       string(string&& other);
       string(const string& other);
 
-      template<class str> requires requires(str s) { std::is_base_of_v<str_base<char>,str>; s.release(); }
-         string(str&& other): string(other.data(),other.size()) { other.release(); }
-
-      template<class str> requires requires { std::is_base_of_v<str_base<char>,str>; }
-         string(const str& other): string(other.data(),other.size()) {}
+      template<str_t strT> requires requires(strT s) { s.release(); }
+         string(strT&& other): string(other.data(),other.size()) { other.release(); }
+      template<str_t strT> string(const strT& other): string(other.data(),other.size()) {}
 
       //properties
       inline constexpr uint size() const { return _buf.size() - 1; }
