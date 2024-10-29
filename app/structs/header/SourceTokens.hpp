@@ -9,7 +9,7 @@
 #include "dyn_arr.hpp"
 #include "dyn_arr_span.hpp"
 
-class clef::SourceTokens {
+struct clef::SourceTokens {
    protected:
       Source _src;
 
@@ -21,7 +21,8 @@ class clef::SourceTokens {
       static constexpr const auto& nameof() { return _nameof; }
 
       //constructors
-      SourceTokens();
+      SourceTokens():_src(),_tokens(),_tokLines() {}
+      SourceTokens(Source&& src):_src(std::move(src)),_tokens(),_tokLines(_src.lineCount()) {}
       void release() { _src.release(); _tokens.release(); _tokLines.release(); }
 
       //properties

@@ -18,6 +18,7 @@ namespace clef {
       UNCLOSED_BLOCK,
       INVALID_LIT
    };
+   constexpr auto      operator+(const ErrCode t) noexcept { return std::to_underlying(t); }
    
    //!enum of AST node type codes
    enum class NodeType : byte {
@@ -44,15 +45,15 @@ namespace clef {
    
    //!token types bitmask
    enum class TokenType : byte {
-      NONE = 0x00, //not a valid member of a token (whitespace)
-      EOS  = 0x01, //end of line of code
-      PTXT = 0x02, //plaintext segment delimiters (strings, comments)
-      BLOC = 0x04, //general block delimiter
-      OP   = 0x08, //operator
-      STRT = 0x10, //first character of an identifier
-      IDEN = 0x20, //identifier (not first character)
-      ILIT = 0x40, //integer literal
-      FLIT = 0x80, //floating point literal
+      NONE = 0_m, //not a valid member of a token (whitespace)
+      EOS  = 1_m, //end of line of code
+      PTXT = 2_m, //plaintext segment delimiters (strings, comments)
+      BLOC = 3_m, //general block delimiter
+      OP   = 4_m, //operator
+      STRT = 5_m, //first character of an identifier
+      IDEN = 6_m, //identifier (not first character)
+      ILIT = 7_m, //integer literal
+      FLIT = 8_m, //floating point literal
                    //anything else -> interpret as bitmask
 
       DLIM = BLOC | OP,
@@ -61,6 +62,8 @@ namespace clef {
       CHAR = STRT | IDEN,
       XDGT = DGIT | CHAR,
       CMNT = PTXT | OP,
+
+      ANY = 0xFF
    };
    constexpr auto      operator+(const TokenType t) noexcept { return std::to_underlying(t); }
    constexpr TokenType operator&(const TokenType lhs, const TokenType rhs) noexcept { return (TokenType)((+lhs) & (+rhs)); }
@@ -73,18 +76,18 @@ namespace clef {
    enum class OpType : byte {
       //!bitmask atoms
       //unused (available for user-definition)
-      FREE        =          0,
+      FREE        = 0_m,
       //associativity
-      LEFT_ASSOC  =        0b1,
-      RIGHT_ASSOC =       0b10,
+      LEFT_ASSOC  = 1_m,
+      RIGHT_ASSOC = 2_m,
 
       //operand count
-      UNARY       =      0b100,
-      BINARY      =     0b1000,
+      UNARY       = 3_m,
+      BINARY      = 4_m,
 
       //other
-      BLOCK_DELIM =   0b100000,
-      TYPE_MOD    =  0b1000000,
+      BLOCK_DELIM = 6_m,
+      TYPE_MOD    = 7_m,
 
 
       //!full operator types
@@ -129,56 +132,56 @@ namespace clef {
    };
 
    //!symbol properties bitmask
-   enum class SymbolProp {
-      NIL = 0,
+   enum class SymbolProp : luint {
+      NIL            = 0_m,
       
-      HAS_NAME_TABLE = 1 << 0,
+      HAS_NAME_TABLE = 1_m,
 
-      KEYWORD        = 1 << 1,   //symbol is a keyword
+      KEYWORD        = 2_m,   //symbol is a keyword
 
-      FUNDAMENTAL    = 1 << 2,   //fundamental type
-      STRUCT         = 1 << 3,   //class or struct type
-      UNION          = 1 << 4,   //union-like type
-      ENUM           = 1 << 5,   //enum type
-      MASK           = 1 << 6,   //bitmask type
-      INTERFACE      = 1 << 7,   //interface type
-      FUNCTION       = 1 << 8,   //C-style function
+      FUNDAMENTAL    = 3_m,   //fundamental type
+      STRUCT         = 4_m,   //class or struct type
+      UNION          = 5_m,   //union-like type
+      ENUM           = 6_m,   //enum type
+      MASK           = 7_m,   //bitmask type
+      INTERFACE      = 8_m,   //interface type
+      FUNCTION       = 9_m,   //C-style function
 
-      OBJECT         = 1 << 0,   //symbol represents an instantiation of a type
-      TYPE           = 1 << 10,   //symbol names a type
-      NAMESPACE      = 1 << 11,  //symbol names a namespace
-      LABEL          = 1 << 12,  //symbol names an asm-like label
-      DIRECTIVE      = 1 << 13,  //symbol represents a preprocessor directive
+      OBJECT         = 10_m,  //symbol represents an instantiation of a type
+      TYPE           = 11_m,   //symbol names a type
+      NAMESPACE      = 12_m,  //symbol names a namespace
+      LABEL          = 13_m,  //symbol names an asm-like label
+      DIRECTIVE      = 14_m,  //symbol represents a preprocessor directive
 
-      CALLABLE       = 1 << 14,  //can be called like a function
-      DEREFABLE      = 1 << 15,  //can be dereferenced like a pointer
-      INDEXABLE      = 1 << 16,  //can be indexed like an array
+      CALLABLE       = 15_m,  //can be called like a function
+      DEREFABLE      = 16_m,  //can be dereferenced like a pointer
+      INDEXABLE      = 17_m,  //can be indexed like an array
 
-      INITIALIZED    = 1 << 17,  //symbol refers to initialized memory
-      IN_SCOPE       = 1 << 18,  //symbol is in currently in scope
-      COMPLETE       = 1 << 19,  //symbol refers to a complete type
+      INITIALIZED    = 18_m,  //symbol refers to initialized memory
+      IN_SCOPE       = 19_m,  //symbol is in currently in scope
+      COMPLETE       = 20_m,  //symbol refers to a complete type
 
       //type qualifiers
-      CONST          = 1 << 20,
-      CONSTEXPR      = 1 << 21,
-      IMMEDIATE      = 1 << 22,
-      FINAL          = 1 << 23,
-      MUTABLE        = 1 << 24,
-      VOLATILE       = 1 << 25,
-      ATOMIC         = 1 << 26,
-      EXTERN         = 1 << 27,
-      INLINE         = 1 << 28,
-      STATIC         = 1 << 29,
+      CONST          = 21_m,
+      CONSTEXPR      = 22_m,
+      IMMEDIATE      = 23_m,
+      FINAL          = 24_m,
+      MUTABLE        = 25_m,
+      VOLATILE       = 26_m,
+      ATOMIC         = 27_m,
+      EXTERN         = 28_m,
+      INLINE         = 29_m,
+      STATIC         = 30_m,
 
       //pointer qualifiers
-      POINTER        = 1 << 30,  //C-style raw pointer
-      SHARED         = 1 << 31,  //shared pointer
-      UNIQUE         = 1 << 32,  //unique pointer (owning)
-      WEAK           = 1 << 33,  //weak pointer
-      REFERENCE      = 1 << 34,  //C++-style reference
-      ITERATOR       = 1 << 35,  //iterator (similar to C++ iterators)
+      POINTER        = 31_m,  //C-style raw pointer
+      SHARED         = 32_m,  //shared pointer
+      UNIQUE         = 33_m,  //unique pointer (owning)
+      WEAK           = 34_m,  //weak pointer
+      REFERENCE      = 35_m,  //C++-style reference
+      ITERATOR       = 36_m,  //iterator (similar to C++ iterators)
    };
-   constexpr auto   operator+(const SymbolProp t) noexcept { return std::to_underlying(t); }
+   constexpr auto       operator+(const SymbolProp t) noexcept { return std::to_underlying(t); }
    constexpr SymbolProp operator&(const SymbolProp lhs, const SymbolProp rhs) noexcept { return (SymbolProp)((+lhs) & (+rhs)); }
    constexpr SymbolProp operator|(const SymbolProp lhs, const SymbolProp rhs) noexcept { return (SymbolProp)((+lhs) | (+rhs)); }
    constexpr SymbolProp operator^(const SymbolProp lhs, const SymbolProp rhs) noexcept { return (SymbolProp)((+lhs) ^ (+rhs)); }

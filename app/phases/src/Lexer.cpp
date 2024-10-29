@@ -4,76 +4,55 @@
 #include "Lexer.hpp"
 #include "MidC_Data.hpp"
 #include "Source.hpp"
+
+#include "char_type.hpp"
 #include <cstring>
 #include <cstdio>
 
-//!null constructor
-clef::Lexer::Lexer():
-_src(),_tokens(),_tokLines() {
-   
-}
 //!constructor from results of file reader
-clef::Lexer::Lexer(Source&& src):
-_src(std::move(src)),_tokens(),_tokLines(src.lineCount()) {
-   src.release();
-   _tokens.emplace_back();
-   mcsl::raw_str_span line;
-   uint tempCounter;
+clef::SourceTokens clef::Lexer::LexSource(Source&& src) {
+   SourceTokens tokens(std::move(src));
+   auto& toks = tokens.tokens();
+   auto& tokLines = tokens.allRows();
+
+   mcsl::array<mcsl::raw_str_span>& srcLines = tokens.source().lineArr();
    
-   for (uint i = 0; i < _src.lineCount(); ++i) {
-      //initialize
-      line = _src.line(i);
-      tempCounter = 0;
+   for (uint lineIndex = 0; lineIndex < srcLines.size(); ++lineIndex) {
+      mcsl::raw_str_span& line = srcLines[lineIndex];
+      char* curr = line.begin();
+      char *const end = line.end();
+      
+      //process tokens in line
+      while (
+         //skip leading whitespace - in lambda to allow comma notation
+         [&](){while(curr < end && !+tokType(*curr)) {++curr;}}(),
+         //condition
+         curr < end) {
+            //init
+            TokenType type = TokenType::ANY; //will contain the type of the token when finished
+            TokenType workingType;
+            char* tokStart = curr;
 
-      //skip leading whitespace
-      while (line.size() && !+Token::typeNum(line[0],false)) { line.inc_begin(1); }
+            //find end of token
+            while ((curr < end) &&
+               ((workingType = type & tokType(*curr)), +workingType)) {
+                  type = workingType;
+                  ++curr;
+            };
 
-      //process line
-      while (line.size()) {
-         //find bounds of token
-         tempCounter = Token::findTokEnd(line);
-         //add to array of tokens
-         _tokens.emplace_back(line.begin(), tempCounter, i);
-         line.inc_begin(tempCounter);
-         
-         //partition token if it is multiple operators
-         if (_tokens.back().isType(TokenType::DLIM)) {
-            while (tempCounter = _tokens.back().maxOpLen(), tempCounter && tempCounter < _tokens.back().size()) {
-               _tokens.emplace_back(_tokens.back().split(tempCounter));
+            //emplace token
+            if (tokStart != curr) {
+               assert(curr < end);
+               toks.emplace_back(tokStart, curr, type);
             }
-         }
-
-         //skip leading whitespace
-      while (line.size() && !+Token::typeNum(line[0],false)) { line.inc_begin(1); }
       }
-      //create token line & increment overall count
-      _tokLines.emplace(i, _tokens.ptr_to_buf(), mcsl::pair{i?_tokLines[i-1].last_index():0 , _tokens.size()});
+      
+      //emplace line
+      const uint startIndex = lineIndex ? (tokLines[lineIndex-1].end() - toks.data()) : 0;
+      tokLines.emplace(lineIndex, toks.ptr_to_buf(), startIndex, toks.size() - startIndex);
    }
-}
-//!move constructor
-clef::Lexer::Lexer(Lexer&& other):
-   _src(std::move(other._src)),
-   _tokens(std::move(other._tokens)),
-   _tokLines(std::move(other._tokLines)) {
-      other.release();
-}
 
-//!read and tokenize file
-clef::Lexer clef::Lexer::TokenizeFile(const char* path) {
-   return Lexer{Source::readFile(path)};
-}
-
-//!formatted print of tokenizer
-void clef::Lexer::printf() const {
-   for (uint lineNum = 0; lineNum < _tokLines.size(); ++lineNum) {
-      std::printf("line %u:", lineNum + 1);
-      for (const Token& tok : _tokLines[lineNum]) {
-         std::printf("\033[24m \033[4m");
-         tok.size() ? tok.printf(),0 : std::printf("\033[31mNIL\033[39m");
-      }
-      std::printf("\033[24m\n");
-   }
-   return;
+   return tokens;
 }
 
 #endif //LEXER_CPP

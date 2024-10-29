@@ -11,7 +11,7 @@
 #include "pair.hpp"
 #include "string.hpp"
 
-#include <set>
+#include <unordered_set>
 #include <cassert>
 #include <cstring>
 
@@ -45,6 +45,7 @@ struct clef::DelimPair {
 using enum clef::OpType;
 namespace clef {
    extern const mcsl::static_arr<TokenType,256> tokTypeArr;
+   constexpr TokenType tokType(const char c) { return tokTypeArr[c]; }
 
    static constexpr const mcsl::static_arr OPERATORS{
       Operator("#",     0,  PREFIX),   //invoke preprocessor
@@ -159,7 +160,7 @@ namespace clef {
       DelimPair{"//", "\n\0"},   //SINGLE-LINE COMMENT
    };
    // // extern const mcsl::static_arr<mcsl::string> KEYWORDS;
-   static const std::set<mcsl::string> KEYWORDS{
+   static const std::unordered_set<mcsl::string> KEYWORDS{
       "void", "auto",
       "uint", "ushort", "ulong", "ubyte",
       "sint", "sshort", "slong", "sbyte",
@@ -193,7 +194,7 @@ namespace clef {
       "if", "else", "for", "while", "do", "break", "continue", "switch", "match", "case", "default", "goto",
       "try", "catch", "throw"
    };
-   static const std::set<mcsl::string> TYPE_KEYWORDS{
+   static const std::unordered_set<mcsl::string> TYPE_KEYWORDS{
       "void", "auto",
       "uint", "ushort", "ulong", "ubyte",
       "sint", "sshort", "slong", "sbyte",
@@ -205,16 +206,16 @@ namespace clef {
       "half", "single", "double", "quad", "oct",
       "num8", "num16", "num32", "num64", "num128", "num256"
    };
-   static const std::set<mcsl::string> TYPE_QUAL_KEYWORDS{
+   static const std::unordered_set<mcsl::string> TYPE_QUAL_KEYWORDS{
       "const", "constexpr", "immediate", "final", "mutable", "volatile", "atomic", "static"
    };
-   static const std::set<mcsl::string> OBJ_TYPE_KEYWORDS{
+   static const std::unordered_set<mcsl::string> OBJ_TYPE_KEYWORDS{
       "class", "struct", "union", "enum"
    };
-   static const std::set<mcsl::string> OBJ_SCOPE_SPEC_KEYWORDS{
+   static const std::unordered_set<mcsl::string> OBJ_SCOPE_SPEC_KEYWORDS{
       "private", "protected", "public"
    };
-   static const std::set<mcsl::string> CAST_KEYWORDS{
+   static const std::unordered_set<mcsl::string> CAST_KEYWORDS{
       "type_cast", "bit_cast", "safe_cast", "quick_cast", "const_cast"
    };
 
@@ -260,34 +261,34 @@ namespace clef {
             && +(tokTypeArr[+str[1]] & TokenType::OP))
          ? 3 : maxlen;
    }
-   template<mcsl::str_t strT> const Operator* getOpData(const strT& str, bool banBinary = true) {
-      uint maxlen = 0;
-      const Operator* op = nullptr;
-      for (uint i = 0; i < OPERATORS.size(); ++i) {
-         //handle unary vs. binary
-         if (banBinary && !+(OPERATORS[i].opType & OpType::BIN)) {
-            continue;
-         }
-         //check length
-         if (OPERATORS[i].size() > str.size()) {
-            continue;
-         }
-         //find first differing char
-         for (uint j = 0; j < OPERATORS[i].size(); ++j) {
-            if (str[j] == OPERATORS[i].opStr[j]) {
-               if (j >= maxlen) {
-                  maxlen = j + 1;
-                  op = &OPERATORS[i];
-               }
-            }
-            else {
-               break;
-            }
-         }
-      }
+   // template<mcsl::str_t strT> const Operator* getOpData(const strT& str, bool banBinary = true) {
+   //    uint maxlen = 0;
+   //    const Operator* op = nullptr;
+   //    for (uint i = 0; i < OPERATORS.size(); ++i) {
+   //       //handle unary vs. binary
+   //       if (banBinary && !+(OPERATORS[i].opType & OpType::BIN)) {
+   //          continue;
+   //       }
+   //       //check length
+   //       if (OPERATORS[i].size() > str.size()) {
+   //          continue;
+   //       }
+   //       //find first differing char
+   //       for (uint j = 0; j < OPERATORS[i].size(); ++j) {
+   //          if (str[j] == OPERATORS[i].opStr[j]) {
+   //             if (j >= maxlen) {
+   //                maxlen = j + 1;
+   //                op = &OPERATORS[i];
+   //             }
+   //          }
+   //          else {
+   //             break;
+   //          }
+   //       }
+   //    }
 
-      return op;
-   }
+   //    return op;
+   // }
 
    //!function to determine if a string is a Middle-C keyword
    template<mcsl::str_t strT> inline bool isKeyword(const strT& str) { return KEYWORDS.contains(str); }
