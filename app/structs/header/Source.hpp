@@ -24,7 +24,9 @@ class clef::Source {
       static Source readFile(const char* path);
 
       mcsl::string& buf() { return _buf; }
+      const mcsl::string& buf() const { return _buf; }
       mcsl::raw_str_span& line(const uint i) { return _lines[i]; }
+      const mcsl::raw_str_span& line(const uint i) const { return _lines[i]; }
       mcsl::array<mcsl::raw_str_span>& lineArr() { return _lines; }
       uint lineCount() const { return _lines.size(); }
 };

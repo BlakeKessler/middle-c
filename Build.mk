@@ -1,6 +1,8 @@
 #compiler
 COMPILER := clang++ -std=c++23
 FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name
+# COMPILER := g++-14 -std=c++23
+# FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4
 
 #compilation paths
 OUT_PATH := test/bin
@@ -30,6 +32,11 @@ BUILD_CMD = $(CLEAN_CMD) && $(COMPILE_CMD) && $(CLEAN_CMD)
 Lexer		:	app/phases app/structs app/elements app/data
 	$(BUILD_CMD)
 Parser	:	app/phases app/structs app/elements app/data
+	$(BUILD_CMD)
+	
+String	:	
+	$(BUILD_CMD)
+hw7		:	
 	$(BUILD_CMD)
 
 #MIDDLE-C STANDARD LIBRARY TARGETS

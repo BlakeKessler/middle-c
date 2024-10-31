@@ -40,8 +40,9 @@ namespace mcsl {
    };
 
    template<typename arr_t> concept contig_t = contig_container_t<arr_t> && arr_t::is_contig;
+
    template<typename string_t> concept str_t = requires (string_t str) {
-      { str[0] } -> castable_to<char>;
+      { str[0] } -> same_t<char&>;
    } && contig_t<string_t>;
 
    template<typename set_t, typename T> concept assoc_t = requires (set_t set, T obj) {

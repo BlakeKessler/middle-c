@@ -26,28 +26,28 @@ struct mcsl::str_base : public contig_base<char_t> {
    
    
    //operations
-   template<str_t strT> strT copy(this const strT&& obj);
+   template<str_t strT> strT copy(this const auto& obj);
 
    // str_t& operator+=(const str_base& other);
-   auto operator+(this const auto&& obj, const auto& other);
+   auto operator+(this const auto& obj, const auto& other);
    
    // str_t& operator*=(const uint i);
-   template<str_t strT> strT operator*(this strT&& obj, const uint i);
+   template<str_t strT> strT operator*(this auto&& obj, const uint i);
    
-   template<str_t strT> strT&& alter(this strT&& obj, char (*const transformer)(const char));
-   template<str_t strT> strT altered(this const strT&& obj, char (*const transformer)(const char));
+   template<str_t strT> strT&& alter(this auto&& obj, char (*const transformer)(const char));
+   template<str_t strT> strT altered(this const auto& obj, char (*const transformer)(const char));
    
-   inline auto&& operator+() { return alter(mcsl::to_upper); }
-   inline auto&& operator-() { return alter(mcsl::to_lower); }
-   inline auto as_upper() const { return altered(mcsl::to_upper); }
-   inline auto as_lower() const { return altered(mcsl::to_lower); }
+   inline auto&& to_upper(this auto&& obj) { return obj.alter(mcsl::to_upper); }
+   inline auto&& to_lower(this auto&& obj) { return obj.alter(mcsl::to_lower); }
+   inline auto as_upper(this const auto& obj) { return obj.altered(mcsl::to_upper); }
+   inline auto as_lower(this const auto& obj) { return obj.altered(mcsl::to_lower); }
 
-   uint operator&(this const auto&& obj, const auto& other); //strspn
-   uint operator^(this const auto&& obj, const auto& other); //strcspn
-   uint operator/(this const auto&& obj, const auto& other); //largest n : other*n ⊇ self
+   uint operator&(this const auto& obj, const auto& other); //strspn
+   uint operator^(this const auto& obj, const auto& other); //strcspn
+   uint operator/(this const auto& obj, const auto& other); //largest n : other*n ⊇ self
 
-   template<str_t strT> dyn_arr<strT> tokenize(this const strT&& obj, const str_base& delimChars);
-   template<str_t strT> dyn_arr<strT> tokenize(this const strT&& obj, const container_base<str_base>& delimStrs);
+   template<str_t strT> dyn_arr<strT> tokenize(this const auto& obj, const str_base& delimChars);
+   template<str_t strT> dyn_arr<strT> tokenize(this const auto& obj, const container_base<str_base>& delimStrs);
 
    //comparison
    template<str_t strT> inline constexpr bool operator==(this const auto& s, const strT& other) { if (s.size() != other.size()) { return false; } return !(s <=> other); }

@@ -25,14 +25,18 @@ struct clef::Symbol {
       SymbolProp maskProps(const SymbolProp props) { _props = _props & props; return _props; }
       SymbolProp toggleProps(const SymbolProp props) { _props = _props ^ props; return _props; }
 
-      bool hasProps(const SymbolProp props) { return (bool)(_props & props); }
+      bool hasProps(const SymbolProp props) const { return (bool)(_props & props); }
 
-      bool operator<=>(const Symbol& other) { return _name <=> other._name; }
-      template <mcsl::str_t str_t> bool operator<=>(const str_t& otherName) { return _name <=> otherName; }
+      sint operator<=>(const Symbol& other) const { return _name <=> other._name; }
+      sint operator== (const Symbol& other) const { return _name ==  other._name; }
+      sint operator!= (const Symbol& other) const { return _name !=  other._name; }
+      template <mcsl::str_t str_t> sint operator<=>(const str_t& otherName) const { return _name <=> otherName; }
+      template <mcsl::str_t str_t> sint operator== (const str_t& otherName) const { return _name ==  otherName; }
+      template <mcsl::str_t str_t> sint operator!= (const str_t& otherName) const { return _name !=  otherName; }
 
       template<mcsl::str_t str_t> Symbol& operator[](const str_t& str) { return (*_table)[str]; }
-      template<mcsl::str_t str_t> const Symbol& operator[](const str_t& str) const { return (*_table)[str]; }
       template<mcsl::str_t str_t> Symbol& at(const str_t& str);
+      template<mcsl::str_t str_t> const Symbol& operator[](const str_t& str) const { return (*_table)[str]; }
       template<mcsl::str_t str_t> const Symbol& at(const str_t& str) const;
 };
 
