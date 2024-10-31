@@ -54,14 +54,12 @@ namespace clef {
       STRT = 6_m, //first character of an identifier
       IDEN = 7_m, //identifier (not first character)
       NUM  = 8_m, //base-10 digit
-                   //anything else -> interpret as bitmask
 
-      DLIM = BLOC | OP,
-      // NUM  = ILIT | FLIT,
-      DGIT = IDEN | NUM,
-      CHAR = STRT | IDEN,
-      XDGT = DGIT | CHAR,
-      CMNT = PTXT | OP,
+      DLIM = BLOC | OP,    //delimiter
+      CHAR = STRT | IDEN,  //character
+      DGIT = IDEN | NUM,   //base-10 digit
+      XDGT = DGIT | CHAR,  //hex digit
+      CMNT = PTXT | OP,    //comment
 
       ANY = 0xFF
    };
