@@ -33,7 +33,7 @@ const mcsl::static_arr<clef::TokenType,256> clef::tokTypeArr{
    NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE,
 
 // SPACE !     "     #     $     %     &     '     (     )     *     +     ,     -     .     /
-   NONE, OP,   PTXT, OP,   OP,   OP,   OP,   PTXT, BLOC, BLOC, CMNT, OP,   OP,   OP, NUM,    OP,
+   NONE, OP,   PTXT, OP,   OP,   OP,   OP,   PTXT, BLOC, BLOC, CMNT, OP,   OP,   OP,   OP,   OP,
 
 // 0     1     2     3     4     5     6     7     8     9     :     ;     <     =     >     ?
    DGIT, DGIT, DGIT, DGIT, DGIT, DGIT, DGIT, DGIT, DGIT, DGIT, OP,   EOS,  DLIM, OP,   DLIM, OP,
@@ -42,7 +42,7 @@ const mcsl::static_arr<clef::TokenType,256> clef::tokTypeArr{
    OP,   XDGT, XDGT, XDGT, XDGT, XDGT, XDGT, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR,
 
 // P     Q     R     S     T     U     V     W     X     Y     Z     [     \     ]     ^     _ 
-   CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, BLOC, OP,   BLOC, OP,   CHAR,
+   CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, BLOC, ESC,  BLOC, OP,   CHAR,
 
 // `     a     b     c     d     e     f     g     h     i     j     k     l     m     n     o
    NONE, XDGT, XDGT, XDGT, XDGT, XDGT, XDGT, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, XDGT,

@@ -49,15 +49,15 @@ namespace clef {
       EOS  = 1_m, //end of line of code
       PTXT = 2_m, //plaintext segment delimiters (strings, comments)
       BLOC = 3_m, //general block delimiter
-      OP   = 4_m, //operator
-      STRT = 5_m, //first character of an identifier
-      IDEN = 6_m, //identifier (not first character)
-      ILIT = 7_m, //integer literal
-      FLIT = 8_m, //floating point literal
+      ESC  = 4_m, //escape character
+      OP   = 5_m, //operator
+      STRT = 6_m, //first character of an identifier
+      IDEN = 7_m, //identifier (not first character)
+      NUM  = 8_m, //base-10 digit
                    //anything else -> interpret as bitmask
 
       DLIM = BLOC | OP,
-      NUM  = ILIT | FLIT,
+      // NUM  = ILIT | FLIT,
       DGIT = IDEN | NUM,
       CHAR = STRT | IDEN,
       XDGT = DGIT | CHAR,
@@ -122,14 +122,14 @@ namespace clef {
       COMMENT_LINE,     //COMMENTED OUT CODE
    };
    constexpr auto operator+(const DelimPairType t) noexcept { return std::to_underlying(t); }
-   //!literal type specification
-   enum class LitType : byte {
-      NONE = 0x00,
-      INT = +TokenType::ILIT,
-      FLOAT = +TokenType::FLIT,
-      CHAR = 0x03,
-      STRING,
-   };
+   // //!literal type specification
+   // enum class LitType : byte {
+   //    NONE = 0x00,
+   //    INT = +TokenType::ILIT,
+   //    FLOAT = +TokenType::FLIT,
+   //    CHAR = 0x03,
+   //    STRING,
+   // };
 
    //!symbol properties bitmask
    enum class SymbolProp : luint {
