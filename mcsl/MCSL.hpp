@@ -20,7 +20,8 @@ namespace mcsl {
    template<typename T> class arr_span;
    template<typename T> class dyn_arr_span;
 
-   // template<typename T> class node;
+   template<typename T> struct bin_node;
+   template<typename T, uint_t index_t> struct indexed_node;
    // template<typename T, cmpfunc(T)> class prio_queue;
    template<typename T, typename cmp> requires cmp_t<T,cmp> class prio_queue;
 
