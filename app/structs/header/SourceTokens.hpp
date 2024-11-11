@@ -48,6 +48,7 @@ struct clef::SourceTokens {
       const mcsl::dyn_arr_span<Token>& row(const uint i) const { return _tokLines[i]; }
       mcsl::array<mcsl::dyn_arr_span<Token>>& allRows() { return _tokLines; }
       const mcsl::array<mcsl::dyn_arr_span<Token>>& allRows() const { return _tokLines; }
+      uint lineCount() const { return _tokLines.size(); }
       Source& source() { return _src; }
       const Source& source() const { return _src; }
 

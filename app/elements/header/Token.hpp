@@ -25,10 +25,10 @@ struct clef::Token : public mcsl::raw_str_span {
       //getters
       TokenType type() const { return _type; }
 
-      //!check if a token represents a block delimiter
-      inline DelimPairType blockDelimEval() const { return begin() ? blockDelimType(self) : DelimPairType::NONE; }
-      //!check if a token represents a MiddleC keyword
-      inline bool isKeyword() const { return begin() ? clef::isKeyword(self) : false; }
+      // //!check if a token represents a block delimiter
+      // inline BlockType blockDelimEval() const { return begin() ? blockDelimType(self) : BlockType::NONE; }
+      // //!check if a token represents a MiddleC keyword
+      // inline bool isKeyword() const { return begin() ? clef::isKeyword(self) : false; }
 
       //token type number calculation
       bool isType(const TokenType t) const { return +(_type & t); }
