@@ -33,11 +33,6 @@ Lexer		:	app/phases app/structs app/elements app/data
 	$(BUILD_CMD)
 Parser	:	app/phases app/structs app/elements app/data
 	$(BUILD_CMD)
-	
-String	:	
-	$(BUILD_CMD)
-hw7		:	
-	$(BUILD_CMD)
 
 #MIDDLE-C STANDARD LIBRARY TARGETS
 MCSL			:	mcsl/*/src/*
