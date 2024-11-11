@@ -23,7 +23,15 @@ struct mcsl::str_base : public contig_base<char_t> {
    constexpr static const auto& nameof() { return _nameof; }
    void printf(this auto&& obj) { std::printf("%.*s", obj.size(), obj.begin()); }
    
-   
+   //strlen
+   constexpr uint strlen(this auto&& obj) {
+      for (uint i = 0; i < obj.size(); ++i) {
+         if (!obj[i]) {
+            return i;
+         }
+      }
+      return obj.size();
+   }
    
    //operations
    template<str_t strT> strT copy(this const auto& obj);
@@ -56,10 +64,10 @@ struct mcsl::str_base : public contig_base<char_t> {
    template<str_t strT> inline constexpr sint operator<=>(this const auto& s, const strT& other) { return s.strcmp(other); }
 
 
-   template<uint len> inline constexpr bool operator==(this const auto& s, const char_t other[len]) { return s == raw_str_span(other); }
-   template<uint len> inline constexpr bool operator!=(this const auto& s, const char_t other[len]) { return s != raw_str_span(other); }
+   template<uint len> inline constexpr bool operator==(this const auto& s, const char_t other[len+1]) { return s == raw_str_span(other); }
+   template<uint len> inline constexpr bool operator!=(this const auto& s, const char_t other[len+1]) { return s != raw_str_span(other); }
 
-   template<uint len> inline constexpr sint operator<=>(this const auto& s, const char_t other[len]) { return s <=> raw_str_span(other); }
+   template<uint len> inline constexpr sint operator<=>(this const auto& s, const char_t other[len+1]) { return s <=> raw_str_span(other); }
 
 
    template<str_t strT> constexpr sint strcmp(this const auto& s, const strT& other) {
@@ -99,8 +107,8 @@ struct mcsl::str_base : public contig_base<char_t> {
 
 //hashing
 template<mcsl::str_t str_t> struct std::hash<str_t> {
-   luint operator()(const str_t& str) const noexcept { //FNV HASH
-      luint hash = 0;
+   word operator()(const str_t& str) const noexcept { //FNV HASH
+      word hash = 0;
       for (uint i = str.size(); i;) {
          --i;
          hash = (hash << 8) + (uint8_t)(str[i]);

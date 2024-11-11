@@ -38,7 +38,7 @@ template <typename T> class mcsl::arr_span : public contig_base<T> {
 #pragma region src
 //!default constructor
 template<typename T> constexpr mcsl::arr_span<T>::arr_span():
-   _buf(nullptr),_size(0) {
+   _buf(),_size() {
 
 }
 template<typename T> constexpr mcsl::arr_span<T>::arr_span(T* buf, const uint size):

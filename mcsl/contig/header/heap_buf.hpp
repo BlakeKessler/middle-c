@@ -17,7 +17,7 @@ template<typename T, uint _capacity> class mcsl::heap_buf : mcsl::contig_base<T>
    public:
       static constexpr const auto& nameof() { return _nameof; }
       
-      constexpr heap_buf():_buf(nullptr),_size(0) {}
+      constexpr heap_buf():_buf(),_size() {}
       heap_buf():_buf(mcsl::calloc<T>(_capacity)),_size(0) {}
       heap_buf(heap_buf&& other): _buf(other._buf),_size(other._size) { other.release(); }
       template<contig_t other_t> heap_buf(const other_t& other);

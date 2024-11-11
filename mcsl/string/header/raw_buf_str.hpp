@@ -17,7 +17,7 @@ class mcsl::raw_buf_str : public str_base<char> {
       static constexpr const raw_str _nameof = "raw_buf_str";
    public:
       //constructors
-      constexpr raw_buf_str():_buf{0},_size{_capacity} {}
+      constexpr raw_buf_str():_buf{},_size{} {}
       constexpr raw_buf_str(const char* str, const size_t strlen);
       constexpr raw_buf_str(const char* str);
       constexpr raw_buf_str(const str_base<char>& other): raw_buf_str(other.data(), other.size()) {}
@@ -37,15 +37,15 @@ class mcsl::raw_buf_str : public str_base<char> {
 };
 
 template<uint _capacity, typename size_t>
-constexpr mcsl::raw_buf_str<_capacity,size_t>::raw_buf_str(const char* str, const size_t strsize): _buf{0},_size(strsize) {
+constexpr mcsl::raw_buf_str<_capacity,size_t>::raw_buf_str(const char* str, const size_t strsize): _buf{},_size(strsize) {
    assert(strsize <= _capacity);
    for (uint i = 0; i < strsize; ++i) {
-      if (!str[i]) { break; }
+      if (!str[i]) { _size = i; break; }
       _buf[i] = str[i];
    }
 }
 template<uint _capacity, typename size_t>
-constexpr mcsl::raw_buf_str<_capacity,size_t>::raw_buf_str(const char* str): _buf{0}, _size(_capacity) {
+constexpr mcsl::raw_buf_str<_capacity,size_t>::raw_buf_str(const char* str): _buf{}, _size(_capacity) {
    for (uint i = 0; i < _capacity; ++i) {
       if (!str[i]) { _size = i; break; }
       _buf[i] = str[i];

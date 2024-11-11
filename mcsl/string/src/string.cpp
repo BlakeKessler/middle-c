@@ -32,7 +32,7 @@ mcsl::string& mcsl::string::operator*=(const uint repeatCount) {
 //!construct with buffer size
 mcsl::string::string(const uint size):
 _buf(size+1) {
-   
+   _buf.back() = '\0';
 }
 //!constructor from c-string and length
 mcsl::string::string(const char* str, const uint strlen):

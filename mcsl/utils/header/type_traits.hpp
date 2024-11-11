@@ -7,9 +7,9 @@
 
 namespace mcsl {
    //max and min values for integer types
-   template <uint_t T> constexpr lsint TYPEMIN() { return 0; }
-   template <sint_t T> constexpr lsint TYPEMIN() { return (T)(1 << (8 * sizeof(T) - 1)); }
-   template < int_t T> constexpr luint TYPEMAX() { return (T)(~TYPEMIN<T>()); }
+   template <uint_t T> constexpr slong TYPEMIN() { return 0; }
+   template <sint_t T> constexpr slong TYPEMIN() { return (T)(1 << (8 * sizeof(T) - 1)); }
+   template < int_t T> constexpr word TYPEMAX() { return (T)(~TYPEMIN<T>()); }
 };
 
 #endif //MCSL_TYPE_TRAITS_HPP

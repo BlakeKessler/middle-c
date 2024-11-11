@@ -20,7 +20,7 @@ class mcsl::dyn_str_span : public str_base<char> {
       static constexpr const raw_str _nameof = "dyn_str_span";
    public:
       //constructors
-      constexpr dyn_str_span():_ptrToBuf(nullptr),_begin(0),_size(0) {}
+      constexpr dyn_str_span():_ptrToBuf(),_begin(),_size() {}
       constexpr dyn_str_span(char* const* str, const uint strlen);
       constexpr dyn_str_span(str_base<char>& other): _ptrToBuf(other.ptr_to_buf()),_begin(0),_size(other.size()) {}
       constexpr dyn_str_span(str_base<char>& other, const uint size): _ptrToBuf(other.ptr_to_buf()),_begin(0),_size(size) { assert(other.size() >= size); }

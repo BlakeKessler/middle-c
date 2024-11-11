@@ -16,7 +16,7 @@ class mcsl::set {
    public:
       class it;
 
-      constexpr set(): _buf(nullptr),_buckets(0),_size(0) {}
+      constexpr set(): _buf(),_buckets(),_size() {}
       set(std::convertible_to<T>&&... elements);
       set(map&& other);
       set(set&& other);
@@ -82,7 +82,7 @@ class mcsl::set {
             mutable uint index _i;
             it(set* obj, const uint i):_obj(obj),_i(i) {}
          public:
-            constexpr it():_obj(nullptr),_i(0) {}
+            constexpr it():_obj(),_i() {}
             it& operator++();
             it& operator--();
             bool operator==(const it& other) { return _i == other._i && _obj == other._obj; }

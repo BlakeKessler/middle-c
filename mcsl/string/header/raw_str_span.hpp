@@ -18,7 +18,7 @@ class mcsl::raw_str_span : public str_base<char> {
       static constexpr const raw_str _nameof = "raw_str_span";
    public:
       //constructors
-      constexpr raw_str_span(): _buf(nullptr),_size(0) {}
+      constexpr raw_str_span(): _buf(),_size() {}
       constexpr raw_str_span(char* str, const uint size):_buf(str),_size(size) {}
       template<typename Other_t> requires requires{ std::is_base_of_v<str_base<char>,Other_t>; } constexpr raw_str_span(Other_t& other): raw_str_span(other.data(),other.size()) {}
       template<typename Other_t> requires requires{ std::is_base_of_v<str_base<char>,Other_t>; } constexpr raw_str_span(Other_t& other, const uint size): raw_str_span(other.data(),size) { assert(other.size() >= size); }

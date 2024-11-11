@@ -16,11 +16,11 @@ template<uint _size> class mcsl::raw_str : public str_base<char> {
       static constexpr char _nameof[] = "raw_str";
    public:
       //constructors
-      constexpr raw_str() = default;
+      // constexpr raw_str(const raw_str& other):_buf{other._buf} {}
+      constexpr raw_str():_buf{} {}
+      template<str_t strT> constexpr raw_str(const strT& other): raw_str(other.data(),other.size()) {}
       constexpr raw_str(const char* str, const uint strlen);
       constexpr raw_str(const char* str);
-      constexpr raw_str(const str_base<char>& other): raw_str(other.data(),other.size()) {}
-      constexpr ~raw_str() = default;
 
       //properties
       constexpr uint size() const { return sizeof(_buf) - 1; }

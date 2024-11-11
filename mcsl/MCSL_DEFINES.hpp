@@ -8,15 +8,35 @@
 //self
 #define self (*this)
 
-//types
-using uint = uint32_t;
-using luint = uint64_t;
-using sint = int32_t;
-using lsint = int64_t;
-using byte = uint8_t;
-using word = uint64_t;
-using real = float;
-using lreal = double;
+//!FIXED WIDTH INTEGER TYPES
+using uint8  = uint8_t;
+using uint16 = uint16_t;
+using uint32 = uint32_t;
+using uint64 = uint64_t;
+
+using sint8  = int8_t;
+using sint16 = int16_t;
+using sint32 = int32_t;
+using sint64 = int64_t;
+
+//!ARCHITECTURE-BASED INTEGER TYPES
+using byte = uint8;
+using word = uint64;
+
+using ushort = uint16;
+using uint = uint32;
+using ulong = uint64;
+
+using sshort = sint16;
+using sint = sint32;
+using slong = sint64;
+
+//!FIXED-WIDTH FLOATING-POINT TYPES
+// using float16 = std::float16_t;
+// using float32 = std::float32_t;
+// using float64 = std::float64_t;
+using float32 = float;
+using float64 = double;
 
 //enums
 namespace mcsl {

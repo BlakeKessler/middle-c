@@ -6,8 +6,8 @@
 
 // template<typename T, cmpfunc(T)> class mcsl::prio_queue {
 //    private:
-//       node<T> _front;
-//       node<T> _back;
+//       bin_node<T> _front;
+//       bin_node<T> _back;
 //    public:
 
 // };

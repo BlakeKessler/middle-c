@@ -21,12 +21,11 @@ template <typename T, uint _size> class mcsl::static_arr : public contig_base<T>
    public:
       static constexpr const auto& nameof() { return _nameof; }
 
-      constexpr static_arr();
+      constexpr static_arr():_buf{} {}
       constexpr static_arr(const contig_base<T>& buf) requires requires{ buf.size() >= _size; } { for (uint i = 0; i < _size; ++i) { _buf[i] = buf[i]; }}
       constexpr static_arr(T (&buf)[_size]);
       // constexpr static_arr(std::initializer_list<T> init);
       constexpr static_arr(std::convertible_to<T> auto... initList) requires requires { sizeof...(initList) == _size; }:_buf{std::forward<decltype(initList)>(initList)...} {}
-      constexpr ~static_arr() {}
 
       constexpr uint size() const { return _size; }
 
@@ -49,11 +48,6 @@ namespace mcsl {
 #pragma endregion CTAD
 
 #pragma region src
-//!default constructor
-//!NOTE: might be unreasonably slow for large _size
-template<typename T,uint _size> constexpr mcsl::static_arr<T,_size>::static_arr():_buf{} {
-   std::memset(_buf,0,_size*sizeof(T));
-}
 //!constructor from raw array
 template<typename T,uint _size> constexpr mcsl::static_arr<T,_size>::static_arr(T (&buf)[_size]):_buf{} {
    for (uint i = 0; i < _size; ++i) {
