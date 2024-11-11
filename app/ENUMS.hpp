@@ -16,12 +16,14 @@ namespace clef {
       PARSER_UNSPEC,
       //syntax errors
       UNCLOSED_BLOCK,
-      INVALID_LIT
+      INVALID_LIT,
+      BAD_PARAM_BLOCK,
+      BAD_LITERAL
    };
    constexpr auto      operator+(const ErrCode t) noexcept { return std::to_underlying(t); }
    
    //!enum of AST node type codes
-   enum class NodeType : byte {
+   enum class NodeType : uint16 {
       ERROR = 0xFF,        //CLEF INTERNAL ERROR
       NONE = 0x00,         //to-be determined
 
@@ -44,7 +46,7 @@ namespace clef {
    constexpr auto operator+(const NodeType t) noexcept { return std::to_underlying(t); }
    
    //!token types bitmask
-   enum class TokenType : byte {
+   enum class TokenType : uint8 {
       NONE = 0_m, //not a valid member of a token (whitespace)
       EOS  = 1_m, //end of line of code
       PTXT = 2_m, //plaintext segment delimiters (strings, comments)
@@ -71,7 +73,7 @@ namespace clef {
    constexpr TokenType operator*(const TokenType lhs, const uint rhs) noexcept { return (TokenType)((+lhs) * rhs); }
 
    //operator properties bitmask
-   enum class OpType : byte {
+   enum class OpType : uint8 {
       //!bitmask atoms
       //unused (available for user-definition)
       FREE        = 0_m,
@@ -84,8 +86,8 @@ namespace clef {
       BINARY      = 4_m,
 
       //other
-      BLOCK_DELIM = 6_m,
-      TYPE_MOD    = 7_m,
+      BLOCK_DELIM = 7_m,
+      TYPE_MOD    = 8_m,
 
 
       //!full operator types
@@ -103,7 +105,7 @@ namespace clef {
    constexpr OpType operator*(const OpType lhs, const uint rhs) noexcept { return (OpType)((+lhs) * rhs); }
 
    //delimiter pair specification
-   enum class DelimPairType : byte {
+   enum class BlockType : uint8 {
       NONE = 0x00,      //not a block type
 
       PARENS = 0x01,    //PARENTHESES
@@ -119,18 +121,44 @@ namespace clef {
       COMMENT_BLOCK,    //COMMENTED-OUT CODE
       COMMENT_LINE,     //COMMENTED OUT CODE
    };
-   constexpr auto operator+(const DelimPairType t) noexcept { return std::to_underlying(t); }
-   // //!literal type specification
-   // enum class LitType : byte {
-   //    NONE = 0x00,
-   //    INT = +TokenType::ILIT,
-   //    FLOAT = +TokenType::FLIT,
-   //    CHAR = 0x03,
-   //    STRING,
-   // };
+   constexpr auto operator+(const BlockType t) noexcept { return std::to_underlying(t); }
+   //!literal type specification
+   enum class LitType : uint8 {
+      NONE = 0x00,
+      INT,
+      FLOAT,
+      CHAR,
+      STRING,
+      FORMAT,
+      REGEX,
+   };
+   //!type qualifier bitmask
+   enum class TypeQualMask : uint16 {
+      NONE           =  0_m,
+
+      CONST          =  1_m,
+      CONSTEXPR      =  2_m,
+      IMMEDIATE      =  3_m,
+      FINAL          =  4_m,
+
+      MUTABLE        =  5_m,
+      VOLATILE       =  6_m,
+      ATOMIC         =  7_m,
+      
+      EXTERN         =  8_m,
+      INLINE         =  9_m,
+      STATIC         = 10_m,
+      
+      POINTER        = 11_m,  //C-style raw pointer
+      SHARED         = 12_m,  //shared pointer
+      UNIQUE         = 13_m,  //unique pointer (owning)
+      WEAK           = 14_m,  //weak pointer
+      REFERENCE      = 15_m,  //C++-style reference
+      ITERATOR       = 16_m,  //iterator (similar to C++ iterators)
+   };
 
    //!symbol properties bitmask
-   enum class SymbolProp : luint {
+   enum class SymbolProp : uint64 {
       NIL            = 0_m,
       
       HAS_NAME_TABLE = 1_m,
@@ -146,7 +174,7 @@ namespace clef {
       FUNCTION       = 9_m,   //C-style function
 
       OBJECT         = 10_m,  //symbol represents an instantiation of a type
-      TYPE           = 11_m,   //symbol names a type
+      TYPE           = 11_m,  //symbol names a type
       NAMESPACE      = 12_m,  //symbol names a namespace
       LABEL          = 13_m,  //symbol names an asm-like label
       DIRECTIVE      = 14_m,  //symbol represents a preprocessor directive

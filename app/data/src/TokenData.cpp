@@ -8,18 +8,18 @@
 // //!NOTE: REPLACE WITH HASHMAP
 // //!NOTE: NOT WORKING
 // template<typename strT> requires mcsl::str_t<strT,char>
-// clef::DelimPairType clef::blockDelimType(const strT& str) {
+// clef::BlockType clef::blockDelimType(const strT& str) {
 //    if (!str.size() || str.size() > MAX_DELIM_LEN) {
-//       return DelimPairType::NONE;
+//       return BlockType::NONE;
 //    }
 
 //    //search array
 //    for (uint i = 0; i < BLOCK_DELIMS.size(); ++i) {
 //       if (str == BLOCK_DELIMS[i].open || str == BLOCK_DELIMS[i].close) {
-//          return static_cast<DelimPairType>(i);
+//          return static_cast<BlockType>(i);
 //       }
 //    }
-//    return DelimPairType::NONE;
+//    return BlockType::NONE;
 // }
 
 //!array encoding which tokens each character is a legal member of
@@ -45,7 +45,7 @@ const mcsl::static_arr<clef::TokenType,256> clef::tokTypeArr{
    CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, BLOC, ESC,  BLOC, OP,   CHAR,
 
 // `     a     b     c     d     e     f     g     h     i     j     k     l     m     n     o
-   NONE, XDGT, XDGT, XDGT, XDGT, XDGT, XDGT, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, XDGT,
+   OP,   XDGT, XDGT, XDGT, XDGT, XDGT, XDGT, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, XDGT,
 
 // p     q     r     s     t     u     v     w     x     y     z     {     |     }     ~     DEL
    CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, CHAR, XDGT, CHAR, CHAR, BLOC, OP,   BLOC, OP,   NONE,

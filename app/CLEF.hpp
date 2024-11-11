@@ -10,25 +10,25 @@
 
 namespace clef {
    //objects for encoding Middle C specification data
-   struct Operator;
+   struct OpGroup;
+   struct OpData;
+   template <uint _size> struct OpDecoder;
    struct DelimPair;
 
    //atomic compilation elements
    struct Token;
-   union astNode;
-      struct Block;
-      struct Comment;
-      struct Declaration;
-      struct Definition;
+   struct astNode;
+      struct Expression;
+      struct Statement;
+      struct StmtSequence;
       struct Identifier;
+      struct Block;
+      struct Type;
       struct Literal;
       struct Object;
-      struct Scope;
+      struct Function;
       struct Operator;
-      struct Statement;
-      struct Type;
-      struct TypeQualifier;
-   struct Symbol;
+      struct Template;
    struct Symbol;
 
    //containers for atomic compilation elements

@@ -4,11 +4,16 @@
 
 #include "MCSL_DEFINES.hpp"
 
-//CLEF defines
+//compiler parameters
 #define MAX_AST_CHILDREN 3
 #define MAX_DELIM_LEN 2
 #define MAX_OP_LEN 3
+#define MAX_OPS_PER_GROUP 7
 #define MAX_KEYWORD_LEN 15
+
+#define OP_DECODER_HASH_BASE 38
+
+//language parameters
 
 
 #endif //CLEF_DEFINES_HPP
