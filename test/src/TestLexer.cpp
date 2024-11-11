@@ -24,16 +24,16 @@ int main(int argc, char** argv) {
    for (uint i = 0; i < src.lineCount(); ++i) {
       std::printf("line %u: %.*s", i + 1, src.line(i).size(), src.line(i).data());
    }
-   printf("\n%sDone printing file.\n", fileDelim);
+   std::printf("\n%sDone printing file.\n", fileDelim);
 
 
    //tokenize
    clef::SourceTokens tokens = clef::Lexer::LexSource(std::move(src));
 
    //print tokens
-   printf("\nPrinting tokens (%u tokens)\n%s", tokens.size(), fileDelim);
+   std::printf("\nPrinting tokens (%u tokens)\n%s", tokens.size(), fileDelim);
    tokens.printf();
-   printf("%sDone printing tokens.\n", fileDelim);
+   std::printf("%sDone printing tokens.\n", fileDelim);
 }
 
 #endif //TOKENIZER_TEST
