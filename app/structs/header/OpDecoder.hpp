@@ -23,6 +23,7 @@ template <uint _size> struct clef::OpDecoder {
       constexpr uint capacity() { return _size; } //number of operators
 
       template<mcsl::str_t str_t> constexpr OpGroup operator[](const str_t& str) const;
+      template<uint len> constexpr OpGroup operator[](const char (&str)[len]) const { return self[mcsl::raw_str(str)]; }
       constexpr mcsl::pair<uint,uint> operator[](const char i) const { return _firstCharBuckets[i % OP_DECODER_HASH_BASE]; }
 };
 
@@ -33,6 +34,7 @@ namespace clef {
 #pragma endregion CTAD
 
 namespace clef {
+   constexpr auto GetAllOplikesData();
    constexpr auto GetOpData();
    constexpr auto GetPtxtData();
    constexpr auto GetBlockData();

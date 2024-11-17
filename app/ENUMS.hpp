@@ -58,10 +58,12 @@ namespace clef {
       NUM  = 8_m, //base-10 digit
 
       DLIM = BLOC | OP,    //delimiter
+      CMNT = PTXT | OP,    //comment
       CHAR = STRT | IDEN,  //character
       DGIT = IDEN | NUM,   //base-10 digit
       XDGT = DGIT | CHAR,  //hex digit
-      CMNT = PTXT | OP,    //comment
+
+      OPLIKE = EOS | PTXT | BLOC | ESC | OP, //syntatically vaguely like an operator
 
       ANY = 0xFF
    };

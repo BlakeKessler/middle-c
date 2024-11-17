@@ -17,6 +17,7 @@
 namespace clef {
    extern const mcsl::static_arr<TokenType,256> tokTypeArr;
    constexpr TokenType tokType(const char c) { return tokTypeArr[c]; }
+   template<mcsl::str_t str_t> constexpr TokenType tokType(const str_t& str);
 
    // // extern const mcsl::static_arr<mcsl::string> KEYWORDS;
    static const std::unordered_set<mcsl::string> KEYWORDS{

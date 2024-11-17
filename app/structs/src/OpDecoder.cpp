@@ -13,7 +13,7 @@ requires ( sizeof...(Argv_t) == _size )
    //sort operators - descending order to:
    // * ensure that longer matches come first
    // * ensure that operators with higher precedence come first
-   std::sort(_opBuf.begin()+1, _opBuf.end(), [](const OpData& lhs, const OpData& rhs){
+   std::sort(_opBuf.begin(), _opBuf.end(), [](const OpData& lhs, const OpData& rhs){
       sint temp = lhs.toString() <=> rhs.toString();
       return temp ? temp > 0 : lhs > rhs;
    });
@@ -68,50 +68,163 @@ template <uint _size> template<mcsl::str_t str_t> constexpr clef::OpGroup clef::
    return OpGroup{};
 }
 
+constexpr auto clef::GetAllOplikesData() {
+   using enum clef::OpType;
+   byte prec = ~0;
+   return OpDecoder{
+      OpData("\\",    --prec, PREFIX),      //escape character
+      OpData(";",       prec, PREFIX),      //end of statement
+
+      OpData("\"",    --prec, BLOCK_DELIM), //string
+      OpData("\'",      prec, BLOCK_DELIM), //char
+
+      OpData("//",      prec, PREFIX),      //line comment
+      OpData("/*",      prec, BLOCK_DELIM), //block comment
+      OpData("*/",      prec, BLOCK_DELIM), //block comment
+
+      OpData("(",     --prec, BLOCK_DELIM), //function calls/functional casts
+      OpData(")",       prec, BLOCK_DELIM), //function calls/functional casts
+      OpData("[",       prec, BLOCK_DELIM), //subscript
+      OpData("]",       prec, BLOCK_DELIM), //subscript
+      OpData("{",       prec, BLOCK_DELIM), //scope/functional casts
+      OpData("}",       prec, BLOCK_DELIM), //scope/functional casts
+      OpData("<",       prec, BLOCK_DELIM), //specifier
+      OpData(">",       prec, BLOCK_DELIM), //specifier
+
+
+
+
+
+      OpData("#",     --prec, PREFIX),            //invoke preprocessor
+
+      OpData("::",    --prec, INFIX_LEFT),        //scope resolution
+
+      OpData("++",    --prec, PREFIX),            //pre-increment
+      OpData("--",      prec, PREFIX),            //pre-decrement
+      OpData(".",       prec, INFIX_LEFT),        //element access
+      OpData("->",      prec, INFIX_LEFT),        //element access
+      OpData("..",      prec, INFIX_LEFT),        //range
+      OpData("...",     prec, INFIX_LEFT),        //array spread
+
+      OpData("++",    --prec, POSTFIX),           //post-increment
+      OpData("--",      prec, POSTFIX),           //post-decrement
+      OpData("+",       prec, POSTFIX),           //unary plus
+      OpData("-",       prec, POSTFIX),           //integer negation
+      OpData("!",       prec, POSTFIX),           //logical negation
+      OpData("~",       prec, POSTFIX),           //bitwise negation
+      OpData("&",       prec, TYPE_MOD | PREFIX), //reference/address of
+      OpData("*",       prec, TYPE_MOD | PREFIX), //raw pointer/dereference
+      OpData("@",       prec, TYPE_MOD),          //unique pointer
+      OpData("$",       prec, TYPE_MOD),          //shared pointer
+      OpData("`",       prec, TYPE_MOD),          //weak pointer
+      OpData("%",       prec, TYPE_MOD),          //iterator
+      OpData("<",       prec, BLOCK_DELIM),       //specifier
+      OpData(">",       prec, BLOCK_DELIM),       //specifier
+      
+      OpData(".*",    --prec, INFIX_LEFT),        //pointer to member
+      OpData("->*",     prec, INFIX_LEFT),        //pointer to member
+
+      OpData("^^",    --prec, INFIX_LEFT),        //exponentiation
+
+      OpData("*",     --prec, INFIX_LEFT),        //multiplication
+      OpData("/",       prec, INFIX_LEFT),        //division
+      OpData("%",       prec, INFIX_LEFT),        //modulo
+
+      OpData("+",     --prec, INFIX_LEFT),        //addition
+      OpData("-",       prec, INFIX_LEFT),        //subtraction
+
+      OpData("<<",    --prec, INFIX_LEFT),        //left bit-shift
+      OpData(">>",      prec, INFIX_LEFT),        //right bit-shift
+
+      OpData("<=>",   --prec, INFIX_LEFT),        //three-way comparison
+
+      OpData(">",     --prec, INFIX_LEFT),        //less than
+      OpData("<",       prec, INFIX_LEFT),        //greater than
+      OpData("<=",      prec, INFIX_LEFT),        //less than or equal to
+      OpData(">=",      prec, INFIX_LEFT),        //greather than or equal to
+
+      OpData("==",    --prec, INFIX_LEFT),        //equality
+      OpData("!=",      prec, INFIX_LEFT),        //inequality
+      OpData("===",     prec, INFIX_LEFT),        //strict equality
+      OpData("!==",     prec, INFIX_LEFT),        //strict inequality
+
+      OpData("&",     --prec, INFIX_LEFT),        //bitwise AND
+      OpData("^",     --prec, INFIX_LEFT),        //bitwise XOR
+      OpData("|",     --prec, INFIX_LEFT),        //bitwise OR
+      OpData("&&",    --prec, INFIX_LEFT),        //logical AND
+      OpData("||",    --prec, INFIX_LEFT),        //logical OR
+
+      OpData("\?\?",  --prec, INFIX_RIGHT),       //null coalescing
+      OpData("?",       prec, INFIX_RIGHT),       //inline if
+      OpData(":",       prec, INFIX_RIGHT),       //inline else
+      OpData("=",       prec, INFIX_RIGHT),       //direct assignment
+      OpData(":=",      prec, INFIX_RIGHT),       //const assignment
+      OpData("+=",      prec, INFIX_RIGHT),       //compound assignment (add)
+      OpData("-=",      prec, INFIX_RIGHT),       //compound assignment (sub)
+      OpData("*=",      prec, INFIX_RIGHT),       //compound assignment (mul)
+      OpData("/=",      prec, INFIX_RIGHT),       //compound assignment (div)
+      OpData("%=",      prec, INFIX_RIGHT),       //compound assignment (mod)
+      OpData("^^=",     prec, INFIX_RIGHT),       //compound assignment (exp)
+      OpData("<<=",     prec, INFIX_RIGHT),       //compound assignment (shl)
+      OpData(">>=",     prec, INFIX_RIGHT),       //compound assignment (shr)
+      OpData("&=",      prec, INFIX_RIGHT),       //compound assignment (AND)
+      OpData("^=",      prec, INFIX_RIGHT),       //compound assignment (XOR)
+      OpData("|=",      prec, INFIX_RIGHT),       //compound assignment (OR)
+      OpData("\?\?=",   prec, INFIX_RIGHT),       //compound assignment (null coalescing)
+
+      OpData(",",     --prec, INFIX_LEFT)         //comma
+
+      //not included in array: triangle (free/unspecified) operators
+   };
+}
+
+
+
+
 constexpr auto clef::GetOpData() {
    using enum clef::OpType;
    byte prec = ~0;
    return OpDecoder{
-      OpData("#",     --prec,  PREFIX),            //invoke preprocessor
+      OpData("#",     --prec, PREFIX),            //invoke preprocessor
 
-      OpData("::",    --prec,  INFIX_LEFT),        //scope resolution
+      OpData("::",    --prec, INFIX_LEFT),        //scope resolution
 
-      OpData("++",    --prec,  PREFIX),            //pre-increment
-      OpData("--",      prec,  PREFIX),            //pre-decrement
-      OpData(".",       prec,  INFIX_LEFT),        //element access
-      OpData("->",      prec,  INFIX_LEFT),        //element access
-      OpData("..",      prec,  INFIX_LEFT),        //range
-      OpData("...",     prec,  INFIX_LEFT),        //array spread
+      OpData("++",    --prec, PREFIX),            //pre-increment
+      OpData("--",      prec, PREFIX),            //pre-decrement
+      OpData(".",       prec, INFIX_LEFT),        //element access
+      OpData("->",      prec, INFIX_LEFT),        //element access
+      OpData("..",      prec, INFIX_LEFT),        //range
+      OpData("...",     prec, INFIX_LEFT),        //array spread
 
-      OpData("++",    --prec,  POSTFIX),           //post-increment
-      OpData("--",      prec,  POSTFIX),           //post-decrement
-      OpData("+",       prec,  POSTFIX),           //unary plus
-      OpData("-",       prec,  POSTFIX),           //integer negation
-      OpData("!",       prec,  POSTFIX),           //logical negation
-      OpData("~",       prec,  POSTFIX),           //bitwise negation
-      OpData("&",       prec,  TYPE_MOD | PREFIX), //reference/address of
-      OpData("*",       prec,  TYPE_MOD | PREFIX), //raw pointer/dereference
-      OpData("@",       prec,  TYPE_MOD),          //unique pointer
-      OpData("$",       prec,  TYPE_MOD),          //shared pointer
-      OpData("`",       prec,  TYPE_MOD),          //weak pointer
-      OpData("%",       prec,  TYPE_MOD),          //iterator
-      OpData("<",       prec,  BLOCK_DELIM),       //specifier
-      OpData(">",       prec,  BLOCK_DELIM),       //specifier
+      OpData("++",    --prec, POSTFIX),           //post-increment
+      OpData("--",      prec, POSTFIX),           //post-decrement
+      OpData("+",       prec, POSTFIX),           //unary plus
+      OpData("-",       prec, POSTFIX),           //integer negation
+      OpData("!",       prec, POSTFIX),           //logical negation
+      OpData("~",       prec, POSTFIX),           //bitwise negation
+      OpData("&",       prec, TYPE_MOD | PREFIX), //reference/address of
+      OpData("*",       prec, TYPE_MOD | PREFIX), //raw pointer/dereference
+      OpData("@",       prec, TYPE_MOD),          //unique pointer
+      OpData("$",       prec, TYPE_MOD),          //shared pointer
+      OpData("`",       prec, TYPE_MOD),          //weak pointer
+      OpData("%",       prec, TYPE_MOD),          //iterator
+      OpData("<",       prec, BLOCK_DELIM),       //specifier
+      OpData(">",       prec, BLOCK_DELIM),       //specifier
       
-      OpData(".*",    --prec,  INFIX_LEFT),        //pointer to member
-      OpData("->*",     prec,  INFIX_LEFT),        //pointer to member
+      OpData(".*",    --prec, INFIX_LEFT),        //pointer to member
+      OpData("->*",     prec, INFIX_LEFT),        //pointer to member
 
-      OpData("^^",    --prec,  INFIX_LEFT),        //exponentiation
+      OpData("^^",    --prec, INFIX_LEFT),        //exponentiation
 
-      OpData("*",     --prec,  INFIX_LEFT),        //multiplication
-      OpData("/",       prec,  INFIX_LEFT),        //division
-      OpData("%",       prec,  INFIX_LEFT),        //modulo
+      OpData("*",     --prec, INFIX_LEFT),        //multiplication
+      OpData("/",       prec, INFIX_LEFT),        //division
+      OpData("%",       prec, INFIX_LEFT),        //modulo
 
-      OpData("+",     --prec,  INFIX_LEFT),        //addition
-      OpData("-",       prec,  INFIX_LEFT),        //subtraction
+      OpData("+",     --prec, INFIX_LEFT),        //addition
+      OpData("-",       prec, INFIX_LEFT),        //subtraction
 
-      OpData("<<",    --prec,  INFIX_LEFT),        //left bit-shift
-      OpData(">>",      prec,  INFIX_LEFT),        //right bit-shift
+      OpData("<<",    --prec, INFIX_LEFT),        //left bit-shift
+      OpData(">>",      prec, INFIX_LEFT),        //right bit-shift
 
       OpData("<=>",   --prec, INFIX_LEFT),        //three-way comparison
 

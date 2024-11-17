@@ -46,16 +46,19 @@ struct alignas(8) clef::OpData {
 struct clef::OpGroup {
    private:
       mcsl::arr_span<OpData> _ops;
+      TokenType _type;
    public:
-      constexpr OpGroup():_ops{} {}
-      constexpr OpGroup(OpData* begin, const uint size):_ops{begin,size} {}
+      constexpr OpGroup():_ops{},_type{} {}
+      constexpr OpGroup(OpData* begin, const uint size):_ops{begin,size},_type{tokType(begin->toString())} {}
 
       constexpr uint size() const { return _ops.size(); }
+      constexpr TokenType type() const { return _type; }
       constexpr OpData& operator[](const uint i) { return _ops[i]; }
       constexpr const OpData& operator[](const uint i) const { return _ops[i]; }
 
       constexpr auto toString() const { return _ops[0].toString(); }
       
+      constexpr operator bool() const { return _ops.size(); }
 };
 
 // //!rework clef::OpData to list all possible operators for the operator string

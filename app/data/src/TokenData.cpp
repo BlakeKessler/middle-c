@@ -2,29 +2,9 @@
 #define TOKEN_DATA_CPP
 
 #include "MidC_Data.hpp"
-#include <cassert>
-
-// //!check if a node is the opening delimiter of a block expression
-// //!NOTE: REPLACE WITH HASHMAP
-// //!NOTE: NOT WORKING
-// template<typename strT> requires mcsl::str_t<strT,char>
-// clef::BlockType clef::blockDelimType(const strT& str) {
-//    if (!str.size() || str.size() > MAX_DELIM_LEN) {
-//       return BlockType::NONE;
-//    }
-
-//    //search array
-//    for (uint i = 0; i < BLOCK_DELIMS.size(); ++i) {
-//       if (str == BLOCK_DELIMS[i].open || str == BLOCK_DELIMS[i].close) {
-//          return static_cast<BlockType>(i);
-//       }
-//    }
-//    return BlockType::NONE;
-// }
 
 //!array encoding which tokens each character is a legal member of
 using enum clef::TokenType;
-#define CTMP (clef::TokenType)(0x88)
 const mcsl::static_arr<clef::TokenType,256> clef::tokTypeArr{
 // NUL   SOH   STX   ETX   EOT   ENQ   ACK   BEL   BS    LF    VT    FF    CR    SO    SI    DLE
    NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE,
@@ -74,6 +54,12 @@ const mcsl::static_arr<clef::TokenType,256> clef::tokTypeArr{
 //	0xf0  0xf1  0xf2  0xf3  0xf4  0xf5  0xf6  0xf7  0xf8  0xf9  0xfa  0xfb  0xfc  0xfd  0xfe  0xff
    NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE, NONE
 };
-#undef CTMP
+
+//!calculate token type of a string
+template<mcsl::str_t str_t> constexpr clef::TokenType clef::tokType(const str_t& str) {
+   TokenType type = TokenType::ANY;
+   for (uint i = str.size(); --i;) { type &= tokType(str[i]); }
+   return type;
+}
 
 #endif //TOKEN_DATA_CPP

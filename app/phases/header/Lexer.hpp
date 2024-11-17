@@ -12,6 +12,9 @@ class clef::Lexer {
 
       static SourceTokens LexSource(Source&& src);
       static inline SourceTokens LexFile(const char* path) { return LexSource(Source::readFile(path)); }
+
+
+      static uint emplaceOps(mcsl::dyn_arr<Token>& toks, mcsl::raw_str_span tokstr);
 };
 
 #endif //LEXER_HPP
