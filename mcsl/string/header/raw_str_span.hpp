@@ -20,6 +20,7 @@ class mcsl::raw_str_span : public str_base<char> {
       //constructors
       constexpr raw_str_span(): _buf(),_size() {}
       constexpr raw_str_span(char* str, const uint size):_buf(str),_size(size) {}
+      constexpr raw_str_span(char* begin, char* end):_buf(begin),_size(end-begin) {}
       template<typename Other_t> requires requires{ std::is_base_of_v<str_base<char>,Other_t>; } constexpr raw_str_span(Other_t& other): raw_str_span(other.data(),other.size()) {}
       template<typename Other_t> requires requires{ std::is_base_of_v<str_base<char>,Other_t>; } constexpr raw_str_span(Other_t& other, const uint size): raw_str_span(other.data(),size) { assert(other.size() >= size); }
       template<typename Other_t> requires requires{ std::is_base_of_v<str_base<char>,Other_t>; } constexpr raw_str_span(Other_t& other, const uint begin, const uint size): raw_str_span(other.data() + begin, size) { assert(other.size() >= begin + size); }
