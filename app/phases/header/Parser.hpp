@@ -6,6 +6,9 @@
 #include "SourceTokens.hpp"
 #include "SyntaxTree.hpp"
 
+#include "MidC_Data.hpp"
+#include "OperatorData.hpp"
+
 #include "alloc.hpp"
 
 class clef::Parser {
