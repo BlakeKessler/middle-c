@@ -3,18 +3,18 @@
 
 #include "Lexer.hpp"
 #include "Source.hpp"
-#include "MidC_Data.hpp"
+#include "TokenData.hpp"
 #include "OperatorData.hpp"
 
 #include "char_type.hpp"
-#include <cstring>
-#include <cstdio>
+// #include <cstring>
+// #include <cstdio>
 
 //!creates a SourceTokens from results of file reader
 clef::SourceTokens clef::Lexer::LexSource(Source&& src) {
    SourceTokens tokens(std::move(src));
    auto& toks = tokens.tokens();
-   auto& tokLines = tokens.allRows();
+   auto& tokLines = tokens.lines();
 
    mcsl::array<mcsl::raw_str_span>& srcLines = tokens.source().lineArr();
    
