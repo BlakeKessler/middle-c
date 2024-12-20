@@ -1,6 +1,6 @@
 #compiler
 COMPILER := clang++ -std=c++23
-FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name
+FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name -Wno-gcc-compat
 # COMPILER := g++-14 -std=c++23
 # FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4
 
@@ -35,6 +35,14 @@ Parser	:	app/phases app/structs app/elements app/data
 	$(BUILD_CMD)
 
 #MIDDLE-C STANDARD LIBRARY TARGETS
+StrToNum	:	mcsl/utils mcsl/math
+	$(BUILD_CMD)
+Benchmark:	mcsl/utils mcsl/math
+	$(BUILD_CMD)
+UintN		: mcsl/math
+	$(BUILD_CMD)
+MUL		: mcsl/math
+	$(BUILD_CMD)
 MCSL			:	mcsl/*/src/*
 	rm -f $(OUT_PATH)/*.o										\
 	&& $(COMPILER) $(FLAGS) -c $^ -Imcs						\
