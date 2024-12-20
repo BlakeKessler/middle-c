@@ -13,7 +13,7 @@ struct clef::SymbolTable {
    private:
       std::unordered_map<mcsl::string, Symbol> _names;
    public:
-      SymbolTable();
+      SymbolTable():_names{} {}
       SymbolTable(const SymbolTable& other);
 
       template<mcsl::str_t str_t, mcsl::is_t<mcsl::container_base<str_t>> container_t> Symbol& operator[](const container_t&);
