@@ -14,10 +14,12 @@ struct clef::Block : public mcsl::contig_base<Expression*> {
       mcsl::dyn_arr<Expression*> _contents;
       Operator* _elemDelim;
       BlockType _type;
+
+      bool _isClosed;
    public:
-      Block():_contents{},_elemDelim{},_type{} {}
-      Block(const BlockType type):_contents{},_elemDelim{},_type{type} {}
-      Block(const BlockType type, Operator* delim):_contents{},_elemDelim{delim},_type{type} {}
+      Block():_contents{},_elemDelim{},_type{},_isClosed{} {}
+      Block(const BlockType type):_contents{},_elemDelim{},_type{type},_isClosed{false} {}
+      Block(const BlockType type, Operator* delim):_contents{},_elemDelim{delim},_type{type},_isClosed{false} {}
       
       Block(OpData open);
       Block(OpData open, OpData close);
@@ -27,6 +29,10 @@ struct clef::Block : public mcsl::contig_base<Expression*> {
       BlockType type() const { return _type; }
       Operator* delim() { return _elemDelim; }
       const Operator* delim() const { return _elemDelim; }
+      bool isClosed() const { return _isClosed; }
+
+      void  open() { _isClosed = false; }
+      void close() { _isClosed = true; }
       
 
 
