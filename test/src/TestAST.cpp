@@ -1,5 +1,5 @@
 #include "SyntaxTree.hpp"
-#include "Tokenizer.hpp"
+#include "Lexer.hpp"
 
 
 #include <cstdio>
@@ -16,13 +16,13 @@ int main(const int argc, char** argv) {
 
    //read and tokenize file
    printf("%s", BIG_HEADER);
-   clef::Lexer tokenizer = clef::TokenizeFile(argv[1]);
+   clef::SourceTokens tokens = clef::Lexer::LexFile(argv[1]);
    std::printf("\033[1mTokens:\033[22m\n%s", SMALL_HEADER);
-   tokenizer.printf();
+   tokens.printf();
    std::printf("\n%s\n", BIG_HEADER);
 
 
-   clef::SyntaxTree tree{std::move(tokenizer.tokens()),tokenizer.allRows()};
+   clef::SyntaxTree tree{std::move(tokens.tokens()),tokens.lines()};
    std::printf("\n%s\033[1mAbstract Syntax Tree:\033[22m\n%s", BIG_HEADER, SMALL_HEADER);
    tree.printf();
    std::printf("\n%s\n", BIG_HEADER);

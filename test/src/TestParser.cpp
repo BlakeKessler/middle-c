@@ -2,9 +2,8 @@
 #define PARSER_TEST
 
 #include "Parser.hpp"
-#include "Tokenizer.hpp"
+#include "Lexer.hpp"
 #include "dyn_arr.hpp"
-#include <cstring>
 #include <cstdio>
 
 #define BIG_HEADER "\033[;1m=======================\n\033[0m"
@@ -19,16 +18,15 @@ int main(const int argc, char** argv) {
 
    //read and tokenize file
    std::printf("%s", BIG_HEADER);
-   clef::Lexer tokenizer = clef::TokenizeFile(argv[1]);
+   clef::SourceTokens tokens = clef::Lexer::LexFile(argv[1]);
    std::printf("\033[1mTokens:\033[22m\n%s", SMALL_HEADER);
-   tokenizer.printf();
+   tokens.printf();
    std::printf("\n%s",BIG_HEADER);
 
    //abstract syntax tree
-   clef::Parser parser{std::move(tokenizer.tokens()),tokenizer.allRows()};
-   parser.runPass();
+   clef::SyntaxTree tree = clef::Parser::parse(tokens);
    std::printf("\033[1mAbstract Syntax Tree:\033[22m\n%s", SMALL_HEADER);
-   parser.printf();
+   tree.printf();
    std::printf("\n%s\n", BIG_HEADER);
 
    //offer to print debug info
@@ -39,7 +37,7 @@ int main(const int argc, char** argv) {
       case 'q':
          break;
       case 'p':
-         parser.print();
+         tree.print();
          std::printf("\n%s\n", BIG_HEADER);
          break;
       default:
