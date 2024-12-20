@@ -7,6 +7,8 @@
 #include "concepts.hpp"
 
 namespace mcsl {
+   template<uint _capacity> struct uint_n;
+
    template<typename first_t, typename second_t = first_t> struct pair;
 
    template<typename T> struct container_base;
