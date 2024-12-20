@@ -26,6 +26,7 @@ clef::Source clef::Source::readFile(const char* path) {
    assert(charsRead == _buf.size());
 
    //validate file encoding (UTF-8)
+   //!NOTE: UNFINISHED
 
 
    //find number of lines

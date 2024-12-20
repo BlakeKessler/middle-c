@@ -44,10 +44,10 @@ struct clef::SourceTokens {
 
       mcsl::dyn_arr<Token>& tokens() { return _tokens; }
       const mcsl::dyn_arr<Token>& tokens() const { return _tokens; }
-      mcsl::dyn_arr_span<Token>& row(const uint i) { return _tokLines[i]; }
-      const mcsl::dyn_arr_span<Token>& row(const uint i) const { return _tokLines[i]; }
-      mcsl::array<mcsl::dyn_arr_span<Token>>& allRows() { return _tokLines; }
-      const mcsl::array<mcsl::dyn_arr_span<Token>>& allRows() const { return _tokLines; }
+      mcsl::dyn_arr_span<Token>& line(const uint i) { return _tokLines[i]; }
+      const mcsl::dyn_arr_span<Token>& line(const uint i) const { return _tokLines[i]; }
+      mcsl::array<mcsl::dyn_arr_span<Token>>& lines() { return _tokLines; }
+      const mcsl::array<mcsl::dyn_arr_span<Token>>& lines() const { return _tokLines; }
       uint lineCount() const { return _tokLines.size(); }
       Source& source() { return _src; }
       const Source& source() const { return _src; }
