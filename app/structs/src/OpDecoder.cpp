@@ -58,10 +58,10 @@ template <uint _size> template<mcsl::str_t str_t> constexpr clef::OpGroup clef::
 
    //find operator group
    const auto bucketBounds = self[str[0]];
-   assert(str[0] == _groupBuf[bucketBounds.first].toString().toString()[0]); //check that the first character is correct
+   assert(str[0] == _opBuf[_groupBuf[bucketBounds.first].first].toString()[0]); //check that the first character is correct
    for (uint i = bucketBounds.first; i < bucketBounds.second; ++i) {
-      if (!_groupBuf[i].toString().substrcmp(str)) {
-         return OpGroup{_opBuf.begin() + _groupBuf[i].first, _groupBuf[i].second};
+      if (!_opBuf[_groupBuf[i].first].toString().substrcmp(str)) {
+         return OpGroup{const_cast<OpData*>(_opBuf.begin()) + _groupBuf[i].first, _groupBuf[i].second};
       }
    }
    //no operator group found - return null group

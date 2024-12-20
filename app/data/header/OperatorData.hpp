@@ -15,12 +15,32 @@ namespace clef {
 
 
 
+
+
+   constexpr const OpGroup OPEN_PARENS       = BLOCK_DELIMS["("];
+   constexpr const OpGroup OPEN_INIT_LIST    = BLOCK_DELIMS["{"];
+   constexpr const OpGroup OPEN_SUBSCRIPT    = BLOCK_DELIMS["["];
+   
+   constexpr const OpGroup CLOSE_PARENS      = BLOCK_DELIMS[")"];
+   constexpr const OpGroup CLOSE_INIT_LIST   = BLOCK_DELIMS["}"];
+   constexpr const OpGroup CLOSE_SUBSCRIPT   = BLOCK_DELIMS["]"];
+
+
+
    constexpr const OpGroup LINE_CMNT         = PTXT_DELIMS["//"];
    constexpr const OpGroup BLOCK_CMNT_OPEN   = PTXT_DELIMS["/*"];
    constexpr const OpGroup BLOCK_CMNT_CLOSE  = PTXT_DELIMS["*/"];
 
    constexpr const OpGroup STR_OP            = PTXT_DELIMS["\""];
    constexpr const OpGroup CHAR_OP           = PTXT_DELIMS["\'"];
+
+
+
+   constexpr const OpGroup LABEL_DELIM       = OPERATORS[":"];
+
+
+
+   constexpr const OpGroup RADIX_POINT       = OPERATORS["."];
 };
 
 #endif //OPERATOR_DATA_HPP

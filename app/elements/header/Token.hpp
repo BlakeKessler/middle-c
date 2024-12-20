@@ -3,7 +3,7 @@
 #define TOKEN_HPP
 
 #include "CLEF.hpp"
-#include "MidC_Data.hpp"
+#include "TokenData.hpp"
 #include "raw_str_span.hpp"
 
 struct clef::Token : public mcsl::raw_str_span {

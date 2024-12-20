@@ -3,6 +3,7 @@
 #define OP_DATA_HPP
 
 #include "CLEF.hpp"
+#include "TokenData.hpp"
 
 #include "static_arr.hpp"
 #include "arr_span.hpp"
@@ -20,7 +21,7 @@ struct alignas(8) clef::OpData {
       template<mcsl::str_t str_t> constexpr OpData(const str_t& str, const byte precedence, const OpType type, const byte id = 0)
          :_opStr{str},_opStrLen{str.strlen()},_precedence{precedence},_type{type},_opID{id} {}
       constexpr OpData(const char str[MAX_OP_LEN + 1], const byte precedence, const OpType type, const byte id = 0)
-         :_opStr{str},_opStrLen{(byte)_opStr.strlen()},_precedence{precedence},_type{type},_opID{id} { _opStrLen > _opStr.size() ? _opStr.size() : _opStrLen; }
+         :_opStr{str},_opStrLen{(byte)_opStr.strlen()},_precedence{precedence},_type{type},_opID{id} { _opStrLen = _opStrLen > _opStr.size() ? _opStr.size() : _opStrLen; }
 
       constexpr uint size() const { return _opStr.size(); }
       constexpr byte id() const { return _opID; }
