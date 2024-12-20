@@ -9,7 +9,7 @@
 //!owning non-null-terminated string
 //!basically only good for data packing
 template<uint _capacity, typename size_t>
-class mcsl::raw_buf_str : public str_base<char> {
+class [[clang::trivial_abi]] mcsl::raw_buf_str : public str_base<char> {
    private:
       char _buf[_capacity];
       size_t _size;
@@ -23,17 +23,17 @@ class mcsl::raw_buf_str : public str_base<char> {
       constexpr raw_buf_str(const str_base<char>& other): raw_buf_str(other.data(), other.size()) {}
 
       //properties
-      constexpr size_t size() const { return _size; }
-      constexpr size_t capacity() const { return _capacity; }
-      constexpr static const auto& nameof() { return _nameof; }
+      [[gnu::pure]] constexpr size_t size() const { return _size; }
+      [[gnu::pure]] constexpr size_t capacity() const { return _capacity; }
+      [[gnu::pure]] constexpr static const auto& nameof() { return _nameof; }
 
       //member access
-      constexpr char* const* ptr_to_buf() { return &_buf; }
-      constexpr char* data() { return _buf; }
-      constexpr char* begin() { return _buf; }
-      constexpr const char* const* ptr_to_buf() const { return &_buf; }
-      constexpr const char* data() const { return _buf; }
-      constexpr const char* begin() const { return _buf; }
+      [[gnu::pure]] constexpr char* const* ptr_to_buf() { return &_buf; }
+      [[gnu::pure]] constexpr char* data() { return _buf; }
+      [[gnu::pure]] constexpr char* begin() { return _buf; }
+      [[gnu::pure]] constexpr const char* const* ptr_to_buf() const { return &_buf; }
+      [[gnu::pure]] constexpr const char* data() const { return _buf; }
+      [[gnu::pure]] constexpr const char* begin() const { return _buf; }
 };
 
 template<uint _capacity, typename size_t>

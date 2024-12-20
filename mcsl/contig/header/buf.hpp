@@ -7,7 +7,7 @@
 #include <memory>
 #include <cassert>
 
-template<typename T, uint _capacity> class mcsl::buf : mcsl::contig_base<T> {
+template<typename T, uint _capacity> class [[clang::trivial_abi]] mcsl::buf : mcsl::contig_base<T> {
    private:
       T _buf[_capacity];
       uint _size;
@@ -16,20 +16,20 @@ template<typename T, uint _capacity> class mcsl::buf : mcsl::contig_base<T> {
    public:
       static constexpr const auto& nameof() { return _nameof; }
       
-      constexpr buf():_buf{0},_size(0) {}
+      constexpr buf():_buf{},_size{} {}
       template<contig_t other_t> constexpr buf(const other_t& other);
-      constexpr buf(std::convertible_to<T> auto&&... initList);
+      constexpr buf(castable_to<T> auto&&... initList);
 
-      constexpr uint size() const { return _size; }
-      constexpr uint capacity() const { return _capacity; }
+      [[gnu::pure]] constexpr uint size() const { return _size; }
+      [[gnu::pure]] constexpr uint capacity() const { return _capacity; }
 
       //member access
-      constexpr T* const* ptr_to_buf() { return &_buf; }
-      constexpr T* data() { return _buf; }
-      constexpr T* begin() { return _buf; }
-      constexpr const T* const* ptr_to_buf() const { return &_buf; }
-      constexpr const T* data() const { return _buf; }
-      constexpr const T* begin() const { return _buf; }
+      [[gnu::pure]] constexpr T* const* ptr_to_buf() { return &_buf; }
+      [[gnu::pure]] constexpr T* data() { return _buf; }
+      [[gnu::pure]] constexpr T* begin() { return _buf; }
+      [[gnu::pure]] constexpr const T* const* ptr_to_buf() const { return &_buf; }
+      [[gnu::pure]] constexpr const T* data() const { return _buf; }
+      [[gnu::pure]] constexpr const T* begin() const { return _buf; }
 
       //modifiers
       T* push_back(const T& obj);
@@ -41,12 +41,13 @@ template<typename T, uint _capacity> class mcsl::buf : mcsl::contig_base<T> {
 template<typename T, uint _capacity> template<mcsl::contig_t other_t> constexpr mcsl::buf<T,_capacity>::buf(const other_t& other):
    _buf{0},
    _size(other.size()) {
-      _size = _size > _capacity ? _capacity : _size;
+      assert(_size <= _capacity);
+      
       for (uint i = 0; i < _size; ++i) {
          _buf[i] = other[i];
       }
 }
-template<typename T, uint _capacity> constexpr mcsl::buf<T,_capacity>::buf(std::convertible_to<T> auto&&... initList):
+template<typename T, uint _capacity> constexpr mcsl::buf<T,_capacity>::buf(castable_to<T> auto&&... initList):
    _buf{0},
    _size(sizeof...(initList)) {
       assert(_size <= _capacity);
@@ -68,6 +69,7 @@ template<typename T, uint _capacity> bool mcsl::buf<T,_capacity>::pop_back() {
       return false;
    }
    --_size;
+   std::destroy_at(end());
    return true;
 }
 template<typename T, uint _capacity> T* mcsl::buf<T,_capacity>::emplace(const uint i, auto&&... args) {

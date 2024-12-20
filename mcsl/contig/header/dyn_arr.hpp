@@ -8,7 +8,6 @@
 
 #include <bit>
 #include <memory>
-#include <initializer_list>
 #include <cstring>
 #include <utility>
 
@@ -26,22 +25,21 @@ template <typename T> class mcsl::dyn_arr : public contig_base<T> {
       constexpr dyn_arr();
       dyn_arr(const uint size);
       dyn_arr(const uint size, const uint bufSize);
-      dyn_arr(std::initializer_list<T>);
-      dyn_arr(std::convertible_to<T> auto... initList) requires requires { sizeof...(initList) == _size; }:_buf{std::forward<decltype(initList)>(initList)...} {}
+      dyn_arr(castable_to<T> auto&... initList) requires requires { sizeof...(initList) == _size; }:_buf{std::forward<decltype(initList)>(initList)...} {}
       dyn_arr(dyn_arr&& other);
       ~dyn_arr() { self.free(); }
-      void free() const { mcsl::free(_buf); }
+      void free() const { mcsl::free(_buf); const_cast<T*&>(_buf) = nullptr; const_cast<uint&>(_bufSize) = 0; const_cast<uint&>(_size) = 0; }
 
-      constexpr uint size() const { return _size; }
-      constexpr uint capacity() const { return _bufSize; }
+      [[gnu::pure]] constexpr uint size() const { return _size; }
+      [[gnu::pure]] constexpr uint capacity() const { return _bufSize; }
 
       //member access
-      constexpr T* const* ptr_to_buf() { return &_buf; }
-      constexpr T* data() { return _buf; }
-      constexpr T* begin() { return _buf; }
-      constexpr const T* const* ptr_to_buf() const { return &_buf; }
-      constexpr const T* data() const { return _buf; }
-      constexpr const T* begin() const { return _buf; }
+      [[gnu::pure]] constexpr T* const* ptr_to_buf() { return &_buf; }
+      [[gnu::pure]] constexpr T* data() { return _buf; }
+      [[gnu::pure]] constexpr T* begin() { return _buf; }
+      [[gnu::pure]] constexpr const T* const* ptr_to_buf() const { return &_buf; }
+      [[gnu::pure]] constexpr const T* data() const { return _buf; }
+      [[gnu::pure]] constexpr const T* begin() const { return _buf; }
 
 
       //MODIFIERS
@@ -78,11 +76,6 @@ template<typename T> mcsl::dyn_arr<T>::dyn_arr(const uint size, const uint bufSi
          _buf = mcsl::calloc<T>(_bufSize);
       }
 }
-//!constructor from initializer list
-template<typename T> mcsl::dyn_arr<T>::dyn_arr(std::initializer_list<T> initPair):
-   _bufSize(initPair.size()),_size(initPair.size()),_buf(mcsl::malloc<T>(_bufSize)) {
-      std::memcpy(_buf,initPair.begin(),_size * sizeof(T));
-}
 //!move constructor
 template<typename T> mcsl::dyn_arr<T>::dyn_arr(dyn_arr&& other):
    _bufSize(other._bufSize),_size(other._size),_buf(other._buf) {
@@ -111,7 +104,8 @@ template<typename T> bool mcsl::dyn_arr<T>::push_back(const T& obj) {
 //!zeroes out the index in the array
 template<typename T> T mcsl::dyn_arr<T>::pop_back() {
    T temp = _buf[--_size];
-   std::memset(_buf + _size, 0, sizeof(T));
+   // std::memset(_buf + _size, 0, sizeof(T));
+   std::destroy_at(self.end());
    return temp;
 }
 //!construct in place

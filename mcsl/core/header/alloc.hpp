@@ -4,55 +4,16 @@
 
 #include "MCSL.hpp"
 #include "concepts.hpp"
-#include <cassert>
-#include <cstdlib>
 
 namespace mcsl {
-#pragma region def
-   template<typename T> T* malloc(const uint itemCount);
-   template<typename T> T* calloc(const uint itemCount);
-   template<typename T> T* realloc(T* buf, const uint newItemCount);
-   void free(void* &&ptr);
-
-#pragma endregion def
-#pragma region src
-   //!allocate a contiguous array large enough to hold itemCount items of type T
-   template<typename T> T* malloc(const uint itemCount) {
-      if (!itemCount) { return nullptr; }
-      T* ptr;
-      if constexpr (is_t<T,void*>) {
-         ptr = std::malloc(itemCount * sizeof(byte));
-      } else {
-         ptr = static_cast<T*>(std::malloc(itemCount * sizeof(T)));
-      }
-      assert(ptr);
-      return ptr;
-   }
-   //!allocate and null-intitialize a contiguous array large enough to hold itemCount items of type T
-   template<typename T> T* calloc(const uint itemCount) {
-      if (!itemCount) { return nullptr; }
-      T* ptr;
-      if constexpr (is_t<T,void*>) {
-         ptr = std::calloc(itemCount, sizeof(byte));
-      } else {
-         ptr = static_cast<T*>(std::calloc(itemCount, sizeof(T)));
-      }
-      assert(ptr);
-      return ptr;
-   }
-   //!allocate and null-intitialize a contiguous array large enough to hold itemCount items of type T
-   template<typename T> T* realloc(T* buf, const uint newItemCount) {
-      if (!newItemCount) { return nullptr; }
-      T* ptr;
-      if constexpr (is_t<T,void*>) {
-         ptr = std::realloc(buf, newItemCount * sizeof(byte));
-      } else {
-         ptr = static_cast<T*>(std::realloc(buf, newItemCount * sizeof(T)));
-      }
-      assert(ptr);
-      return ptr;
-   }
-
-#pragma endregion src
+   template<typename T> [[gnu::malloc]] T* alloc(const uint itemCount);
+   template<typename T> [[gnu::malloc]] T* malloc(const uint itemCount);
+   template<typename T> [[gnu::malloc]] T* calloc(const uint itemCount);
+   template<typename T> [[gnu::malloc]] T* dalloc(const uint itemCount);
+   template<typename T> [[gnu::malloc]] T* realloc(T* buf, const uint newItemCount);
+   void free(void* ptr);
 }
+
+#include "../src/alloc.cpp"
+
 #endif //MCSL_ALLOC_HPP

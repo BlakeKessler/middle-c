@@ -3,7 +3,6 @@
 
 #include "string.hpp"
 #include "alloc.hpp"
-#include <bit>
 #include <cassert>
 #include <cstring>
 

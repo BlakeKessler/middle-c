@@ -10,7 +10,7 @@
 //!invalidated if the string is reallocated
 //!relatively unsafe (even ignoring the invalidation)
 //!   nothing stops setting/incrementing _buf or _size beyond the end of the spanned string
-class mcsl::raw_str_span : public str_base<char> {
+class [[clang::trivial_abi]] mcsl::raw_str_span : public str_base<char> {
    private:
       char* _buf;
       uint _size;
@@ -21,25 +21,25 @@ class mcsl::raw_str_span : public str_base<char> {
       constexpr raw_str_span(): _buf(),_size() {}
       constexpr raw_str_span(char* str, const uint size):_buf(str),_size(size) {}
       constexpr raw_str_span(char* begin, char* end):_buf(begin),_size(end-begin) {}
-      template<typename Other_t> requires requires{ std::is_base_of_v<str_base<char>,Other_t>; } constexpr raw_str_span(Other_t& other): raw_str_span(other.data(),other.size()) {}
-      template<typename Other_t> requires requires{ std::is_base_of_v<str_base<char>,Other_t>; } constexpr raw_str_span(Other_t& other, const uint size): raw_str_span(other.data(),size) { assert(other.size() >= size); }
-      template<typename Other_t> requires requires{ std::is_base_of_v<str_base<char>,Other_t>; } constexpr raw_str_span(Other_t& other, const uint begin, const uint size): raw_str_span(other.data() + begin, size) { assert(other.size() >= begin + size); }
+      template<mcsl::str_t Other_t> constexpr raw_str_span(Other_t& other): raw_str_span(other.begin(),other.size()) {}
+      template<mcsl::str_t Other_t> constexpr raw_str_span(Other_t& other, const uint size): raw_str_span(other.begin(),size) { assert(other.size() >= size); }
+      template<mcsl::str_t Other_t> constexpr raw_str_span(Other_t& other, const uint begin, const uint size): raw_str_span(other.begin() + begin, size) { assert(other.size() >= begin + size); }
 
       //properties
-      constexpr uint size() const { return _size; }
-      constexpr static const auto& nameof() { return _nameof; }
+      [[gnu::pure]] constexpr uint size() const { return _size; }
+      [[gnu::pure]] constexpr static const auto& nameof() { return _nameof; }
       
       constexpr raw_str_span& inc_begin(const sint i) { _size -= i; _buf += i; return self; }
       constexpr raw_str_span& set_size(const uint i) { _size = i; return self; }
       constexpr raw_str_span& inc_end(const sint i) { _size += i; return self; }
 
       //member access
-      constexpr char* const* ptr_to_buf() { return &_buf; }
-      constexpr char* data() { return _buf; }
-      constexpr char* begin() { return _buf; }
-      constexpr const char* const* ptr_to_buf() const { return &_buf; }
-      constexpr const char* data() const { return _buf; }
-      constexpr const char* begin() const { return _buf; }
+      [[gnu::pure]] constexpr char* const* ptr_to_buf() { return &_buf; }
+      [[gnu::pure]] constexpr char* data() { return _buf; }
+      [[gnu::pure]] constexpr char* begin() { return _buf; }
+      [[gnu::pure]] constexpr const char* const* ptr_to_buf() const { return &_buf; }
+      [[gnu::pure]] constexpr const char* data() const { return _buf; }
+      [[gnu::pure]] constexpr const char* begin() const { return _buf; }
 };
 
 #endif //MCSL_RAW_STRING_SPAN_HPP

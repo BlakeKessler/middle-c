@@ -6,14 +6,10 @@
 #include "contig_base.hpp"
 #include "raw_str.hpp"
 
-#include <bit>
-#include <memory>
-#include <cstring>
 #include <cassert>
-#include <initializer_list>
 #include <utility>
 
-template <typename T, uint _size> class mcsl::static_arr : public contig_base<T> {
+template <typename T, uint _size> class [[clang::trivial_abi]] mcsl::static_arr : public contig_base<T> {
    private:
       T _buf[_size];
 
@@ -22,20 +18,19 @@ template <typename T, uint _size> class mcsl::static_arr : public contig_base<T>
       static constexpr const auto& nameof() { return _nameof; }
 
       constexpr static_arr():_buf{} {}
-      constexpr static_arr(const contig_base<T>& buf) requires requires{ buf.size() >= _size; } { for (uint i = 0; i < _size; ++i) { _buf[i] = buf[i]; }}
-      constexpr static_arr(T (&buf)[_size]);
-      // constexpr static_arr(std::initializer_list<T> init);
-      constexpr static_arr(std::convertible_to<T> auto... initList) requires requires { sizeof...(initList) == _size; }:_buf{std::forward<decltype(initList)>(initList)...} {}
+      constexpr static_arr(const contig_base<T>& other) requires requires{ other.size() >= _size; } { assert(other.size() >= _size); for (uint i = 0; i < _size; ++i) { _buf[i] = other[i]; }}
+      constexpr static_arr(T (&other)[_size]):_buf{other} {}
+      constexpr static_arr(castable_to<T> auto... initList) requires requires { sizeof...(initList) == _size; }:_buf{std::forward<decltype(initList)>(initList)...} {}
 
-      constexpr uint size() const { return _size; }
+      [[gnu::pure]] constexpr uint size() const { return _size; }
 
       //member access
-      constexpr T* const* ptr_to_buf() { return &_buf; }
-      constexpr T* data() { return _buf; }
-      constexpr T* begin() { return _buf; }
-      constexpr const T* const* ptr_to_buf() const { return &_buf; }
-      constexpr const T* data() const { return _buf; }
-      constexpr const T* begin() const { return _buf; }
+      [[gnu::pure]] constexpr T* const* ptr_to_buf() { return &_buf; }
+      [[gnu::pure]] constexpr T* data() { return _buf; }
+      [[gnu::pure]] constexpr T* begin() { return _buf; }
+      [[gnu::pure]] constexpr const T* const* ptr_to_buf() const { return &_buf; }
+      [[gnu::pure]] constexpr const T* data() const { return _buf; }
+      [[gnu::pure]] constexpr const T* begin() const { return _buf; }
 
       //MODIFIERS
       constexpr T* emplace(const uint i, auto&&... args);
@@ -43,17 +38,11 @@ template <typename T, uint _size> class mcsl::static_arr : public contig_base<T>
 
 #pragma region CTAD
 namespace mcsl {
-   template<typename T, std::derived_from<T> ...U> static_arr(T, U...) -> static_arr<T,1+sizeof...(U)>;
+   template<typename T, castable_to<T>... Argv_t> static_arr(T, Argv_t...) -> static_arr<T, sizeof...(Argv_t)+1>;
 }
 #pragma endregion CTAD
 
 #pragma region src
-//!constructor from raw array
-template<typename T,uint _size> constexpr mcsl::static_arr<T,_size>::static_arr(T (&buf)[_size]):_buf{} {
-   for (uint i = 0; i < _size; ++i) {
-      _buf[i] = buf[i];
-   }
-}
 
 //!construct in place
 template<typename T,uint _size> constexpr T* mcsl::static_arr<T,_size>::emplace(const uint i, auto&&... args) {

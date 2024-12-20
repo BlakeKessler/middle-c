@@ -37,15 +37,15 @@ template <typename T> struct mcsl::bin_node {
          free();
       }
 
-      T& operator*() { return _obj; }
-      const T& operator*() const { return _obj; }
-      T& operator->() { return *self; }
-      const T& operator->() const { return *self; }
+      [[gnu::pure]] T& operator*() { return _obj; }
+      [[gnu::pure]] const T& operator*() const { return _obj; }
+      [[gnu::pure]] T& operator->() { return *self; }
+      [[gnu::pure]] const T& operator->() const { return *self; }
 
-      bin_node* next() { return _next; }
-      bin_node* prev() { return _prev; }
-      const bin_node* next() const { return _next; }
-      const bin_node* prev() const { return _prev; }
+      [[gnu::pure]] bin_node* next() { return _next; }
+      [[gnu::pure]] bin_node* prev() { return _prev; }
+      [[gnu::pure]] const bin_node* next() const { return _next; }
+      [[gnu::pure]] const bin_node* prev() const { return _prev; }
 
       bin_node* pop() {
          if (_next) { _next->_prev = _prev; }

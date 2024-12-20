@@ -11,7 +11,7 @@
 //!   the object itself - pointers to characters are still invalidated
 //!relatively unsafe (even ignoring the invalidation)
 //!   nothing stops setting/incrementing _begin or _size beyond the end of the spanned string
-class mcsl::dyn_str_span : public str_base<char> {
+class [[clang::trivial_abi]] mcsl::dyn_str_span : public str_base<char> {
    private:
       char* const* _ptrToBuf;
       uint _begin;
@@ -27,8 +27,8 @@ class mcsl::dyn_str_span : public str_base<char> {
       constexpr dyn_str_span(str_base<char>& other, const uint begin, const uint size): _ptrToBuf(other.ptr_to_buf()),_begin(begin),_size(size) { assert(other.size() >= begin + size); }
 
       //properties
-      constexpr uint size() const { return _size; }
-      constexpr static const auto& nameof() { return _nameof; }
+      [[gnu::pure]] constexpr uint size() const { return _size; }
+      [[gnu::pure]] constexpr static const auto& nameof() { return _nameof; }
       
       constexpr dyn_str_span& set_begin(const uint i) { _size += _begin; _size -= i; _begin = i; return self; }
       constexpr dyn_str_span& inc_begin(const sint i) { _size -= i; _begin += i; return self; }
@@ -36,12 +36,12 @@ class mcsl::dyn_str_span : public str_base<char> {
       constexpr dyn_str_span& inc_end(const sint i) { _size += i; return self; }
 
       //member access
-      constexpr char* const* ptr_to_buf() { return _ptrToBuf; }
-      constexpr char* data() { return *_ptrToBuf; }
-      constexpr char* begin() { return *_ptrToBuf + _begin; }
-      constexpr const char* const* ptr_to_buf() const { return _ptrToBuf; }
-      constexpr const char* data() const { return *_ptrToBuf; }
-      constexpr const char* begin() const { return *_ptrToBuf + _begin; }
+      [[gnu::pure]] constexpr char* const* ptr_to_buf() { return _ptrToBuf; }
+      [[gnu::pure]] constexpr char* data() { return *_ptrToBuf; }
+      [[gnu::pure]] constexpr char* begin() { return *_ptrToBuf + _begin; }
+      [[gnu::pure]] constexpr const char* const* ptr_to_buf() const { return _ptrToBuf; }
+      [[gnu::pure]] constexpr const char* data() const { return *_ptrToBuf; }
+      [[gnu::pure]] constexpr const char* begin() const { return *_ptrToBuf + _begin; }
 };
 
 #endif //MCSL_DYN_STRING_SPAN_HPP

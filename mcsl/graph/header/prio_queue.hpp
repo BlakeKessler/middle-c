@@ -23,10 +23,12 @@ template<typename T, typename cmp_t> class mcsl::prio_queue {
       void push(bin_node* bin_node, const uint depth);
       template<container_t<T> arr_t> void push_contents(arr_t&& objs);
 
+      [[gnu::pure]] constexpr uint size() const { return _size; }
+
       void emplace(auto&&... args);
 
       void pop();
-      const T& top();
+      [[gnu::pure]] const T& top();
 };
 
 #endif //MCSL_PRIO_QUEUE_HPP

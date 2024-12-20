@@ -8,7 +8,7 @@
 #include <utility>
 
 //!non-owning array
-template <typename T> class mcsl::arr_span : public contig_base<T> {
+template <typename T> class [[clang::trivial_abi]] mcsl::arr_span : public contig_base<T> {
    private:
       T* _buf;
       uint _size;
@@ -17,39 +17,28 @@ template <typename T> class mcsl::arr_span : public contig_base<T> {
    public:
       static constexpr const auto& nameof() { return _nameof; }
 
-      constexpr arr_span();
-      constexpr arr_span(T* buf, const uint size);
-      constexpr arr_span(T* buf, T* end);
+      constexpr arr_span():_buf{},_size{} {}
+      constexpr arr_span(T* begin, T* end):_buf{begin},_size{end-begin} { assert(begin <= end); }
+      constexpr arr_span(T* buf, const uint size):_buf{buf},_size{size} {}
+      constexpr arr_span(const contig_base<T>& other):arr_span{other.begin(), other.size()} {}
+      constexpr arr_span(const contig_base<T>& other, const uint size):arr_span{other.begin(), size} { assert(size <= other.size()); }
+      constexpr arr_span(const contig_base<T>& other, const uint begin, const uint size):arr_span{other.begin()+begin, size} { assert((begin+size) <= other.size()); }
 
-      constexpr uint size() const { return _size; }
+      [[gnu::pure]] constexpr uint size() const { return _size; }
 
       //member access
-      constexpr T* const* ptr_to_buf() { return &_buf; }
-      constexpr T* data() { return _buf; }
-      constexpr T* begin() { return _buf; }
-      constexpr const T* const* ptr_to_buf() const { return &_buf; }
-      constexpr const T* data() const { return _buf; }
-      constexpr const T* begin() const { return _buf; }
+      [[gnu::pure]] constexpr T* const* ptr_to_buf() { return &_buf; }
+      [[gnu::pure]] constexpr T* data() { return _buf; }
+      [[gnu::pure]] constexpr T* begin() { return _buf; }
+      [[gnu::pure]] constexpr const T* const* ptr_to_buf() const { return &_buf; }
+      [[gnu::pure]] constexpr const T* data() const { return _buf; }
+      [[gnu::pure]] constexpr const T* begin() const { return _buf; }
 
       //MODIFIERS
       constexpr T* emplace(const uint i, auto&&... args);
 };
 
 #pragma region src
-//!default constructor
-template<typename T> constexpr mcsl::arr_span<T>::arr_span():
-   _buf(),_size() {
-
-}
-template<typename T> constexpr mcsl::arr_span<T>::arr_span(T* buf, const uint size):
-   _buf(buf),_size(size) {
-
-}
-template<typename T> constexpr mcsl::arr_span<T>::arr_span(T* buf, T* end):
-   _buf(buf),_size(buf - end) {
-
-}
-
 //!construct in place
 template<typename T> constexpr T* mcsl::arr_span<T>::emplace(const uint i, auto&&... args) {
    if (i >= _size) {

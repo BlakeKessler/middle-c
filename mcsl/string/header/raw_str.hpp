@@ -8,7 +8,7 @@
 #include <cassert>
 
 //!null-terminated string literal
-template<uint _size> class mcsl::raw_str : public str_base<char> {
+template<uint _size> class [[clang::trivial_abi]] mcsl::raw_str : public str_base<char> {
    private:
       char _buf[_size + 1];
 
@@ -23,18 +23,18 @@ template<uint _size> class mcsl::raw_str : public str_base<char> {
       constexpr raw_str(const char* str);
 
       //properties
-      constexpr uint size() const { return sizeof(_buf) - 1; }
-      constexpr static const auto& nameof() { return _nameof; }
+      [[gnu::pure]] constexpr uint size() const { return sizeof(_buf) - 1; }
+      [[gnu::pure]] constexpr static const auto& nameof() { return _nameof; }
       // constexpr uint size() const { return _size; }
       // constexpr auto& nameof() const { return _nameof; }
 
       //member access
-      constexpr char* const* ptr_to_buf() { return reinterpret_cast<char**>(&_buf); }
-      constexpr char* data() { return _buf; }
-      constexpr char* begin() { return _buf; }
-      constexpr const char* const* ptr_to_buf() const { return reinterpret_cast<char**>(&_buf); }
-      constexpr const char* data() const { return _buf; }
-      constexpr const char* begin() const { return _buf; }
+      [[gnu::pure]] constexpr char* const* ptr_to_buf() { return reinterpret_cast<char**>(&_buf); }
+      [[gnu::pure]] constexpr char* data() { return _buf; }
+      [[gnu::pure]] constexpr char* begin() { return _buf; }
+      [[gnu::pure]] constexpr const char* const* ptr_to_buf() const { return reinterpret_cast<char**>(&_buf); }
+      [[gnu::pure]] constexpr const char* data() const { return _buf; }
+      [[gnu::pure]] constexpr const char* begin() const { return _buf; }
 };
 
 template<uint _size> constexpr mcsl::raw_str<_size>::raw_str(const char* str, const uint strsize): _buf{} {

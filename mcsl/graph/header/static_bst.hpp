@@ -5,13 +5,13 @@
 #include "MCSL.hpp"
 
 template<typename T, uint _size, typename cmp>
-class mcsl::static_bst {
+class [[clang::trivial_abi]] mcsl::static_bst {
    public:
       struct node;
    private:
       T _buf[_size];
       node _pointerBuf[_size];
-      node* _root;
+      uint _rootIndex;
 
    public:
       constexpr static_bst();
@@ -21,9 +21,11 @@ class mcsl::static_bst {
       T* insert(const T& obj);
       void erase(T* obj);
 
-      template<typename obj_t> bool contains(const obj_t& obj) const
+      [[gnu::pure]] constexpr uint size() const { return _size; }
+
+      template<typename obj_t> [[gnu::pure]] bool contains(const obj_t& obj) const
          requires (const T&& elem, const obj_t&& obj) { {cmp(elem, obj)} -> is<bool>; };
-      template<typename obj_t> bool find(const obj_t& obj) const
+      template<typename obj_t> [[gnu::pure]] bool find(const obj_t& obj) const
          requires (const T&& elem, const obj_t&& obj) { {cmp(elem, obj)} -> is<bool>; };
 };
 
