@@ -14,6 +14,8 @@ namespace clef {
    struct OpGroup;
    template <uint _size> struct OpDecoder;
    struct DelimPair;
+   struct KeywordSpec;
+   template <uint _size> struct KeywordDecoder;
 
    //atomic compilation elements
    struct Token;

@@ -14,39 +14,40 @@ namespace clef {
       LEXER_UNSPEC,
 
       PARSER_UNSPEC,
+      PARSER_NOT_IMPLEMENTED,
       //syntax errors
       UNCLOSED_BLOCK,
-      INVALID_LIT,
       BAD_PARAM_BLOCK,
-      BAD_LITERAL
+      BAD_LITERAL,
+      BAD_CMNT,
+      BAD_IDEN,
+      //ast/ast node errors
+      BAD_LIT_CAST,
+      BAD_NODE_CAST,
    };
    constexpr auto      operator+(const ErrCode t) noexcept { return std::to_underlying(t); }
    
    //!enum of AST node type codes
-   enum class NodeType : uint16 {
-      ERROR = 0xFF,        //CLEF INTERNAL ERROR
-      NONE = 0x00,         //to-be determined
+   enum class [[clang::flag_enum]] NodeType : uint8 {
+      ERROR = 0xFF,  //CLEF INTERNAL ERROR
+      NONE = 0x00,   //to-be determined
 
-      COMMENT,             //commented out code
-      LITERAL,             //numeric, string, or character literal
-
-      TYPE,                //fundamental or object type
-      OBJ,                 //instantiation of a type
-      QUAL,                //type qualifier (EX: const, static, &, *)
-      IDEN,                //identifier
-      DECL,                //declaration
-      DEF,                 //definition  
-      
-      STATEMENT,           //statement (AKA: line of code)
-      
-      BLOCK,               //block-delimiter delimited block
-
-      OPERATOR             //MiddleC operator (binary infix, unary prefix, or unary postfix)
+      EXPR,          //expression
+      STMT,          //statement
+      STMT_SEQ,      //statement sequence
+      IDEN,          //identifier
+      BLOCK,         //block
+      TYPE,          //type
+      LIT,           //literal
+      OBJ,           //object
+      FUNC,          //function
+      OP,            //operator
+      TEMPLATE,      //template
    };
    constexpr auto operator+(const NodeType t) noexcept { return std::to_underlying(t); }
    
    //!token types bitmask
-   enum class TokenType : uint8 {
+   enum class [[clang::flag_enum]] TokenType : uint8 {
       NONE = 0_m, //not a valid member of a token (whitespace)
       EOS  = 1_m, //end of line of code
       PTXT = 2_m, //plaintext segment delimiters (strings, comments)
@@ -75,7 +76,7 @@ namespace clef {
    constexpr TokenType operator*(const TokenType lhs, const uint rhs) noexcept { return (TokenType)((+lhs) * rhs); }
 
    //operator properties bitmask
-   enum class OpType : uint8 {
+   enum class [[clang::flag_enum]] OpType : uint8 {
       //!bitmask atoms
       //unused (available for user-definition)
       FREE        = 0_m,
@@ -127,7 +128,8 @@ namespace clef {
    //!literal type specification
    enum class LitType : uint8 {
       NONE = 0x00,
-      INT,
+      UINT,
+      SINT,
       FLOAT,
       CHAR,
       STRING,
@@ -135,7 +137,7 @@ namespace clef {
       REGEX,
    };
    //!type qualifier bitmask
-   enum class TypeQualMask : uint16 {
+   enum class [[clang::flag_enum]] TypeQualMask : uint16 {
       NONE           =  0_m,
 
       CONST          =  1_m,
@@ -160,7 +162,7 @@ namespace clef {
    };
 
    //!symbol properties bitmask
-   enum class SymbolProp : uint64 {
+   enum class [[clang::flag_enum]] SymbolProp : uint64 {
       NIL            = 0_m,
       
       HAS_NAME_TABLE = 1_m,
@@ -174,11 +176,11 @@ namespace clef {
       MASK           = 7_m,   //bitmask type
       INTERFACE      = 8_m,   //interface type
       FUNCTION       = 9_m,   //C-style function
+      LABEL          = 10_m,  //ASM-style label
 
-      OBJECT         = 10_m,  //symbol represents an instantiation of a type
-      TYPE           = 11_m,  //symbol names a type
-      NAMESPACE      = 12_m,  //symbol names a namespace
-      LABEL          = 13_m,  //symbol names an asm-like label
+      OBJECT         = 11_m,  //symbol represents an instantiation of a type
+      TYPE           = 12_m,  //symbol names a type
+      NAMESPACE      = 13_m,  //symbol names a namespace
       DIRECTIVE      = 14_m,  //symbol represents a preprocessor directive
 
       CALLABLE       = 15_m,  //can be called like a function
@@ -216,6 +218,165 @@ namespace clef {
    constexpr SymbolProp operator~(const SymbolProp lhs) noexcept { return (SymbolProp)(~+lhs); }
    constexpr SymbolProp operator*(const SymbolProp lhs, const uint rhs) noexcept { return (SymbolProp)((+lhs) * rhs); }
 
+
+   enum class KeywordID : uint8 {
+      __TYPE         = 8_m,
+         __NUMERIC      = 7_m, __NUMERIC_TYPE = __TYPE | __NUMERIC,
+            __FIXED_WIDTH  = 6_m,
+            __FLOATING     = 5_m,
+            __SIGNED       = 4_m,
+         __TEXT         = 4_m,
+      __TYPE_ADJACENT = 7_m,
+         __OBJECT_TYPE  = 6_m,
+         __QUALIFIER    = 5_m,
+         __CAST         = 4_m,
+      __CONTROL_FLOW = 6_m,
+      ___LAST_SPEC = __CONTROL_FLOW,
+
+      _8_BITS        = 1,
+
+
+      _NOT_A_KEYWORD = 0,
+
+
+      VOID           = __TYPE + 1,
+      AUTO,
+
+
+      CHAR           = __TYPE | __TEXT,
+      CHAR_UTF_8     = __TYPE | __TEXT | __FIXED_WIDTH | _8_BITS,
+      CHAR_UTF_16,
+      CHAR_UTF_32,
+      
+
+      BOOL           = __TYPE | __NUMERIC,
+      UBYTE,
+      USHORT,
+      UINT,
+      ULONG,
+
+      SIGN_T         = __TYPE | __NUMERIC | __SIGNED,
+      SBYTE,
+      SSHORT,
+      SINT,
+      SLONG,
+
+
+      UINT_8         = __TYPE | __NUMERIC | __FIXED_WIDTH | _8_BITS,
+      UINT_16,
+      UINT_32,
+      UINT_64,
+      UINT_128,
+      UINT_256,
+
+      SINT_8         = UINT_8 | __SIGNED,
+      SINT_16,
+      SINT_32,
+      SINT_64,
+      SINT_128,
+      SINT_256,
+
+      FLOAT             = SINT | __FLOATING,
+
+      FLOAT_16          = SINT_16 | __FLOATING,
+      FLOAT_32,
+      FLOAT_64,
+      FLOAT_128,
+      FLOAT_256,
+
+
+
+
+
+
+
+      CLASS             = __TYPE_ADJACENT | __OBJECT_TYPE + 1,
+      STRUCT,
+      UNION,
+      ENUM,
+      MASK,
+      NAMESPACE,
+
+      CONST             = __TYPE_ADJACENT | __QUALIFIER + 1,
+      CONSTEXPR,
+      IMMEDIATE,
+      FINAL,
+      MUTABLE,
+      VOLATILE,
+      ATOMIC,
+      EXPLICIT,
+
+      CAST              = __TYPE_ADJACENT | __CAST + 1,
+      UP_CAST,
+      DYN_CAST,
+      BIT_CAST,
+      CONST_CAST,
+
+      TYPEOF            = __TYPE_ADJACENT + 1,
+      TYPEID,
+      TYPENAME,
+      SIZEOF,
+      ARRLEN,
+      ALIGNAS,
+      ALIGNOF,
+      TEMPLATE,
+      
+
+      GOTO              = __CONTROL_FLOW + 1,
+      IF,
+      ELSE,
+      FOR,
+      WHILE,
+      DO,
+      BREAK,
+      CONTINUE,
+      SWITCH,
+      MATCH,
+      CASE,
+      DEFAULT,
+      TRY,
+      CATCH,
+      THROW,
+
+
+
+
+      THIS = 1,
+      SELF,
+
+      NEW,
+      DELETE,
+
+      ASSERT,
+      STATIC_ASSERT,
+
+      TRUE,
+      FALSE,
+
+      NULLPTR,
+
+      RETURN,
+
+      USING,
+
+      ASM,
+   };
+   constexpr auto operator+(const KeywordID t) noexcept { return std::to_underlying(t); }
+   constexpr bool isType(const KeywordID id) noexcept { return +id & +KeywordID::__NUMERIC; }
+      constexpr bool isNumeric(const KeywordID id) noexcept { return +id & +KeywordID::__NUMERIC_TYPE; }
+         constexpr bool isFloatingPoint(const KeywordID id) noexcept { return +id & (+KeywordID::__NUMERIC_TYPE | +KeywordID::__FLOATING); }
+         constexpr bool isInteger(const KeywordID id) noexcept { return ~(+id & +KeywordID::__NUMERIC_TYPE) & +KeywordID::__FLOATING; }
+            constexpr bool isSint(const KeywordID id) noexcept { return ~(+id & (+KeywordID::__NUMERIC_TYPE | +KeywordID::__SIGNED)) & +KeywordID::__FLOATING; }
+            constexpr bool isUint(const KeywordID id) noexcept { return ~(+id & +KeywordID::__NUMERIC_TYPE) & (+KeywordID::__FLOATING | +KeywordID::__SIGNED); }
+      constexpr bool isText(const KeywordID id) noexcept { return ~(+id & (+KeywordID::__TYPE | +KeywordID::__TEXT)) & (+KeywordID::__NUMERIC); }
+         constexpr bool isASCII(const KeywordID id) noexcept { return ~(+id & (+KeywordID::__TYPE | +KeywordID::__TEXT)) & (+KeywordID::__NUMERIC | +KeywordID::__FIXED_WIDTH); }
+         constexpr bool isUnicode(const KeywordID id) noexcept { return ~(+id & (+KeywordID::__TYPE | +KeywordID::__TEXT | +KeywordID::__FIXED_WIDTH)) & +KeywordID::__NUMERIC; }
+   constexpr bool isTypeAdjacent(const KeywordID id) noexcept { return ~(+id & +KeywordID::__TYPE_ADJACENT) & +KeywordID::__TYPE; }
+      constexpr bool isObjectType(const KeywordID id) noexcept { return ~(+id & (+KeywordID::__TYPE_ADJACENT | +KeywordID::__OBJECT_TYPE)) & +KeywordID::__TYPE; }
+      constexpr bool isQualifier(const KeywordID id) noexcept { return ~(+id & (+KeywordID::__TYPE_ADJACENT | +KeywordID::__QUALIFIER)) & (+KeywordID::__TYPE | +KeywordID::__OBJECT_TYPE); }
+      constexpr bool isCast(const KeywordID id) noexcept { return ~(+id & (+KeywordID::__TYPE_ADJACENT | +KeywordID::__CAST)) & (+KeywordID::__TYPE | +KeywordID::__OBJECT_TYPE | +KeywordID::__QUALIFIER); }
+   constexpr bool isControlFlow(const KeywordID id) noexcept { return ~(+id & +KeywordID::__CONTROL_FLOW) & +KeywordID::__NUMERIC_TYPE; }
+   constexpr bool isUnspec(const KeywordID id) noexcept { return +id < +KeywordID::___LAST_SPEC; }
 }
 
 #endif //ENUMS_HPP
