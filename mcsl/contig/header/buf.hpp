@@ -17,7 +17,7 @@ template<typename T, uint _capacity> class [[clang::trivial_abi]] mcsl::buf : mc
       static constexpr const auto& nameof() { return _nameof; }
       
       constexpr buf():_buf{},_size{} {}
-      template<contig_t other_t> constexpr buf(const other_t& other);
+      constexpr buf(const contig_t auto& other);
       constexpr buf(castable_to<T> auto&&... initList);
 
       [[gnu::pure]] constexpr uint size() const { return _size; }
@@ -38,8 +38,8 @@ template<typename T, uint _capacity> class [[clang::trivial_abi]] mcsl::buf : mc
       T* emplace_back(auto&&... args);
 };
 
-template<typename T, uint _capacity> template<mcsl::contig_t other_t> constexpr mcsl::buf<T,_capacity>::buf(const other_t& other):
-   _buf{0},
+template<typename T, uint _capacity> constexpr mcsl::buf<T,_capacity>::buf(const contig_t auto& other):
+   _buf{},
    _size(other.size()) {
       assert(_size <= _capacity);
       
@@ -48,7 +48,7 @@ template<typename T, uint _capacity> template<mcsl::contig_t other_t> constexpr 
       }
 }
 template<typename T, uint _capacity> constexpr mcsl::buf<T,_capacity>::buf(castable_to<T> auto&&... initList):
-   _buf{0},
+   _buf{},
    _size(sizeof...(initList)) {
       assert(_size <= _capacity);
 

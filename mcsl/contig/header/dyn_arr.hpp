@@ -27,6 +27,7 @@ template <typename T> class mcsl::dyn_arr : public contig_base<T> {
       dyn_arr(const uint size, const uint bufSize);
       dyn_arr(castable_to<T> auto&... initList) requires requires { sizeof...(initList) == _size; }:_buf{std::forward<decltype(initList)>(initList)...} {}
       dyn_arr(dyn_arr&& other);
+      dyn_arr(const dyn_arr& other);
       ~dyn_arr() { self.free(); }
       void free() const { mcsl::free(_buf); const_cast<T*&>(_buf) = nullptr; const_cast<uint&>(_bufSize) = 0; const_cast<uint&>(_size) = 0; }
 
@@ -79,7 +80,14 @@ template<typename T> mcsl::dyn_arr<T>::dyn_arr(const uint size, const uint bufSi
 //!move constructor
 template<typename T> mcsl::dyn_arr<T>::dyn_arr(dyn_arr&& other):
    _bufSize(other._bufSize),_size(other._size),_buf(other._buf) {
-      other.release();
+      if (this != &other) { other.release(); }
+}
+//!copy constructor
+template<typename T> mcsl::dyn_arr<T>::dyn_arr(const dyn_arr& other):
+   dyn_arr{other._size, other._bufSize} {
+      for (uint i = 0; i < _size; ++i) {
+         self[i] = other[i];
+      }
 }
 
 //!realloc buffer to the specified size

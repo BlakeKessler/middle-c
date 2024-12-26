@@ -24,7 +24,7 @@ class mcsl::string : public str_base<char> {
       string(const string& other);
 
       template<str_t strT> requires requires(strT s) { s.release(); }
-         string(strT&& other): string(other.data(),other.size()) { other.release(); }
+         string(strT&& other): string(other.data(),other.size()) { if (this != &other) { other.release(); } }
       template<str_t strT> string(const strT& other): string(other.data(),other.size()) {}
 
       //properties

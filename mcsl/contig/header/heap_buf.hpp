@@ -19,8 +19,8 @@ template<typename T, uint _capacity> class mcsl::heap_buf : mcsl::contig_base<T>
       
       constexpr heap_buf():_buf(),_size() {}
       heap_buf():_buf(mcsl::calloc<T>(_capacity)),_size(0) {}
-      heap_buf(heap_buf&& other): _buf(other._buf),_size(other._size) { other.release(); }
-      template<contig_t other_t> heap_buf(const other_t& other);
+      heap_buf(heap_buf&& other): _buf(other._buf),_size(other._size) { if (this != &other) { other.release(); } }
+      heap_buf(const contig_t auto& other);
       heap_buf(castable_to<T> auto&&... initList);
 
       ~heap_buf() { self.free(); }
@@ -46,7 +46,7 @@ template<typename T, uint _capacity> class mcsl::heap_buf : mcsl::contig_base<T>
       T* emplace_back(auto&&... args);
 };
 
-template<typename T, uint _capacity> template<mcsl::contig_t other_t> constexpr mcsl::heap_buf<T,_capacity>::heap_buf(const other_t& other):
+template<typename T, uint _capacity> constexpr mcsl::heap_buf<T,_capacity>::heap_buf(const contig_t auto& other):
    _buf(mcsl::malloc<T>(_capacity)),
    _size(other.size()) {
       assert(_size <= _capacity);

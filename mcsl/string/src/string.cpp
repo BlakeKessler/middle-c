@@ -47,7 +47,7 @@ string(str,std::strlen(str)) {
 //!move constructor
 mcsl::string::string(string&& other):
    _buf(std::move(other._buf)) {
-      other.release();
+      if (this != &other) { other.release(); }
 }
 //!copy constructor
 //!NOTE: will be removed if possible

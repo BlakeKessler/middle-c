@@ -20,9 +20,9 @@ template <typename T> class [[clang::trivial_abi]] mcsl::arr_span : public conti
       constexpr arr_span():_buf{},_size{} {}
       constexpr arr_span(T* begin, T* end):_buf{begin},_size{end-begin} { assert(begin <= end); }
       constexpr arr_span(T* buf, const uint size):_buf{buf},_size{size} {}
-      constexpr arr_span(const contig_base<T>& other):arr_span{other.begin(), other.size()} {}
-      constexpr arr_span(const contig_base<T>& other, const uint size):arr_span{other.begin(), size} { assert(size <= other.size()); }
-      constexpr arr_span(const contig_base<T>& other, const uint begin, const uint size):arr_span{other.begin()+begin, size} { assert((begin+size) <= other.size()); }
+      constexpr arr_span(const contig_t auto& other):arr_span{other.begin(), other.size()} {}
+      constexpr arr_span(const contig_t auto& other, const uint size):arr_span{other.begin(), size} { assert(size <= other.size()); }
+      constexpr arr_span(const contig_t auto& other, const uint begin, const uint size):arr_span{other.begin()+begin, size} { assert((begin+size) <= other.size()); }
 
       [[gnu::pure]] constexpr uint size() const { return _size; }
 

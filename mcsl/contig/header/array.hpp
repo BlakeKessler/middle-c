@@ -24,6 +24,7 @@ template <typename T> class mcsl::array : public contig_base<T> {
       array(const uint size);
       array(const T* buf, const uint size);
       array(array&& other);
+      array(const array& other);
       array(castable_to<T> auto... initList) requires requires { sizeof...(initList) == _size; }:_buf{std::forward<decltype(initList)>(initList)...} {}
       ~array() { self.free(); }
       void free() const { mcsl::free(_buf); const_cast<T*&>(_buf) = nullptr; const_cast<uint&>(_size) = 0; }
@@ -64,7 +65,14 @@ template<typename T> mcsl::array<T>::array(const T* buf, const uint size):
 //!move constructor
 template<typename T> mcsl::array<T>::array(array&& other):
    _buf(other._buf),_size(other._size) {
-      other.release();
+      if (this != &other) { other.release(); }
+}
+//!copy constructor
+template<typename T> mcsl::array<T>::array(const array& other):
+   array{other._size} {
+      for (uint i = 0; i < _size; ++i) {
+         self[i] = other[i];
+      }
 }
 
 //!construct in place
