@@ -29,9 +29,9 @@ COMPILE_CMD = $(COMPILE_OBJ_CMD) $(OUT_PATH) && $(COMPILE_OUT_CMD)
 BUILD_CMD = $(CLEAN_CMD) && $(COMPILE_CMD) && $(CLEAN_CMD)
 
 #CLEF TARGETS
-Lexer		:	app/phases app/structs app/elements app/data
+Lexer		:	app/phases app/structures app/elements app/data
 	$(BUILD_CMD)
-Parser	:	app/phases app/structs app/elements app/data
+Parser	:	app/phases app/structures app/elements app/data
 	$(BUILD_CMD)
 
 #MIDDLE-C STANDARD LIBRARY TARGETS
