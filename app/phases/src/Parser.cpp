@@ -5,7 +5,7 @@
 
 #include "type_traits.hpp"
 
-#define advance() if (++tokIt >= endtok) { goto DONE_WITH_FILE; }
+#define advance() if (++tokIt >= endtok) { [[unlikely]] goto DONE_WITH_FILE; }
 #define gotoEOS() \
 if (tokIt->type() != TokenType::EOS) {\
    hadErrors |= logError<true>(ErrCode::PARSER_UNSPEC, "missing EOS");\
@@ -163,6 +163,7 @@ clef::SyntaxTree clef::Parser::parse(const SourceTokens& src) {
                   }
                   [[fallthrough]];
                case KeywordID::FOR: [[fallthrough]];
+               case KeywordID::FOREACH: [[fallthrough]];
                case KeywordID::WHILE: [[fallthrough]];
                case KeywordID::SWITCH: [[fallthrough]];
                case KeywordID::MATCH:
@@ -259,6 +260,7 @@ clef::SyntaxTree clef::Parser::parse(const SourceTokens& src) {
                #pragma region objtype
                case KeywordID::CLASS: [[fallthrough]];
                case KeywordID::STRUCT: [[fallthrough]];
+               case KeywordID::INTERFACE: [[fallthrough]];
                case KeywordID::UNION: [[fallthrough]];
                case KeywordID::ENUM: [[fallthrough]];
                case KeywordID::MASK: [[fallthrough]];
@@ -343,6 +345,9 @@ clef::SyntaxTree clef::Parser::parse(const SourceTokens& src) {
                   advance();
                   gotoEOS();
 
+               case KeywordID::TEMPLATE:
+                  consumeSpecificBlock(BlockType::SPECIALIZER, tree, tokIt, endtok); //contents //!NOTE: make it consume a template parameter list
+
                //lvalues - treat as identifier
                case KeywordID::THIS: [[fallthrough]];
                case KeywordID::SELF:
@@ -372,6 +377,10 @@ clef::SyntaxTree clef::Parser::parse(const SourceTokens& src) {
                      goto HANDLE_TYPENAME;
                   }
 
+                  if (isQualifier(keyword)) {
+                     //!NOTE: UNFINISHED
+                  }
+
                   #pragma endregion typeKeywords
 
                   if (isCast(keyword)) {
@@ -382,6 +391,15 @@ clef::SyntaxTree clef::Parser::parse(const SourceTokens& src) {
 
                      goto DONE_WITH_TOKEN;
                   }
+
+
+                  if (isTypeAdjacent(keyword)) {
+                     advance();
+                     consumeSpecificBlock(BlockType::PARENS, tree, tokIt, endtok); //!NOTE: make it consume an expression in parens
+
+                     goto DONE_WITH_TOKEN;
+                  }
+
 
                   //!NOTE: IF THIS CODE GET REACHED THERE IS AN ERROR IN THE CLEF CODE
                   throwError(ErrCode::PARSER_NOT_IMPLEMENTED, "keyword does not have a case and is not handled as a member of a category (%u)", (uint)keyword);

@@ -1,28 +1,32 @@
 #pragma once
-#ifndef EXPRESISON_HPP
-#define EXPRESSION_HPP
+#ifndef EXPR_HPP
+#define EXPR_HPP
 
 #include "CLEF.hpp"
-
-#include "astNode.hpp"
-#include "ast-nodes/Type.hpp"
-
-#include "static_arr.hpp"
+#include "ast-nodes/Operator.hpp"
 
 struct clef::Expression {
    private:
-      mcsl::static_arr<astNode*, 3> _nodes;
-      Type* _returnType;
+      Operator* _op;
+      void* _lhs;
+      void* _rhs;
+      // union { //!NOTE: if I use this, move it before _op to facilitate type punning
+      //    mcsl::pair<void*,void*> _operands;
+      //    Literal _lit;
+      // };
+
+      friend class Declaration;
+      friend class Loop;
+      friend class If;
+      friend class Else;
+      friend class ElseIf;
+      friend class Switch;
+      friend class Match;
+      
+      Expression():_op{},_lhs{},_rhs{} {}
+      Expression(Operator* op, void* lhs, void* rhs):_op{op},_lhs{lhs},_rhs{rhs} {}
    public:
-      Expression(Type* type, astNode* first = nullptr, astNode* second = nullptr, astNode* third = nullptr)
-         :_nodes{mcsl::static_arr<astNode*,3>{first, second, third}},_returnType{type} {}
-      Expression(Type* type, mcsl::static_arr<astNode*,3> nodes):_nodes{nodes},_returnType{type} {}
-
-      astNode*& operator[](const uint i) { return _nodes[i]; }
-      const astNode* operator[](const uint i) const { return _nodes[i]; }
-
-      Type*& type() { return _returnType; }
-      const Type* type() const { return _returnType; }
+      Literal* value() const; //evaluate expression
 };
 
-#endif //EXPRESSION_HPP
+#endif //EXPR_HPP

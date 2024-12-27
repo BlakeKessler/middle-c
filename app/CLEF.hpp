@@ -9,6 +9,10 @@
 #include "raw_str.hpp"
 
 namespace clef {
+   //utilities
+   class allocator;
+   template<typename T> struct index;
+
    //objects for encoding Middle C specification data
    struct OpData;
    struct OpGroup;
@@ -20,17 +24,50 @@ namespace clef {
    //atomic compilation elements
    struct Token;
    struct astNode;
-      struct Expression;
-      struct Statement;
-      struct StmtSequence;
       struct Identifier;
-      struct Block;
-      struct Type;
+         struct Variable;
+         struct Function;
+         struct Type;
+            struct VariadicParameter; using VariadicParam = VariadicParameter;
+            struct FundamentalType; using FundType = FundamentalType;
+            struct FunctionSignature; using FuncSig = FunctionSignature;
+            struct Enum;
+            struct Union;
+            struct Namespace;
+            struct Interface;
+            struct Struct;
+            struct Class;
+            struct GenericType;
+      struct Scope;
       struct Literal;
-      struct Object;
-      struct Function;
       struct Operator;
-      struct Template;
+      struct Expression; using Expr = Expression;
+         struct Declaration; using Decl = Declaration;
+         struct Loop;
+         struct If;
+         struct Else;
+         struct ElseIf;
+         struct Switch;
+         struct Match;
+      struct ForLoopParams;
+      struct SwitchCases;
+      struct MatchCases;
+      struct Statement; using Stmt = Statement;
+      struct StatementSequence; using StmtSeq = StatementSequence;
+      struct ArgumentList; using ArgList = ArgumentList;
+      struct ParameterList; using ParamList = ParameterList;
+   // struct astNode;
+   //    struct Expression;
+   //    struct Statement;
+   //    struct StmtSequence;
+   //    struct Identifier;
+   //    struct Block;
+   //    struct Type;
+   //    struct Literal;
+   //    struct Object;
+   //    struct Function;
+   //    struct Operator;
+   //    struct Template;
    struct Symbol;
 
    //containers for atomic compilation elements
@@ -43,5 +80,11 @@ namespace clef {
    class Lexer;
    class Parser;
 }
+
+template<typename T> struct clef::index{
+   uint i;
+   operator uint&() { return i; }
+   operator uint() { return i; }
+};
 
 #endif //CLEF_HPP

@@ -1,0 +1,15 @@
+#pragma once
+#ifndef VAR_PARAM_HPP
+#define VAR_PARAM_HPP
+
+#include "CLEF.hpp"
+#include "ast-nodes/Type.hpp"
+
+struct clef::VariadicParameter : public clef::Type {
+   private:
+   
+   public:
+      using Type::Type;
+};
+
+#endif //VAR_PARAM_HPP

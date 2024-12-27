@@ -3,31 +3,17 @@
 #define FUNCTION_HPP
 
 #include "CLEF.hpp"
-
 #include "ast-nodes/Identifier.hpp"
-#include "ast-nodes/Block.hpp"
 
-#include "dyn_arr.hpp"
-
-//!AST node representing a function signature
-struct clef::Function {
+struct clef::Function : public clef::Identifier {
    private:
-      Identifier* _name;
-      Type* _returnType;
-      Block* _params;
+      FuncSig* _signature;
    public:
-      Function(Identifier* name = nullptr, Type* returnType = nullptr, Block* params = nullptr);
+      Function():Identifier{},_signature{} {}
+      Function(FuncSig* sig, const char* str, const uint len, Decl* decl = nullptr):Identifier{str, len, decl},_signature{sig} {}
 
-      Identifier* name() { return _name; }
-      Type* returnType() { return _returnType; }
-      Block* params() { return _params; }
-      const Identifier* name() const { return _name; }
-      const Type* returnType() const { return _returnType; }
-      const Block* params() const { return _params; }
-
-      bool isAnonymous() const { return _name; }
-      bool sameSignature(const Function& other) const;
-      bool sameSignature(const Function* other) const { return other && sameSignature(*other); }
+      FuncSig* signature() { return _signature; }
+      const FuncSig* signature() const { return _signature; }
 };
 
 #endif //FUNCTION_HPP

@@ -4,22 +4,22 @@
 
 #include "CLEF.hpp"
 
-#include "string.hpp"
+#include "raw_str_span.hpp"
 
 struct clef::Identifier {
    private:
-      mcsl::string _name;
-      NodeType _type;
+      Decl* _decl;
+      const mcsl::raw_str_span _name;
    public:
-      Identifier():_name{},_type{} {}
-      template<mcsl::str_t str_t> Identifier(const str_t& str):_name{str} {}
+      Identifier():_decl{},_name{} {}
+      Identifier(const char* str, const uint len, Decl* decl = nullptr):_decl{decl},_name{const_cast<char*>(str), len} {}
 
-      mcsl::string& name() { return _name; }
-      const mcsl::string& name() const { return _name; }
-      NodeType type() const { return _type; }
 
-      bool operator==(const Identifier& other) const { return _name == other._name; }
-      template <mcsl::str_t str_t> bool operator==(const str_t& str) const { return _name == str; }
+      bool operator==(const Identifier& other) const;
+      bool operator!=(const Identifier& other) const;
+      bool operator<=>(const Identifier& other) const;
+
+      operator mcsl::raw_str_span() const { return _name; }
 };
 
 #endif //IDENTIFIER_HPP

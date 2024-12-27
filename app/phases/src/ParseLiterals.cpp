@@ -101,21 +101,108 @@ mcsl::string clef::Parser::parseStrLitASCII(const char* begin, const char* end) 
 
 //!parse a numeric literal
 bool clef::Parser::parseNumLit(SyntaxTree& tree, const Token*& tokIt, const Token* endtok) {
-   const Token* it = tokIt + 1;
    LitType type = LitType::UINT;
-   if (it >= endtok || it->type() != TokenType::OP || tokIt->end() != it->begin()|| OPERATORS[*it] != RADIX_POINT) {
-      goto STR_TO_NUM;
+   uint radix = 0;
+
+   //check if it has a radix specifier
+   if (tokIt->size() >= 2 && (*tokIt)[0] == '0') {
+      switch ((*tokIt)[1]) {
+         case 'b': case 'B': radix = 2; break;
+         case 'o': case 'O': radix = 8; break;
+         case 'd': case 'D': radix = 10; break;
+         case 'x': case 'X': radix = 16; break;
+
+         default: break;
+      }
    }
-   type = LitType::FLOAT;
-   ++it;
-   if (it >= endtok || (it->type() != TokenType::DGIT && it->type() != TokenType::NUM && it->type() != TokenType::XDGT) || (it-1)->end() != it->begin()) {
-      type = LitType::UINT;
-      goto STR_TO_NUM;
+   
+   const Token* it = tokIt + 1;
+   if (it >= endtok) { goto STR_TO_NUM; }
+   //radix point
+   if (it->type() == TokenType::OP && OPERATORS[*it] == RADIX_POINT) {
+      ++it;
+      if (it >= endtok) { goto STR_TO_NUM; }
+      if (it->type() == TokenType::NUM || it->type() == TokenType::DGIT || it->type() == TokenType::XDGT) {
+         type = LitType::FLOAT;
+         ++it;
+         if (it >= endtok) { goto STR_TO_NUM; }
+      } else {
+         goto BAD_NUM;
+      }
+   }
+   //radix separator
+   if (it->type() == TokenType::CHAR && (*it) == RADIX_SEPARATOR) { //p
+      ++it;
+      if (it >= endtok) { goto STR_TO_NUM; }
+      //sign
+      if (it->type() == TokenType::OP && [&](){ const auto tmp = OPERATORS[*it]; return tmp == ADDITION || tmp == SUBTRACTION; }()) {
+         ++it;
+         if (it >= endtok) { goto STR_TO_NUM; }
+      }
+      //digits
+      if (it->type() == TokenType::NUM || it->type() == TokenType::DGIT || it->type() == TokenType::XDGT) {
+         type = LitType::FLOAT;
+         ++it;
+         if (it >= endtok) { goto STR_TO_NUM; }
+      }
+   } else if (radix < 16) {
+      if (it->back() == DECIMAL_RADIX_SEPARATOR) { //e
+         ++it;
+         if (it >= endtok) { goto STR_TO_NUM; }
+         //sign
+         if (it->type() == TokenType::OP && [&](){ const auto tmp = OPERATORS[*it]; return tmp == ADDITION || tmp == SUBTRACTION; }()) {
+            ++it;
+            if (it >= endtok) { goto STR_TO_NUM; }
+         }
+         //digits
+         if (it->type() == TokenType::NUM || it->type() == TokenType::DGIT || it->type() == TokenType::XDGT) {
+            type = LitType::FLOAT;
+            ++it;
+            if (it >= endtok) { goto STR_TO_NUM; }
+         }
+      }
+      else {
+         for (uint i = it->size() - 1; mcsl::carry::SUB(i, 1); ) { //search for radix separator (back-to-front)
+            if ((*tokIt)[i] == DECIMAL_RADIX_SEPARATOR) {
+               type = LitType::FLOAT;
+               goto STR_TO_NUM;
+            }
+         }
+      }
    }
 
+   STR_TO_NUM: {
+      --it;
+
+      const char* begin = tokIt->begin();
+      if (radix) {
+         begin += 2;
+      } else { radix = 10; }
+      const uint strlen = begin - it->end();
+      
+      switch (type) {
+         case LitType::UINT:
+            const ulong val = mcsl::str_to_uint(begin, strlen, radix);
+            //!NOTE: UNFINISHED
+
+            tokIt = it;
+            return true;
+
+         case LitType::FLOAT:
+            const double val = mcsl::str_to_real(begin, strlen, radix);
+            //!NOTE: UNFINISHED
+
+            tokIt = it;
+            return true;
+
+         default: //!NOTE: SHOULD BE IMPOSSIBLE
+            //!NOTE: UNFINISHED
+            throw "make a proper error code for this";
+      }
+   }
+
+   BAD_NUM:
    //!NOTE: UNFINISHED
-
-   STR_TO_NUM:
 
 }
 

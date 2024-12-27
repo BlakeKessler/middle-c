@@ -5,6 +5,7 @@
 // #include "CLEF.hpp"
 #include "CLEF_DEFINES.hpp"
 #include <utility>
+#include <bit>
 
 namespace clef {
    //!enum of CLEF error codes
@@ -32,19 +33,53 @@ namespace clef {
       ERROR = 0xFF,  //CLEF INTERNAL ERROR
       NONE = 0x00,   //to-be determined
 
-      EXPR,          //expression
-      STMT,          //statement
-      STMT_SEQ,      //statement sequence
-      IDEN,          //identifier
-      BLOCK,         //block
-      TYPE,          //type
-      LIT,           //literal
-      OBJ,           //object
-      FUNC,          //function
-      OP,            //operator
-      TEMPLATE,      //template
+      IDEN,
+         VAR,
+         FUNC,
+         TYPE,
+            VAR_PARAM,
+            FUND_TYPE,
+            FUNC_SIG,
+            ENUM,
+            UNION,
+            NAMESPACE,
+            INTERFACE,
+            STRUCT,
+            CLASS,
+            GENERIC,
+      SCOPE,
+      LITERAL,
+      OPERATOR,
+      EXPR,
+         STMT,
+         DECL,
+         LOOP,
+         IF,
+         ELSE,
+         ELSE_IF,
+         SWITCH,
+         MATCH,
+      FOR_LOOP_PARAMS,
+      SWITCH_CASES,
+      MATCH_CASES,
+      STMT_SEQ,
+      ARG_LIST,
+      PARAM_LIST,
    };
    constexpr auto operator+(const NodeType t) noexcept { return std::to_underlying(t); }
+   constexpr bool canUpCastTo(const NodeType from, const NodeType to) {
+      switch (to) {
+         case NodeType::IDEN:
+            return from >= NodeType::IDEN && from <= NodeType::GENERIC;
+         case NodeType::TYPE:
+            return from >= NodeType::TYPE && from <= NodeType::GENERIC;
+         case NodeType::EXPR:
+            return from >= NodeType::EXPR && from <= NodeType::MATCH;
+         
+         default:
+            return from == to;
+      };
+   }
    
    //!token types bitmask
    enum class [[clang::flag_enum]] TokenType : uint8 {
@@ -135,6 +170,7 @@ namespace clef {
       STRING,
       FORMAT,
       REGEX,
+      TYPEID,
    };
    //!type qualifier bitmask
    enum class [[clang::flag_enum]] TypeQualMask : uint16 {
@@ -143,7 +179,7 @@ namespace clef {
       CONST          =  1_m,
       CONSTEXPR      =  2_m,
       IMMEDIATE      =  3_m,
-      FINAL          =  4_m,
+      READONLY       =  4_m,
 
       MUTABLE        =  5_m,
       VOLATILE       =  6_m,
@@ -195,7 +231,7 @@ namespace clef {
       CONST          = 21_m,
       CONSTEXPR      = 22_m,
       IMMEDIATE      = 23_m,
-      FINAL          = 24_m,
+      READONLY       = 24_m,
       MUTABLE        = 25_m,
       VOLATILE       = 26_m,
       ATOMIC         = 27_m,
@@ -292,6 +328,7 @@ namespace clef {
 
       CLASS             = __TYPE_ADJACENT | __OBJECT_TYPE + 1,
       STRUCT,
+      INTERFACE,
       UNION,
       ENUM,
       MASK,
@@ -300,7 +337,7 @@ namespace clef {
       CONST             = __TYPE_ADJACENT | __QUALIFIER + 1,
       CONSTEXPR,
       IMMEDIATE,
-      FINAL,
+      READONLY,
       MUTABLE,
       VOLATILE,
       ATOMIC,
@@ -319,13 +356,13 @@ namespace clef {
       ARRLEN,
       ALIGNAS,
       ALIGNOF,
-      TEMPLATE,
       
 
       GOTO              = __CONTROL_FLOW + 1,
       IF,
       ELSE,
       FOR,
+      FOREACH,
       WHILE,
       DO,
       BREAK,
@@ -360,6 +397,8 @@ namespace clef {
       USING,
 
       ASM,
+
+      TEMPLATE,
    };
    constexpr auto operator+(const KeywordID t) noexcept { return std::to_underlying(t); }
    constexpr bool isType(const KeywordID id) noexcept { return +id & +KeywordID::__NUMERIC; }
@@ -377,6 +416,162 @@ namespace clef {
       constexpr bool isCast(const KeywordID id) noexcept { return ~(+id & (+KeywordID::__TYPE_ADJACENT | +KeywordID::__CAST)) & (+KeywordID::__TYPE | +KeywordID::__OBJECT_TYPE | +KeywordID::__QUALIFIER); }
    constexpr bool isControlFlow(const KeywordID id) noexcept { return ~(+id & +KeywordID::__CONTROL_FLOW) & +KeywordID::__NUMERIC_TYPE; }
    constexpr bool isUnspec(const KeywordID id) noexcept { return +id < +KeywordID::___LAST_SPEC; }
+
+   enum class FundTypeID : uint8 {
+      NULL,
+      FUNCTION_SIGNATURE,
+   };
+
+   #define toenum0() std::bit_cast<uint32>("\0\0\0")
+   #define toenum1(str) std::bit_cast<uint32>(str "\0\0")
+   #define toenum2(str) std::bit_cast<uint32>(str "\0")
+   #define toenum3(str) std::bit_cast<uint32>(str)
+   #define CLOSE_LIST "}" //get around broken vscode colorization
+   enum class OperatorID : uint32 {
+      NULL = toenum0(),
+
+      ESCAPE = toenum1("\\"),
+      EOS = toenum1(";"),
+
+      STRING = toenum1("\""),
+      CHAR = toenum1("\'"),
+
+      LINE_CMNT = toenum2("/" "/"),
+      BLOCK_CMNT_OPEN = toenum2("/" "*"),
+      BLOCK_CMNT_CLOSE = toenum2("*" "/"),
+
+      CALL_OPEN = toenum1("("),
+      CALL_CLOSE = toenum1(")"),
+      SUBSCRIPT_OPEN = toenum1("["),
+      SUBSCRIPT_CLOSE = toenum1("]"),
+      LIST_OPEN = toenum1("{"),
+      LIST_CLOSE = toenum1(CLOSE_LIST),
+      SPECIALIZER_OPEN = toenum1("<"),
+      SPECIALIZER_CLOSE = toenum1(">"),
+
+
+      PREPROCESSOR = toenum1("#"),
+
+      SCOPE_RESOLUTION = toenum2("::"),
+
+      INCREMENT = toenum2("++"),
+      DECREMENT = toenum2("--"),
+
+      MEMBER_ACCESS = toenum1("."),
+      MEMBER_OF_POINTER_ACCESS = toenum2("->"),
+      POINTER_TO_MEMBER = toenum2(".*"),
+      POINTER_TO_MEMBER_OF_POINTER = toenum3("->*"),
+
+      RANGE = toenum2(".."),
+      SPREAD = toenum3("..."),
+      
+      ADD = toenum1("+"),
+      SUB = toenum1("-"),
+      MUL = toenum1("*"),
+      DIV = toenum1("/"),
+      MOD = toenum1("%"),
+      EXP = toenum2("^^"),
+      
+      LOGICAL_NOT = toenum1("!"),
+      LOGICAL_AND = toenum2("&&"),
+      LOGICAL_OR = toenum2("||"),
+
+      BIT_NOT = toenum1("~"),
+      BIT_AND = toenum1("&"),
+      BIT_OR = toenum1("|"),
+      BIT_XOR = toenum1("^"),
+      SHIFT_LEFT = toenum2("<<"),
+      SHIFT_RIGHT = toenum2(">>"),
+      
+      
+      UNIQUE_PTR = toenum1("@"),
+      SHARED_PTR = toenum1("$"),
+      WEAK_PTR = toenum1("`"),
+      
+
+      THREE_WAY_COMP = toenum3("<=>"),
+      LESSER = toenum1("<"),
+      GREATER = toenum1(">"),
+      LESSER_OR_EQ = toenum2("<="),
+      GREATER_OR_EQ = toenum2(">="),
+
+      EQUAL = toenum2("=="),
+      UNEQUAL = toenum2("!="),
+      // EQUAL_STRICT = toenum3("==="),
+      // UNEQUAL_STRICT = toenum3("!=="),
+
+      COALESCE = toenum2("??"),
+
+      INLINE_IF = toenum1("?"),
+      INLINE_ELSE = toenum1(":"),
+
+      ASSIGN = toenum1("="),
+      // CONST_ASSIGN = toenum2(":="),
+      ADD_ASSIGN = toenum2("+="),
+      SUB_ASSIGN = toenum2("-="),
+      MUL_ASSIGN = toenum2("*="),
+      DIV_ASSIGN = toenum2("/="),
+      MOD_ASSIGN = toenum2("%="),
+      EXP_ASSIGN = toenum3("^^="),
+      SHL_ASSIGN = toenum3("<<="),
+      SHR_ASSIGN = toenum3(">>="),
+      AND_ASSIGN = toenum2("&="),
+      XOR_ASSIGN = toenum2("^="),
+      OR_ASSIGN = toenum2("|="),
+      COALESCE_ASSIGN = toenum3("??="),
+
+      COMMA = toenum1(","),
+
+
+
+      //keyword pseudo-operators
+      _LOOPS = toenum3("\0\0a"),
+      FOR = _LOOPS | toenum2("\0a"),
+      FOREACH = _LOOPS | toenum2("\0b"),
+      WHILE = _LOOPS | toenum2("\0c"),
+      DO_WHILE = _LOOPS | toenum2("\0d"),
+
+      IF = toenum3("\0\0e"),
+      ELSE = toenum3("\0\0f"),
+      ELIF = toenum3("\0\0g"),
+
+      SWITCH = toenum3("\0\0h"),
+      MATCH = toenum3("\0\0i"),
+
+      //other pseudo-operators
+      DECL = toenum3("\0\0A"),
+
+      //helpers
+      FIRST_CHAR_MASK = toenum3("\xff\0\0"),
+   };
+   #undef toenum0
+   #undef toenum1
+   #undef toenum2
+   #undef toenum3
+   #undef CLOSE_LIST
+   constexpr auto operator+(const OperatorID x) { return std::to_underlying(x); }
+   constexpr OperatorID operator&(const OperatorID lhs, const OperatorID rhs) { return (OperatorID)(+lhs & +rhs); }
+   constexpr OperatorID& operator&=(OperatorID& lhs, const OperatorID rhs) { lhs = lhs & rhs; return lhs; }
+   constexpr bool isOperator(const OperatorID x) { return +x & +OperatorID::FIRST_CHAR_MASK; }
+   constexpr OperatorID bytemask(OperatorID e) {
+      char (&str)[sizeof(OperatorID)] = reinterpret_cast<char(&)[sizeof(OperatorID)]>(e);
+      for (int i = 0; i < sizeof(str); ++i) {
+         str[i] = str[i] ? ~0 : 0;
+      }
+      return e;
+   }
+   constexpr uint opidlen(const OperatorID x) {
+      const char* str = std::bit_cast<const char*>(&x);
+      for (uint i = 0; i < sizeof(OperatorID); ++i) {
+         if (!str[i]) { return i; }
+      }
+      return sizeof(OperatorID); 
+   }
+   constexpr bool opidcmp(const OperatorID x, const char* str) { //!NOTE: succeptible to segfaults
+      OperatorID op = *std::bit_cast<const OperatorID*>(str);
+      op &= bytemask(x);
+      return op == x;
+   }
 }
 
 #endif //ENUMS_HPP

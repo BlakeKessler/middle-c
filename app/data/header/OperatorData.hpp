@@ -41,6 +41,8 @@ namespace clef {
 
 
    constexpr const OpGroup RADIX_POINT       = OPERATORS["."];
+   constexpr const OpGroup ADDITION          = OPERATORS["+"];
+   constexpr const OpGroup SUBTRACTION       = OPERATORS["-"];
 };
 
 #endif //OPERATOR_DATA_HPP
