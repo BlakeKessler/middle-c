@@ -4,6 +4,7 @@
 #include "CLEF.hpp"
 #include "SymbolTable.hpp"
 #include "astNode.hpp"
+#include "allocator.hpp"
 
 #include "dyn_arr.hpp"
 #include "pair.hpp"
@@ -17,13 +18,15 @@ struct clef::SyntaxTree {
 
       astNode* _root;
       astNode* _back;
+
+      allocator _alloc;
    public:
-      SyntaxTree():_names{},_buf{},_spine{},_root{},_back{} {}
+      SyntaxTree():_names{},_buf{},_spine{},_root{},_back{},_alloc{} { astNode::_CURR_ALLOC = &_alloc; }
       // SyntaxTree(SyntaxTree&& other);
       // SyntaxTree(const SyntaxTree& other);
       SyntaxTree(const SyntaxTree& other);
       SyntaxTree(SyntaxTree&& other);
-      ~SyntaxTree() { _spine.free(); }
+      ~SyntaxTree() { if (astNode::_CURR_ALLOC == &_alloc) { astNode::_CURR_ALLOC = nullptr; } }
 
       astNode* root() { return _root; }
       mcsl::dyn_arr<mcsl::pair<astNode*>>& spine() { return _spine; }
@@ -32,6 +35,16 @@ struct clef::SyntaxTree {
 
       void printf() const;
       void print() const;
+
+
+      Statement* pushStatement(StmtSequence* parent, Statement* stmt);
+
+      Statement* pushForLoop(StmtSequence* parent, Statement* init, Statement* condition, Expression* increment);
+      Statement* pushForeachLoop(StmtSequence* parent, Expression* decl, Expression* range);
+      Statement* pushWhileLoop(StmtSequence* parent, Expression* condition);
+
+      // Statement* pushTemplate();
+
 
 
       

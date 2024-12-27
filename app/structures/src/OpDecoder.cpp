@@ -138,15 +138,15 @@ constexpr auto clef::GetAllOplikesData() {
 
       OpData("<=>",   --prec, INFIX_LEFT),        //three-way comparison
 
-      OpData(">",     --prec, INFIX_LEFT),        //less than
-      OpData("<",       prec, INFIX_LEFT),        //greater than
+      OpData("<",     --prec, INFIX_LEFT),        //less than
+      OpData(">",       prec, INFIX_LEFT),        //greater than
       OpData("<=",      prec, INFIX_LEFT),        //less than or equal to
       OpData(">=",      prec, INFIX_LEFT),        //greather than or equal to
 
       OpData("==",    --prec, INFIX_LEFT),        //equality
       OpData("!=",      prec, INFIX_LEFT),        //inequality
-      OpData("===",     prec, INFIX_LEFT),        //strict equality
-      OpData("!==",     prec, INFIX_LEFT),        //strict inequality
+      // OpData("===",     prec, INFIX_LEFT),        //strict equality
+      // OpData("!==",     prec, INFIX_LEFT),        //strict inequality
 
       OpData("&",     --prec, INFIX_LEFT),        //bitwise AND
       OpData("^",     --prec, INFIX_LEFT),        //bitwise XOR
@@ -154,11 +154,11 @@ constexpr auto clef::GetAllOplikesData() {
       OpData("&&",    --prec, INFIX_LEFT),        //logical AND
       OpData("||",    --prec, INFIX_LEFT),        //logical OR
 
-      OpData("\?\?",  --prec, INFIX_RIGHT),       //null coalescing
+      OpData("??",    --prec, INFIX_RIGHT),       //null coalescing
       OpData("?",       prec, INFIX_RIGHT),       //inline if
       OpData(":",       prec, INFIX_RIGHT),       //inline else
       OpData("=",       prec, INFIX_RIGHT),       //direct assignment
-      OpData(":=",      prec, INFIX_RIGHT),       //const assignment
+      // OpData(":=",      prec, INFIX_RIGHT),       //const assignment
       OpData("+=",      prec, INFIX_RIGHT),       //compound assignment (add)
       OpData("-=",      prec, INFIX_RIGHT),       //compound assignment (sub)
       OpData("*=",      prec, INFIX_RIGHT),       //compound assignment (mul)
@@ -170,7 +170,7 @@ constexpr auto clef::GetAllOplikesData() {
       OpData("&=",      prec, INFIX_RIGHT),       //compound assignment (AND)
       OpData("^=",      prec, INFIX_RIGHT),       //compound assignment (XOR)
       OpData("|=",      prec, INFIX_RIGHT),       //compound assignment (OR)
-      OpData("\?\?=",   prec, INFIX_RIGHT),       //compound assignment (null coalescing)
+      OpData("??=",     prec, INFIX_RIGHT),       //compound assignment (null coalescing)
 
       OpData(",",     --prec, INFIX_LEFT)         //comma
 
@@ -235,8 +235,8 @@ constexpr auto clef::GetOpData() {
 
       OpData("==",    --prec, INFIX_LEFT),        //equality
       OpData("!=",      prec, INFIX_LEFT),        //inequality
-      OpData("===",     prec, INFIX_LEFT),        //strict equality
-      OpData("!==",     prec, INFIX_LEFT),        //strict inequality
+      // OpData("===",     prec, INFIX_LEFT),        //strict equality
+      // OpData("!==",     prec, INFIX_LEFT),        //strict inequality
 
       OpData("&",     --prec, INFIX_LEFT),        //bitwise AND
       OpData("^",     --prec, INFIX_LEFT),        //bitwise XOR
@@ -248,7 +248,7 @@ constexpr auto clef::GetOpData() {
       OpData("?",       prec, INFIX_RIGHT),       //inline if
       OpData(":",       prec, INFIX_RIGHT),       //inline else
       OpData("=",       prec, INFIX_RIGHT),       //direct assignment
-      OpData(":=",      prec, INFIX_RIGHT),       //const assignment
+      // OpData(":=",      prec, INFIX_RIGHT),       //const assignment
       OpData("+=",      prec, INFIX_RIGHT),       //compound assignment (add)
       OpData("-=",      prec, INFIX_RIGHT),       //compound assignment (sub)
       OpData("*=",      prec, INFIX_RIGHT),       //compound assignment (mul)
