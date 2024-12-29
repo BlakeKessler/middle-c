@@ -3,7 +3,6 @@
 #define MCSL_HASH_HPP
 
 #include "MCSL.hpp"
-#include <cstring>
 
 namespace mcsl {
    static constexpr const word FNV_offset = 0xcbf29ce484222325;

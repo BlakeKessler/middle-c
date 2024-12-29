@@ -67,6 +67,7 @@ namespace mcsl {
 //simple integer macros
 #define sign(num) ((num > 0) - (num < 0))
 #define signofdif(a,b) ((a > b) - (a < b))
+#define absdif(a,b) ((a>b)?a-b:b-a)
 
 //numeric constants
 constexpr const float Inf = __builtin_inff();
