@@ -12,22 +12,21 @@
 struct clef::Enum : public clef::Type {
    private:
       FundType* _baseType;
-      mcsl::dyn_arr<mcsl::pair<Identifier*, Expr*>>& _enumerators;
+      ParameterList* _enumerators;
    public:
-      Enum():Type{},_baseType{},_enumerators{astNode::derefBuf(astNode::allocBuf<mcsl::pair<Identifier*, Expr*>>())} {}
-      Enum(mcsl::is_t<mcsl::pair<Identifier*, Expr*>> auto... enumerators):_baseType{},_enumerators{enumerators...} {}
-      Enum(FundType* base, mcsl::is_t<mcsl::pair<Identifier*, Expr*>> auto... enumerators):_baseType{base},_enumerators{astNode::derefBuf(astNode::allocBuf<mcsl::pair<Identifier*, Expr*>>(enumerators...))} {}
-      Enum(const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_baseType{},_enumerators{astNode::derefBuf(astNode::allocBuf<mcsl::pair<Identifier*, Expr*>>())} {}
-      Enum(const char* str, const uint len, Decl* decl, mcsl::is_t<mcsl::pair<Identifier*, Expr*>> auto... enumerators):Type{str, len, decl},_baseType{},_enumerators{astNode::derefBuf(astNode::allocBuf<mcsl::pair<Identifier*, Expr*>>())} {}
-      Enum(const char* str, const uint len, mcsl::is_t<mcsl::pair<Identifier*, Expr*>> auto... enumerators):Type{str, len, decl},_baseType{},_enumerators{astNode::derefBuf(astNode::allocBuf<mcsl::pair<Identifier*, Expr*>>())} {}
-      Enum(const char* str, const uint len, Decl* decl, FundType* base, mcsl::is_t<mcsl::pair<Identifier*, Expr*>> auto... enumerators):Type{str, len, decl},_baseType{type},_enumerators{astNode::derefBuf(astNode::allocBuf<mcsl::pair<Identifier*, Expr*>>(enumerators...))} {}
-      Enum(const char* str, const uint len, FundType* base, mcsl::is_t<mcsl::pair<Identifier*, Expr*>> auto... enumerators):Type{str, len, decl},_baseType{type},_enumerators{astNode::derefBuf(astNode::allocBuf<mcsl::pair<Identifier*, Expr*>>(enumerators...))} {}
+      Enum():Type{},_baseType{},_enumerators{} {}
+      Enum(ParameterList* enums):_baseType{},_enumerators{enums} {}
+      Enum(FundType* base, ParameterList* enums = nullptr):_baseType{base},_enumerators{enums} {}
+      Enum(const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_baseType{},_enumerators{} {}
+      Enum(ParameterList* enums, const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_baseType{},_enumerators{enums} {}
+      Enum(FundType* base, const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_baseType{base},_enumerators{} {}
+      Enum(FundType* base, ParameterList* enums, const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_baseType{base},_enumerators{enums} {}
 
       FundType*& baseType() { return _baseType; }
       const FundType* baseType() const { return _baseType; }
 
-      auto& enumerators() { return _enumerators; }
-      const auto& enumerators() const { return _enumerators; }
+      ParameterList*& enumerators() { return _enumerators; }
+      const ParameterList* enumerators() const { return _enumerators; }
 };
 
 #endif //ENUM_HPP

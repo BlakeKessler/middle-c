@@ -10,15 +10,15 @@
 
 struct clef::Interface : public clef::Type {
    private:
-      mcsl::dyn_arr<Function*>& _methods;
+      InterfaceSpec* _spec;
    public:
-      Interface():Type{},_methods{astNode::derefBuf(astNode::allocBuf<Function*>())} {}
-      Interface(const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_methods{astNode::derefBuf(astNode::allocBuf<Function*>())} {}
-      Interface(const char* str, const uint len, mcsl::is_t<Function*> auto... methods):Type{str, len},_methods{astNode::derefBuf(astNode::allocBuf<Function*>(methods...))} {}
-      Interface(const char* str, const uint len, Decl* decl, mcsl::is_t<Function*> auto... methods):Type{str, len, decl},_methods{astNode::derefBuf(astNode::allocBuf<Function*>(methods...))} {}
+      Interface():Type{},_spec{} {}
+      Interface(InterfaceSpec* spec):Type{},_spec{spec} {}
+      Interface(const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_spec{} {}
+      Interface(InterfaceSpec* spec, const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_spec{spec} {}
 
-      auto& methods() { return _methods; }
-      const auto& methods() const { return _methods; }
+      InterfaceSpec*& spec() { return _spec; }
+      const InterfaceSpec* spec() const { return _spec; }
 };
 
 #endif //INTERFACE_HPP

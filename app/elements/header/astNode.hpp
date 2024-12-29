@@ -3,7 +3,6 @@
 #define AST_NODE_HPP
 
 #include "CLEF.hpp"
-#include "allocator.hpp"
 
 #include "ast-nodes/Expression.hpp"
 #include "ast-nodes/Function.hpp"
@@ -40,8 +39,7 @@
 
 struct clef::astNode {
    private:
-      static allocator* _CURR_ALLOC;
-
+      NodeType _nodeType;
       union {
          Identifier _identifier;
          Variable _variable;
@@ -76,7 +74,6 @@ struct clef::astNode {
          ArgumentList _argumentList;
          ParameterList _parameterList;
       };
-      NodeType _nodeType;
 
       friend class SyntaxTree;
    public:
@@ -121,10 +118,6 @@ struct clef::astNode {
       void upCast(NodeType t);
       void verticalCast(NodeType t);
       void anyCast(NodeType t);
-
-      template<typename T> static index<T> allocBuf(mcsl::is_t<T> auto... initList);
-      template<typename T> static mcsl::dyn_arr<T>& derefBuf(const index<T> i) { return _CURR_ALLOC->at(i); }
-      template<typename T> static mcsl::dyn_arr<T>* moveBuf(mcsl::dyn_arr<T>&&);
 
       [[noreturn]] void throwCastErr(NodeType target) const { throwError(ErrCode::BAD_NODE_CAST, "%u to %u", (uint)_nodeType, (uint)target); }
 

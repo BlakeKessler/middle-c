@@ -10,20 +10,15 @@
 
 struct clef::Namespace : public clef::Type {
    private:
-      index<Variable*> _vars;
-      index<Function*> _funcs;
-      index<Type*> _types;
+      NamespaceSpec* _spec;
    public:
-      Namespace():Type{},_vars{astNode::allocBuf<Variable*>()},_funcs{astNode::allocBuf<Function*>()},_types{astNode::allocBuf<Type*>()} {}
-      Namespace(const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_vars{astNode::allocBuf<Variable*>()},_funcs{astNode::allocBuf<Function*>()},_types{astNode::allocBuf<Type*>()} {}
+      Namespace():Type{},_spec{} {}
+      Namespace(NamespaceSpec* spec):Type{},_spec{spec} {}
+      Namespace(NamespaceSpec* spec, const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_spec{spec} {}
+      Namespace(const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_spec{} {}
 
-
-      auto& vars() { return astNode::derefBuf(_vars); }
-      auto& funcs() { return astNode::derefBuf(_funcs); }
-      auto& types() { return astNode::derefBuf(_types); }
-      const auto& vars() const { return astNode::derefBuf(_vars); }
-      const auto& funcs() const { return astNode::derefBuf(_funcs); }
-      const auto& types() const { return astNode::derefBuf(_types); }
+      NamespaceSpec*& spec() { return _spec; }
+      const NamespaceSpec* spec() const { return _spec; }
 
 };
 

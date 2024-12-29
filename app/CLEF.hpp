@@ -50,24 +50,16 @@ namespace clef {
          struct Switch;
          struct Match;
       struct ForLoopParams;
+      struct ForeachLoopParams;
       struct SwitchCases;
       struct MatchCases;
       struct Statement; using Stmt = Statement;
       struct StatementSequence; using StmtSeq = StatementSequence;
       struct ArgumentList; using ArgList = ArgumentList;
       struct ParameterList; using ParamList = ParameterList;
-   // struct astNode;
-   //    struct Expression;
-   //    struct Statement;
-   //    struct StmtSequence;
-   //    struct Identifier;
-   //    struct Block;
-   //    struct Type;
-   //    struct Literal;
-   //    struct Object;
-   //    struct Function;
-   //    struct Operator;
-   //    struct Template;
+   class ObjTypeSpec;
+   class InterfaceSpec;
+   class NamespaceSpec;
    struct Symbol;
 
    //containers for atomic compilation elements

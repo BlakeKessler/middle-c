@@ -10,22 +10,15 @@
 
 struct clef::Class : public clef::Type {
    private:
-      index<Variable*> _dataMembers;
-      index<Function*> _methods;
-
-      index<Variable*> _staticMembers;
+      ObjTypeSpec* _spec;
    public:
-      Class():Type{},_dataMembers{astNode::allocBuf<Variable*>()},_methods{astNode::allocBuf<Function*>()},_staticMembers{astNode::allocBuf<Variable*>()} {}
-      Class(const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_dataMembers{astNode::allocBuf<Variable*>()},_methods{astNode::allocBuf<Function*>()},_staticMembers{astNode::allocBuf<Variable*>()} {}
+      Class():Type{},_spec{} {}
+      Class(ObjTypeSpec* spec):Type{},_spec{spec} {}
+      Class(ObjTypeSpec* spec, const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_spec{spec} {}
+      Class(const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_spec{} {}
 
-
-      auto& dataMembers() { return astNode::derefBuf(_dataMembers); }
-      auto& methods() { return astNode::derefBuf(_methods); }
-      auto& staticMembers() { return astNode::derefBuf(_staticMembers); }
-
-      const auto& dataMembers() const { return astNode::derefBuf(_dataMembers); }
-      const auto& methods() const { return astNode::derefBuf(_methods); }
-      const auto& staticMembers() const { return astNode::derefBuf(_staticMembers); }
+      ObjTypeSpec*& spec() { return _spec; }
+      const ObjTypeSpec* spec() const { return _spec; }
 };
 
 #endif //CLASS_HPP

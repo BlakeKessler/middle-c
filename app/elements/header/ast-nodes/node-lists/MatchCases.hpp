@@ -8,12 +8,34 @@
 #include "dyn_arr.hpp"
 #include "pair.hpp"
 
-struct clef::MatchCases {
+struct clef::MatchCases : public mcsl::contig_base<mcsl::pair<Expr*,Scope*>> {
    private:
-      mcsl::dyn_arr<mcsl::pair<Expr*,Scope*>>& _cases; //case expression, scope to jump to
+      mcsl::dyn_arr<mcsl::pair<Expr*,Scope*>>* _cases; //case expression, scope to jump to
    public:
-      MatchCases(mcsl::is_t<mcsl::pair<Expr*,Scope*>> auto... cases):_cases{astNode::derefBuf<mcsl::pair<Expr*,Scope*>>(astNode::allocBuf<mcsl::pair<Expr*,Scope*>>(cases...))} {}
-      MatchCases(MatchCases& cases):_cases{cases._cases} {}
+      MatchCases(mcsl::dyn_arr<mcsl::pair<Expr*,Scope*>>& cases):_cases{&cases} {}
+
+
+      #pragma region dyn_arr
+      auto size() const { return _cases->size(); }
+      auto capacity() const { return _cases->capacity(); }
+
+      auto* data() { return _cases->data(); }
+      auto* begin() { return _cases->begin(); }
+      auto* const* ptr_to_buf() { return _cases->ptr_to_buf(); }
+
+      const auto* data() const { return _cases->data(); }
+      const auto* begin() const { return _cases->begin(); }
+      const auto* const* ptr_to_buf() const { return _cases->ptr_to_buf(); }
+
+
+      bool resize(const uint newSize) { return _cases->resize(newSize); }
+      bool resize_exact(const uint newSize) { return _cases->resize_exact(newSize); }
+      auto* release() { return _cases->release(); }
+      bool push_back(const mcsl::pair<Expr*,Scope*>& obj) { return _cases->push_back(obj); }
+      auto pop_back() { return _cases->pop_back(); }
+      auto* emplace(const uint i, auto&&... args) { return _cases->emplace(i, std::forward<decltype(auto)>(args...)); }
+      auto* emplace_back(auto&&... args) { return _cases->emplace_back(std::forward<decltype(auto)>(args...)); }
+      #pragma endregion dyn_arr
 };
 
 #endif //MATCH_CASES_HPP

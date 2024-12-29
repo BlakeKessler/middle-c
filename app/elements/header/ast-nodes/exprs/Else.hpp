@@ -12,9 +12,9 @@ struct clef::Else : public clef::Expression {
       Else():Expression{} {}
       Else(Operator* op, If* ifptr, Scope* proc):Expression{op,ifptr,proc} { assert(_op->isElse()); }
 
-      If* parentIf() { return (If*)_lhs; }
+      If*& parentIf() { return (If*&)_lhs; }
       const If* parentIf() const { return (If*)_lhs; }
-      Scope* procedure() { return (Scope*)_rhs;}
+      Scope*& procedure() { return (Scope*&)_rhs;}
       const Scope* procedure() const { return (Scope*)_rhs;}
 };
 

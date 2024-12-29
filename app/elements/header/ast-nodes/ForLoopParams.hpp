@@ -13,9 +13,9 @@ struct clef::ForLoopParams {
       ForLoopParams():_declExpr{},_cond{},_inc{} {}
       ForLoopParams(Expr* decl, Expr* cond, Expr* inc):_declExpr{decl},_cond{cond},_inc{inc} {}
 
-      Expr* decl() { return _declExpr; }
-      Expr* condition() { return _cond; }
-      Expr* increment() { return _inc; }
+      Expr*& decl() { return _declExpr; }
+      Expr*& condition() { return _cond; }
+      Expr*& increment() { return _inc; }
 
       const Expr* decl() const { return _declExpr; }
       const Expr* condition() const { return _cond; }

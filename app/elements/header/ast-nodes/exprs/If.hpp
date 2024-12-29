@@ -12,9 +12,9 @@ struct clef::If : public clef::Expression {
       If():Expression{} {}
       If(Operator* op, Expr* condition, Scope* procedure):Expression{op,condition,procedure} { assert(_op->isIf()); }
 
-      Expr* condition() { return (Expr*)_lhs; }
+      Expr*& condition() { return (Expr*&)_lhs; }
       const Expr* condition() const { return (Expr*)_lhs; }
-      Scope* procedure() { return (Scope*)_rhs;}
+      Scope*& procedure() { return (Scope*&)_rhs;}
       const Scope* procedure() const { return (Scope*)_rhs;}
 };
 

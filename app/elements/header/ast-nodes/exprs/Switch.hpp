@@ -12,9 +12,9 @@ struct clef::Switch : public clef::Expression {
       Switch():Expression{} {}
       Switch(Operator* op, Expr* cond, SwitchCases* cases):Expression{op,cond,cases} { assert(_op->isSwitch()); }
 
-      Expr* condition() { return (Expr*)_lhs; }
+      Expr*& condition() { return (Expr*&)_lhs; }
       const Expr* condition() const { return (Expr*)_lhs; }
-      SwitchCases* cases() { return (SwitchCases*)_rhs;}
+      SwitchCases*& cases() { return (SwitchCases*&)_rhs;}
       const SwitchCases* cases() const { return (SwitchCases*)_rhs;}
 };
 

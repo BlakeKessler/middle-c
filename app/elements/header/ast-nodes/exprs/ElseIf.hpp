@@ -12,9 +12,9 @@ struct clef::ElseIf : public clef::Expression {
       ElseIf():Expression{} {}
       ElseIf(Operator* op, If* parentIf, If* elseif):Expression{op,parentIf,elseif} { assert(_op->isElseIf()); }
 
-      If* parentIf() { return (If*)_lhs; }
+      If*& parentIf() { return (If*&)_lhs; }
       const If* parentIf() const { return (If*)_lhs; }
-      If* condition() { return (If*)_rhs;}
+      If*& condition() { return (If*&)_rhs;}
       const If* condition() const { return (If*)_rhs;}
 };
 

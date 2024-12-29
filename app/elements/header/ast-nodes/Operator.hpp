@@ -23,7 +23,7 @@ struct clef::Operator {
       constexpr bool isDoWhileLoop() const { return _id == OperatorID::DO_WHILE; }
 
       constexpr bool isLoop() const { return +(_id & OperatorID::_LOOPS); }
-      constexpr bool isNonForLoop() const { return isLoop() && !isForLoop(); }
+      constexpr bool isSimpleLoop() const { return isLoop() && !isForLoop() && !isForeachLoop(); }
 
       constexpr bool isIf() const { return _id == OperatorID::IF; }
       constexpr bool isElse() const { return _id == OperatorID::ELSE; }
