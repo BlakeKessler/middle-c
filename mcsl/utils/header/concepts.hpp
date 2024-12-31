@@ -12,12 +12,12 @@
 
 namespace mcsl {
    #pragma region basic
-   template<typename child_t, typename parent_t> concept is_t = std::derived_from<child_t,parent_t>;
+   template<typename lhs, typename rhs> concept same_t = std::same_as<lhs,rhs>;
+   template<typename child_t, typename parent_t> concept is_t = std::derived_from<child_t,parent_t> || same_t<child_t,parent_t>;
    template<typename orig_t, typename target_t> concept castable_to = std::convertible_to<orig_t,target_t>;
    // template<typename lhs, typename rhs> concept priv_is_t = requires {
    //    std::is_base_of_v<rhs,lhs>;
    // };
-   template<typename lhs, typename rhs> concept same_t = std::same_as<lhs,rhs>;
    template<typename T> concept int_t = std::integral<T>;
    template<typename T> concept uint_t = std::unsigned_integral<T>;
    template<typename T> concept sint_t = std::signed_integral<T>;
