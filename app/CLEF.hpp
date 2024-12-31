@@ -57,6 +57,7 @@ namespace clef {
       struct StatementSequence; using StmtSeq = StatementSequence;
       struct ArgumentList; using ArgList = ArgumentList;
       struct ParameterList; using ParamList = ParameterList;
+      template<typename T> concept astNode_t = requires { {T::nodeType()} -> mcsl::same_t<NodeType>; };
    class ObjTypeSpec;
    class InterfaceSpec;
    class NamespaceSpec;
@@ -64,9 +65,9 @@ namespace clef {
 
    //containers for atomic compilation elements
    class Source;
-   struct SourceTokens;
-   struct SymbolTable;
-   struct SyntaxTree;
+   class SourceTokens;
+   class SymbolTable;
+   class SyntaxTree;
 
    //classes for phases of compilation
    class Lexer;

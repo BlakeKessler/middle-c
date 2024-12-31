@@ -9,7 +9,7 @@
 #include "dyn_arr.hpp"
 #include "dyn_arr_span.hpp"
 
-struct clef::SourceTokens {
+class clef::SourceTokens {
    protected:
       Source _src;
 

@@ -9,7 +9,7 @@
 #include "alloc.hpp"
 #include <unordered_map>
 
-struct clef::SymbolTable {
+class clef::SymbolTable {
    private:
       std::unordered_map<mcsl::string, Symbol> _names;
    public:
