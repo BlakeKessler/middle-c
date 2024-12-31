@@ -41,7 +41,7 @@ struct clef::Literal {
 
       Literal(Literal& other) {
          if (this != &other) {
-            assert(absdif(this, &other) >= 8*sizeof(Literal));
+            assert(absdif(this, &other) >= 8*(slong)sizeof(Literal));
             std::memcpy(this, &other, sizeof(Literal));
          }
       }
