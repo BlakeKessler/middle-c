@@ -32,6 +32,7 @@ namespace clef {
             struct FundamentalType; using FundType = FundamentalType;
             struct FunctionSignature; using FuncSig = FunctionSignature;
             struct Enum;
+            struct Mask;
             struct Union;
             struct Namespace;
             struct Interface;
@@ -40,7 +41,6 @@ namespace clef {
             struct GenericType;
       struct Scope;
       struct Literal;
-      struct Operator;
       struct Expression; using Expr = Expression;
          struct Declaration; using Decl = Declaration;
          struct Loop;
@@ -49,6 +49,8 @@ namespace clef {
          struct ElseIf;
          struct Switch;
          struct Match;
+         struct TryCatch;
+         struct Asm;
       struct ForLoopParams;
       struct ForeachLoopParams;
       struct SwitchCases;

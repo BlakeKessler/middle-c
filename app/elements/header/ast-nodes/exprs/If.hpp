@@ -10,7 +10,7 @@ struct clef::If : public clef::Expression {
 
    public:
       If():Expression{} {}
-      If(Operator* op, Expr* condition, Scope* procedure):Expression{op,condition,procedure} { assert(_op->isIf()); }
+      If(Expr* condition, Scope* procedure):Expression{OperatorID::IF,condition,procedure} {}
 
       Expr*& condition() { return (Expr*&)_lhs; }
       const Expr* condition() const { return (Expr*)_lhs; }

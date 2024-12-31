@@ -14,8 +14,9 @@ struct clef::Union : public clef::Type {
    public:
       Union():Type{},_members{} {}
       Union(ParameterList* members):Type{},_members{members} {}
-      Union(const char* str, const uint len, Decl* decl = nullptr):Type{str,len,decl},_members{} {}
-      Union(ParameterList* members, const char* str, const uint len, Decl* decl = nullptr):Type{str,len,decl},_members{members} {}
+      Union(Type* name):Type{name?*name:Type{}},_members{} {}
+      Union(ParameterList* members, Type* name):Type{name?*name:Type{}},_members{members} {}
+      Union(Identifier* name, ParameterList* members = nullptr):Type{name?*(Type*)name:Type{}},_members{members} {}
 
       ParameterList*& members() { return _members; }
       const ParameterList* members() const { return _members; }

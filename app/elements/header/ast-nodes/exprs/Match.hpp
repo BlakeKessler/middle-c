@@ -10,7 +10,7 @@ struct clef::Match : public clef::Expression {
 
    public:
       Match():Expression{} {}
-      Match(Operator* op, Expr* cond, MatchCases* cases):Expression{op,cond,cases} { assert(_op->isMatch()); }
+      Match(Expr* cond, MatchCases* cases):Expression{OperatorID::MATCH,cond,cases} {}
 
       Expr*& condition() { return (Expr*&)_lhs; }
       const Expr* condition() const { return (Expr*)_lhs; }

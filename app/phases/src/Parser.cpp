@@ -3,467 +3,503 @@
 
 #include "Parser.hpp"
 
-#include "type_traits.hpp"
+#include "InterfaceSpec.hpp"
 
-#define advance() if (++tokIt >= endtok) { [[unlikely]] goto DONE_WITH_FILE; }
-#define gotoEOS() \
-if (tokIt->type() != TokenType::EOS) {\
-   hadErrors |= logError<true>(ErrCode::PARSER_UNSPEC, "missing EOS");\
-   goto DONE_WITH_FILE;\
-} goto EOS
-clef::SyntaxTree clef::Parser::parse(const SourceTokens& src) {
-   SyntaxTree tree;
+clef::Stmt* clef::Parser::parseStmt() {
+   Stmt* stmt;
+   Expr* expr = nullptr;
 
-   const Token* endtok = src.end();
-
-   auto lineIt = src.lines().begin(); //will almost never be accurate
-   bool hadErrors = false;
+   TypeQualMask quals = parseQuals();
+   Identifier* begin = parseIdentifier(); //might just be a standard identifier
+   if (!begin) {
+      logError(ErrCode::PARSER_UNSPEC, "bad statement start");   
+   }
 
 
-   for (const Token* tokIt = src.begin(); tokIt < endtok; ++tokIt) {
-      switch (tokIt->type()) {
-         //!END OF STATEMENT:
-         case TokenType::EOS: EOS:
-            tree.endStatement();
-            goto DONE_WITH_TOKEN;
-
-
-         //!PLAINTEXT DELIMITERS:
-         case TokenType::PTXT:{
-            const OpGroup op = PTXT_DELIMS[*tokIt];
-            //find closing token
-            for (const Token* it = tokIt+1; it < endtok; ++it) {
-               //non-matching tokens
-               if (it->type() == TokenType::ESC) { ++it; continue; }
-               if ((it->type() != TokenType::PTXT) || (PTXT_DELIMS[*it].toString() != op.toString())) { continue; }
-               
-               //found end of segment
-               if (op.toString() == CHAR_OP.toString()) {         //!character literal
-                  const char ch = Parser::parseCharLitASCII(tokIt->begin(), it->begin());
-                  if (ch < 0) { hadErrors |= logError<true>(ErrCode::BAD_LITERAL, "bad ASCII character literal"); } //!SYNTAX ERROR - BAD CHAR LITERAL
-                  
-                  tree.pushNode(Literal{ch});
-                  tokIt = it;
-                  goto DONE_WITH_TOKEN;
-
-               } else if (op.toString() == STR_OP.toString()) {   //!string literal
-                  const mcsl::string strLitContents = parseStrLitASCII(tokIt->end(), it->begin());
-                  tree.pushNode(Literal{strLitContents});
-                  tokIt = it;
-                  goto DONE_WITH_TOKEN;
-
-               } else { //!SYNTAX ERROR - bad plaintext literal
-                  hadErrors |= logError<true>(ErrCode::BAD_LITERAL, "bad character literal opener");
-                  goto DONE_WITH_FILE;
-               }
-            }
-            //!SYNTAX ERROR - bad plaintext block
-            hadErrors |= logError<true>(ErrCode::PARSER_UNSPEC, "un-closed plaintext block opener");
-            goto DONE_WITH_FILE;
-         }
-
-
-         //!COMMENT DELIMITERS:
-         case TokenType::CMNT:{
-            const OpGroup cmntOp = PTXT_DELIMS[*tokIt];
-            if (cmntOp.toString() == LINE_CMNT.toString()) { //!single-line comment
-               //update lineIt
-               const auto linesEnd = src.lines().end();
-               for (; lineIt < linesEnd; ++lineIt) {
-                  if (lineIt->begin() > tokIt) { //found start of new line
-                     tokIt = lineIt->begin();
-                     goto DONE_WITH_TOKEN;
-                  }
-               }
-               //didn't find a next line to go to -> must be a line comment on the last line of the file
-               goto DONE_WITH_FILE;
-
-            } else if (cmntOp.toString() == BLOCK_CMNT_OPEN.toString()) { //!multi-line comment
-               //find block comment closer
-               while (++tokIt < endtok) {
-                  if (tokIt->type() == TokenType::CMNT && PTXT_DELIMS[*tokIt].toString() == BLOCK_CMNT_CLOSE.toString()) {
-                     goto DONE_WITH_TOKEN;
-                  }
-               }
-               //!SYNTAX ERROR - UNCLOSED BLOCK COMMENT
-               hadErrors |= logError<true>(ErrCode::BAD_CMNT, "unclosed block comment");
-               goto DONE_WITH_FILE;
-            }
-            //!SYNTAX ERROR - invalid comment - SHOULD NOT BE POSSIBLE (should be prevented by previous phases)
-            hadErrors |= logError<true>(ErrCode::BAD_CMNT, "invalid comment");
-            goto DONE_WITH_FILE;
-         }
-
-
-         //!BLOCK DELIMITERS:
-         case TokenType::BLOC:{
-            BlockType type = consumeBlock(tree, tokIt, endtok);
-            if (type == BlockType::NONE) { //token string is not a block delimiter
-               hadErrors |= logError<true>(ErrCode::PARSER_UNSPEC, "block delimiter token string does not correspond to any block delimiter");
-               goto DONE_WITH_FILE;
-            }
-            if (tokIt == nullptr) { //unclosed block
-               hadErrors |= logError<true>(ErrCode::UNCLOSED_BLOCK, "unclosed block (block type: %u)", +type);
-               goto DONE_WITH_FILE;
-            }
-            if (tokIt >= endtok) {
-               goto DONE_WITH_FILE;
-            }
-            goto DONE_WITH_TOKEN;
-         }
-
-         //!ESCAPE CHARACTERS:
-         case TokenType::ESC:
-            hadErrors |= logError<true>(ErrCode::PARSER_UNSPEC, "floating escape character");
-            goto DONE_WITH_FILE;
-
-         //!OPERATORS:
-         case TokenType::OP:
+   KeywordID keywordID = begin->keywordID();
+   switch (keywordID) {
+      default:
+         assert(isType(keywordID));
+         [[fallthrough]];
+      case KeywordID::THIS    : [[fallthrough]];
+      case KeywordID::SELF    : [[fallthrough]];
+      case KeywordID::VOID    : [[fallthrough]];
+      case KeywordID::AUTO    : [[fallthrough]];
+      case KeywordID::_NOT_A_KEYWORD:
+         switch (tokIt->type()) {
             //!NOTE: UNFINISHED
+         }
+         //!NOTE: UNFINISHED
+         break;
 
+      case KeywordID::ASM           : stmt = (Stmt*)parseASM(); break;
+      
+      case KeywordID::CLASS         : stmt = (Stmt*)parseClass(); break;
+      case KeywordID::STRUCT        : stmt = (Stmt*)parseStruct(); break;
+      case KeywordID::INTERFACE     : stmt = (Stmt*)parseInterface(); break;
+      case KeywordID::UNION         : stmt = (Stmt*)parseUnion(); break;
+      case KeywordID::ENUM          : stmt = (Stmt*)parseEnum(); break;
+      case KeywordID::MASK          : stmt = (Stmt*)parseMask(); break;
+      case KeywordID::NAMESPACE     : stmt = (Stmt*)parseNamespace(); break;
 
-            goto DONE_WITH_TOKEN;
-            
+      case KeywordID::IF            : stmt = (Stmt*)parseIf(); break;
+      case KeywordID::ELSE          : logError(ErrCode::PARSER_UNSPEC, "floating ELSE");
 
-         //!IDENTIFIERS:
-         case TokenType::IDEN: //RELIES ON FALLTHROUGH
-            //check first char
-            if (!+(tokType((*tokIt)[0]) & TokenType::STRT)) {
-               //!SYNTAX ERROR - identifier starting with illegal first char of identifier
-               hadErrors |= logError<true>(ErrCode::BAD_IDEN, "identifier must start with letter or underscore (%.*s)", tokIt->size(),tokIt->begin());
-               goto DONE_WITH_FILE;
-            }
-            [[fallthrough]];
-         case TokenType::STRT: //RELIES ON FALLTHROUGH
-            [[fallthrough]];
-         case TokenType::CHAR:{
-            //!NOTE: NONE OF THESE ACTUALLY PUSH THE NODE FOR THE KEYWORD YET!
-            const KeywordID keyword = decodeKeyword(*tokIt);
-            switch (keyword) {
-               //!CONTROL FLOW KEYWORDS
-               #pragma region controlflow
-               case KeywordID::GOTO:
-                  advance();
-                  if (!consumeIdentifier(tree, tokIt, endtok)) { //!NOTE: probably rework to not allow scoped identifers
-                     hadErrors |= logError<true>(ErrCode::PARSER_UNSPEC, "GOTO without label");
-                     goto DONE_WITH_FILE;
-                  }
-                  advance();
+      case KeywordID::FOR           : stmt = (Stmt*)parseForLoop(); break;
+      case KeywordID::FOREACH       : stmt = (Stmt*)parseForeachLoop(); break;
+      case KeywordID::WHILE         : stmt = (Stmt*)parseWhileLoop(); break;
+      case KeywordID::DO            : stmt = (Stmt*)parseDoWhileLoop(); break;
 
-                  gotoEOS();
+      case KeywordID::SWITCH        : stmt = (Stmt*)parseSwitch(); break;
+      case KeywordID::MATCH         : stmt = (Stmt*)parseMatch(); break;
 
-               case KeywordID::TRY:
-                  advance();
-                  consumeEnclosedStmts(tree, tokIt, endtok); //contents
-                  
-                  advance();
-                  if (tokIt->type() != TokenType::CHAR || decodeKeyword(*tokIt) != KeywordID::CATCH) {
-                     hadErrors |= logError<true>(ErrCode::PARSER_UNSPEC, "TRY without CATCH");
-                     goto DONE_WITH_FILE;
-                  }
-                  [[fallthrough]];
-               case KeywordID::FOR: [[fallthrough]];
-               case KeywordID::FOREACH: [[fallthrough]];
-               case KeywordID::WHILE: [[fallthrough]];
-               case KeywordID::SWITCH: [[fallthrough]];
-               case KeywordID::MATCH:
-                  advance();
-                  consumeSpecificBlock(BlockType::PARENS, tree, tokIt, endtok); //condition
-                  advance();
-                  consumeEnclosedStmts(tree, tokIt, endtok); //contents
+      case KeywordID::BREAK         : [[fallthrough]];
+      case KeywordID::CONTINUE      :
+         consumeEOS("bad BREAK or CONTINUE");
 
-                  goto DONE_WITH_TOKEN;
+         //!NOTE: UNFINISHED
 
-               case KeywordID::DO:
-                  advance();
-                  consumeEnclosedStmts(tree, tokIt, endtok); //contents
-                  
-                  //!WHILE
-                  advance();
-                  if (tokIt->type() != TokenType::CHAR || decodeKeyword(*tokIt) != KeywordID::WHILE) {
-                     hadErrors |= logError<true>(ErrCode::PARSER_UNSPEC, "DO without a WHILE");
-                     goto DONE_WITH_FILE;
-                  }
+         break;
+      
+      case KeywordID::CASE          : [[fallthrough]];
+      case KeywordID::DEFAULT       : logError(ErrCode::PARSER_UNSPEC, "floating CASE or DEFAULT");
 
-                  advance();
-                  consumeSpecificBlock(BlockType::PARENS, tree, tokIt, endtok); //condition
-                  advance();
+      case KeywordID::GOTO          : //!NOTE: UNFINISHED
 
-                  //EOS
-                  gotoEOS();
-               
-               case KeywordID::IF: HANDLE_IF:
-                  advance();
-                  consumeSpecificBlock(BlockType::PARENS, tree, tokIt, endtok); //condition
-                  advance();
-                  consumeEnclosedStmts(tree, tokIt, endtok); //contents
-                  advance();
+      case KeywordID::TRY           : stmt = (Stmt*)parseTryCatch(); break;
+      case KeywordID::CATCH         : logError(ErrCode::PARSER_UNSPEC, "floating CATCH");
 
-                  //check for else
-                  if (tokIt->type() != TokenType::CHAR || decodeKeyword(*tokIt) != KeywordID::ELSE) {
-                     goto DONE_WITH_TOKEN;
-                  }
-
-                  //!ELSE
-                  advance();
-                  switch (tokIt->type()) {
-                     case TokenType::BLOC: //else
-                        consumeEnclosedStmts(tree, tokIt, endtok);
-                        advance();
-                        goto DONE_WITH_TOKEN;
-                     case TokenType::CHAR: //else if
-                        if (decodeKeyword(*tokIt) == KeywordID::IF) { //jump to IF handler code
-                           goto HANDLE_IF;
-                        }
-                        [[fallthrough]];
-                     default: //other - ERROR
-                        hadErrors |= logError<true>(ErrCode::PARSER_UNSPEC, "bad ELSE");
-                        goto DONE_WITH_FILE;
-                  }
-
-               //LOOP CONTROL - break and continue
-               case KeywordID::BREAK: [[fallthrough]];
-               case KeywordID::CONTINUE:
-                  //check that in a loop or switch statement //!NOTE: UNFINISHED
-                  advance();
-                  gotoEOS();
-
-               //SWITCH/MATCH CONTROL - case and default
-               case KeywordID::CASE:
-                  consumeExpression(tree, tokIt, endtok);
-                  advance();
-                  [[fallthrough]];
-               case KeywordID::DEFAULT:
-                  if (tokIt->type() != TokenType::OP || OPERATORS[*tokIt] != LABEL_DELIM) {
-                     hadErrors |= logError<true>(ErrCode::PARSER_UNSPEC, "bad CASE");
-                     goto DONE_WITH_FILE;
-                  }
-                  advance();
-                  goto DONE_WITH_TOKEN;
-
-               case KeywordID::THROW:
-                  consumeExpression(tree, tokIt, endtok);
-                  advance();
-                  gotoEOS();
-
-                  
-               //floating keywords
-               case KeywordID::CATCH: [[fallthrough]];
-               case KeywordID::ELSE:
-                  hadErrors |= logError<true>(ErrCode::PARSER_UNSPEC, "floating keyword (%u)", (uint)keyword);
-                  goto DONE_WITH_FILE;
-
-               #pragma endregion controlflow
-
-
-               //!OBJECT TYPE KEYWORDS
-               #pragma region objtype
-               case KeywordID::CLASS: [[fallthrough]];
-               case KeywordID::STRUCT: [[fallthrough]];
-               case KeywordID::INTERFACE: [[fallthrough]];
-               case KeywordID::UNION: [[fallthrough]];
-               case KeywordID::ENUM: [[fallthrough]];
-               case KeywordID::MASK: [[fallthrough]];
-               case KeywordID::NAMESPACE:
-                  advance() //consume keyword
-                  switch (tokIt->type()) { //handle keyword
-                     case TokenType::IDEN: [[fallthrough]];
-                     case TokenType::STRT: [[fallthrough]];
-                     case TokenType::CHAR: //named object type
-                        consumeIdentifier(tree, tokIt, endtok); //name
-                        advance();
-                        switch (tokIt->type()) {
-                           default:
-                              hadErrors |= logError<true>(ErrCode::PARSER_UNSPEC, "bad object type declaration");
-                              goto DONE_WITH_FILE;
-
-                           case TokenType::EOS: //forward declaration
-                              goto EOS;
-                           
-                           case TokenType::BLOC: //definition
-                        }
-                        [[fallthrough]];
-                     case TokenType::BLOC: //anonymous object type
-                        consumeEnclosedStmts(tree, tokIt, endtok);
-                        advance();
-                        
-                        gotoEOS();
-
-
-                     default:
-                        hadErrors |= logError<true>(ErrCode::PARSER_UNSPEC, "bad object type keyword");
-                        goto DONE_WITH_FILE;
-                  }
-
-
-
-               #pragma endregion objtype
-               
-
-               //!OTHER
-               #pragma region other
-               case KeywordID::RETURN:
-                  //check if in a function //!NOTE: UNFINISHED
-
-                  advance();
-
-                  //consume return value
-                  consumeExpression(tree, tokIt, endtok);
-                  advance();
-
-                  //EOS
-                  gotoEOS();
-
-               //ASSERT and STATIC_ASSERT
-               case KeywordID::ASSERT: [[fallthrough]];
-               case KeywordID::STATIC_ASSERT:
-                  advance();
-                  consumeExpression(tree, tokIt, endtok);
-                  advance();
-
-                  gotoEOS();
-
-
-               //ASM (inline assembly)
-               case KeywordID::ASM:
-                  //!NOTE: UNFINISHED
-                  consumeSpecificBlock(BlockType::PARENS, tree, tokIt, endtok); //parameters
-                  advance();
-                  consumeSpecificBlock(BlockType::INIT_LIST, tree, tokIt, endtok); //contents //!NOTE: intentionally doesn't use consumeEnclosedStmts
-                  advance();
-                  gotoEOS();
-
-               //dynamic allocation/deallocation
-               case KeywordID::NEW:
-                  advance();
-                  consumeIdentifier(tree, tokIt, endtok);
-                  advance();
-                  gotoEOS();
-               case KeywordID::DELETE:
-                  advance();
-                  consumeExpression(tree, tokIt, endtok);
-                  advance();
-                  gotoEOS();
-
-               case KeywordID::TEMPLATE:
-                  consumeSpecificBlock(BlockType::SPECIALIZER, tree, tokIt, endtok); //contents //!NOTE: make it consume a template parameter list
-
-               //lvalues - treat as identifier
-               case KeywordID::THIS: [[fallthrough]];
-               case KeywordID::SELF:
-                  goto HANDLE_IDENTIFIER;
-
-               //rvalues - log the error and continue as if it was a standard identifier
-               case KeywordID::TRUE: [[fallthrough]];
-               case KeywordID::FALSE: [[fallthrough]];
-               case KeywordID::NULLPTR:
-                  hadErrors |= logError<false>(ErrCode::PARSER_UNSPEC, "expression cannot begin with an rvalue");
-                  goto HANDLE_IDENTIFIER;
-
-               #pragma endregion other
-
-
-               //!too many handled identically to be worth that many labels
-               //!NOTE: MIGHT BE WORTH THE LABELS ANYWAY
-               #pragma region categories
-               default:{
-                  //!TYPES
-                  #pragma region typeKeywords
-                  if (isType(keyword)) {
-                     //!NOTE: UNFINISHED
-                     //check for illegal uses of typename keywords (DO NOT advance())
-
-                     //handle typename
-                     goto HANDLE_TYPENAME;
-                  }
-
-                  if (isQualifier(keyword)) {
-                     //!NOTE: UNFINISHED
-                  }
-
-                  #pragma endregion typeKeywords
-
-                  if (isCast(keyword)) {
-                     advance();
-                     consumeSpecificBlock(BlockType::SPECIALIZER, tree, tokIt, endtok); //!NOTE: make it consume a type in a specializer
-                     advance();
-                     consumeSpecificBlock(BlockType::PARENS, tree, tokIt, endtok); //!NOTE: make it consume an expression in parens
-
-                     goto DONE_WITH_TOKEN;
-                  }
-
-
-                  if (isTypeAdjacent(keyword)) {
-                     advance();
-                     consumeSpecificBlock(BlockType::PARENS, tree, tokIt, endtok); //!NOTE: make it consume an expression in parens
-
-                     goto DONE_WITH_TOKEN;
-                  }
-
-
-                  //!NOTE: IF THIS CODE GET REACHED THERE IS AN ERROR IN THE CLEF CODE
-                  throwError(ErrCode::PARSER_NOT_IMPLEMENTED, "keyword does not have a case and is not handled as a member of a category (%u)", (uint)keyword);
-                  assert(false);
-               }
-               #pragma endregion categories
-
-
-
-               //!NOTE: UNFINISHED (still need to handle most of the keywords)
-
-               
-
-               //!NON-KEYWORDS (IDENTIFIERS)
-               case KeywordID::_NOT_A_KEYWORD: { HANDLE_IDENTIFIER:
-                  //!NOTE: UNFINISHED
-
-                  #pragma region typename
-                  HANDLE_TYPENAME:
-                  consumeIdentifier(tree, tokIt, endtok);
-                  //!NOTE: UNFINISHED
-
-                  #pragma endregion typename
-               }
-            }
-
-
-            goto DONE_WITH_TOKEN;
-}
-
-         //!NUMBERS:
-         case TokenType::NUM: [[fallthrough]];
-         case TokenType::DGIT: [[fallthrough]];
-         case TokenType::XDGT:
-            // tree.pushNode(Literal{mcsl::str_to_uint(tokIt->begin(), tokIt->size())});
-            goto DONE_WITH_TOKEN;
-            
-         default:
-            //SYNTAX ERROR - ILLEGAL TOKEN
-            hadErrors |= logError<true>(ErrCode::PARSER_UNSPEC, "illegal token");
-            goto DONE_WITH_FILE;
+      case KeywordID::THROW         : [[fallthrough]];
+      case KeywordID::ASSERT        : [[fallthrough]];
+      case KeywordID::STATIC_ASSERT : [[fallthrough]];
+      case KeywordID::RETURN        : {
+         expr = parseExpr();
+         consumeEOS("bad THROW, ASSERT, STATIC_ASSERT, or RETURN");
+         stmt = (Stmt*)tree.allocNode(NodeType::STMT);
+         *stmt = Stmt{OperatorID::CALL, begin, expr};
+         break;
       }
 
-
-      DONE_WITH_TOKEN:
+      case KeywordID::USING         : //!NOTE: UNFINISHED
    }
 
+   return stmt;
+}
 
-   //final error checks
-   if (!tree.isComplete()) {
-      hadErrors |= logError<true>(ErrCode::PARSER_UNSPEC, "end of file reached at illegal spot");
+clef::Scope* clef::Parser::parseProcedure() {
+   Scope* scope = (Scope*)tree.allocNode(NodeType::SCOPE);
+
+   while (tokIt < endtok) {
+      if (tryConsumeOperator(OperatorID::LIST_CLOSE)) {
+         return scope;
+      }
+      scope->push_back(parseStmt());
    }
 
+   //reached end of source without finding closing token
+   logError(ErrCode::PARSER_UNSPEC, "unclosed procedure");
+}
 
-   DONE_WITH_FILE:
-   if (hadErrors) {
-      throwError(ErrCode::PARSER_UNSPEC, "error earlier in file, compilation continued only until end of file");
-      return SyntaxTree{};
+#pragma region loop
+
+clef::Loop* clef::Parser::parseForLoop() {
+   //open parens
+   consumeOperator(OperatorID::CALL_OPEN, "FOR loop without opening parens for condition");
+
+   //params
+   Stmt* decl = parseStmt();
+   Stmt* condition = parseStmt();
+   Expr* inc = parseExpr();
+
+   //closing parens
+   consumeOperator(OperatorID::CALL_CLOSE, "FOR loop without closing parens for condition");
+
+   //procedure
+   consumeOperator(OperatorID::LIST_OPEN, "bad FOR block");
+   Scope* proc = parseProcedure();
+
+   //EOS
+   consumeEOS("FOR statement without EOS token");
+
+   //return
+   ForLoopParams* params = new (tree.allocNode(NodeType::FOREACH_LOOP_PARAMS)) ForLoopParams{decl, condition, inc};
+   Loop* loop = new (tree.allocNode(NodeType::LOOP)) Loop{params, proc};
+
+   return loop;
+}
+
+clef::Loop* clef::Parser::parseForeachLoop() {
+   //open parens
+   consumeOperator(OperatorID::CALL_OPEN, "FOREACH loop without opening parens for condition");
+
+   //iterator declaration
+   TypeQualMask quals = parseQuals();
+   Type* itType = (Type*)parseIdentifier();
+      ((astNode*)itType)->downCast(NodeType::TYPE);
+   Identifier* itName = parseIdentifier();
+
+   //IN operator
+   consumeOperator(OperatorID::LABEL_DELIM, "bad FOREACH params");
+
+   //FOREACH target
+   Expr* target = parseExpr();
+
+   //closing parens
+   consumeOperator(OperatorID::CALL_CLOSE, "FOREACH loop without closing parens for condition");
+
+   //procedure
+   consumeOperator(OperatorID::LIST_OPEN, "bad FOREACH block");
+   Scope* proc = parseProcedure();
+
+   //EOS
+   consumeEOS("FOREACH statement without EOS token");
+
+   //return
+   Decl* decl = new (tree.allocNode(NodeType::DECL)) Decl{itType, itName};
+   ForeachLoopParams* params = new (tree.allocNode(NodeType::FOREACH_LOOP_PARAMS)) ForeachLoopParams{decl, target};
+   Loop* loop = new (tree.allocNode(NodeType::LOOP)) Loop{params, proc};
+
+   return loop;
+}
+
+clef::Loop* clef::Parser::parseWhileLoop() {
+   //open parens
+   consumeOperator(OperatorID::CALL_OPEN, "WHILE loop without opening parens for condition");
+
+   //condition
+   Expr* condition = parseExpr();
+
+   //closing parens
+   consumeOperator(OperatorID::CALL_CLOSE, "WHILE loop without closing parens for condition");
+
+   //procedure
+   consumeOperator(OperatorID::LIST_OPEN, "bad WHILE block");
+   Scope* proc = parseProcedure();
+
+   //EOS
+   consumeEOS("WHILE statement without EOS token");
+
+   //return
+   return new (tree.allocNode(NodeType::LOOP)) Loop{OperatorID::WHILE, condition, proc};
+}
+
+clef::Loop* clef::Parser::parseDoWhileLoop() {
+   //procedure
+   consumeOperator(OperatorID::LIST_OPEN, "bad DO WHILE block");
+   Scope* proc = parseProcedure();
+
+   //WHILE keyword
+   consumeKeyword(KeywordID::WHILE, "DO WHILE without WHILE");
+
+   //condition
+   consumeOperator(OperatorID::CALL_OPEN, "DO WHILE loop without opening parens for condition");
+   Expr* condition = parseExpr();
+   consumeOperator(OperatorID::CALL_CLOSE, "DO WHILE loop without closing parens for condition");
+
+   //EOS
+   consumeEOS("DO WHILE statement without EOS token");
+
+   //return
+   return new (tree.allocNode(NodeType::LOOP)) Loop{OperatorID::DO_WHILE, condition, proc};
+}
+
+#pragma endregion loop
+
+clef::If* clef::Parser::parseIf() {
+   //condition
+   consumeOperator(OperatorID::CALL_OPEN, "IF statement without opening parens for condition");
+   Expr* condition = parseExpr();
+   consumeOperator(OperatorID::CALL_CLOSE, "IF statement without closing parens for condition");
+
+   //procedure
+   consumeOperator(OperatorID::LIST_OPEN, "bad IF block");
+   Scope* proc = parseProcedure();
+
+   //EOS
+   if (tryConsumeEOS()) {
+      return new (tree.allocNode(NodeType::IF)) If{condition, proc};
+   }
+
+   //ELSE
+   consumeKeyword(KeywordID::ELSE, "IF statement without EOS token");
+   switch (tokIt->type()) {
+      case TokenType::OP: //basic ELSE
+         consumeOperator(OperatorID::LIST_OPEN, "bad ELSE block");
+         Scope* proc = parseProcedure();
+         //EOS
+         consumeEOS("DO WHILE statement without EOS token");
+
+         //return
+         If* ifStmt = new (tree.allocNode(NodeType::IF)) If{condition, proc};
+         Else* elseStmt = new (tree.allocNode(NodeType::ELSE)) Else{ifStmt, proc};
+         return elseStmt;
+      
+      default: //ELSE IF
+         consumeKeyword(KeywordID::IF, "bad ELSE IF block");
+         If* ifOfElif = parseIf(); //will consume EOS
+
+         //return
+         If* ifStmt = new (tree.allocNode(NodeType::IF)) If{condition, proc};
+         ElseIf* elifStmt = new (tree.allocNode(NodeType::ELSE_IF)) ElseIf{ifStmt, ifOfElif};
+         return elifStmt;
+   }
+}
+
+clef::Switch* clef::Parser::parseSwitch() {
+   //condition
+   consumeOperator(OperatorID::CALL_OPEN, "SWITCH without opening parens for condition");
+   Expr* condition = parseExpr();
+   consumeOperator(OperatorID::CALL_CLOSE, "SWITCH without closing parens for condition");
+
+   //procedure
+   consumeOperator(OperatorID::LIST_OPEN, "bad SWITCH block");
+   Scope* procedure = new (tree.allocNode(NodeType::SCOPE)) Scope{tree.allocBuf<Stmt*>()};
+   SwitchCases* cases = new (tree.allocNode(NodeType::SWITCH_CASES)) SwitchCases{tree.allocBuf<mcsl::pair<Expr*,Stmt*>>(), procedure};
+
+   while (!tryConsumeOperator(OperatorID::LIST_CLOSE)) {
+      if (tryConsumeKeyword(KeywordID::CASE)) { //CASE
+         Expr* caseExpr = parseExpr();
+         consumeOperator(OperatorID::LABEL_DELIM, "bad CASE in SWITCH statement");
+         
+         //!NOTE: UNFINISHED
+
+      } else if (tryConsumeKeyword(KeywordID::DEFAULT)) { //DEFAULT
+         consumeOperator(OperatorID::LABEL_DELIM, "bad DEFAULT in SWITCH statement");
+         
+         //!NOTE: UNFINISHED
+
+      } else { //standard statement
+         procedure->push_back(parseStmt());
+      }
+   }
+
+   //EOS
+   consumeEOS("SWITCH statement without EOS");
+
+   //return
+   return new (tree.allocNode(NodeType::SWITCH)) Switch{condition, cases};
+}
+
+clef::Match* clef::Parser::parseMatch() {
+   //condition
+   consumeOperator(OperatorID::CALL_OPEN, "MATCH without opening parens for condition");
+   Expr* condition = parseExpr();
+   consumeOperator(OperatorID::CALL_CLOSE, "MATCH without closing parens for condition");
+
+   //procedure
+   consumeOperator(OperatorID::LIST_OPEN, "bad MATCH block");
+   MatchCases* cases = new (tree.allocNode(NodeType::SWITCH_CASES)) MatchCases{tree.allocBuf<mcsl::pair<Expr*,Scope*>>()};
+
+   while (!tryConsumeOperator(OperatorID::LIST_CLOSE)) {
+      Expr* caseExpr;
+      if (tryConsumeKeyword(KeywordID::CASE)) { //CASE
+         caseExpr = parseExpr();
+      } else {
+         consumeKeyword(KeywordID::DEFAULT, "bad MATCH block procedure");
+         caseExpr = nullptr;   
+      }
+      consumeOperator(OperatorID::LABEL_DELIM, "bad CASE or DEFAULT in MATCH statement");
+      consumeOperator(OperatorID::LIST_OPEN, "bad CASE or DEFAULT procedure in MATCH statement");
+      Scope* procedure = parseProcedure();
+      
+      cases->emplace_back(caseExpr, procedure);
+   }
+
+   //EOS
+   consumeEOS("MATCH statement without EOS");
+
+   //return
+   return new (tree.allocNode(NodeType::MATCH)) Match{condition, cases};
+}
+
+clef::Function* clef::Parser::parseFunction() {
+   Identifier* name = tryParseIdentifier();
+   
+   //params
+   consumeOperator(OperatorID::CALL_OPEN, "FUNC without parameters");
+   ParamList* params = new (tree.allocNode(NodeType::FUNC_SIG)) ParamList{tree.allocBuf<Variable*>()};
+   while (!tryConsumeOperator(OperatorID::CALL_CLOSE)) {
+      //parse parameter
+      TypeQualMask quals = parseQuals();
+      Type* paramType = (Type*)parseIdentifier();
+         ((astNode*)paramType)->downCast(NodeType::TYPE);
+      Identifier* paramName = tryParseIdentifier();
+      //!NOTE: UNFINISHED (no support for default values)
+      // Expr* defaultVal;
+      // if (tryConsumeOperator(OperatorID::ASSIGN)) {
+      //    defaultVal = parseExpr();
+      //    if (!defaultVal) { logError(ErrCode::PARSER_UNSPEC, "invalid FUNC parameter default value"); }
+      // } else { defaultVal = nullptr; }
+
+      //push to parameter list
+      ((astNode*)paramName)->downCast(NodeType::VAR);
+      params->push_back(new (paramName) Variable{paramType, paramName});
+
+      //check for comma
+      if (!tryConsumeOperator(OperatorID::COMMA)) {
+         consumeOperator(OperatorID::CALL_CLOSE, "bad FUNC parameter list");
+      }
+   }
+
+   //return type
+   consumeOperator(OperatorID::MEMBER_OF_POINTER_ACCESS, "FUNC without trailing return type");
+   TypeQualMask returnTypeQuals = parseQuals();
+   Type* returnType = (Type*)parseIdentifier();
+      ((astNode*)returnType)->downCast(NodeType::TYPE);
+
+   //make signature
+   FuncSig* sig = new (tree.allocNode(NodeType::FUNC_SIG)) FuncSig{sig, params};
+
+   if (tryConsumeEOS()) { //forward declaration
+      if (name) {
+         Function* func = (Function*)name;
+         ((astNode*)func)->downCast(NodeType::FUNC);
+         return new (func) Function{sig, name};
+      } else {
+         return new (tree.allocNode(NodeType::FUNC)) Function{sig};
+      }
+   }
+
+   //definition
+   consumeOperator(OperatorID::LIST_OPEN, "bad FUNC definition");
+   Scope* procedure = parseProcedure();
+
+   //EOS
+   consumeEOS("FUNC without EOS");
+
+   //return
+   if (name) {
+      Function* func = (Function*)name;
+      ((astNode*)func)->downCast(NodeType::FUNC);
+      return new (func) Function{sig, procedure, name};
+   } else {
+      return new (tree.allocNode(NodeType::FUNC)) Function{sig, procedure};
+   }
+}
+
+#pragma region objectType
+
+clef::Interface* clef::Parser::parseInterface() {
+   Identifier* name = parseIdentifier();
+   
+   if (tryConsumeEOS()) { //forward declaration
+      ((astNode*)name)->downCast(NodeType::INTERFACE);
+      return new (name) Interface{(Type*)name};
    }
    
-   //return the tree
-   return tree;
-}
-#undef advance
-#undef gotoEOS
+   //inheritance
+   InterfaceSpec* spec = new (tree.allocInterfaceSpec()) InterfaceSpec{};
+   if (tryConsumeOperator(OperatorID::LABEL_DELIM)) {
+      do {
+         Interface* parentType = (Interface*)parseIdentifier();
+            ((astNode*)parentType)->downCast(NodeType::INTERFACE);
+         spec->inheritedInterfaces().push_back(parentType);
+      } while (tryConsumeOperator(OperatorID::COMMA));
+   }
 
+   //definition
+   consumeOperator(OperatorID::LIST_OPEN, "bad INTERFACE definition");
+   while (!tryConsumeOperator(OperatorID::LIST_CLOSE)) {
+      TypeQualMask quals = parseQuals();
+      consumeKeyword(KeywordID::FUNC, "INTERFACE can only contain functions");
+      Function* func = parseFunction();
+      if (+(quals & TypeQualMask::STATIC)) {
+         spec->staticFuncs().push_back(func);
+      } else {
+         spec->methods().push_back(func);
+      }
+   }
+
+   //EOS
+   consumeEOS("INTERFACE without EOS");
+
+   //return
+   ((astNode*)name)->downCast(NodeType::INTERFACE);
+   return new (name) Interface{spec, (Type*)name};
+}
+
+clef::Union* clef::Parser::parseUnion() {
+   Identifier* name = tryParseIdentifier();
+
+   if (tryConsumeEOS()) { //forward declaration
+      if (!name) {
+         logError(ErrCode::PARSER_UNSPEC, "cannot forward-declare an anonymous UNION");
+      }
+      ((astNode*)name)->downCast(NodeType::UNION);
+      return new (name) Union{name};
+   }
+
+   consumeOperator(OperatorID::LIST_OPEN, "bad UNION definition");
+
+   ParameterList* members = new (tree.allocNode(NodeType::PARAM_LIST)) ParameterList{tree.allocBuf<Variable*>()};
+   while (!tryConsumeOperator(OperatorID::LIST_CLOSE)) {
+      //parse member
+      Type* memberType = (Type*)parseIdentifier();
+         ((astNode*)memberType)->downCast(NodeType::TYPE);
+      Identifier* memberName = parseIdentifier();
+      consumeEOS("bad UNION member");
+      
+      //push to members list
+      Variable* member = (Variable*)memberName;
+      ((astNode*)member)->downCast(NodeType::VAR);
+      member->type() = memberType;
+      members->push_back(member);
+   }
+
+   //EOS
+   consumeEOS("UNION without EOS");
+
+   //return
+   if (name) { ((astNode*)name)->downCast(NodeType::UNION); }
+   return new (name) Union{name, members};
+}
+
+//!NOTE: clef::Parser::parseMask relies on this function - be careful changing observable behavior
+clef::Enum* clef::Parser::parseEnum() {
+   Identifier* name = tryParseIdentifier();
+   Type* baseType;
+   if (tryConsumeOperator(OperatorID::LABEL_DELIM)) {
+      baseType = (Type*)parseIdentifier();
+         ((astNode*)baseType)->downCast(NodeType::TYPE);
+   } else { baseType = nullptr; }
+
+   if (tryConsumeEOS()) { //forward declaration
+      if (!name) {
+         logError(ErrCode::PARSER_UNSPEC, "cannot forward-declare an anonymous ENUM");
+      }
+      ((astNode*)name)->anyCast(NodeType::ENUM);
+      return new (name) Enum{baseType};
+   }
+
+   consumeOperator(OperatorID::LIST_OPEN, "bad ENUM definition");
+   while (!tryConsumeOperator(OperatorID::LIST_CLOSE)) {
+      Identifier* enumerator = parseIdentifier();
+      Expr* val;
+      if (tryConsumeOperator(OperatorID::ASSIGN)) {
+         val = parseExpr();
+      } else { val = nullptr; }
+
+      //!NOTE: UNFINISHED (need to actually add push enumerator to the enum)
+
+      if (!tryConsumeOperator(OperatorID::COMMA)) {
+         consumeOperator(OperatorID::LIST_CLOSE, "bad ENUM enumerator");
+         break;
+      }
+   }
+
+   //EOS
+   consumeEOS("ENUM without EOS");
+
+   //return
+   //!NOTE: UNFINISHED
+}
+
+//!NOTE: ASSUMES THAT THE SYNTAX AND MEMORY LAYOUT OF THE AST NODES FOR MASKS AND ENUMS ARE IDENTICAL
+clef::Mask* clef::Parser::parseMask() {
+   astNode* mask = (astNode*)parseEnum();
+   mask->anyCast(NodeType::MASK);
+   return (Mask*)mask;
+}
+
+#pragma endregion objectType
 #endif //PARSER_CPP

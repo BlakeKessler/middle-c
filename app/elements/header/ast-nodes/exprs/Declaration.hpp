@@ -10,7 +10,7 @@ struct clef::Declaration : public clef::Expression {
    
    public:
       Declaration():Expression{} {}
-      Declaration(Operator* decl, Type* type, Identifier* name):Expression{decl,type,name} { assert(_op->isDecl()); }
+      Declaration(Type* type, Identifier* name):Expression{OperatorID::DECL,type,name} {}
 
       Type*& type() { return (Type*&)_lhs; }
       const Type* type() const { return (const Type*)_lhs; }

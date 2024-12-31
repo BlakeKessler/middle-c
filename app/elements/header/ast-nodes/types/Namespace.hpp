@@ -14,8 +14,8 @@ struct clef::Namespace : public clef::Type {
    public:
       Namespace():Type{},_spec{} {}
       Namespace(NamespaceSpec* spec):Type{},_spec{spec} {}
-      Namespace(NamespaceSpec* spec, const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_spec{spec} {}
-      Namespace(const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_spec{} {}
+      Namespace(NamespaceSpec* spec, Type* name):Type{name?*name:Type{}},_spec{spec} {}
+      Namespace(Type* name):Type{name?*name:Type{}},_spec{} {}
 
       NamespaceSpec*& spec() { return _spec; }
       const NamespaceSpec* spec() const { return _spec; }

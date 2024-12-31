@@ -14,6 +14,8 @@ struct clef::Identifier {
       Identifier():_decl{},_name{} {}
       Identifier(const char* str, const uint len, Decl* decl = nullptr):_decl{decl},_name{const_cast<char*>(str), len} {}
 
+      KeywordID keywordID() const;
+
 
       bool operator==(const Identifier& other) const;
       bool operator!=(const Identifier& other) const;

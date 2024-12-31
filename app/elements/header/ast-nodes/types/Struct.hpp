@@ -14,8 +14,8 @@ struct clef::Struct : public clef::Type {
    public:
       Struct():Type{},_spec{} {}
       Struct(ObjTypeSpec* spec):Type{},_spec{spec} {}
-      Struct(ObjTypeSpec* spec, const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_spec{spec} {}
-      Struct(const char* str, const uint len, Decl* decl = nullptr):Type{str, len, decl},_spec{} {}
+      Struct(ObjTypeSpec* spec, Type* name):Type{name?*name:Type{}},_spec{spec} {}
+      Struct(Type* name):Type{name?*name:Type{}},_spec{} {}
 
       ObjTypeSpec*& spec() { return _spec; }
       const ObjTypeSpec* spec() const { return _spec; }

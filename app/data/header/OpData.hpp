@@ -47,12 +47,14 @@ struct alignas(8) clef::OpData {
 struct clef::OpGroup {
    private:
       mcsl::arr_span<OpData> _ops;
+      OperatorID _opId;
       TokenType _type;
    public:
-      constexpr OpGroup():_ops{},_type{} {}
-      constexpr OpGroup(OpData* begin, const uint size):_ops{begin,size},_type{tokType(begin->toString())} {}
+      constexpr OpGroup():_ops{},_opId{},_type{} {}
+      constexpr OpGroup(OpData* begin, const uint size):_ops{begin,size},_opId{std::bit_cast<OperatorID>(begin->toString())},_type{tokType(begin->toString())} {}
 
       constexpr uint size() const { return _ops.size(); }
+      constexpr OperatorID opID() const { return _opId; }
       constexpr TokenType type() const { return _type; }
       constexpr OpData& operator[](const uint i) { return _ops[i]; }
       constexpr const OpData& operator[](const uint i) const { return _ops[i]; }

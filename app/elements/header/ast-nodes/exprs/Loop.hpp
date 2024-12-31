@@ -10,9 +10,9 @@ struct clef::Loop : public clef::Expression {
    
    public:
       Loop():Expression{} {}
-      Loop(Operator* loopType, Expr* condition, Scope* procedure):Expression{loopType,condition,procedure} { assert(_op->isSimpleLoop()); }
-      Loop(Operator* loopType, ForLoopParams* params, Scope* procedure):Expression{loopType,params,procedure} { assert(_op->isForLoop()); }
-      Loop(Operator* loopType, ForeachLoopParams* params, Scope* procedure):Expression{loopType,params,procedure} { assert(_op->isForeachLoop()); }
+      Loop(OperatorID loopType, Expr* condition, Scope* procedure):Expression{loopType,condition,procedure} { assert(isSimpleLoop(_op)); }
+      Loop(ForLoopParams* params, Scope* procedure):Expression{OperatorID::FOR,params,procedure} {}
+      Loop(ForeachLoopParams* params, Scope* procedure):Expression{OperatorID::FOREACH,params,procedure} {}
 
       Expr*& condition();
       const Expr* condition() const;

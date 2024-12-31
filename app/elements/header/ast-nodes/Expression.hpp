@@ -3,11 +3,10 @@
 #define EXPR_HPP
 
 #include "CLEF.hpp"
-#include "ast-nodes/Operator.hpp"
 
 struct clef::Expression {
    private:
-      Operator* _op;
+      OperatorID _op;
       void* _lhs;
       void* _rhs;
       // union { //!NOTE: if I use this, move it before _op to facilitate type punning
@@ -24,8 +23,12 @@ struct clef::Expression {
       friend class Match;
       
       Expression():_op{},_lhs{},_rhs{} {}
-      Expression(Operator* op, void* lhs, void* rhs):_op{op},_lhs{lhs},_rhs{rhs} {}
+      Expression(OperatorID op, void* lhs, void* rhs):_op{op},_lhs{lhs},_rhs{rhs} {}
    public:
+      Expression(OperatorID op, Expr* lhs, Expr* rhs);
+      Expression(OperatorID op, Identifier* lhs, Expr* rhs);
+      Expression(OperatorID op, Expr* lhs, Identifier* rhs);
+      Expression(OperatorID op, Identifier* lhs, Identifier* rhs);
       Literal* value() const; //evaluate expression
 };
 

@@ -1,6 +1,6 @@
 #pragma once
-#ifndef ENUM_HPP
-#define ENUM_HPP
+#ifndef MASK_HPP
+#define MASK_HPP
 
 #include "CLEF.hpp"
 #include "astNode.hpp"
@@ -9,13 +9,13 @@
 #include "dyn_arr.hpp"
 #include "pair.hpp"
 
-struct clef::Enum : public clef::Type {
+struct clef::Mask : public clef::Type {
    private:
       Type* _baseType;
       ParameterList* _enumerators;
    public:
-      Enum():Type{},_baseType{},_enumerators{} {}
-      Enum(Type* name, Type* base = nullptr, ParameterList* enums = nullptr):Type{name?*name:Type{}},_baseType{base},_enumerators{enums} {}
+      Mask():Type{},_baseType{},_enumerators{} {}
+      Mask(Type* name, Type* base = nullptr, ParameterList* enums = nullptr):Type{name?*name:Type{}},_baseType{base},_enumerators{enums} {}
 
       Type*& baseType() { return _baseType; }
       const Type* baseType() const { return _baseType; }
@@ -24,4 +24,4 @@ struct clef::Enum : public clef::Type {
       const ParameterList* enumerators() const { return _enumerators; }
 };
 
-#endif //ENUM_HPP
+#endif //MASK_HPP

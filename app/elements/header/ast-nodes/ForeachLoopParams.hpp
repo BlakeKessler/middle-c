@@ -1,6 +1,6 @@
 #pragma once
-#ifndef FOR_LOOP_PARAMS_HPP
-#define FOR_LOOP_PARAMS_HPP
+#ifndef FOREACH_LOOP_PARAMS_HPP
+#define FOREACH_LOOP_PARAMS_HPP
 
 #include "CLEF.hpp"
 
@@ -19,4 +19,4 @@ struct clef::ForeachLoopParams {
       const Expr* target() const { return _target; }
 };
 
-#endif //FOR_LOOP_PARAMS_HPP
+#endif //FOREACH_LOOP_PARAMS_HPP

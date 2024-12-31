@@ -10,7 +10,7 @@ struct clef::ElseIf : public clef::Expression {
 
    public:
       ElseIf():Expression{} {}
-      ElseIf(Operator* op, If* parentIf, If* elseif):Expression{op,parentIf,elseif} { assert(_op->isElseIf()); }
+      ElseIf(If* parentIf, If* elseif):Expression{OperatorID::ELIF,parentIf,elseif} {}
 
       If*& parentIf() { return (If*&)_lhs; }
       const If* parentIf() const { return (If*)_lhs; }

@@ -8,12 +8,17 @@
 struct clef::Function : public clef::Identifier {
    private:
       FuncSig* _signature;
+      Scope* _procedure;
    public:
-      Function():Identifier{},_signature{} {}
-      Function(FuncSig* sig, const char* str, const uint len, Decl* decl = nullptr):Identifier{str, len, decl},_signature{sig} {}
+      Function():Identifier{},_signature{},_procedure{} {}
+      Function(FuncSig* sig, Scope* procedure = nullptr):Identifier{},_signature{sig},_procedure{procedure} {}
+      Function(FuncSig* sig, Identifier* name):Identifier{name?*name:Identifier{}},_signature{sig},_procedure{} {}
+      Function(FuncSig* sig, Scope* procedure, Identifier* name):Identifier{name?*name:Identifier{}},_signature{sig},_procedure{procedure} {}
 
-      FuncSig* signature() { return _signature; }
+      FuncSig*& signature() { return _signature; }
       const FuncSig* signature() const { return _signature; }
+      Scope*& procedure() { return _procedure; }
+      const Scope* procedure() const { return _procedure; }
 };
 
 #endif //FUNCTION_HPP

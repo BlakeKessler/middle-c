@@ -41,6 +41,7 @@ namespace clef {
             FUND_TYPE,
             FUNC_SIG,
             ENUM,
+            MASK,
             UNION,
             NAMESPACE,
             INTERFACE,
@@ -60,6 +61,7 @@ namespace clef {
          SWITCH,
          MATCH,
       FOR_LOOP_PARAMS,
+      FOREACH_LOOP_PARAMS,
       SWITCH_CASES,
       MATCH_CASES,
       STMT_SEQ,
@@ -196,6 +198,8 @@ namespace clef {
       REFERENCE      = 15_m,  //C++-style reference
       ITERATOR       = 16_m,  //iterator (similar to C++ iterators)
    };
+   constexpr auto operator+(TypeQualMask mask) { return std::to_underlying(mask); }
+   constexpr TypeQualMask operator&(TypeQualMask lhs, TypeQualMask rhs) { return (TypeQualMask)(+lhs & +rhs); }
 
    //!symbol properties bitmask
    enum class [[clang::flag_enum]] SymbolProp : uint64 {
@@ -333,6 +337,7 @@ namespace clef {
       ENUM,
       MASK,
       NAMESPACE,
+      FUNC,
 
       CONST             = __TYPE_ADJACENT | __QUALIFIER + 1,
       CONSTEXPR,
@@ -442,6 +447,7 @@ namespace clef {
 
       CALL_OPEN = toenum1("("),
       CALL_CLOSE = toenum1(")"),
+      CALL = toenum2("()"),
       SUBSCRIPT_OPEN = toenum1("["),
       SUBSCRIPT_CLOSE = toenum1("]"),
       LIST_OPEN = toenum1("{"),
@@ -453,6 +459,8 @@ namespace clef {
       PREPROCESSOR = toenum1("#"),
 
       SCOPE_RESOLUTION = toenum2("::"),
+
+      LABEL_DELIM = toenum1(":"),
 
       INCREMENT = toenum2("++"),
       DECREMENT = toenum2("--"),
@@ -544,6 +552,23 @@ namespace clef {
       //helpers
       FIRST_CHAR_MASK = toenum3("\xff\0\0"),
    };
+   constexpr bool isDecl(const OperatorID op) { return op == OperatorID::DECL; }
+
+   constexpr bool isForLoop(const OperatorID op) { return op == OperatorID::FOR; }
+   constexpr bool isForeachLoop(const OperatorID op) { return op == OperatorID::FOREACH; }
+   constexpr bool isWhileLoop(const OperatorID op) { return op == OperatorID::WHILE; }
+   constexpr bool isDoWhileLoop(const OperatorID op) { return op == OperatorID::DO_WHILE; }
+
+   constexpr bool isLoop(const OperatorID op) { return +(op & OperatorID::_LOOPS); }
+   constexpr bool isSimpleLoop(const OperatorID op) { return isLoop(op) && !isForLoop(op) && !isForeachLoop(op); }
+
+   constexpr bool isIf(const OperatorID op) { return op == OperatorID::IF; }
+   constexpr bool isElse(const OperatorID op) { return op == OperatorID::ELSE; }
+   constexpr bool isElseIf(const OperatorID op) { return op == OperatorID::ELIF; }
+   constexpr bool isSwitch(const OperatorID op) { return op == OperatorID::SWITCH; }
+   constexpr bool isMatch(const OperatorID op) { return op == OperatorID::MATCH; }
+
+
    #undef toenum0
    #undef toenum1
    #undef toenum2

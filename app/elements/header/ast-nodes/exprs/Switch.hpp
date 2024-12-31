@@ -10,7 +10,7 @@ struct clef::Switch : public clef::Expression {
 
    public:
       Switch():Expression{} {}
-      Switch(Operator* op, Expr* cond, SwitchCases* cases):Expression{op,cond,cases} { assert(_op->isSwitch()); }
+      Switch(Expr* cond, SwitchCases* cases):Expression{OperatorID::SWITCH,cond,cases} {}
 
       Expr*& condition() { return (Expr*&)_lhs; }
       const Expr* condition() const { return (Expr*)_lhs; }

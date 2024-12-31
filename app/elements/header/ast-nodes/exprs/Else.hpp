@@ -10,7 +10,7 @@ struct clef::Else : public clef::Expression {
 
    public:
       Else():Expression{} {}
-      Else(Operator* op, If* ifptr, Scope* proc):Expression{op,ifptr,proc} { assert(_op->isElse()); }
+      Else(If* ifptr, Scope* proc):Expression{OperatorID::ELSE,ifptr,proc} {}
 
       If*& parentIf() { return (If*&)_lhs; }
       const If* parentIf() const { return (If*)_lhs; }
