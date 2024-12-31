@@ -15,8 +15,6 @@
 #include "ast-nodes/Statement.hpp"
 #include "ast-nodes/Variable.hpp"
 #include "ast-nodes/stmts/Declaration.hpp"
-#include "ast-nodes/stmts/Else.hpp"
-#include "ast-nodes/stmts/ElseIf.hpp"
 #include "ast-nodes/stmts/If.hpp"
 #include "ast-nodes/stmts/Loop.hpp"
 #include "ast-nodes/stmts/Switch.hpp"
@@ -64,8 +62,6 @@ struct clef::astNode {
          Declaration _declaration;
          Loop _loop;
          If _if;
-         Else _else;
-         ElseIf _elseIf;
          Switch _switch;
          Match _match;
          TryCatch _tryCatch;
@@ -107,8 +103,6 @@ struct clef::astNode {
       astNode(Declaration& node):_declaration{node},_nodeType{NodeType::DECL} {}
       astNode(Loop& node):_loop{node},_nodeType{NodeType::LOOP} {}
       astNode(If& node):_if{node},_nodeType{NodeType::IF} {}
-      astNode(Else& node):_else{node},_nodeType{NodeType::ELSE} {}
-      astNode(ElseIf& node):_elseIf{node},_nodeType{NodeType::ELSE_IF} {}
       astNode(Switch& node):_switch{node},_nodeType{NodeType::SWITCH} {}
       astNode(Match& node):_match{node},_nodeType{NodeType::MATCH} {}
       astNode(TryCatch& node):_tryCatch{node},_nodeType{NodeType::TRY_CATCH} {}
@@ -158,8 +152,6 @@ struct clef::astNode {
       _def_cast_func(_declaration)
       _def_cast_func(_loop)
       _def_cast_func(_if)
-      _def_cast_func(_else)
-      _def_cast_func(_elseIf)
       _def_cast_func(_switch)
       _def_cast_func(_match)
       _def_cast_func(_tryCatch)

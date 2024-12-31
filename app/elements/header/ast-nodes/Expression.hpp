@@ -13,17 +13,11 @@ struct clef::Expression {
       void* _lhs;
       void* _rhs;
       void* _extra;
-      // union { //!NOTE: if I use this, move it before _op to facilitate type punning
-      //    mcsl::pair<void*,void*> _operands;
-      //    Literal _lit;
-      // };
 
       friend class Declaration;
       friend class Loop;
       friend class If;
       friend class Else;
-      friend class ElseIf;
-      friend class Switch;
       friend class Match;
       friend class TryCatch;
       friend class Asm;

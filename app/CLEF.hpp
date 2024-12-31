@@ -45,8 +45,6 @@ namespace clef {
          struct Declaration; using Decl = Declaration;
          struct Loop;
          struct If;
-         struct Else;
-         struct ElseIf;
          struct Switch;
          struct Match;
          struct TryCatch;

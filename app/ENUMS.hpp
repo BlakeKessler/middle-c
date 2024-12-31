@@ -56,8 +56,6 @@ namespace clef {
             DECL,
             LOOP,
             IF,
-            ELSE,
-            ELSE_IF,
             SWITCH,
             MATCH,
             TRY_CATCH,
@@ -435,7 +433,7 @@ namespace clef {
    #define toenum1(str) std::bit_cast<uint32>(str "\0\0")
    #define toenum2(str) std::bit_cast<uint32>(str "\0")
    #define toenum3(str) std::bit_cast<uint32>(str)
-   #define CLOSE_LIST "}" //get around broken vscode colorization
+   #define _CLOSE_LIST_CHAR "}" //get around broken vscode colorization
    enum class OperatorID : uint32 {
       NULL = toenum0(),
 
@@ -455,7 +453,7 @@ namespace clef {
       SUBSCRIPT_OPEN = toenum1("["),
       SUBSCRIPT_CLOSE = toenum1("]"),
       LIST_OPEN = toenum1("{"),
-      LIST_CLOSE = toenum1(CLOSE_LIST),
+      LIST_CLOSE = toenum1(_CLOSE_LIST_CHAR),
       SPECIALIZER_OPEN = toenum1("<"),
       SPECIALIZER_CLOSE = toenum1(">"),
 
@@ -544,11 +542,9 @@ namespace clef {
       DO_WHILE = _LOOPS | toenum2("\0d"),
 
       IF = toenum3("\0\0e"),
-      ELSE = toenum3("\0\0f"),
-      ELIF = toenum3("\0\0g"),
 
-      SWITCH = toenum3("\0\0h"),
-      MATCH = toenum3("\0\0i"),
+      SWITCH = toenum3("\0\0f"),
+      MATCH = toenum3("\0\0g"),
 
       //other pseudo-operators
       DECL = toenum3("\0\0A"),
@@ -556,6 +552,12 @@ namespace clef {
       //helpers
       FIRST_CHAR_MASK = toenum3("\xff\0\0"),
    };
+   #undef toenum0
+   #undef toenum1
+   #undef toenum2
+   #undef toenum3
+   #undef _CLOSE_LIST_CHAR
+
    constexpr bool isDecl(const OperatorID op) { return op == OperatorID::DECL; }
 
    constexpr bool isForLoop(const OperatorID op) { return op == OperatorID::FOR; }
@@ -567,17 +569,9 @@ namespace clef {
    constexpr bool isSimpleLoop(const OperatorID op) { return isLoop(op) && !isForLoop(op) && !isForeachLoop(op); }
 
    constexpr bool isIf(const OperatorID op) { return op == OperatorID::IF; }
-   constexpr bool isElse(const OperatorID op) { return op == OperatorID::ELSE; }
-   constexpr bool isElseIf(const OperatorID op) { return op == OperatorID::ELIF; }
    constexpr bool isSwitch(const OperatorID op) { return op == OperatorID::SWITCH; }
    constexpr bool isMatch(const OperatorID op) { return op == OperatorID::MATCH; }
 
-
-   #undef toenum0
-   #undef toenum1
-   #undef toenum2
-   #undef toenum3
-   #undef CLOSE_LIST
    constexpr auto operator+(const OperatorID x) { return std::to_underlying(x); }
    constexpr OperatorID operator&(const OperatorID lhs, const OperatorID rhs) { return (OperatorID)(+lhs & +rhs); }
    constexpr OperatorID& operator&=(OperatorID& lhs, const OperatorID rhs) { lhs = lhs & rhs; return lhs; }

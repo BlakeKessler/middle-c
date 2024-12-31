@@ -232,7 +232,7 @@ clef::Loop* clef::Parser::parseDoWhileLoop() {
 
 #pragma endregion loop
 
-clef::Stmt* clef::Parser::parseIf() {
+clef::If* clef::Parser::parseIf() {
    //condition
    consumeOperator(OperatorID::CALL_OPEN, "IF statement without opening parens for condition");
    Expr* condition = parseExpr();
@@ -257,21 +257,17 @@ clef::Stmt* clef::Parser::parseIf() {
          consumeEOS("DO WHILE statement without EOS token");
 
          //return
-         If* ifStmt = new (tree.allocNode(NodeType::IF)) If{condition, proc};
-         Else* elseStmt = new (tree.allocNode(NodeType::ELSE)) Else{ifStmt, proc};
-         return elseStmt;
+         If* elseStmt = new (tree.allocNode(NodeType::IF)) If{nullptr, proc, nullptr};
+         If* ifStmt = new (tree.allocNode(NodeType::IF)) If{condition, proc, elseStmt};
+         return ifStmt;
       
       default: //ELSE IF
          consumeKeyword(KeywordID::IF, "bad ELSE IF block");
-         Stmt* ifOfElif = parseIf(); //will consume EOS
-         while (ifOfElif->lhs() && ((astNode*)ifOfElif->lhs())->nodeType() != NodeType::IF) { //!NOTE: RELIES ON ELSE AND ELSEIF BOTH PUTING THEIR IF STATEMENT IN THE LHS
-            ifOfElif = (Stmt*)ifOfElif->lhs();
-         }
+         If* elifStmt = parseIf(); //will consume EOS
 
          //return
-         If* ifStmt = new (tree.allocNode(NodeType::IF)) If{condition, proc};
-         ElseIf* elifStmt = new (tree.allocNode(NodeType::ELSE_IF)) ElseIf{ifStmt, (If*)ifOfElif};
-         return elifStmt;
+         If* ifStmt = new (tree.allocNode(NodeType::IF)) If{condition, proc, elifStmt};
+         return ifStmt;
    }
 }
 

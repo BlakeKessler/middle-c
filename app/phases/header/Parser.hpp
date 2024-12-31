@@ -59,7 +59,7 @@ class clef::Parser {
       Loop* parseWhileLoop();
       Loop* parseDoWhileLoop();
 
-      Stmt* parseIf(); //parse if statement (including following else/else if blocks)
+      If* parseIf(); //parse if statement (including following else/else if blocks)
       Switch* parseSwitch();
       Match* parseMatch();
 
