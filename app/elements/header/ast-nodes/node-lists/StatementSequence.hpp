@@ -34,8 +34,8 @@ struct clef::StatementSequence : public mcsl::contig_base<Stmt*> {
       auto* release() { return _stmts->release(); }
       bool push_back(Stmt* obj) { return _stmts->push_back(obj); }
       auto pop_back() { return _stmts->pop_back(); }
-      auto* emplace(const uint i, auto&&... args) { return _stmts->emplace(i, std::forward<decltype(auto)>(args...)); }
-      auto* emplace_back(auto&&... args) { return _stmts->emplace_back(std::forward<decltype(auto)>(args...)); }
+      auto* emplace(const uint i, auto&&... args) { return _stmts->emplace(i, std::forward(args...)); }
+      auto* emplace_back(auto&&... args) { return _stmts->emplace_back(std::forward(args...)); }
       #pragma endregion dyn_arr
 };
 
