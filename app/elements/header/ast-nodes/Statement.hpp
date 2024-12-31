@@ -3,7 +3,7 @@
 #define STATEMENT_HPP
 
 #include "CLEF.hpp"
-#include "Expression.hpp"
+#include "ast-nodes/Expression.hpp"
 
 struct clef::Statement : public clef::Expression {
    private:
@@ -12,8 +12,6 @@ struct clef::Statement : public clef::Expression {
       static constexpr NodeType nodeType() { return NodeType::STMT; }
 
       using Expression::Expression;
-      // Statement():Expression{} {}
-      // Statement(Expression& expr):Expression{expr} {}
 };
 
 #endif //STATEMENT_HPP
