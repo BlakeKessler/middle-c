@@ -11,6 +11,8 @@ struct clef::Scope : public clef::StatementSequence {
    private:
    
    public:
+      static constexpr NodeType nodeType() { return NodeType::SCOPE; }
+
       using StatementSequence::StatementSequence;
       // Scope():StatementSequence{} {}
       // Scope(StatementSequence& stmts):StatementSequence{stmts} {}

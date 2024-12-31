@@ -12,6 +12,8 @@ struct clef::MatchCases : public mcsl::contig_base<mcsl::pair<Expr*,Scope*>> {
    private:
       mcsl::dyn_arr<mcsl::pair<Expr*,Scope*>>* _cases; //case expression, scope to jump to
    public:
+      static constexpr NodeType nodeType() { return NodeType::MATCH_CASES; }
+
       MatchCases(mcsl::dyn_arr<mcsl::pair<Expr*,Scope*>>& cases):_cases{&cases} {}
 
 

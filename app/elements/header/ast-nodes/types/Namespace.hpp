@@ -12,6 +12,8 @@ struct clef::Namespace : public clef::Type {
    private:
       NamespaceSpec* _spec;
    public:
+      static constexpr NodeType nodeType() { return NodeType::NAMESPACE; }
+
       Namespace():Type{},_spec{} {}
       Namespace(NamespaceSpec* spec):Type{},_spec{spec} {}
       Namespace(NamespaceSpec* spec, Type* name):Type{name?*name:Type{}},_spec{spec} {}

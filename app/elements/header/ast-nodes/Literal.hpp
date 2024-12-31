@@ -23,6 +23,8 @@ struct clef::Literal {
       };
       LitType _type;
    public:
+      static constexpr NodeType nodeType() { return NodeType::LITERAL; }
+
       #pragma region constructors
       Literal(const char ch):_charLit{ch},_type{LitType::CHAR} {}
       template<mcsl::uint_t  uint_t > Literal(const  uint_t i):_uintLit{i}, _type{LitType::UINT}  {}

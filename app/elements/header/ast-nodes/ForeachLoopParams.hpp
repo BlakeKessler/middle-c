@@ -9,6 +9,8 @@ struct clef::ForeachLoopParams {
       Decl* _decl;
       Expr* _target;
    public:
+      static constexpr NodeType nodeType() { return NodeType::FOREACH_LOOP_PARAMS; }
+
       ForeachLoopParams():_decl{},_target{} {}
       ForeachLoopParams(Decl* decl, Expr* target):_decl{decl},_target{target} {}
 

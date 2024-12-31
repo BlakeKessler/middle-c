@@ -12,6 +12,8 @@ struct clef::Class : public clef::Type {
    private:
       ObjTypeSpec* _spec;
    public:
+      static constexpr NodeType nodeType() { return NodeType::CLASS; }
+
       Class():Type{},_spec{} {}
       Class(ObjTypeSpec* spec):Type{},_spec{spec} {}
       Class(ObjTypeSpec* spec, Type* name):Type{name?*name:Type{}},_spec{spec} {}

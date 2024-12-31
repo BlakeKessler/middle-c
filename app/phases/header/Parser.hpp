@@ -34,7 +34,6 @@ class clef::Parser {
       inline bool tryConsumeOperator(const OperatorID);
       inline bool tryConsumeEOS();
 
-      inline Identifier* tryParseIdentifier();
 
       Stmt* parseDeclStmt();
 
@@ -52,14 +51,15 @@ class clef::Parser {
 
       TypeQualMask parseQuals();
 
-      Identifier* parseIdentifier();
+      Identifier* tryParseIdentifier(Identifier* scopeName = {});
+      Identifier* parseIdentifier(Identifier* scopeName = {});
 
       Loop* parseForLoop();
       Loop* parseForeachLoop();
       Loop* parseWhileLoop();
       Loop* parseDoWhileLoop();
 
-      If* parseIf(); //parse if statement (including following else/else if blocks)
+      Stmt* parseIf(); //parse if statement (including following else/else if blocks)
       Switch* parseSwitch();
       Match* parseMatch();
 
@@ -77,7 +77,7 @@ class clef::Parser {
       Namespace* parseNamespace();
 
       //error logging
-      [[noreturn]] void logError(const clef::ErrCode code, const char* formatStr, auto&&... args);
+      void [[noreturn]] logError(const clef::ErrCode code, const char* formatStr, auto&&... args);
       
       
       
@@ -91,7 +91,7 @@ class clef::Parser {
 
 
 #pragma region src
-[[noreturn]] void clef::Parser::logError(const clef::ErrCode code, const char* formatStr, auto&&... args) {
+void [[noreturn]] clef::Parser::logError(const clef::ErrCode code, const char* formatStr, auto&&... args) {
    _errno = code;
    clef::throwError(code, formatStr, std::forward<decltype(args)>(args)...);
 }

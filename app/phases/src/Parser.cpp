@@ -100,6 +100,33 @@ clef::Scope* clef::Parser::parseProcedure() {
    logError(ErrCode::PARSER_UNSPEC, "unclosed procedure");
 }
 
+clef::Identifier* clef::Parser::tryParseIdentifier(Identifier* scopeName = {}) {
+   Identifier* name = scopeName;
+   const Token* tmp;
+
+   if (!+(tokIt->type() & TokenType::CHAR)) { return name; }
+   do {
+      name = new (tree.allocNode(NodeType::IDEN)) Identifier{*tokIt, name};
+      tmp = ++tokIt;
+   } while (!tryConsumeOperator(OperatorID::SCOPE_RESOLUTION) || !+(tokIt->type() & TokenType::CHAR));
+   
+   tokIt = tmp;
+   return name;
+}
+clef::Identifier* clef::Parser::parseIdentifier(Identifier* scopeName = {}) {
+   Identifier* name = scopeName;
+   const Token* tmp;
+
+   if (!+(tokIt->type() & TokenType::CHAR)) { logError(ErrCode::PARSER_UNSPEC, "bad IDENTIFIER"); }
+   do {
+      name = new (tree.allocNode(NodeType::IDEN)) Identifier{*tokIt, name};
+      tmp = ++tokIt;
+   } while (!tryConsumeOperator(OperatorID::SCOPE_RESOLUTION) || !+(tokIt->type() & TokenType::CHAR));
+   
+   if (tokIt != tmp || name == scopeName) { logError(ErrCode::PARSER_UNSPEC, "bad IDENTIFIER"); }
+   return name;
+}
+
 #pragma region loop
 
 clef::Loop* clef::Parser::parseForLoop() {
@@ -205,7 +232,7 @@ clef::Loop* clef::Parser::parseDoWhileLoop() {
 
 #pragma endregion loop
 
-clef::If* clef::Parser::parseIf() {
+clef::Stmt* clef::Parser::parseIf() {
    //condition
    consumeOperator(OperatorID::CALL_OPEN, "IF statement without opening parens for condition");
    Expr* condition = parseExpr();
@@ -236,11 +263,14 @@ clef::If* clef::Parser::parseIf() {
       
       default: //ELSE IF
          consumeKeyword(KeywordID::IF, "bad ELSE IF block");
-         If* ifOfElif = parseIf(); //will consume EOS
+         Stmt* ifOfElif = parseIf(); //will consume EOS
+         while (ifOfElif->lhs() && ((astNode*)ifOfElif->lhs())->nodeType() != NodeType::IF) { //!NOTE: RELIES ON ELSE AND ELSEIF BOTH PUTING THEIR IF STATEMENT IN THE LHS
+            ifOfElif = (Stmt*)ifOfElif->lhs();
+         }
 
          //return
          If* ifStmt = new (tree.allocNode(NodeType::IF)) If{condition, proc};
-         ElseIf* elifStmt = new (tree.allocNode(NodeType::ELSE_IF)) ElseIf{ifStmt, ifOfElif};
+         ElseIf* elifStmt = new (tree.allocNode(NodeType::ELSE_IF)) ElseIf{ifStmt, (If*)ifOfElif};
          return elifStmt;
    }
 }

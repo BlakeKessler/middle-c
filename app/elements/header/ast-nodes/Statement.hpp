@@ -9,6 +9,8 @@ struct clef::Statement : public clef::Expression {
    private:
 
    public:
+      static constexpr NodeType nodeType() { return NodeType::STMT; }
+
       using Expression::Expression;
       // Statement():Expression{} {}
       // Statement(Expression& expr):Expression{expr} {}

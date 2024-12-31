@@ -3,14 +3,16 @@
 #define SWITCH_HPP
 
 #include "CLEF.hpp"
-#include "ast-nodes/Expression.hpp"
+#include "ast-nodes/Statement.hpp"
 
-struct clef::Switch : public clef::Expression {
+struct clef::Switch : public clef::Statement {
    private:
 
    public:
-      Switch():Expression{} {}
-      Switch(Expr* cond, SwitchCases* cases):Expression{OperatorID::SWITCH,cond,cases} {}
+      static constexpr NodeType nodeType() { return NodeType::SWITCH; }
+
+      Switch():Statement{} {}
+      Switch(Expr* cond, SwitchCases* cases):Statement{OperatorID::SWITCH,cond,cases} {}
 
       Expr*& condition() { return (Expr*&)_lhs; }
       const Expr* condition() const { return (Expr*)_lhs; }

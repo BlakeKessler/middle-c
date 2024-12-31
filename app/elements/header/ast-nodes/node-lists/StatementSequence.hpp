@@ -11,6 +11,8 @@ struct clef::StatementSequence : public mcsl::contig_base<Stmt*> {
    private:
       mcsl::dyn_arr<Stmt*>* _stmts;
    public:
+      static constexpr NodeType nodeType() { return NodeType::STMT_SEQ; }
+
       StatementSequence(mcsl::dyn_arr<Stmt*>& stmts):_stmts{&stmts} {}
 
 

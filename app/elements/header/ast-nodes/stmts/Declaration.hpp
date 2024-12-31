@@ -9,6 +9,8 @@ struct clef::Declaration : public clef::Expression {
    private:
    
    public:
+      static constexpr NodeType nodeType() { return NodeType::DECL; }
+
       Declaration():Expression{} {}
       Declaration(Type* type, Identifier* name):Expression{OperatorID::DECL,type,name} {}
 

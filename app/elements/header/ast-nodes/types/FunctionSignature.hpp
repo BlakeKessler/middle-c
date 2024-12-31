@@ -10,6 +10,8 @@ struct clef::FunctionSignature : public clef::Type {
       Type* _returnType;
       ParamList* _paramTypes;
    public:
+      static constexpr NodeType nodeType() { return NodeType::FUNC_SIG; }
+
       FunctionSignature():Type{},_returnType{},_paramTypes{} {}
       FunctionSignature(Type* ret, ParamList* params = nullptr):Type{},_returnType{ret},_paramTypes{params} {}
 

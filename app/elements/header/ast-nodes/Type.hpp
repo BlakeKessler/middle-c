@@ -9,6 +9,8 @@ struct clef::Type : public clef::Identifier {
    private:
       
    public:
+      static constexpr NodeType nodeType() { return NodeType::TYPE; }
+
       using Identifier::Identifier;
 };
 

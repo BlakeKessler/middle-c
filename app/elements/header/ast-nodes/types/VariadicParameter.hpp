@@ -9,6 +9,7 @@ struct clef::VariadicParameter : public clef::Type {
    private:
    
    public:
+      static constexpr NodeType nodeType() { return NodeType::VAR_PARAM; }
       using Type::Type;
 };
 

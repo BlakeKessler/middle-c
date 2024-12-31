@@ -11,6 +11,8 @@ struct clef::ParameterList : public mcsl::contig_base<Variable*> {
    private:
       mcsl::dyn_arr<Variable*>* _params;
    public:
+      static constexpr NodeType nodeType() { return NodeType::PARAM_LIST; }
+
       ParameterList(mcsl::dyn_arr<Variable*>& params):_params{&params} {}
 
 

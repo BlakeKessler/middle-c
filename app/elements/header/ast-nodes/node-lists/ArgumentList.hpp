@@ -11,6 +11,8 @@ struct clef::ArgumentList : public mcsl::contig_base<Expr*> {
    private:
       mcsl::dyn_arr<Expr*>* _exprs;
    public:
+      static constexpr NodeType nodeType() { return NodeType::ARG_LIST; }
+
       ArgumentList(mcsl::dyn_arr<Expr*>& exprs):_exprs{&exprs} {}
 
 

@@ -13,6 +13,8 @@ struct clef::SwitchCases : public mcsl::contig_base<mcsl::pair<Expr*,Stmt*>> {
       Scope* _proc;
       mcsl::dyn_arr<mcsl::pair<Expr*,Stmt*>>* _cases; //case expression, statement to jump to
    public:
+      static constexpr NodeType nodeType() { return NodeType::SWITCH_CASES; }
+
       SwitchCases(mcsl::dyn_arr<mcsl::pair<Expr*,Stmt*>>& cases, Scope* procedure = nullptr):_proc{procedure},_cases{&cases} {}
 
 

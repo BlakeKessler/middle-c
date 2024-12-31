@@ -14,8 +14,10 @@ struct clef::Mask : public clef::Type {
       Type* _baseType;
       ParameterList* _enumerators;
    public:
+      static constexpr NodeType nodeType() { return NodeType::MASK; }
+
       Mask():Type{},_baseType{},_enumerators{} {}
-      Mask(Type* name, Type* base = nullptr, ParameterList* enums = nullptr):Type{name?*name:Type{}},_baseType{base},_enumerators{enums} {}
+      Mask(Type* name, Type* base = {}, ParameterList* enums = {}):Type{name?*name:Type{}},_baseType{base},_enumerators{enums} {}
 
       Type*& baseType() { return _baseType; }
       const Type* baseType() const { return _baseType; }

@@ -10,8 +10,10 @@ struct clef::Function : public clef::Identifier {
       FuncSig* _signature;
       Scope* _procedure;
    public:
+      static constexpr NodeType nodeType() { return NodeType::FUNC; }
+
       Function():Identifier{},_signature{},_procedure{} {}
-      Function(FuncSig* sig, Scope* procedure = nullptr):Identifier{},_signature{sig},_procedure{procedure} {}
+      Function(FuncSig* sig, Scope* procedure = {}):Identifier{},_signature{sig},_procedure{procedure} {}
       Function(FuncSig* sig, Identifier* name):Identifier{name?*name:Identifier{}},_signature{sig},_procedure{} {}
       Function(FuncSig* sig, Scope* procedure, Identifier* name):Identifier{name?*name:Identifier{}},_signature{sig},_procedure{procedure} {}
 

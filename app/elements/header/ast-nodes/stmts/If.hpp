@@ -3,14 +3,16 @@
 #define IF_HPP
 
 #include "CLEF.hpp"
-#include "ast-nodes/Expression.hpp"
+#include "ast-nodes/Statement.hpp"
 
-struct clef::If : public clef::Expression {
+struct clef::If : public clef::Statement {
    private:
 
    public:
-      If():Expression{} {}
-      If(Expr* condition, Scope* procedure):Expression{OperatorID::IF,condition,procedure} {}
+      static constexpr NodeType nodeType() { return NodeType::IF; }
+
+      If():Statement{} {}
+      If(Expr* condition, Scope* procedure):Statement{OperatorID::IF,condition,procedure} {}
 
       Expr*& condition() { return (Expr*&)_lhs; }
       const Expr* condition() const { return (Expr*)_lhs; }

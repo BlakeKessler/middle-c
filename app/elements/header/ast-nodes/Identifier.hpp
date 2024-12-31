@@ -8,11 +8,15 @@
 
 struct clef::Identifier {
    private:
-      Decl* _decl;
       const mcsl::raw_str_span _name;
+      Identifier* _scopeName;
    public:
-      Identifier():_decl{},_name{} {}
-      Identifier(const char* str, const uint len, Decl* decl = nullptr):_decl{decl},_name{const_cast<char*>(str), len} {}
+      static constexpr NodeType nodeType() { return NodeType::IDEN; }
+
+      Identifier(const mcsl::raw_str_span name = {}, Identifier* scopeName = {}):_name{name},_scopeName{scopeName} {}
+
+      Identifier*& scopeName() { return _scopeName; }
+      const Identifier* scopeName() const { return _scopeName; }
 
       KeywordID keywordID() const;
 
@@ -20,8 +24,8 @@ struct clef::Identifier {
       bool operator==(const Identifier& other) const;
       bool operator!=(const Identifier& other) const;
       bool operator<=>(const Identifier& other) const;
-
-      operator mcsl::raw_str_span() const { return _name; }
+      
+      operator const mcsl::raw_str_span() const { return _name; } //unqualified name
 };
 
 #endif //IDENTIFIER_HPP

@@ -12,6 +12,8 @@ struct clef::Interface : public clef::Type {
    private:
       InterfaceSpec* _spec;
    public:
+      static constexpr NodeType nodeType() { return NodeType::INTERFACE; }
+
       Interface():Type{},_spec{} {}
       Interface(InterfaceSpec* spec):Type{},_spec{spec} {}
       Interface(Type* name):Type{name?*name:Type{}},_spec{} {}

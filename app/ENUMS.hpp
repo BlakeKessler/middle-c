@@ -53,13 +53,15 @@ namespace clef {
       OPERATOR,
       EXPR,
          STMT,
-         DECL,
-         LOOP,
-         IF,
-         ELSE,
-         ELSE_IF,
-         SWITCH,
-         MATCH,
+            DECL,
+            LOOP,
+            IF,
+            ELSE,
+            ELSE_IF,
+            SWITCH,
+            MATCH,
+            TRY_CATCH,
+            ASM,
       FOR_LOOP_PARAMS,
       FOREACH_LOOP_PARAMS,
       SWITCH_CASES,
@@ -76,7 +78,9 @@ namespace clef {
          case NodeType::TYPE:
             return from >= NodeType::TYPE && from <= NodeType::GENERIC;
          case NodeType::EXPR:
-            return from >= NodeType::EXPR && from <= NodeType::MATCH;
+            return from >= NodeType::EXPR && from <= NodeType::ASM;
+         case NodeType::STMT:
+            return from >= NodeType::STMT && from <= NodeType::ASM;
          
          default:
             return from == to;

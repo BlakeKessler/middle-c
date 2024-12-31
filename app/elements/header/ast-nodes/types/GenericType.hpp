@@ -9,6 +9,8 @@ struct clef::GenericType : public clef::Type {
    private:
    
    public:
+      static constexpr NodeType nodeType() { return NodeType::GENERIC; }
+
       using Type::Type;
 };
 

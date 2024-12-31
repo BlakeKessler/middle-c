@@ -14,15 +14,15 @@
 #include "ast-nodes/Identifier.hpp"
 #include "ast-nodes/Statement.hpp"
 #include "ast-nodes/Variable.hpp"
-#include "ast-nodes/exprs/Declaration.hpp"
-#include "ast-nodes/exprs/Else.hpp"
-#include "ast-nodes/exprs/ElseIf.hpp"
-#include "ast-nodes/exprs/If.hpp"
-#include "ast-nodes/exprs/Loop.hpp"
-#include "ast-nodes/exprs/Switch.hpp"
-#include "ast-nodes/exprs/Match.hpp"
-#include "ast-nodes/exprs/TryCatch.hpp"
-#include "ast-nodes/exprs/Asm.hpp"
+#include "ast-nodes/stmts/Declaration.hpp"
+#include "ast-nodes/stmts/Else.hpp"
+#include "ast-nodes/stmts/ElseIf.hpp"
+#include "ast-nodes/stmts/If.hpp"
+#include "ast-nodes/stmts/Loop.hpp"
+#include "ast-nodes/stmts/Switch.hpp"
+#include "ast-nodes/stmts/Match.hpp"
+#include "ast-nodes/stmts/TryCatch.hpp"
+#include "ast-nodes/stmts/Asm.hpp"
 #include "ast-nodes/node-lists/ArgumentList.hpp"
 #include "ast-nodes/node-lists/MatchCases.hpp"
 #include "ast-nodes/node-lists/ParameterList.hpp"
@@ -123,7 +123,7 @@ struct clef::astNode {
       astNode(ParameterList& node):_parameterList{node},_nodeType{NodeType::PARAM_LIST} {}
       #pragma endregion constructors
 
-      NodeType type() const { return _nodeType; }
+      NodeType nodeType() const { return _nodeType; }
       void downCast(NodeType t);
       void upCast(NodeType t);
       void verticalCast(NodeType t);
@@ -134,44 +134,44 @@ struct clef::astNode {
 
 
       #pragma region cast
-      #define _def_cast_func(type, nodetype, varName) \
-         operator type&() { if (_nodeType == NodeType::nodetype) { return varName; } else { throwCastErr(NodeType::nodetype); }} \
-         operator const type&() const { if (_nodeType == NodeType::nodetype) { return varName; } else { throwCastErr(NodeType::nodetype); }}
-      _def_cast_func(Identifier, IDEN, _identifier)
-      _def_cast_func(Variable, VAR, _variable)
-      _def_cast_func(Function, FUNC, _function)
-      _def_cast_func(Type, TYPE, _type)
-      _def_cast_func(VariadicParameter, VAR_PARAM, _variadicParameter)
-      _def_cast_func(FundamentalType, FUND_TYPE, _fundamentalType)
-      _def_cast_func(FunctionSignature, FUNC_SIG, _functionSignature)
-      _def_cast_func(Enum, ENUM, _enum)
-      _def_cast_func(Mask, MASK, _mask)
-      _def_cast_func(Union, UNION, _union)
-      _def_cast_func(Namespace, NAMESPACE, _namespace)
-      _def_cast_func(Interface, INTERFACE, _interface)
-      _def_cast_func(Struct, STRUCT, _struct)
-      _def_cast_func(Class, CLASS, _class)
-      _def_cast_func(GenericType, GENERIC, _genericType)
-      _def_cast_func(Scope, SCOPE, _scope)
-      _def_cast_func(Literal, LITERAL, _literal)
-      _def_cast_func(Expression, EXPR, _expression)
-      _def_cast_func(Declaration, DECL, _declaration)
-      _def_cast_func(Loop, LOOP, _loop)
-      _def_cast_func(If, IF, _if)
-      _def_cast_func(Else, ELSE, _else)
-      _def_cast_func(ElseIf, ELSE_IF, _elseIf)
-      _def_cast_func(Switch, SWITCH, _switch)
-      _def_cast_func(Match, MATCH, _match)
-      _def_cast_func(TryCatch, TRY_CATCH, _tryCatch)
-      _def_cast_func(Asm, ASM, _asm)
-      _def_cast_func(ForLoopParams, FOR_LOOP_PARAMS, _forLoopParams)
-      _def_cast_func(ForeachLoopParams, FOREACH_LOOP_PARAMS, _foreachLoopParams)
-      _def_cast_func(SwitchCases, SWITCH_CASES, _switchCases)
-      _def_cast_func(MatchCases, MATCH_CASES, _matchCases)
-      _def_cast_func(Statement, STMT, _statement)
-      _def_cast_func(StatementSequence, STMT_SEQ, _statementSequence)
-      _def_cast_func(ArgumentList, ARG_LIST, _argumentList)
-      _def_cast_func(ParameterList, PARAM_LIST, _parameterList)
+      #define _def_cast_func(varName) \
+         operator decltype(varName)&() { if (_nodeType == decltype(varName)::nodeType()) { return varName; } else { throwCastErr(decltype(varName)::nodeType()); }} \
+         operator const decltype(varName)&() const { if (_nodeType == decltype(varName)::nodeType()) { return varName; } else { throwCastErr(decltype(varName)::nodeType()); }}
+      _def_cast_func(_identifier)
+      _def_cast_func(_variable)
+      _def_cast_func(_function)
+      _def_cast_func(_type)
+      _def_cast_func(_variadicParameter)
+      _def_cast_func(_fundamentalType)
+      _def_cast_func(_functionSignature)
+      _def_cast_func(_enum)
+      _def_cast_func(_mask)
+      _def_cast_func(_union)
+      _def_cast_func(_namespace)
+      _def_cast_func(_interface)
+      _def_cast_func(_struct)
+      _def_cast_func(_class)
+      _def_cast_func(_genericType)
+      _def_cast_func(_scope)
+      _def_cast_func(_literal)
+      _def_cast_func(_expression)
+      _def_cast_func(_declaration)
+      _def_cast_func(_loop)
+      _def_cast_func(_if)
+      _def_cast_func(_else)
+      _def_cast_func(_elseIf)
+      _def_cast_func(_switch)
+      _def_cast_func(_match)
+      _def_cast_func(_tryCatch)
+      _def_cast_func(_asm)
+      _def_cast_func(_forLoopParams)
+      _def_cast_func(_foreachLoopParams)
+      _def_cast_func(_switchCases)
+      _def_cast_func(_matchCases)
+      _def_cast_func(_statement)
+      _def_cast_func(_statementSequence)
+      _def_cast_func(_argumentList)
+      _def_cast_func(_parameterList)
 
       #undef _def_cast_func
       #pragma endregion cast

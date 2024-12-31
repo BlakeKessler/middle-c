@@ -3,14 +3,16 @@
 #define MATCH_HPP
 
 #include "CLEF.hpp"
-#include "ast-nodes/Expression.hpp"
+#include "ast-nodes/Statement.hpp"
 
-struct clef::Match : public clef::Expression {
+struct clef::Match : public clef::Statement {
    private:
 
    public:
-      Match():Expression{} {}
-      Match(Expr* cond, MatchCases* cases):Expression{OperatorID::MATCH,cond,cases} {}
+      static constexpr NodeType nodeType() { return NodeType::MATCH; }
+
+      Match():Statement{} {}
+      Match(Expr* cond, MatchCases* cases):Statement{OperatorID::MATCH,cond,cases} {}
 
       Expr*& condition() { return (Expr*&)_lhs; }
       const Expr* condition() const { return (Expr*)_lhs; }
