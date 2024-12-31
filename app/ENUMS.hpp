@@ -429,10 +429,10 @@ namespace clef {
       FUNCTION_SIGNATURE,
    };
 
-   #define toenum0() std::bit_cast<uint32>("\0\0\0")
-   #define toenum1(str) std::bit_cast<uint32>(str "\0\0")
-   #define toenum2(str) std::bit_cast<uint32>(str "\0")
-   #define toenum3(str) std::bit_cast<uint32>(str)
+   #define toenum0() [](){constexpr char buf[4] = "\0\0\0"; return std::bit_cast<unsigned int>(buf); }()
+   #define toenum1(str) [](){constexpr char buf[4] = str "\0\0"; return std::bit_cast<unsigned int>(buf); }()
+   #define toenum2(str) [](){constexpr char buf[4] = str "\0"; return std::bit_cast<unsigned int>(buf); }()
+   #define toenum3(str) [](){constexpr char buf[4] = str; return std::bit_cast<unsigned int>(buf); }()
    #define _CLOSE_LIST_CHAR "}" //get around broken vscode colorization
    enum class OperatorID : uint32 {
       NULL = toenum0(),
@@ -558,27 +558,13 @@ namespace clef {
    #undef toenum3
    #undef _CLOSE_LIST_CHAR
 
-   constexpr bool isDecl(const OperatorID op) { return op == OperatorID::DECL; }
-
-   constexpr bool isForLoop(const OperatorID op) { return op == OperatorID::FOR; }
-   constexpr bool isForeachLoop(const OperatorID op) { return op == OperatorID::FOREACH; }
-   constexpr bool isWhileLoop(const OperatorID op) { return op == OperatorID::WHILE; }
-   constexpr bool isDoWhileLoop(const OperatorID op) { return op == OperatorID::DO_WHILE; }
-
-   constexpr bool isLoop(const OperatorID op) { return +(op & OperatorID::_LOOPS); }
-   constexpr bool isSimpleLoop(const OperatorID op) { return isLoop(op) && !isForLoop(op) && !isForeachLoop(op); }
-
-   constexpr bool isIf(const OperatorID op) { return op == OperatorID::IF; }
-   constexpr bool isSwitch(const OperatorID op) { return op == OperatorID::SWITCH; }
-   constexpr bool isMatch(const OperatorID op) { return op == OperatorID::MATCH; }
-
    constexpr auto operator+(const OperatorID x) { return std::to_underlying(x); }
    constexpr OperatorID operator&(const OperatorID lhs, const OperatorID rhs) { return (OperatorID)(+lhs & +rhs); }
    constexpr OperatorID& operator&=(OperatorID& lhs, const OperatorID rhs) { lhs = lhs & rhs; return lhs; }
    constexpr bool isOperator(const OperatorID x) { return +x & +OperatorID::FIRST_CHAR_MASK; }
    constexpr OperatorID bytemask(OperatorID e) {
-      char (&str)[sizeof(OperatorID)] = reinterpret_cast<char(&)[sizeof(OperatorID)]>(e);
-      for (int i = 0; i < sizeof(str); ++i) {
+      char* str = std::bit_cast<char*>(&e);
+      for (uint i = 0; i < sizeof(e); ++i) {
          str[i] = str[i] ? ~0 : 0;
       }
       return e;
@@ -595,6 +581,20 @@ namespace clef {
       op &= bytemask(x);
       return op == x;
    }
+
+   constexpr bool isDecl(const OperatorID op) { return op == OperatorID::DECL; }
+
+   constexpr bool isForLoop(const OperatorID op) { return op == OperatorID::FOR; }
+   constexpr bool isForeachLoop(const OperatorID op) { return op == OperatorID::FOREACH; }
+   constexpr bool isWhileLoop(const OperatorID op) { return op == OperatorID::WHILE; }
+   constexpr bool isDoWhileLoop(const OperatorID op) { return op == OperatorID::DO_WHILE; }
+
+   constexpr bool isLoop(const OperatorID op) { return +(op & OperatorID::_LOOPS); }
+   constexpr bool isSimpleLoop(const OperatorID op) { return isLoop(op) && !isForLoop(op) && !isForeachLoop(op); }
+
+   constexpr bool isIf(const OperatorID op) { return op == OperatorID::IF; }
+   constexpr bool isSwitch(const OperatorID op) { return op == OperatorID::SWITCH; }
+   constexpr bool isMatch(const OperatorID op) { return op == OperatorID::MATCH; }
 }
 
 #endif //ENUMS_HPP
