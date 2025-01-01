@@ -100,7 +100,7 @@ clef::Scope* clef::Parser::parseProcedure() {
    logError(ErrCode::PARSER_UNSPEC, "unclosed procedure");
 }
 
-clef::Identifier* clef::Parser::tryParseIdentifier(Identifier* scopeName = {}) {
+clef::Identifier* clef::Parser::tryParseIdentifier(Identifier* scopeName) {
    Identifier* name = scopeName;
    const Token* tmp;
 
@@ -113,7 +113,7 @@ clef::Identifier* clef::Parser::tryParseIdentifier(Identifier* scopeName = {}) {
    tokIt = tmp;
    return name;
 }
-clef::Identifier* clef::Parser::parseIdentifier(Identifier* scopeName = {}) {
+clef::Identifier* clef::Parser::parseIdentifier(Identifier* scopeName) {
    Identifier* name = scopeName;
    const Token* tmp;
 
@@ -250,7 +250,7 @@ clef::If* clef::Parser::parseIf() {
    //ELSE
    consumeKeyword(KeywordID::ELSE, "IF statement without EOS token");
    switch (tokIt->type()) {
-      case TokenType::OP: //basic ELSE
+      case TokenType::OP: { //basic ELSE
          consumeOperator(OperatorID::LIST_OPEN, "bad ELSE block");
          Scope* proc = parseProcedure();
          //EOS
@@ -260,14 +260,15 @@ clef::If* clef::Parser::parseIf() {
          If* elseStmt = new (tree.allocNode(NodeType::IF)) If{nullptr, proc, nullptr};
          If* ifStmt = new (tree.allocNode(NodeType::IF)) If{condition, proc, elseStmt};
          return ifStmt;
-      
-      default: //ELSE IF
+      }
+      default: { //ELSE IF
          consumeKeyword(KeywordID::IF, "bad ELSE IF block");
          If* elifStmt = parseIf(); //will consume EOS
 
          //return
          If* ifStmt = new (tree.allocNode(NodeType::IF)) If{condition, proc, elifStmt};
          return ifStmt;
+      }
    }
 }
 

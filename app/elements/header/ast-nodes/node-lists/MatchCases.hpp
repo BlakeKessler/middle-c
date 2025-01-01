@@ -36,8 +36,8 @@ struct clef::MatchCases : public mcsl::contig_base<mcsl::pair<Expr*,Scope*>> {
       bool push_back(mcsl::pair<Expr*,Scope*>&& obj) { return _cases->push_back(std::forward<decltype(obj)>(obj)); }
       bool push_back(const mcsl::pair<Expr*,Scope*>& obj) { return _cases->push_back(obj); }
       auto pop_back() { return _cases->pop_back(); }
-      auto* emplace(const uint i, auto&&... args) { return _cases->emplace(i, std::forward(args...)); }
-      auto* emplace_back(auto&&... args) { return _cases->emplace_back(std::forward(args...)); }
+      auto* emplace(const uint i, auto&&... args) { return _cases->emplace(i, std::forward<decltype(args)>(args)...); }
+      auto* emplace_back(auto&&... args) { return _cases->emplace_back(std::forward<decltype(args)>(args)...); }
       #pragma endregion dyn_arr
 };
 

@@ -34,8 +34,8 @@ struct clef::ArgumentList : public mcsl::contig_base<Expr*> {
       auto* release() { return _exprs->release(); }
       bool push_back(Expr* obj) { return _exprs->push_back(obj); }
       auto pop_back() { return _exprs->pop_back(); }
-      auto* emplace(const uint i, auto&&... args) { return _exprs->emplace(i, std::forward(args...)); }
-      auto* emplace_back(auto&&... args) { return _exprs->emplace_back(std::forward(args...)); }
+      auto* emplace(const uint i, auto&&... args) { return _exprs->emplace(i, std::forward<decltype(args)>(args)...); }
+      auto* emplace_back(auto&&... args) { return _exprs->emplace_back(std::forward<decltype(args)>(args)...); }
       #pragma endregion dyn_arr
 };
 
