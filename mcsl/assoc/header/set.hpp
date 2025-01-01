@@ -71,8 +71,8 @@ class mcsl::set {
             T* push_back(T&& obj) { return _buf.push_back(std::forward<decltype(obj)>(obj)); }
             T* push_back(const T& obj) { return _buf.push_back(obj); }
             bool pop_back() { return _buf.pop_back(); }
-            T* emplace(const uint i, auto&&... args) { return _buf.emplace(i, std::forward<decltype(args)>(args)); }
-            T* emplace_back(auto&&... args) { return _buf.emplace(std::forward<decltype(args)>(args)); }
+            T* emplace(const uint i, auto&&... args) { return _buf.emplace(i, std::forward<decltype(args)>(args)...); }
+            T* emplace_back(auto&&... args) { return _buf.emplace(std::forward<decltype(args)>(args)...); }
       };
 
 
