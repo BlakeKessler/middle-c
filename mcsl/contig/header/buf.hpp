@@ -32,6 +32,7 @@ template<typename T, uint _capacity> class [[clang::trivial_abi]] mcsl::buf : mc
       [[gnu::pure]] constexpr const T* begin() const { return _buf; }
 
       //modifiers
+      T* push_back(T&& obj);
       T* push_back(const T& obj);
       bool pop_back();
       T* emplace(const uint i, auto&&... args);
@@ -57,6 +58,13 @@ template<typename T, uint _capacity> constexpr mcsl::buf<T,_capacity>::buf(casta
       }
 }
 
+template<typename T, uint _capacity> T* mcsl::buf<T,_capacity>::push_back(T&& obj) {
+   if (_size >= _capacity) {
+      return nullptr;
+   }
+   new (&_buf[_size++]) T{std::forward<decltype(obj)>(obj)};
+   return _buf + (_size++);
+}
 template<typename T, uint _capacity> T* mcsl::buf<T,_capacity>::push_back(const T& obj) {
    if (_size >= _capacity) {
       return nullptr;

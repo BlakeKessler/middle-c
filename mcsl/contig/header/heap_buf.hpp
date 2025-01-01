@@ -40,6 +40,7 @@ template<typename T, uint _capacity> class mcsl::heap_buf : mcsl::contig_base<T>
       [[gnu::pure]] constexpr const T* begin() const { return _buf; }
 
       //modifiers
+      T* push_back(T&& obj);
       T* push_back(const T& obj);
       bool pop_back();
       T* emplace(const uint i, auto&&... args);
@@ -65,6 +66,13 @@ template<typename T, uint _capacity> constexpr mcsl::heap_buf<T,_capacity>::heap
       }
 }
 
+template<typename T, uint _capacity> T* mcsl::heap_buf<T,_capacity>::push_back(T&& obj) {
+   if (_size >= _capacity) {
+      return nullptr;
+   }
+   new (&_buf[_size++]) T{std::forward<decltype(obj)>(obj)};
+   return _buf + (_size++);
+}
 template<typename T, uint _capacity> T* mcsl::heap_buf<T,_capacity>::push_back(const T& obj) {
    if (_size >= _capacity) {
       return nullptr;
