@@ -69,7 +69,7 @@ namespace clef {
       PARAM_LIST,
    };
    constexpr auto operator+(const NodeType t) noexcept { return std::to_underlying(t); }
-   constexpr bool canUpCastTo(const NodeType from, const NodeType to) {
+   constexpr bool canDownCastTo(const NodeType from, const NodeType to) {
       switch (to) {
          case NodeType::IDEN:
             return from >= NodeType::IDEN && from <= NodeType::GENERIC;
