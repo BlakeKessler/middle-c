@@ -123,12 +123,12 @@ struct clef::astNode {
       #pragma endregion constructors
 
       NodeType nodeType() const { return _nodeType; }
-      void downCast(NodeType t);
-      void upCast(NodeType t);
-      void verticalCast(NodeType t);
-      void anyCast(NodeType t);
+      void downCast(NodeType);
+      void upCast(NodeType);
+      void verticalCast(NodeType);
+      void anyCast(NodeType);
 
-      [[noreturn]] void throwCastErr(NodeType target) const { throwError(ErrCode::BAD_NODE_CAST, "%u to %u", (uint)_nodeType, (uint)target); }
+      [[noreturn]] void throwCastErr(NodeType target) const { throwError(ErrCode::BAD_NODE_CAST, "%hhu to %hhu", _nodeType, target); }
 
 
 
