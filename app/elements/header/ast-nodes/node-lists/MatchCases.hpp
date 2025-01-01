@@ -33,6 +33,7 @@ struct clef::MatchCases : public mcsl::contig_base<mcsl::pair<Expr*,Scope*>> {
       bool resize(const uint newSize) { return _cases->resize(newSize); }
       bool resize_exact(const uint newSize) { return _cases->resize_exact(newSize); }
       auto* release() { return _cases->release(); }
+      bool push_back(mcsl::pair<Expr*,Scope*>&& obj) { return _cases->push_back(std::forward<decltype(obj)>(obj)); }
       bool push_back(const mcsl::pair<Expr*,Scope*>& obj) { return _cases->push_back(obj); }
       auto pop_back() { return _cases->pop_back(); }
       auto* emplace(const uint i, auto&&... args) { return _cases->emplace(i, std::forward(args...)); }

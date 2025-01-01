@@ -12,9 +12,9 @@ struct clef::Loop : public clef::Statement {
       static constexpr NodeType nodeType() { return NodeType::LOOP; }
 
       Loop():Statement{} {}
-      Loop(OperatorID loopType, Expr* condition, Scope* procedure):Statement{loopType,condition,procedure} { assert(isSimpleLoop(_op)); }
-      Loop(ForLoopParams* params, Scope* procedure):Statement{OperatorID::FOR,params,procedure} {}
-      Loop(ForeachLoopParams* params, Scope* procedure):Statement{OperatorID::FOREACH,params,procedure} {}
+      Loop(OperatorID loopType, Expr* condition, Scope* procedure):Statement{loopType,NodeType::EXPR,NodeType::SCOPE,condition,procedure} { assert(isSimpleLoop(_op)); }
+      Loop(ForLoopParams* params, Scope* procedure):Statement{OperatorID::FOR,NodeType::FOR_LOOP_PARAMS,NodeType::SCOPE,params,procedure} {}
+      Loop(ForeachLoopParams* params, Scope* procedure):Statement{OperatorID::FOREACH,NodeType::FOREACH_LOOP_PARAMS,NodeType::SCOPE,params,procedure} {}
 
       Expr*& condition();
       const Expr* condition() const;

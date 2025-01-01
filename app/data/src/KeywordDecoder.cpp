@@ -146,7 +146,7 @@ auto clef::GET_ALL_KEYWORDS() {
 
       KeywordSpec{mcsl::raw_str{"using"}, USING},
 
-      KeywordSpec{mcsl::raw_str{"asm"}, ASM},
+      // KeywordSpec{mcsl::raw_str{"asm"}, ASM},
    };
 }
 

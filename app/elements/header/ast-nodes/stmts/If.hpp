@@ -12,7 +12,9 @@ struct clef::If : public clef::Statement {
       static constexpr NodeType nodeType() { return NodeType::IF; }
 
       If():Statement{} {}
-      If(Expr* condition, Scope* procedure, If* elseStmt = {}):Statement{OperatorID::IF,NodeType::EXPR,NodeType::SCOPE,NodeType::IF,condition,procedure,elseStmt} {}
+      // If(Expr* condition, Scope* procedure, If* elseStmt = {}):Statement{OperatorID::IF,condition,procedure,elseStmt} {}
+      If(Expr* condition, Scope* procedure, If* elseStmt = {}):
+         Statement{OperatorID::IF,NodeType::EXPR,NodeType::SCOPE,NodeType::IF,condition,procedure,elseStmt} {}
 
       Expr*& condition() { return (Expr*&)_lhs; }
       const Expr* condition() const { return (Expr*)_lhs; }

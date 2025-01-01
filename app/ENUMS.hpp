@@ -58,8 +58,8 @@ namespace clef {
             IF,
             SWITCH,
             MATCH,
+            // ASM,
             TRY_CATCH,
-            ASM,
       FOR_LOOP_PARAMS,
       FOREACH_LOOP_PARAMS,
       SWITCH_CASES,
@@ -76,9 +76,9 @@ namespace clef {
          case NodeType::TYPE:
             return from >= NodeType::TYPE && from <= NodeType::GENERIC;
          case NodeType::EXPR:
-            return from >= NodeType::EXPR && from <= NodeType::ASM;
+            return from >= NodeType::EXPR && from <= NodeType::TRY_CATCH;
          case NodeType::STMT:
-            return from >= NodeType::STMT && from <= NodeType::ASM;
+            return from >= NodeType::STMT && from <= NodeType::TRY_CATCH;
          
          default:
             return from == to;
@@ -403,7 +403,7 @@ namespace clef {
 
       USING,
 
-      ASM,
+      // ASM,
 
       TEMPLATE,
    };
@@ -545,6 +545,9 @@ namespace clef {
 
       SWITCH = toenum3("\0\0f"),
       MATCH = toenum3("\0\0g"),
+
+      TRY_CATCH = toenum3("\0\0h"),
+      // ASM = toenum3("\0\0i"),
 
       //other pseudo-operators
       DECL = toenum3("\0\0A"),

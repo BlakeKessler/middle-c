@@ -17,6 +17,11 @@ struct clef::SwitchCases : public mcsl::contig_base<mcsl::pair<Expr*,Stmt*>> {
 
       SwitchCases(mcsl::dyn_arr<mcsl::pair<Expr*,Stmt*>>& cases, Scope* procedure = nullptr):_proc{procedure},_cases{&cases} {}
 
+      Scope*& procedure() { return _proc; }
+      auto*& cases() { return _cases; }
+
+      const Scope* procedure() const { return _proc; }
+      const auto* cases() const { return _cases; }
 
       #pragma region dyn_arr
       auto size() const { return _cases->size(); }
@@ -34,6 +39,7 @@ struct clef::SwitchCases : public mcsl::contig_base<mcsl::pair<Expr*,Stmt*>> {
       bool resize(const uint newSize) { return _cases->resize(newSize); }
       bool resize_exact(const uint newSize) { return _cases->resize_exact(newSize); }
       auto* release() { return _cases->release(); }
+      bool push_back(mcsl::pair<Expr*,Stmt*>&& obj) { return _cases->push_back(std::forward<decltype(obj)>(obj)); }
       bool push_back(const mcsl::pair<Expr*,Stmt*>& obj) { return _cases->push_back(obj); }
       auto pop_back() { return _cases->pop_back(); }
       auto* emplace(const uint i, auto&&... args) { return _cases->emplace(i, std::forward(args...)); }

@@ -14,15 +14,21 @@ struct clef::Expression {
       void* _rhs;
       void* _extra;
 
-      friend class Declaration;
-      friend class Loop;
-      friend class If;
-      friend class Else;
-      friend class Match;
-      friend class TryCatch;
-      friend class Asm;
-      
+      friend struct Statement;
+      friend struct Declaration;
+      friend struct Loop;
+      friend struct If;
+      friend struct Else;
+      friend struct Switch;
+      friend struct Match;
+      friend struct TryCatch;
+      // friend struct Asm;
+
       Expression(OperatorID op, NodeType lhsType, NodeType rhsType, NodeType extraType, void* lhs, void* rhs, void* extra):_op{op},_lhsType{lhsType},_rhsType{rhsType},_extraType{extraType},_lhs{lhs},_rhs{rhs},_extra{extra} {}
+      Expression(OperatorID op, NodeType lhsType, NodeType rhsType, void* lhs, void* rhs):_op{op},_lhsType{lhsType},_rhsType{rhsType},_extraType{NodeType::NONE},_lhs{lhs},_rhs{rhs},_extra{nullptr} {}
+      template<astNode_t lhs_t, astNode_t rhs_t, astNode_t extra_t> Expression(OperatorID op, lhs_t* lhs, rhs_t* rhs, rhs_t* extra):
+         _op{op},_lhsType{lhs_t::nodeType()},_rhsType{rhs_t::nodeType()},_extraType{extra_t::nodeType()},
+         _lhs{lhs},_rhs{rhs},_extra{extra} {}
    public:
       static constexpr NodeType nodeType() { return NodeType::EXPR; }
 
@@ -45,13 +51,12 @@ struct clef::Expression {
       void* extra() { return _extra; }
       const void* extra() const { return _extra; }
 
-      template<typename T> void setLHS(T* lhs) requires requires { {T::nodeType()} -> mcsl::is_t<NodeType>; } { _lhs = lhs; _lhsType = T::nodeType(); }
-      template<typename T> void setRHS(T* rhs) requires requires { {T::nodeType()} -> mcsl::is_t<NodeType>; } { _rhs = rhs; _rhsType = T::nodeType(); }
-      template<typename T> void setExtra(T* extra) requires requires { {T::nodeType()} -> mcsl::is_t<NodeType>; } { _extra = extra; _extraType = T::nodeType(); }
-
-      void setLHS(astNode* lhs) { _lhs = lhs; _lhsType = lhs ? lhs->nodeType() : NodeType::NONE; }
-      void setRHS(astNode* rhs) { _rhs = rhs; _rhsType = rhs ? rhs->nodeType() : NodeType::NONE; }
-      void setExtra(astNode* extra) { _extra = extra; _extraType = extra ? extra->nodeType() : NodeType::NONE; }
+      template<astNode_t T> void setLHS(T* lhs) { _lhs = lhs; _lhsType = T::nodeType(); }
+      template<astNode_t T> void setRHS(T* rhs) { _rhs = rhs; _rhsType = T::nodeType(); }
+      template<astNode_t T> void setExtra(T* extra) { _extra = extra; _extraType = T::nodeType(); }
+      void setLHS(astNode* lhs);
+      void setRHS(astNode* rhs);
+      void setExtra(astNode* extra);
 };
 
 #endif //EXPR_HPP

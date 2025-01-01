@@ -48,7 +48,7 @@ namespace clef {
          struct Switch;
          struct Match;
          struct TryCatch;
-         struct Asm;
+         // struct Asm;
       struct ForLoopParams;
       struct ForeachLoopParams;
       struct SwitchCases;
@@ -74,10 +74,13 @@ namespace clef {
    class Parser;
 }
 
-template<typename T> struct clef::index{
+template<typename T> struct clef::index {
    uint i;
+
+   index(const uint n):i{n} {}
+
    operator uint&() { return i; }
-   operator uint() { return i; }
+   operator uint() const { return i; }
 };
 
 #endif //CLEF_HPP

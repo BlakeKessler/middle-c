@@ -62,7 +62,7 @@ mcsl::string clef::Parser::parseStrLitASCII(const char* begin, const char* end) 
             //HEX
             case 'x':
                it += 2; // skip the \x
-               if ((it >= end) || !mcsl::is_digit(*it, 16)) { logError<true>(ErrCode::BAD_LITERAL, "bad escaped hex value in string literal"); }
+               if ((it >= end) || !mcsl::is_digit(*it, 16)) { logError(ErrCode::BAD_LITERAL, "bad escaped hex value in string literal"); }
                str.push_back(mcsl::str_to_uint(it, end, 16));
 
                ++it;
@@ -91,7 +91,7 @@ mcsl::string clef::Parser::parseStrLitASCII(const char* begin, const char* end) 
             case '\'': str.push_back('\''); it += 2; break;
             case '\"': str.push_back('\"'); it += 2; break;
             
-            default: logError<true>(ErrCode::BAD_LITERAL, "bad escape code in string literal");
+            default: logError(ErrCode::BAD_LITERAL, "bad escape code in string literal");
          }
       }
    }
@@ -181,20 +181,20 @@ bool clef::Parser::parseNumLit(SyntaxTree& tree, const Token*& tokIt, const Toke
       const uint strlen = begin - it->end();
       
       switch (type) {
-         case LitType::UINT:
+         case LitType::UINT:{
             const ulong val = mcsl::str_to_uint(begin, strlen, radix);
             //!NOTE: UNFINISHED
 
             tokIt = it;
             return true;
-
-         case LitType::FLOAT:
+         }
+         case LitType::FLOAT:{
             const double val = mcsl::str_to_real(begin, strlen, radix);
             //!NOTE: UNFINISHED
 
             tokIt = it;
             return true;
-
+         }
          default: //!NOTE: SHOULD BE IMPOSSIBLE
             //!NOTE: UNFINISHED
             throw "make a proper error code for this";

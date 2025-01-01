@@ -32,7 +32,7 @@ clef::Stmt* clef::Parser::parseStmt() {
          //!NOTE: UNFINISHED
          break;
 
-      case KeywordID::ASM           : stmt = (Stmt*)parseASM(); break;
+      // case KeywordID::ASM           : stmt = (Stmt*)parseASM(); break;
       
       case KeywordID::CLASS         : stmt = (Stmt*)parseClass(); break;
       case KeywordID::STRUCT        : stmt = (Stmt*)parseStruct(); break;

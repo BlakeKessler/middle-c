@@ -12,12 +12,13 @@
 //  should probably also make that only active in debug mode for efficiency
 class clef::allocator {
    private:
-      mcsl::dyn_arr<mcsl::dyn_arr<void>> _bufBuf;
+      mcsl::dyn_arr<mcsl::dyn_arr<byte>> _bufBuf;
    public:
       static allocator* active;
       
       allocator():_bufBuf{} {}
       allocator(allocator&& other):_bufBuf{std::move(other._bufBuf)} { other._bufBuf.release(); }
+      allocator(allocator&) = delete;
 
       allocator& merge(allocator&& other);
 

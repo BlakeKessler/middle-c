@@ -8,7 +8,7 @@
 
 #include "dyn_arr.hpp"
 
-struct clef::SyntaxTree {
+class clef::SyntaxTree {
    private:
       SymbolTable _names;
 
@@ -32,7 +32,7 @@ struct clef::SyntaxTree {
 
 
 
-      astNode* allocNode(const NodeType type) { _buf.push_back(astNode{type}); return &_buf.back(); }
+      astNode* allocNode(const NodeType type) { _buf.emplace_back(type); return &_buf.back(); }
       template<typename T> mcsl::dyn_arr<T>& allocBuf() { return _alloc.at(_alloc.alloc<T>()); }
       InterfaceSpec* allocInterfaceSpec() { _intSpecBuf.emplace_back(); return &_intSpecBuf.back(); }
 };

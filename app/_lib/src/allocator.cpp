@@ -11,25 +11,25 @@ clef::allocator& clef::allocator::merge(allocator&& other) {
    return self;
 }
 
-template<typename T> mcsl::dyn_arr<T>& clef::allocator::at(const index<T>) {
+template<typename T> mcsl::dyn_arr<T>& clef::allocator::at(const index<T> i) {
    return reinterpret_cast<mcsl::dyn_arr<T>&>(_bufBuf.at(i));
 }
 
 template<typename T> clef::index<T> clef::allocator::alloc() {
    index<T> i = _bufBuf.size();
-   _bufBuf.push_back(mcsl::dyn_arr<void>{});
+   _bufBuf.push_back(mcsl::dyn_arr<byte>{});
    return i;
 }
 
 template<typename T> clef::index<T> clef::allocator::emplaceBuf(mcsl::is_t<T> auto... initList) {
    index<T> i = _bufBuf.size();
-   _bufBuf.push_back(mcsl::dyn_arr<T>{initList...});
+   _bufBuf.push_back(reinterpret_cast<mcsl::dyn_arr<byte>>(mcsl::dyn_arr<T>{initList...}));
    return i;
 }
 
 template<typename T> clef::index<T> clef::allocator::takeOwnershipOf(mcsl::dyn_arr<T>&& buf) {
    index<T> i = _bufBuf.size();
-   _bufBuf.push_back(reinterpret_cast<mcsl::dyn_arr<void>&>(buf));
+   _bufBuf.push_back(reinterpret_cast<mcsl::dyn_arr<byte>&>(buf));
    buf.release();
    return i;
 }

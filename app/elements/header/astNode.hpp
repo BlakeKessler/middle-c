@@ -20,7 +20,7 @@
 #include "ast-nodes/stmts/Switch.hpp"
 #include "ast-nodes/stmts/Match.hpp"
 #include "ast-nodes/stmts/TryCatch.hpp"
-#include "ast-nodes/stmts/Asm.hpp"
+// #include "ast-nodes/stmts/Asm.hpp"
 #include "ast-nodes/node-lists/ArgumentList.hpp"
 #include "ast-nodes/node-lists/MatchCases.hpp"
 #include "ast-nodes/node-lists/ParameterList.hpp"
@@ -37,6 +37,10 @@
 #include "ast-nodes/types/Struct.hpp"
 #include "ast-nodes/types/Union.hpp"
 #include "ast-nodes/types/VariadicParameter.hpp"
+
+#include "InterfaceSpec.hpp"
+#include "NamespaceSpec.hpp"
+#include "ObjTypeSpec.hpp"
 
 struct clef::astNode {
    private:
@@ -65,7 +69,7 @@ struct clef::astNode {
          Switch _switch;
          Match _match;
          TryCatch _tryCatch;
-         Asm _asm;
+         // Asm _asm;
          ForLoopParams _forLoopParams;
          ForeachLoopParams _foreachLoopParams;
          SwitchCases _switchCases;
@@ -80,41 +84,42 @@ struct clef::astNode {
       friend class SyntaxTree;
    public:
       #pragma region constructor
-      astNode():_nodeType{NodeType::NONE} {}
-      /*unsafe<UNINIT_MEM>*/ astNode(const NodeType type):_nodeType{type} {}
-      astNode(Identifier& node):_identifier{node},_nodeType{NodeType::IDEN} {}
-      astNode(Variable& node):_variable{node},_nodeType{NodeType::VAR} {}
-      astNode(Function& node):_function{node},_nodeType{NodeType::FUNC} {}
-      astNode(Type& node):_type{node},_nodeType{NodeType::TYPE} {}
-      astNode(VariadicParameter& node):_variadicParameter{node},_nodeType{NodeType::VAR_PARAM} {}
-      astNode(FundamentalType& node):_fundamentalType{node},_nodeType{NodeType::FUND_TYPE} {}
-      astNode(FunctionSignature& node):_functionSignature{node},_nodeType{NodeType::FUNC_SIG} {}
-      astNode(Enum& node):_enum{node},_nodeType{NodeType::ENUM} {}
-      astNode(Mask& node):_mask{node},_nodeType{NodeType::MASK} {}
-      astNode(Union& node):_union{node},_nodeType{NodeType::UNION} {}
-      astNode(Namespace& node):_namespace{node},_nodeType{NodeType::NAMESPACE} {}
-      astNode(Interface& node):_interface{node},_nodeType{NodeType::INTERFACE} {}
-      astNode(Struct& node):_struct{node},_nodeType{NodeType::STRUCT} {}
-      astNode(Class& node):_class{node},_nodeType{NodeType::CLASS} {}
-      astNode(GenericType& node):_genericType{node},_nodeType{NodeType::GENERIC} {}
-      astNode(Scope& node):_scope{node},_nodeType{NodeType::SCOPE} {}
-      astNode(Literal& node):_literal{node},_nodeType{NodeType::LITERAL} {}
-      astNode(Expression& node):_expression{node},_nodeType{NodeType::EXPR} {}
-      astNode(Declaration& node):_declaration{node},_nodeType{NodeType::DECL} {}
-      astNode(Loop& node):_loop{node},_nodeType{NodeType::LOOP} {}
-      astNode(If& node):_if{node},_nodeType{NodeType::IF} {}
-      astNode(Switch& node):_switch{node},_nodeType{NodeType::SWITCH} {}
-      astNode(Match& node):_match{node},_nodeType{NodeType::MATCH} {}
-      astNode(TryCatch& node):_tryCatch{node},_nodeType{NodeType::TRY_CATCH} {}
-      astNode(Asm& node):_asm{node},_nodeType{NodeType::ASM} {}
-      astNode(ForLoopParams& node):_forLoopParams{node},_nodeType{NodeType::FOR_LOOP_PARAMS} {}
-      astNode(ForeachLoopParams& node):_foreachLoopParams{node},_nodeType{NodeType::FOREACH_LOOP_PARAMS} {}
-      astNode(SwitchCases& node):_switchCases{node},_nodeType{NodeType::SWITCH_CASES} {}
-      astNode(MatchCases& node):_matchCases{node},_nodeType{NodeType::MATCH_CASES} {}
-      astNode(Statement& node):_statement{node},_nodeType{NodeType::STMT} {}
-      astNode(StatementSequence& node):_statementSequence{node},_nodeType{NodeType::STMT_SEQ} {}
-      astNode(ArgumentList& node):_argumentList{node},_nodeType{NodeType::ARG_LIST} {}
-      astNode(ParameterList& node):_parameterList{node},_nodeType{NodeType::PARAM_LIST} {}
+      /*unsafe<UNINIT_MEM>*/ astNode(const NodeType type = NodeType::NONE):_nodeType{type} {}
+      #define _def_ctor(varName) astNode(decltype(varName)& node):varName{node},_nodeType{node.nodeType()} {}
+      _def_ctor(_identifier)
+      _def_ctor(_variable)
+      _def_ctor(_function)
+      _def_ctor(_type)
+      _def_ctor(_variadicParameter)
+      _def_ctor(_fundamentalType)
+      _def_ctor(_functionSignature)
+      _def_ctor(_enum)
+      _def_ctor(_mask)
+      _def_ctor(_union)
+      _def_ctor(_namespace)
+      _def_ctor(_interface)
+      _def_ctor(_struct)
+      _def_ctor(_class)
+      _def_ctor(_genericType)
+      _def_ctor(_scope)
+      _def_ctor(_literal)
+      _def_ctor(_expression)
+      _def_ctor(_declaration)
+      _def_ctor(_loop)
+      _def_ctor(_if)
+      _def_ctor(_switch)
+      _def_ctor(_match)
+      _def_ctor(_tryCatch)
+      // _def_ctor(_asm)
+      _def_ctor(_forLoopParams)
+      _def_ctor(_foreachLoopParams)
+      _def_ctor(_switchCases)
+      _def_ctor(_matchCases)
+      _def_ctor(_statement)
+      _def_ctor(_statementSequence)
+      _def_ctor(_argumentList)
+      _def_ctor(_parameterList)
+      #undef _def_ctor
       #pragma endregion constructors
 
       NodeType nodeType() const { return _nodeType; }
@@ -155,7 +160,7 @@ struct clef::astNode {
       _def_cast_func(_switch)
       _def_cast_func(_match)
       _def_cast_func(_tryCatch)
-      _def_cast_func(_asm)
+      // _def_cast_func(_asm)
       _def_cast_func(_forLoopParams)
       _def_cast_func(_foreachLoopParams)
       _def_cast_func(_switchCases)

@@ -66,7 +66,7 @@ class clef::Parser {
       TryCatch* parseTryCatch();
 
       Function* parseFunction();
-      Asm* parseASM();
+      // Asm* parseASM();
       
       Class* parseClass();
       Struct* parseStruct();
@@ -77,7 +77,7 @@ class clef::Parser {
       Namespace* parseNamespace();
 
       //error logging
-      void [[noreturn]] logError(const clef::ErrCode code, const char* formatStr, auto&&... args);
+      void logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, auto&&... args);
       
       
       
@@ -91,10 +91,13 @@ class clef::Parser {
 
 
 #pragma region src
-void [[noreturn]] clef::Parser::logError(const clef::ErrCode code, const char* formatStr, auto&&... args) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
+void clef::Parser::logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, auto&&... args) {
    _errno = code;
    clef::throwError(code, formatStr, std::forward<decltype(args)>(args)...);
 }
+#pragma GCC diagnostic pop
 #pragma endregion src
 
 #endif //PARSER_HPP

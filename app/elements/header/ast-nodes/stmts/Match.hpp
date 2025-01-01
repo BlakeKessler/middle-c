@@ -12,7 +12,7 @@ struct clef::Match : public clef::Statement {
       static constexpr NodeType nodeType() { return NodeType::MATCH; }
 
       Match():Statement{} {}
-      Match(Expr* cond, MatchCases* cases):Statement{OperatorID::MATCH,cond,cases} {}
+      Match(Expr* cond, MatchCases* cases):Statement{OperatorID::SWITCH,NodeType::EXPR,NodeType::MATCH_CASES,cond,cases} {}
 
       Expr*& condition() { return (Expr*&)_lhs; }
       const Expr* condition() const { return (Expr*)_lhs; }
