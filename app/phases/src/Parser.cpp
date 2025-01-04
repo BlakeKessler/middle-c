@@ -3,7 +3,7 @@
 
 #include "Parser.hpp"
 
-#include "InterfaceSpec.hpp"
+#include "dyn_arr.hpp"
 
 clef::Stmt* clef::Parser::parseStmt() {
    Stmt* stmt;
@@ -86,6 +86,85 @@ clef::Stmt* clef::Parser::parseStmt() {
    return stmt;
 }
 
+clef::Expr* clef::Parser::parseExpr() {
+   Expr* expr = parseExprNoPrimaryComma();
+   while (tryConsumeOperator(OperatorID::COMMA)) {
+      expr = new (tree.allocNode(NodeType::EXPR)) Expr{OperatorID::COMMA, expr, parseExprNoPrimaryComma()};
+   }
+   return expr;
+}
+
+clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
+   mcsl::dyn_arr<OperatorID> operatorStack;
+   mcsl::dyn_arr<astNode*> operandStack;
+   bool prevTokIsOperand = false;
+
+   auto eval = [&]() { //evaluate the subexpression on the top of the stacks
+      OperatorID op = operatorStack.pop_back();
+      if (!operandStack.size()) { logError(ErrCode::PARSER_UNSPEC, "bad expression (missing RHS on stack)"); }
+      astNode* rhs = operandStack.pop_back();
+      astNode* lhs;
+      if (isBinary(op)) { //!NOTE: PRIORITIZES BINARY OVER POSTIX-UNARY
+         if (!operandStack.size()) { logError(ErrCode::PARSER_UNSPEC, "bad expression (missing LHS on stack)"); }
+         lhs = operandStack.pop_back();
+      } else { lhs = nullptr; }
+
+      operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::EXPR)) Expr{op, lhs, rhs}));
+   };
+
+   do {
+      if (isOperand(tokIt->type())) { //push operand
+         operandStack.push_back(tokIt);
+         prevTokIsOperand = true;
+      } else if (isOperator(tokIt->type())) { //handle operator
+         OperatorID id = OPERATORS[*tokIt].opID();
+         if (id == OperatorID::EOS || (id == OperatorID::COMMA && operatorStack.size())) { //operator that cannot be part of this type of expression
+            break;
+         }
+
+         if (prevTokIsOperand) { //binary or postfix unary
+            while (operatorStack.size() && precedence(operatorStack.back()) >= precedence(id)) {
+               eval();
+            }
+            operatorStack.push_back(id);
+         } else { //prefix unary
+            operatorStack.push_back(id); //!NOTE: NEEDS TO ACTUALLY INDICATE THAT THE OPERATOR IS UNARY
+         }
+         prevTokIsOperand = false;
+      } else if (isBlockLike(tokIt->type())) { //handle block delimiter
+         OperatorID id = OPERATORS[*tokIt].opID();
+         if (isStringLike(id)) { //string and character literals
+            switch (id) {
+               case OperatorID::STRING : operandStack.push_back((astNode*)parseStrLit());  break;
+               case OperatorID::CHAR   : operandStack.push_back((astNode*)parseCharLit()); break;
+               default: std::unreachable();
+            }
+            prevTokIsOperand = true;
+         }
+         else { //blocks
+            if (!isOpener(id)) { logError(ErrCode::PARSER_UNSPEC, "floating closing block delimiter"); }
+            ++tokIt;
+            if (prevTokIsOperand) { //function call, initializer list, subscript, or specializer
+               ArgList* args = parseArgList(getCloser(id));
+               operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::EXPR)) Expr{getInvoker(id),operandStack.pop_back(),args}));
+            } else if (id == OperatorID::LIST_OPEN) { //tuple
+               operandStack.push_back((astNode*)(parseArgList(getCloser(id))));
+            } else { //block subexpression
+               operandStack.push_back((astNode*)parseExpr());
+               if (!isBlockLike(tokIt->type()) || getCloser(id) != OPERATORS[*tokIt].opID()) { logError(ErrCode::PARSER_UNSPEC, "bad block subexpression"); }
+            }
+            prevTokIsOperand = true;
+         }
+      } else {
+         break;
+      }
+   } while (++tokIt < endtok);
+
+   while (operatorStack.size()) { eval(); }
+   assert(operandStack.size() == 1);
+   return (Expr*)operandStack.back();
+}
+
 clef::Scope* clef::Parser::parseProcedure() {
    Scope* scope = (Scope*)tree.allocNode(NodeType::SCOPE);
 
@@ -97,14 +176,15 @@ clef::Scope* clef::Parser::parseProcedure() {
    }
 
    //reached end of source without finding closing token
-   logError(ErrCode::PARSER_UNSPEC, "unclosed procedure");
+   logError(ErrCode::PARSER_UNSPEC, "unclosed procedure block");
 }
 
 clef::Identifier* clef::Parser::tryParseIdentifier(Identifier* scopeName) {
+   if (!+(tokIt->type() & TokenType::CHAR)) { return nullptr; }
+
    Identifier* name = scopeName;
    const Token* tmp;
 
-   if (!+(tokIt->type() & TokenType::CHAR)) { return name; }
    do {
       name = new (tree.allocNode(NodeType::IDEN)) Identifier{*tokIt, name};
       tmp = ++tokIt;
@@ -114,10 +194,11 @@ clef::Identifier* clef::Parser::tryParseIdentifier(Identifier* scopeName) {
    return name;
 }
 clef::Identifier* clef::Parser::parseIdentifier(Identifier* scopeName) {
+   if (!+(tokIt->type() & TokenType::CHAR)) { logError(ErrCode::PARSER_UNSPEC, "bad IDENTIFIER"); }
+
    Identifier* name = scopeName;
    const Token* tmp;
 
-   if (!+(tokIt->type() & TokenType::CHAR)) { logError(ErrCode::PARSER_UNSPEC, "bad IDENTIFIER"); }
    do {
       name = new (tree.allocNode(NodeType::IDEN)) Identifier{*tokIt, name};
       tmp = ++tokIt;
@@ -126,7 +207,17 @@ clef::Identifier* clef::Parser::parseIdentifier(Identifier* scopeName) {
    if (tokIt != tmp || name == scopeName) { logError(ErrCode::PARSER_UNSPEC, "bad IDENTIFIER"); }
    return name;
 }
+clef::Type* clef::Parser::parseTypename(Identifier* scopeName) {
+   Type* name = (Type*)parseIdentifier(scopeName);
+   ((astNode*)name)->upCast(NodeType::TYPE);
+   return name;
+}
 
+clef::Decl* clef::Parser::parseDecl(Identifier* scopeName) {
+   Type* type = parseTypename(scopeName);
+   Identifier* name = parseIdentifier(scopeName);
+   return new (tree.allocNode(NodeType::DECL)) Decl{type, name};
+}
 #pragma region loop
 
 clef::Loop* clef::Parser::parseForLoop() {
@@ -162,7 +253,7 @@ clef::Loop* clef::Parser::parseForeachLoop() {
    //iterator declaration
    TypeQualMask quals = parseQuals();
    Type* itType = (Type*)parseIdentifier();
-      ((astNode*)itType)->downCast(NodeType::TYPE);
+      ((astNode*)itType)->upCast(NodeType::TYPE);
    Identifier* itName = parseIdentifier();
 
    //IN operator
@@ -339,48 +430,54 @@ clef::Match* clef::Parser::parseMatch() {
    return new (tree.allocNode(NodeType::MATCH)) Match{condition, cases};
 }
 
+clef::TryCatch* clef::Parser::parseTryCatch() {
+   Scope* procedure = parseProcedure();
+   consumeKeyword(KeywordID::CATCH, "TRY block without CATCH block");
+   consumeOperator(OperatorID::CALL_OPEN, "CATCH block without opening parens");
+   Decl* decl = parseDecl();
+   consumeOperator(OperatorID::CALL_CLOSE, "CATCH block without closing parens");
+   Scope* handler = parseProcedure();
+   return new (tree.allocNode(NodeType::TRY_CATCH)) TryCatch{procedure, decl, handler};
+}
+
 clef::Function* clef::Parser::parseFunction() {
    Identifier* name = tryParseIdentifier();
    
    //params
    consumeOperator(OperatorID::CALL_OPEN, "FUNC without parameters");
    ParamList* params = new (tree.allocNode(NodeType::FUNC_SIG)) ParamList{tree.allocBuf<Variable*>()};
-   while (!tryConsumeOperator(OperatorID::CALL_CLOSE)) {
-      //parse parameter
-      TypeQualMask quals = parseQuals();
-      Type* paramType = (Type*)parseIdentifier();
-         ((astNode*)paramType)->downCast(NodeType::TYPE);
-      Identifier* paramName = tryParseIdentifier();
-      //!NOTE: UNFINISHED (no support for default values)
-      // Expr* defaultVal;
-      // if (tryConsumeOperator(OperatorID::ASSIGN)) {
-      //    defaultVal = parseExpr();
-      //    if (!defaultVal) { logError(ErrCode::PARSER_UNSPEC, "invalid FUNC parameter default value"); }
-      // } else { defaultVal = nullptr; }
+   if (!tryConsumeOperator(OperatorID::CALL_CLOSE)) {
+      do {
+         //parse parameter
+         TypeQualMask quals = parseQuals();
+         Type* paramType = parseTypename();
+         Identifier* paramName = tryParseIdentifier();
+         Expr* defaultVal;
+         if (tryConsumeOperator(OperatorID::ASSIGN)) {
+            defaultVal = parseExprNoPrimaryComma();
+            if (!defaultVal) { logError(ErrCode::PARSER_UNSPEC, "invalid FUNC parameter default value"); }
+         } else { defaultVal = nullptr; }
 
-      //push to parameter list
-      ((astNode*)paramName)->downCast(NodeType::VAR);
-      params->push_back(new (paramName) Variable{paramType, paramName});
-
-      //check for comma
-      if (!tryConsumeOperator(OperatorID::COMMA)) {
-         consumeOperator(OperatorID::CALL_CLOSE, "bad FUNC parameter list");
-      }
+         //push to parameter list
+         ((astNode*)paramName)->upCast(NodeType::VAR);
+         params->push_back(new (paramName) Variable{paramType, paramName, defaultVal});
+      } while (tryConsumeOperator(OperatorID::COMMA));
+      consumeOperator(OperatorID::CALL_CLOSE, "bad FUNC parameter list");
    }
+   
 
    //return type
    consumeOperator(OperatorID::MEMBER_OF_POINTER_ACCESS, "FUNC without trailing return type");
    TypeQualMask returnTypeQuals = parseQuals();
-   Type* returnType = (Type*)parseIdentifier();
-      ((astNode*)returnType)->downCast(NodeType::TYPE);
+   Type* returnType = parseTypename();
 
    //make signature
-   FuncSig* sig = new (tree.allocNode(NodeType::FUNC_SIG)) FuncSig{sig, params};
+   FuncSig* sig = new (tree.allocNode(NodeType::FUNC_SIG)) FuncSig{returnType, params};
 
    if (tryConsumeEOS()) { //forward declaration
       if (name) {
          Function* func = (Function*)name;
-         ((astNode*)func)->downCast(NodeType::FUNC);
+         ((astNode*)func)->upCast(NodeType::FUNC);
          return new (func) Function{sig, name};
       } else {
          return new (tree.allocNode(NodeType::FUNC)) Function{sig};
@@ -397,7 +494,7 @@ clef::Function* clef::Parser::parseFunction() {
    //return
    if (name) {
       Function* func = (Function*)name;
-      ((astNode*)func)->downCast(NodeType::FUNC);
+      ((astNode*)func)->upCast(NodeType::FUNC);
       return new (func) Function{sig, procedure, name};
    } else {
       return new (tree.allocNode(NodeType::FUNC)) Function{sig, procedure};
@@ -410,7 +507,7 @@ clef::Interface* clef::Parser::parseInterface() {
    Identifier* name = parseIdentifier();
    
    if (tryConsumeEOS()) { //forward declaration
-      ((astNode*)name)->downCast(NodeType::INTERFACE);
+      ((astNode*)name)->upCast(NodeType::INTERFACE);
       return new (name) Interface{(Type*)name};
    }
    
@@ -419,7 +516,7 @@ clef::Interface* clef::Parser::parseInterface() {
    if (tryConsumeOperator(OperatorID::LABEL_DELIM)) {
       do {
          Interface* parentType = (Interface*)parseIdentifier();
-            ((astNode*)parentType)->downCast(NodeType::INTERFACE);
+            ((astNode*)parentType)->upCast(NodeType::INTERFACE);
          spec->inheritedInterfaces().push_back(parentType);
       } while (tryConsumeOperator(OperatorID::COMMA));
    }
@@ -441,7 +538,7 @@ clef::Interface* clef::Parser::parseInterface() {
    consumeEOS("INTERFACE without EOS");
 
    //return
-   ((astNode*)name)->downCast(NodeType::INTERFACE);
+   ((astNode*)name)->upCast(NodeType::INTERFACE);
    return new (name) Interface{spec, (Type*)name};
 }
 
@@ -452,7 +549,7 @@ clef::Union* clef::Parser::parseUnion() {
       if (!name) {
          logError(ErrCode::PARSER_UNSPEC, "cannot forward-declare an anonymous UNION");
       }
-      ((astNode*)name)->downCast(NodeType::UNION);
+      ((astNode*)name)->upCast(NodeType::UNION);
       return new (name) Union{name};
    }
 
@@ -462,13 +559,13 @@ clef::Union* clef::Parser::parseUnion() {
    while (!tryConsumeOperator(OperatorID::LIST_CLOSE)) {
       //parse member
       Type* memberType = (Type*)parseIdentifier();
-         ((astNode*)memberType)->downCast(NodeType::TYPE);
+         ((astNode*)memberType)->upCast(NodeType::TYPE);
       Identifier* memberName = parseIdentifier();
       consumeEOS("bad UNION member");
       
       //push to members list
       Variable* member = (Variable*)memberName;
-      ((astNode*)member)->downCast(NodeType::VAR);
+      ((astNode*)member)->upCast(NodeType::VAR);
       member->type() = memberType;
       members->push_back(member);
    }
@@ -477,7 +574,7 @@ clef::Union* clef::Parser::parseUnion() {
    consumeEOS("UNION without EOS");
 
    //return
-   if (name) { ((astNode*)name)->downCast(NodeType::UNION); }
+   if (name) { ((astNode*)name)->upCast(NodeType::UNION); }
    return new (name) Union{name, members};
 }
 
@@ -487,7 +584,7 @@ clef::Enum* clef::Parser::parseEnum() {
    Type* baseType;
    if (tryConsumeOperator(OperatorID::LABEL_DELIM)) {
       baseType = (Type*)parseIdentifier();
-         ((astNode*)baseType)->downCast(NodeType::TYPE);
+         ((astNode*)baseType)->upCast(NodeType::TYPE);
    } else { baseType = nullptr; }
 
    if (tryConsumeEOS()) { //forward declaration
@@ -499,26 +596,28 @@ clef::Enum* clef::Parser::parseEnum() {
    }
 
    consumeOperator(OperatorID::LIST_OPEN, "bad ENUM definition");
-   while (!tryConsumeOperator(OperatorID::LIST_CLOSE)) {
-      Identifier* enumerator = parseIdentifier();
-      Expr* val;
-      if (tryConsumeOperator(OperatorID::ASSIGN)) {
-         val = parseExpr();
-      } else { val = nullptr; }
+   ParamList* enumerators = new (tree.allocNode(NodeType::PARAM_LIST)) ParamList{tree.allocBuf<Variable*>()};
+   if (!tryConsumeOperator(OperatorID::LIST_CLOSE)) {
+      do {
+         Identifier* enumerator = parseIdentifier();
+         Expr* val;
+         if (tryConsumeOperator(OperatorID::ASSIGN)) {
+            val = parseExprNoPrimaryComma();
+         } else { val = nullptr; }
 
-      //!NOTE: UNFINISHED (need to actually add push enumerator to the enum)
+         ((astNode*)enumerator)->upCast(NodeType::VAR);
+         enumerators->push_back(new (enumerator) Variable{baseType, enumerator, val});
 
-      if (!tryConsumeOperator(OperatorID::COMMA)) {
-         consumeOperator(OperatorID::LIST_CLOSE, "bad ENUM enumerator");
-         break;
-      }
+      } while (tryConsumeOperator(OperatorID::COMMA));
+      consumeOperator(OperatorID::LIST_CLOSE, "bad ENUM enumerator");
    }
-
+   
    //EOS
    consumeEOS("ENUM without EOS");
 
    //return
-   //!NOTE: UNFINISHED
+   ((astNode*)name)->upCast(NodeType::ENUM);
+   return new (name) Enum{(Type*)name, baseType, enumerators};
 }
 
 //!NOTE: ASSUMES THAT THE SYNTAX AND MEMORY LAYOUT OF THE AST NODES FOR MASKS AND ENUMS ARE IDENTICAL

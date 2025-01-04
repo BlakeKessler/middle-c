@@ -26,21 +26,20 @@ class clef::Parser {
       mcsl::string parseStrLitASCII(const char* begin, const char* end);
       bool parseNumLit(SyntaxTree& tree, const Token*& tokIt, const Token* endtok);
 
-      inline bool consumeKeyword(const KeywordID, const char* errStr);
-      inline bool consumeOperator(const OperatorID, const char* errStr);
-      inline bool consumeEOS(const char* errStr);
+      /*inline*/ bool consumeKeyword(const KeywordID, const char* errStr);
+      /*inline*/ bool consumeOperator(const OperatorID, const char* errStr);
+      /*inline*/ bool consumeEOS(const char* errStr);
 
-      inline bool tryConsumeKeyword(const KeywordID);
-      inline bool tryConsumeOperator(const OperatorID);
-      inline bool tryConsumeEOS();
-
-
-      Stmt* parseDeclStmt();
+      /*inline*/ bool tryConsumeKeyword(const KeywordID);
+      /*inline*/ bool tryConsumeOperator(const OperatorID);
+      /*inline*/ bool tryConsumeEOS();
 
       //parsing functions
       Expr* parseExpr();
+      Expr* parseExprNoPrimaryComma(); //expression that cannot have the comma operator as its principal connective
       Stmt* parseStmt();
       Scope* parseProcedure();
+      ArgList* parseArgList(const OperatorID closer);
 
       void skipBlockComment();
       void skipLineComment();
@@ -53,6 +52,10 @@ class clef::Parser {
 
       Identifier* tryParseIdentifier(Identifier* scopeName = {});
       Identifier* parseIdentifier(Identifier* scopeName = {});
+      Decl* parseDecl(Identifier* scopeName = {});
+      Stmt* parseForwardDecl(Identifier* scopeName = {});
+      Stmt* parseDeclStmt(Identifier* scopeName = {});
+      Type* parseTypename(Identifier* scopeName = {});
 
       Loop* parseForLoop();
       Loop* parseForeachLoop();
