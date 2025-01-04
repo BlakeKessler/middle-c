@@ -1,7 +1,7 @@
 #ifndef LOOP_CPP
 #define LOOP_CPP
 
-#include "ast-nodes/stmts/Loop.hpp"
+#include "ast-nodes/exprs/Loop.hpp"
 #include "ast-nodes/ForLoopParams.hpp"
 
 clef::Expr*& clef::Loop::condition() {

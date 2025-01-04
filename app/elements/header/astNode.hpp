@@ -14,13 +14,13 @@
 #include "ast-nodes/Identifier.hpp"
 #include "ast-nodes/Statement.hpp"
 #include "ast-nodes/Variable.hpp"
-#include "ast-nodes/stmts/Declaration.hpp"
-#include "ast-nodes/stmts/If.hpp"
-#include "ast-nodes/stmts/Loop.hpp"
-#include "ast-nodes/stmts/Switch.hpp"
-#include "ast-nodes/stmts/Match.hpp"
-#include "ast-nodes/stmts/TryCatch.hpp"
-// #include "ast-nodes/stmts/Asm.hpp"
+#include "ast-nodes/exprs/Declaration.hpp"
+#include "ast-nodes/exprs/If.hpp"
+#include "ast-nodes/exprs/Loop.hpp"
+#include "ast-nodes/exprs/Switch.hpp"
+#include "ast-nodes/exprs/Match.hpp"
+#include "ast-nodes/exprs/TryCatch.hpp"
+// #include "ast-nodes/exprs/Asm.hpp"
 #include "ast-nodes/node-lists/ArgumentList.hpp"
 #include "ast-nodes/node-lists/MatchCases.hpp"
 #include "ast-nodes/node-lists/ParameterList.hpp"
@@ -128,7 +128,7 @@ struct clef::astNode {
       void verticalCast(NodeType);
       void anyCast(NodeType);
 
-      [[noreturn]] void throwCastErr(NodeType target) const { throwError(ErrCode::BAD_NODE_CAST, "%hhu to %hhu", _nodeType, target); }
+      [[noreturn]] void throwCastErr(NodeType target) const { throwError(ErrCode::BAD_NODE_CAST, "%hhu to %hhu", +_nodeType, +target); }
 
 
 
