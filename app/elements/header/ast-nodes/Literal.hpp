@@ -47,7 +47,7 @@ struct clef::Literal {
       }
       #pragma endregion constructors
 
-      [[noreturn]] void throwCastErr(LitType target) const { throwError(ErrCode::BAD_LIT_CAST, "%hhu to %hhu", _type, target); }
+      [[noreturn]] void throwCastErr(LitType target) const { throwError(ErrCode::BAD_LIT_CAST, "%hhu to %hhu", +_type, +target); }
 
       #pragma region cast
       operator ulong()        const { if (_type == LitType::UINT)   { return _uintLit;   } else { throwCastErr(LitType::UINT);   } }
