@@ -114,18 +114,22 @@ namespace clef {
    constexpr TokenType operator~(const TokenType lhs) noexcept { return (TokenType)(~+lhs); }
    constexpr TokenType operator*(const TokenType lhs, const uint rhs) noexcept { return (TokenType)((+lhs) * rhs); }
 
+   constexpr bool isOperator(const TokenType t) { return +(t & (TokenType::OP | TokenType::ESC | TokenType::EOS)); }
+   constexpr bool isBlockLike(const TokenType t) { return +(t & (TokenType::BLOC | TokenType::PTXT)); }
+   constexpr bool isOperand(const TokenType t) { return +(t & TokenType::XDGT); }
+
    //operator properties bitmask
    enum class [[clang::flag_enum]] OpType : uint8 {
       //!bitmask atoms
       //unused (available for user-definition)
       FREE        = 0_m,
       //associativity
-      LEFT_ASSOC  = 1_m,
-      RIGHT_ASSOC = 2_m,
+      _LEFT_ASSOC  = 1_m,
+      _RIGHT_ASSOC = 2_m,
 
       //operand count
-      UNARY       = 3_m,
-      BINARY      = 4_m,
+      _UNARY       = 3_m,
+      _BINARY      = 4_m,
 
       //other
       BLOCK_DELIM = 7_m,
@@ -133,10 +137,10 @@ namespace clef {
 
 
       //!full operator types
-      PREFIX      = UNARY  | RIGHT_ASSOC,
-      POSTFIX     = UNARY  | LEFT_ASSOC,
-      INFIX_LEFT  = BINARY | LEFT_ASSOC,
-      INFIX_RIGHT = BINARY | RIGHT_ASSOC,
+      PREFIX      = _UNARY  | _RIGHT_ASSOC,
+      POSTFIX     = _UNARY  | _LEFT_ASSOC,
+      INFIX_LEFT  = _BINARY | _LEFT_ASSOC,
+      INFIX_RIGHT = _BINARY | _RIGHT_ASSOC,
 
    };
    constexpr auto   operator+(const OpType t) noexcept { return std::to_underlying(t); }
@@ -176,6 +180,7 @@ namespace clef {
       REGEX,
       TYPEID,
    };
+   auto operator+(const LitType t) noexcept { return std::to_underlying(t); }
    //!type qualifier bitmask
    enum class [[clang::flag_enum]] TypeQualMask : uint16 {
       NONE           =  0_m,
@@ -452,10 +457,13 @@ namespace clef {
       CALL = toenum2("()"),
       SUBSCRIPT_OPEN = toenum1("["),
       SUBSCRIPT_CLOSE = toenum1("]"),
+      SUBSCRIPT = toenum2("[]"),
       LIST_OPEN = toenum1("{"),
       LIST_CLOSE = toenum1(_CLOSE_LIST_CHAR),
+      LIST = toenum2("{" _CLOSE_LIST_CHAR),
       SPECIALIZER_OPEN = toenum1("<"),
       SPECIALIZER_CLOSE = toenum1(">"),
+      SPECIALIZER = toenum2("<>"),
 
 
       PREPROCESSOR = toenum1("#"),
@@ -598,6 +606,27 @@ namespace clef {
    constexpr bool isIf(const OperatorID op) { return op == OperatorID::IF; }
    constexpr bool isSwitch(const OperatorID op) { return op == OperatorID::SWITCH; }
    constexpr bool isMatch(const OperatorID op) { return op == OperatorID::MATCH; }
+
+   constexpr bool isStringLike(const OperatorID op) { return op == OperatorID::STRING || op == OperatorID::CHAR; }
+   constexpr bool isOpener(const OperatorID op) { return op == OperatorID::CALL_OPEN || op == OperatorID::SUBSCRIPT_OPEN || op == OperatorID::LIST_OPEN || op == OperatorID::SPECIALIZER_OPEN; }
+   constexpr OperatorID getCloser(const OperatorID op) {
+      switch (op) {
+         case OperatorID::CALL_OPEN       : return OperatorID::CALL_CLOSE;
+         case OperatorID::SUBSCRIPT_OPEN  : return OperatorID::SUBSCRIPT_CLOSE;
+         case OperatorID::LIST_OPEN       : return OperatorID::LIST_CLOSE;
+         case OperatorID::SPECIALIZER_OPEN: return OperatorID::SPECIALIZER_CLOSE;
+         default: std::unreachable();
+      }
+   }
+   constexpr OperatorID getInvoker(const OperatorID op) {
+      switch (op) {
+         case OperatorID::CALL_OPEN       : return OperatorID::CALL;
+         case OperatorID::SUBSCRIPT_OPEN  : return OperatorID::SUBSCRIPT;
+         case OperatorID::LIST_OPEN       : return OperatorID::LIST;
+         case OperatorID::SPECIALIZER_OPEN: return OperatorID::SPECIALIZER;
+         default: std::unreachable();
+      }
+   }
 }
 
 #endif //ENUMS_HPP
