@@ -37,6 +37,9 @@ struct clef::Expression {
       Expression(OpID op, Identifier* lhs, Expr* rhs);
       Expression(OpID op, Expr* lhs, Identifier* rhs);
       Expression(OpID op, Identifier* lhs, Identifier* rhs);
+      
+      Expression(OpID op, astNode* lhs, astNode* rhs);
+      Expression(OpID op, astNode* lhs, astNode* rhs, astNode* extra);
       Literal* value() const; //evaluate expression
       
       OpID opID() const { return _op; }

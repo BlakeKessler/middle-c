@@ -104,7 +104,7 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
       if (!operandStack.size()) { logError(ErrCode::PARSER_UNSPEC, "bad expression (missing RHS on stack)"); }
       astNode* rhs = operandStack.pop_back();
       astNode* lhs;
-      if (isBinary(op)) { //!NOTE: PRIORITIZES BINARY OVER POSTIX-UNARY
+      if (isBinary(op)) { //!NOTE: PRIORITIZES BINARY OVER POSTFIX-UNARY
          if (!operandStack.size()) { logError(ErrCode::PARSER_UNSPEC, "bad expression (missing LHS on stack)"); }
          lhs = operandStack.pop_back();
       } else { lhs = nullptr; }
@@ -114,7 +114,11 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
 
    do {
       if (isOperand(tokIt->type())) { //push operand
-         operandStack.push_back(tokIt);
+         if (tokIt->type() == TokenType::CHAR || tokIt->type() == TokenType::IDEN || tokIt->type() == TokenType::STRT) {
+            operandStack.push_back((astNode*)parseIdentifier());
+         } else {
+            operandStack.push_back((astNode*)parseNumLit());
+         }
          prevTokIsOperand = true;
       } else if (isOperator(tokIt->type())) { //handle operator
          OpData op = OPERATORS[*tokIt];
@@ -148,7 +152,7 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
             ++tokIt;
             if (prevTokIsOperand) { //function call, initializer list, subscript, or specializer
                ArgList* args = parseArgList(getCloser(op));
-               operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::EXPR)) Expr{getInvoker(op),operandStack.pop_back(),args}));
+               operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::EXPR)) Expr{getInvoker(op),operandStack.pop_back(),(astNode*)args}));
             } else if (op == OpID::LIST_OPEN) { //tuple
                operandStack.push_back((astNode*)(parseArgList(getCloser(op))));
             } else { //block subexpression

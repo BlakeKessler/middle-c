@@ -4,6 +4,23 @@
 #include "ast-nodes/Expression.hpp"
 #include "astNode.hpp"
 
+clef::Expression::Expression(OpID op, astNode* lhs, astNode* rhs):
+   _op{op},
+   _lhsType{lhs?lhs->nodeType():NodeType::NONE},
+   _rhsType{rhs?rhs->nodeType():NodeType::NONE},
+   _extraType{NodeType::NONE},
+   _lhs{lhs},_rhs{rhs},_extra{} {
+
+}
+clef::Expression::Expression(OpID op, astNode* lhs, astNode* rhs, astNode* extra):
+   _op{op},
+   _lhsType{lhs?lhs->nodeType():NodeType::NONE},
+   _rhsType{rhs?rhs->nodeType():NodeType::NONE},
+   _extraType{extra?extra->nodeType():NodeType::NONE},
+   _lhs{lhs},_rhs{rhs},_extra{extra} {
+
+}
+
 void clef::Expression::setLHS(astNode* lhs) {
    _lhs = lhs;
    _lhsType = lhs ? lhs->nodeType() : NodeType::NONE;
