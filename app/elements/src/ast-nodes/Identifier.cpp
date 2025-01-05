@@ -7,7 +7,7 @@
 clef::KeywordID clef::Identifier::keywordID() const {
    KeywordID id = decodeKeyword(_name);
    if (+id && _scopeName) {
-      throwError(ErrCode::PARSER_UNSPEC, "cannot use keyword with scope resolution");
+      throwError(ErrCode::BAD_IDEN, "cannot use keyword with scope resolution");
    }
    return id;
 }

@@ -6,7 +6,7 @@
 /*inline*/ bool clef::Parser::consumeKeyword(const KeywordID keywordID, const char* errStr) {
    Identifier* keyword = parseIdentifier();
    if (!keyword || keyword->keywordID() != keywordID) {
-      logError(ErrCode::PARSER_UNSPEC, errStr);
+      logError(ErrCode::BAD_KEYWORD, errStr);
       return false;
    }
    return true;
@@ -24,7 +24,7 @@
 
 /*inline*/ bool clef::Parser::consumeOperator(const OpID id, const char* errStr) {
    if (tokIt->type() != TokenType::OP || OPERATORS[*tokIt].opID() != id) {
-      logError(ErrCode::PARSER_UNSPEC, errStr);
+      logError(ErrCode::BAD_KEYWORD, errStr);
       return false;
    }
    ++tokIt;
@@ -43,7 +43,7 @@
       ++tokIt;
       return true;
    }
-   logError(ErrCode::PARSER_UNSPEC, errStr);
+   logError(ErrCode::MISSING_EOS, errStr);
    return false;
 }
 /*inline*/ bool clef::Parser::tryConsumeEOS() {

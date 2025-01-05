@@ -12,7 +12,7 @@ clef::Stmt* clef::Parser::parseStmt() {
    TypeQualMask quals = parseQuals();
    Identifier* begin = parseIdentifier();
    if (!begin) {
-      logError(ErrCode::PARSER_UNSPEC, "bad statement start");   
+      logError(ErrCode::BAD_STMT, "bad statement start");   
    }
 
 
@@ -43,7 +43,7 @@ clef::Stmt* clef::Parser::parseStmt() {
       case KeywordID::NAMESPACE     : stmt = (Stmt*)parseNamespace(); break;
 
       case KeywordID::IF            : stmt = (Stmt*)parseIf(); break;
-      case KeywordID::ELSE          : logError(ErrCode::PARSER_UNSPEC, "floating ELSE");
+      case KeywordID::ELSE          : logError(ErrCode::BAD_KEYWORD, "floating ELSE");
 
       case KeywordID::FOR           : stmt = (Stmt*)parseForLoop(); break;
       case KeywordID::FOREACH       : stmt = (Stmt*)parseForeachLoop(); break;
@@ -62,12 +62,12 @@ clef::Stmt* clef::Parser::parseStmt() {
          break;
       
       case KeywordID::CASE          : [[fallthrough]];
-      case KeywordID::DEFAULT       : logError(ErrCode::PARSER_UNSPEC, "floating CASE or DEFAULT");
+      case KeywordID::DEFAULT       : logError(ErrCode::BAD_KEYWORD, "floating CASE or DEFAULT");
 
       case KeywordID::GOTO          : //!NOTE: UNFINISHED
 
       case KeywordID::TRY           : stmt = (Stmt*)parseTryCatch(); break;
-      case KeywordID::CATCH         : logError(ErrCode::PARSER_UNSPEC, "floating CATCH");
+      case KeywordID::CATCH         : logError(ErrCode::BAD_KEYWORD, "floating CATCH");
 
       case KeywordID::THROW         : [[fallthrough]];
       case KeywordID::ASSERT        : [[fallthrough]];
@@ -101,11 +101,11 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
 
    auto eval = [&]() { //evaluate the subexpression on the top of the stacks
       OpData op = operatorStack.pop_back();
-      if (!operandStack.size()) { logError(ErrCode::PARSER_UNSPEC, "bad expression (missing RHS on stack)"); }
+      if (!operandStack.size()) { logError(ErrCode::BAD_EXPR, "bad expression (missing RHS on stack)"); }
       astNode* rhs = operandStack.pop_back();
       astNode* lhs;
       if (isBinary(op)) { //!NOTE: PRIORITIZES BINARY OVER POSTFIX-UNARY
-         if (!operandStack.size()) { logError(ErrCode::PARSER_UNSPEC, "bad expression (missing LHS on stack)"); }
+         if (!operandStack.size()) { logError(ErrCode::BAD_EXPR, "bad expression (missing LHS on stack)"); }
          lhs = operandStack.pop_back();
       } else { lhs = nullptr; }
 
@@ -148,7 +148,7 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
             prevTokIsOperand = true;
          }
          else { //blocks
-            if (!isOpener(op)) { logError(ErrCode::PARSER_UNSPEC, "floating closing block delimiter"); }
+            if (!isOpener(op)) { logError(ErrCode::BAD_BLOCK_DELIM, "floating closing block delimiter"); }
             ++tokIt;
             if (prevTokIsOperand) { //function call, initializer list, subscript, or specializer
                ArgList* args = parseArgList(getCloser(op));
@@ -157,7 +157,7 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
                operandStack.push_back((astNode*)(parseArgList(getCloser(op))));
             } else { //block subexpression
                operandStack.push_back((astNode*)parseExpr());
-               if (!isBlockLike(tokIt->type()) || getCloser(op) != OPERATORS[*tokIt]) { logError(ErrCode::PARSER_UNSPEC, "bad block subexpression"); }
+               if (!isBlockLike(tokIt->type()) || getCloser(op) != OPERATORS[*tokIt]) { logError(ErrCode::BAD_BLOCK_DELIM, "bad block subexpression"); }
             }
             prevTokIsOperand = true;
          }
@@ -182,7 +182,7 @@ clef::Scope* clef::Parser::parseProcedure() {
    }
 
    //reached end of source without finding closing token
-   logError(ErrCode::PARSER_UNSPEC, "unclosed procedure block");
+   logError(ErrCode::UNCLOSED_BLOCK, "unclosed procedure block");
 }
 
 clef::Identifier* clef::Parser::tryParseIdentifier(Identifier* scopeName) {
@@ -200,7 +200,7 @@ clef::Identifier* clef::Parser::tryParseIdentifier(Identifier* scopeName) {
    return name;
 }
 clef::Identifier* clef::Parser::parseIdentifier(Identifier* scopeName) {
-   if (!+(tokIt->type() & TokenType::CHAR)) { logError(ErrCode::PARSER_UNSPEC, "bad IDENTIFIER"); }
+   if (!+(tokIt->type() & TokenType::CHAR)) { logError(ErrCode::BAD_IDEN, "bad IDENTIFIER"); }
 
    Identifier* name = scopeName;
    const Token* tmp;
@@ -210,7 +210,7 @@ clef::Identifier* clef::Parser::parseIdentifier(Identifier* scopeName) {
       tmp = ++tokIt;
    } while (!tryConsumeOperator(OpID::SCOPE_RESOLUTION) || !+(tokIt->type() & TokenType::CHAR));
    
-   if (tokIt != tmp || name == scopeName) { logError(ErrCode::PARSER_UNSPEC, "bad IDENTIFIER"); }
+   if (tokIt != tmp || name == scopeName) { logError(ErrCode::BAD_IDEN, "bad IDENTIFIER"); }
    return name;
 }
 clef::Type* clef::Parser::parseTypename(Identifier* scopeName) {
@@ -461,7 +461,7 @@ clef::Function* clef::Parser::parseFunction() {
          Expr* defaultVal;
          if (tryConsumeOperator(OpID::ASSIGN)) {
             defaultVal = parseExprNoPrimaryComma();
-            if (!defaultVal) { logError(ErrCode::PARSER_UNSPEC, "invalid FUNC parameter default value"); }
+            if (!defaultVal) { logError(ErrCode::BAD_FUNC, "invalid FUNC parameter default value"); }
          } else { defaultVal = nullptr; }
 
          //push to parameter list
@@ -553,7 +553,7 @@ clef::Union* clef::Parser::parseUnion() {
 
    if (tryConsumeEOS()) { //forward declaration
       if (!name) {
-         logError(ErrCode::PARSER_UNSPEC, "cannot forward-declare an anonymous UNION");
+         logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous UNION");
       }
       ((astNode*)name)->upCast(NodeType::UNION);
       return new (name) Union{name};
@@ -595,7 +595,7 @@ clef::Enum* clef::Parser::parseEnum() {
 
    if (tryConsumeEOS()) { //forward declaration
       if (!name) {
-         logError(ErrCode::PARSER_UNSPEC, "cannot forward-declare an anonymous ENUM");
+         logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous ENUM");
       }
       ((astNode*)name)->anyCast(NodeType::ENUM);
       return new (name) Enum{baseType};
