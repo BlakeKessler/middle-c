@@ -12,7 +12,7 @@ struct clef::Declaration : public clef::Expression {
       static constexpr NodeType nodeType() { return NodeType::DECL; }
 
       Declaration():Expression{} {}
-      Declaration(Type* type, Identifier* name):Expression{OperatorID::DECL,NodeType::TYPE,NodeType::IDEN,type,name} {}
+      Declaration(Type* type, Identifier* name):Expression{OpID::DECL,NodeType::TYPE,NodeType::IDEN,type,name} {}
 
       Type*& type() { return (Type*&)_lhs; }
       const Type* type() const { return (const Type*)_lhs; }

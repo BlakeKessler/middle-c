@@ -12,7 +12,7 @@ struct clef::Switch : public clef::Statement {
       static constexpr NodeType nodeType() { return NodeType::SWITCH; }
 
       Switch():Statement{} {}
-      Switch(Expr* cond, SwitchCases* cases):Statement{OperatorID::SWITCH,NodeType::EXPR,NodeType::SWITCH_CASES,cond,cases} {}
+      Switch(Expr* cond, SwitchCases* cases):Statement{OpID::SWITCH,NodeType::EXPR,NodeType::SWITCH_CASES,cond,cases} {}
 
       Expr*& condition() { return (Expr*&)_lhs; }
       const Expr* condition() const { return (Expr*)_lhs; }

@@ -7,6 +7,8 @@
 #include <utility>
 #include <bit>
 
+#include <cassert>
+
 namespace clef {
    //!enum of CLEF error codes
    enum class ErrCode {
@@ -117,38 +119,6 @@ namespace clef {
    constexpr bool isOperator(const TokenType t) { return +(t & (TokenType::OP | TokenType::ESC | TokenType::EOS)); }
    constexpr bool isBlockLike(const TokenType t) { return +(t & (TokenType::BLOC | TokenType::PTXT)); }
    constexpr bool isOperand(const TokenType t) { return +(t & TokenType::XDGT); }
-
-   //operator properties bitmask
-   enum class [[clang::flag_enum]] OpType : uint8 {
-      //!bitmask atoms
-      //unused (available for user-definition)
-      FREE        = 0_m,
-      //associativity
-      _LEFT_ASSOC  = 1_m,
-      _RIGHT_ASSOC = 2_m,
-
-      //operand count
-      _UNARY       = 3_m,
-      _BINARY      = 4_m,
-
-      //other
-      BLOCK_DELIM = 7_m,
-      TYPE_MOD    = 8_m,
-
-
-      //!full operator types
-      PREFIX      = _UNARY  | _RIGHT_ASSOC,
-      POSTFIX     = _UNARY  | _LEFT_ASSOC,
-      INFIX_LEFT  = _BINARY | _LEFT_ASSOC,
-      INFIX_RIGHT = _BINARY | _RIGHT_ASSOC,
-
-   };
-   constexpr auto   operator+(const OpType t) noexcept { return std::to_underlying(t); }
-   constexpr OpType operator&(const OpType lhs, const OpType rhs) noexcept { return (OpType)((+lhs) & (+rhs)); }
-   constexpr OpType operator|(const OpType lhs, const OpType rhs) noexcept { return (OpType)((+lhs) | (+rhs)); }
-   constexpr OpType operator*(const OpType lhs, const OpType rhs) noexcept { return (OpType)((+lhs) * (+rhs)); }
-   constexpr OpType operator~(const OpType lhs) noexcept { return (OpType)(~+lhs); }
-   constexpr OpType operator*(const OpType lhs, const uint rhs) noexcept { return (OpType)((+lhs) * rhs); }
 
    //delimiter pair specification
    enum class BlockType : uint8 {
@@ -398,6 +368,7 @@ namespace clef {
 
       ASSERT,
       STATIC_ASSERT,
+      DEBUG_ASSERT,
 
       TRUE,
       FALSE,
@@ -432,200 +403,227 @@ namespace clef {
    enum class FundTypeID : uint8 {
       NULL,
       FUNCTION_SIGNATURE,
+      //!NOTE: UNFINISHED
    };
 
-   #define toenum0() [](){constexpr char buf[4] = "\0\0\0"; return std::bit_cast<unsigned int>(buf); }()
-   #define toenum1(str) [](){constexpr char buf[4] = str "\0\0"; return std::bit_cast<unsigned int>(buf); }()
-   #define toenum2(str) [](){constexpr char buf[4] = str "\0"; return std::bit_cast<unsigned int>(buf); }()
-   #define toenum3(str) [](){constexpr char buf[4] = str; return std::bit_cast<unsigned int>(buf); }()
-   #define _CLOSE_LIST_CHAR "}" //get around broken vscode colorization
-   enum class OperatorID : uint32 {
-      NULL = toenum0(),
 
-      ESCAPE = toenum1("\\"),
-      EOS = toenum1(";"),
+   enum class OpID : uint8 {
+      NULL = 0, //not an operator or no-op
 
-      STRING = toenum1("\""),
-      CHAR = toenum1("\'"),
+      ESCAPE, //escape character
+      EOS,
 
-      LINE_CMNT = toenum2("/" "/"),
-      BLOCK_CMNT_OPEN = toenum2("/" "*"),
-      BLOCK_CMNT_CLOSE = toenum2("*" "/"),
+      STRING,
+      CHAR,
 
-      CALL_OPEN = toenum1("("),
-      CALL_CLOSE = toenum1(")"),
-      CALL = toenum2("()"),
-      SUBSCRIPT_OPEN = toenum1("["),
-      SUBSCRIPT_CLOSE = toenum1("]"),
-      SUBSCRIPT = toenum2("[]"),
-      LIST_OPEN = toenum1("{"),
-      LIST_CLOSE = toenum1(_CLOSE_LIST_CHAR),
-      LIST = toenum2("{" _CLOSE_LIST_CHAR),
-      SPECIALIZER_OPEN = toenum1("<"),
-      SPECIALIZER_CLOSE = toenum1(">"),
-      SPECIALIZER = toenum2("<>"),
+      LINE_CMNT,
+      BLOCK_CMNT,
+         BLOCK_CMNT_OPEN,
+         BLOCK_CMNT_CLOSE,
+
+      CALL_INVOKE, //parens
+         CALL_OPEN,
+         CALL_CLOSE,
+      SUBSCRIPT_INVOKE, //square brackets
+         SUBSCRIPT_OPEN,
+         SUBSCRIPT_CLOSE,
+      LIST_INVOKE, //curly brackets
+         LIST_OPEN,
+         LIST_CLOSE,
+      SPECIALIZER_INVOKE, //triangle brackets
+         SPECIALIZER_OPEN,
+         SPECIALIZER_CLOSE,
 
 
-      PREPROCESSOR = toenum1("#"),
+      PREPROCESSOR,
 
-      SCOPE_RESOLUTION = toenum2("::"),
+      SCOPE_RESOLUTION,
 
-      LABEL_DELIM = toenum1(":"),
+      INC, //increment
+      DEC, //decrement
 
-      INCREMENT = toenum2("++"),
-      DECREMENT = toenum2("--"),
+      MEMBER_ACCESS, // .
+      MEMBER_OF_POINTER_ACCESS, // ->
+      POINTER_TO_MEMBER, // .*
+      POINTER_TO_MEMBER_OF_POINTER, // ->*
 
-      MEMBER_ACCESS = toenum1("."),
-      MEMBER_OF_POINTER_ACCESS = toenum2("->"),
-      POINTER_TO_MEMBER = toenum2(".*"),
-      POINTER_TO_MEMBER_OF_POINTER = toenum3("->*"),
-
-      RANGE = toenum2(".."),
-      SPREAD = toenum3("..."),
+      RANGE,
+      SPREAD,
       
-      ADD = toenum1("+"),
-      SUB = toenum1("-"),
-      MUL = toenum1("*"),
-      DIV = toenum1("/"),
-      MOD = toenum1("%"),
-      EXP = toenum2("^^"),
+      ADD, //addition
+      SUB, //subtraction
+      MUL, //multiplication
+      DIV, //division
+      MOD, //modulo
+      EXP, //exponentation
       
-      LOGICAL_NOT = toenum1("!"),
-      LOGICAL_AND = toenum2("&&"),
-      LOGICAL_OR = toenum2("||"),
+      LOGICAL_NOT,
+      LOGICAL_AND,
+      LOGICAL_OR,
 
-      BIT_NOT = toenum1("~"),
-      BIT_AND = toenum1("&"),
-      BIT_OR = toenum1("|"),
-      BIT_XOR = toenum1("^"),
-      SHIFT_LEFT = toenum2("<<"),
-      SHIFT_RIGHT = toenum2(">>"),
+      BIT_NOT,
+      BIT_AND,
+      BIT_OR,
+      BIT_XOR,
+      SHIFT_LEFT,
+      SHIFT_RIGHT,
       
       
-      UNIQUE_PTR = toenum1("@"),
-      SHARED_PTR = toenum1("$"),
-      WEAK_PTR = toenum1("`"),
+      UNIQUE_PTR,
+      SHARED_PTR,
+      WEAK_PTR,
+      ITERATOR,
       
 
-      THREE_WAY_COMP = toenum3("<=>"),
-      LESSER = toenum1("<"),
-      GREATER = toenum1(">"),
-      LESSER_OR_EQ = toenum2("<="),
-      GREATER_OR_EQ = toenum2(">="),
+      THREE_WAY_COMP, //AKA spaceship
+      LESSER, //less than
+      GREATER, //greater than
+      LESSER_OR_EQ, //less than or equal to
+      GREATER_OR_EQ, //greater than or equal to
 
-      EQUAL = toenum2("=="),
-      UNEQUAL = toenum2("!="),
-      // EQUAL_STRICT = toenum3("==="),
-      // UNEQUAL_STRICT = toenum3("!=="),
+      IS_EQUAL, //equality comparison
+      IS_UNEQUAL, //inequality comparison
+      // IS_EQUAL_STRICT, //!NOTE: NOT USED BY MIDDLE C
+      // IS_UNEQUAL_STRICT, //!NOTE: NOT USED BY MIDDLE C
 
-      COALESCE = toenum2("??"),
+      COALESCE, //null coalescing
 
-      INLINE_IF = toenum1("?"),
-      INLINE_ELSE = toenum1(":"),
+      INLINE_IF, //ternary operator opener
+      INLINE_ELSE, //ternary operator closer
 
-      ASSIGN = toenum1("="),
-      // CONST_ASSIGN = toenum2(":="),
-      ADD_ASSIGN = toenum2("+="),
-      SUB_ASSIGN = toenum2("-="),
-      MUL_ASSIGN = toenum2("*="),
-      DIV_ASSIGN = toenum2("/="),
-      MOD_ASSIGN = toenum2("%="),
-      EXP_ASSIGN = toenum3("^^="),
-      SHL_ASSIGN = toenum3("<<="),
-      SHR_ASSIGN = toenum3(">>="),
-      AND_ASSIGN = toenum2("&="),
-      XOR_ASSIGN = toenum2("^="),
-      OR_ASSIGN = toenum2("|="),
-      COALESCE_ASSIGN = toenum3("??="),
+      ASSIGN,
+      // CONST_ASSIGN, //!NOTE: NOT USED BY MIDDLE C
+      ADD_ASSIGN, //compound assignment (addition)
+      SUB_ASSIGN, //compound assignment (substraction)
+      MUL_ASSIGN, //compound assignment (multiplication)
+      DIV_ASSIGN, //compound assignment (division)
+      MOD_ASSIGN, //compound assignment (modulo)
+      EXP_ASSIGN, //compound assignment (exponentiation)
+      SHL_ASSIGN, //compound assignment (left-shift)
+      SHR_ASSIGN, //compound assignment (right-shift)
+      AND_ASSIGN, //compound assignment (bitwise and)
+      XOR_ASSIGN, //compound assignment (bitwise exclusive or)
+      OR_ASSIGN, //compound assignment (bitwise or)
+      COALESCE_ASSIGN, //compound assignment (null-coalescing)
 
-      COMMA = toenum1(","),
+      COMMA,
 
 
 
       //keyword pseudo-operators
-      _LOOPS = toenum3("\0\0a"),
-      FOR = _LOOPS | toenum2("\0a"),
-      FOREACH = _LOOPS | toenum2("\0b"),
-      WHILE = _LOOPS | toenum2("\0c"),
-      DO_WHILE = _LOOPS | toenum2("\0d"),
+      FOR,
+      FOREACH,
+      WHILE,
+      DO_WHILE,
 
-      IF = toenum3("\0\0e"),
+      IF,
 
-      SWITCH = toenum3("\0\0f"),
-      MATCH = toenum3("\0\0g"),
+      SWITCH,
+      MATCH,
 
-      TRY_CATCH = toenum3("\0\0h"),
-      // ASM = toenum3("\0\0i"),
+      TRY_CATCH,
+      ASM,
 
       //other pseudo-operators
-      DECL = toenum3("\0\0A"),
+      DECL,
+
+      //aliases
+      LABEL_DELIM = INLINE_IF,
+      EACH_OF = LABEL_DELIM,
+      EXTENDS = LABEL_DELIM,
+      ADDRESS_OF = BIT_AND,
+      REFERENCE = ADDRESS_OF,
+      RAW_PTR = MUL,
+      DEREF = RAW_PTR,
+      VARIADIC_PARAM = SPREAD,
+      ARROW = MEMBER_OF_POINTER_ACCESS,
+      UNARY_PLUS = ADD,
+      UNARY_MINUS = SUB,
+      RADIX_POINT = MEMBER_ACCESS,
 
       //helpers
-      FIRST_CHAR_MASK = toenum3("\xff\0\0"),
+      __FIRST_PSEUDO_OP,
+      __FIRST_LOOP,
+      __LAST_LOOP,
    };
-   #undef toenum0
-   #undef toenum1
-   #undef toenum2
-   #undef toenum3
-   #undef _CLOSE_LIST_CHAR
 
-   constexpr auto operator+(const OperatorID x) { return std::to_underlying(x); }
-   constexpr OperatorID operator&(const OperatorID lhs, const OperatorID rhs) { return (OperatorID)(+lhs & +rhs); }
-   constexpr OperatorID& operator&=(OperatorID& lhs, const OperatorID rhs) { lhs = lhs & rhs; return lhs; }
-   constexpr bool isOperator(const OperatorID x) { return +x & +OperatorID::FIRST_CHAR_MASK; }
-   constexpr OperatorID bytemask(OperatorID e) {
-      char* str = std::bit_cast<char*>(&e);
-      for (uint i = 0; i < sizeof(e); ++i) {
-         str[i] = str[i] ? ~0 : 0;
-      }
-      return e;
+   constexpr auto operator+(const OpID x) { return std::to_underlying(x); }
+   constexpr OpID operator&(const OpID lhs, const OpID rhs) { return (OpID)(+lhs & +rhs); }
+   constexpr OpID& operator&=(OpID& lhs, const OpID rhs) { lhs = lhs & rhs; return lhs; }
+   constexpr bool isOperator(const OpID x) { return x < OpID::__FIRST_PSEUDO_OP; }
+
+   constexpr bool isDecl(const OpID op) { return op == OpID::DECL; }
+
+   constexpr bool isForLoop(const OpID op) { return op == OpID::FOR; }
+   constexpr bool isForeachLoop(const OpID op) { return op == OpID::FOREACH; }
+   constexpr bool isWhileLoop(const OpID op) { return op == OpID::WHILE; }
+   constexpr bool isDoWhileLoop(const OpID op) { return op == OpID::DO_WHILE; }
+
+   constexpr bool isLoop(const OpID op) { return op >= OpID::__FIRST_LOOP && op <= OpID::__LAST_LOOP; }
+   constexpr bool isSimpleLoop(const OpID op) { return isWhileLoop(op) || isDoWhileLoop(op); }
+
+   constexpr bool isIf(const OpID op) { return op == OpID::IF; }
+   constexpr bool isSwitch(const OpID op) { return op == OpID::SWITCH; }
+   constexpr bool isMatch(const OpID op) { return op == OpID::MATCH; }
+
+   constexpr bool isStringLike(const OpID op) { return op == OpID::STRING || op == OpID::CHAR; }
+   constexpr bool isOpener(const OpID op) { return op == OpID::CALL_OPEN || op == OpID::SUBSCRIPT_OPEN || op == OpID::LIST_OPEN || op == OpID::SPECIALIZER_OPEN; }
+   constexpr OpID getCloser(const OpID opener) {
+      debug_assert(isOpener(opener));
+      return (OpID)(+opener + 1);
    }
-   constexpr uint opidlen(const OperatorID x) {
-      const char* str = std::bit_cast<const char*>(&x);
-      for (uint i = 0; i < sizeof(OperatorID); ++i) {
-         if (!str[i]) { return i; }
-      }
-      return sizeof(OperatorID); 
-   }
-   constexpr bool opidcmp(const OperatorID x, const char* str) { //!NOTE: succeptible to segfaults
-      OperatorID op = *std::bit_cast<const OperatorID*>(str);
-      op &= bytemask(x);
-      return op == x;
+   constexpr OpID getInvoker(const OpID opener) {
+      debug_assert(isOpener(opener));
+      return (OpID)(+opener - 1);
    }
 
-   constexpr bool isDecl(const OperatorID op) { return op == OperatorID::DECL; }
+   //operator properties bitmask
+   enum class [[clang::flag_enum]] OpProps : uint8 {
+      NULL = 0,
 
-   constexpr bool isForLoop(const OperatorID op) { return op == OperatorID::FOR; }
-   constexpr bool isForeachLoop(const OperatorID op) { return op == OperatorID::FOREACH; }
-   constexpr bool isWhileLoop(const OperatorID op) { return op == OperatorID::WHILE; }
-   constexpr bool isDoWhileLoop(const OperatorID op) { return op == OperatorID::DO_WHILE; }
+      CAN_BE_POSTFIX = 8_m,
+      CAN_BE_PREFIX  = 7_m,
+      CAN_BE_BINARY  = 6_m,
+      IS_LEFT_ASSOC  = 5_m, //only applies for use as binary operators
 
-   constexpr bool isLoop(const OperatorID op) { return +(op & OperatorID::_LOOPS); }
-   constexpr bool isSimpleLoop(const OperatorID op) { return isLoop(op) && !isForLoop(op) && !isForeachLoop(op); }
+      __PRECEDENCE_BITS = 4_m | 3_m | 2_m | 1_m,
 
-   constexpr bool isIf(const OperatorID op) { return op == OperatorID::IF; }
-   constexpr bool isSwitch(const OperatorID op) { return op == OperatorID::SWITCH; }
-   constexpr bool isMatch(const OperatorID op) { return op == OperatorID::MATCH; }
+      POSTFIX = CAN_BE_POSTFIX,
+      PREFIX = CAN_BE_PREFIX,
+      INFIX_LEFT = CAN_BE_BINARY | IS_LEFT_ASSOC,
+      INFIX_RIGHT = CAN_BE_BINARY,
 
-   constexpr bool isStringLike(const OperatorID op) { return op == OperatorID::STRING || op == OperatorID::CHAR; }
-   constexpr bool isOpener(const OperatorID op) { return op == OperatorID::CALL_OPEN || op == OperatorID::SUBSCRIPT_OPEN || op == OperatorID::LIST_OPEN || op == OperatorID::SPECIALIZER_OPEN; }
-   constexpr OperatorID getCloser(const OperatorID op) {
-      switch (op) {
-         case OperatorID::CALL_OPEN       : return OperatorID::CALL_CLOSE;
-         case OperatorID::SUBSCRIPT_OPEN  : return OperatorID::SUBSCRIPT_CLOSE;
-         case OperatorID::LIST_OPEN       : return OperatorID::LIST_CLOSE;
-         case OperatorID::SPECIALIZER_OPEN: return OperatorID::SPECIALIZER_CLOSE;
-         default: std::unreachable();
-      }
+      OPEN_DELIM = PREFIX,
+      CLOSE_DELIM = POSTFIX,
+      DELIM = OPEN_DELIM | CLOSE_DELIM,
+
+      TYPE_MOD = POSTFIX,
+   };
+   constexpr auto    operator+(const OpProps t) noexcept { return std::to_underlying(t); }
+   constexpr OpProps operator~(const OpProps lhs) noexcept { return (OpProps)(~+lhs); }
+   constexpr OpProps operator&(const OpProps lhs, const OpProps rhs) noexcept { return (OpProps)((+lhs) & (+rhs)); }
+   constexpr OpProps operator^(const OpProps lhs, const OpProps rhs) noexcept { return (OpProps)((+lhs) ^ (+rhs)); }
+   constexpr OpProps operator|(const OpProps lhs, const OpProps rhs) noexcept { return (OpProps)((+lhs) | (+rhs)); }
+   constexpr uint8 precedence(const OpProps x) { return +(x & OpProps::__PRECEDENCE_BITS); }
+   constexpr OpProps makeOpProps(const bool canBePostfix, const bool canBePrefix, const bool canBeBinary, const bool isLeftAssocWhenBinary, const uint8 precedence) {
+      assert(precedence == (precedence & +OpProps::__PRECEDENCE_BITS)); //maybe make debug_assert?
+      OpProps post = canBePostfix ? OpProps::CAN_BE_POSTFIX : OpProps::NULL;
+      OpProps pre  = canBePrefix  ? OpProps::CAN_BE_PREFIX  : OpProps::NULL;
+      OpProps bin  = canBeBinary  ? OpProps::CAN_BE_BINARY  : OpProps::NULL;
+      OpProps left = (isLeftAssocWhenBinary && canBeBinary) ? OpProps::IS_LEFT_ASSOC : OpProps::NULL;
+      return post | pre | bin | left | (OpProps)precedence;
    }
-   constexpr OperatorID getInvoker(const OperatorID op) {
-      switch (op) {
-         case OperatorID::CALL_OPEN       : return OperatorID::CALL;
-         case OperatorID::SUBSCRIPT_OPEN  : return OperatorID::SUBSCRIPT;
-         case OperatorID::LIST_OPEN       : return OperatorID::LIST;
-         case OperatorID::SPECIALIZER_OPEN: return OperatorID::SPECIALIZER;
-         default: std::unreachable();
-      }
+   constexpr OpProps makeOpProps(const uint8 flags, const uint8 precedence) {
+      assert(flags      == (flags      & +OpProps::__PRECEDENCE_BITS)); //maybe make debug_assert?
+      assert(precedence == (precedence & +OpProps::__PRECEDENCE_BITS)); //maybe make debug_assert?
+
+      return (OpProps)((flags << 4) | precedence);
+   }
+   constexpr OpProps makeOpProps(const OpProps flags, const uint8 precedence) {
+      assert(flags      == (flags      & ~OpProps::__PRECEDENCE_BITS)); //maybe make debug_assert?
+      assert(precedence == (precedence & +OpProps::__PRECEDENCE_BITS)); //maybe make debug_assert?
+
+      return (OpProps)(+flags | precedence);
    }
 }
 

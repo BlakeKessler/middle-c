@@ -6,7 +6,7 @@
 
 struct clef::Expression {
    private:
-      OperatorID _op;
+      OpID _op;
       NodeType _lhsType;
       NodeType _rhsType;
       NodeType _extraType;
@@ -24,22 +24,22 @@ struct clef::Expression {
       friend struct TryCatch;
       // friend struct Asm;
 
-      Expression(OperatorID op, NodeType lhsType, NodeType rhsType, NodeType extraType, void* lhs, void* rhs, void* extra):_op{op},_lhsType{lhsType},_rhsType{rhsType},_extraType{extraType},_lhs{lhs},_rhs{rhs},_extra{extra} {}
-      Expression(OperatorID op, NodeType lhsType, NodeType rhsType, void* lhs, void* rhs):_op{op},_lhsType{lhsType},_rhsType{rhsType},_extraType{NodeType::NONE},_lhs{lhs},_rhs{rhs},_extra{nullptr} {}
-      template<astNode_t lhs_t, astNode_t rhs_t, astNode_t extra_t> Expression(OperatorID op, lhs_t* lhs, rhs_t* rhs, rhs_t* extra):
+      Expression(OpID op, NodeType lhsType, NodeType rhsType, NodeType extraType, void* lhs, void* rhs, void* extra):_op{op},_lhsType{lhsType},_rhsType{rhsType},_extraType{extraType},_lhs{lhs},_rhs{rhs},_extra{extra} {}
+      Expression(OpID op, NodeType lhsType, NodeType rhsType, void* lhs, void* rhs):_op{op},_lhsType{lhsType},_rhsType{rhsType},_extraType{NodeType::NONE},_lhs{lhs},_rhs{rhs},_extra{nullptr} {}
+      template<astNode_t lhs_t, astNode_t rhs_t, astNode_t extra_t> Expression(OpID op, lhs_t* lhs, rhs_t* rhs, rhs_t* extra):
          _op{op},_lhsType{lhs_t::nodeType()},_rhsType{rhs_t::nodeType()},_extraType{extra_t::nodeType()},
          _lhs{lhs},_rhs{rhs},_extra{extra} {}
    public:
       static constexpr NodeType nodeType() { return NodeType::EXPR; }
 
       Expression():_op{},_lhsType{},_rhsType{},_lhs{},_rhs{} {}
-      Expression(OperatorID op, Expr* lhs, Expr* rhs);
-      Expression(OperatorID op, Identifier* lhs, Expr* rhs);
-      Expression(OperatorID op, Expr* lhs, Identifier* rhs);
-      Expression(OperatorID op, Identifier* lhs, Identifier* rhs);
+      Expression(OpID op, Expr* lhs, Expr* rhs);
+      Expression(OpID op, Identifier* lhs, Expr* rhs);
+      Expression(OpID op, Expr* lhs, Identifier* rhs);
+      Expression(OpID op, Identifier* lhs, Identifier* rhs);
       Literal* value() const; //evaluate expression
       
-      OperatorID opID() const { return _op; }
+      OpID opID() const { return _op; }
       NodeType lhsType() const { return _lhsType; }
       NodeType rhsType() const { return _rhsType; }
       NodeType extraType() const { return _extraType; }

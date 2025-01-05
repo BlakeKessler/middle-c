@@ -19,7 +19,7 @@ clef::Stmt* clef::Parser::parseStmt() {
    KeywordID keywordID = begin->keywordID();
    switch (keywordID) {
       default:
-         assert(isType(keywordID));
+         debug_assert(isType(keywordID));
          [[fallthrough]];
       case KeywordID::THIS    : [[fallthrough]];
       case KeywordID::SELF    : [[fallthrough]];
@@ -76,7 +76,7 @@ clef::Stmt* clef::Parser::parseStmt() {
          expr = parseExpr();
          consumeEOS("bad THROW, ASSERT, STATIC_ASSERT, or RETURN");
          stmt = (Stmt*)tree.allocNode(NodeType::STMT);
-         *stmt = Stmt{OperatorID::CALL, begin, expr};
+         *stmt = Stmt{OpID::CALL_INVOKE, begin, expr};
          break;
       }
 
@@ -88,19 +88,19 @@ clef::Stmt* clef::Parser::parseStmt() {
 
 clef::Expr* clef::Parser::parseExpr() {
    Expr* expr = parseExprNoPrimaryComma();
-   while (tryConsumeOperator(OperatorID::COMMA)) {
-      expr = new (tree.allocNode(NodeType::EXPR)) Expr{OperatorID::COMMA, expr, parseExprNoPrimaryComma()};
+   while (tryConsumeOperator(OpID::COMMA)) {
+      expr = new (tree.allocNode(NodeType::EXPR)) Expr{OpID::COMMA, expr, parseExprNoPrimaryComma()};
    }
    return expr;
 }
 
 clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
-   mcsl::dyn_arr<OperatorID> operatorStack;
+   mcsl::dyn_arr<OpID> operatorStack;
    mcsl::dyn_arr<astNode*> operandStack;
    bool prevTokIsOperand = false;
 
    auto eval = [&]() { //evaluate the subexpression on the top of the stacks
-      OperatorID op = operatorStack.pop_back();
+      OpID op = operatorStack.pop_back();
       if (!operandStack.size()) { logError(ErrCode::PARSER_UNSPEC, "bad expression (missing RHS on stack)"); }
       astNode* rhs = operandStack.pop_back();
       astNode* lhs;
@@ -117,8 +117,8 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
          operandStack.push_back(tokIt);
          prevTokIsOperand = true;
       } else if (isOperator(tokIt->type())) { //handle operator
-         OperatorID id = OPERATORS[*tokIt].opID();
-         if (id == OperatorID::EOS || (id == OperatorID::COMMA && operatorStack.size())) { //operator that cannot be part of this type of expression
+         OpID id = OPERATORS[*tokIt].opID();
+         if (id == OpID::EOS || (id == OpID::COMMA && operatorStack.size())) { //operator that cannot be part of this type of expression
             break;
          }
 
@@ -132,11 +132,11 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
          }
          prevTokIsOperand = false;
       } else if (isBlockLike(tokIt->type())) { //handle block delimiter
-         OperatorID id = OPERATORS[*tokIt].opID();
+         OpID id = OPERATORS[*tokIt].opID();
          if (isStringLike(id)) { //string and character literals
             switch (id) {
-               case OperatorID::STRING : operandStack.push_back((astNode*)parseStrLit());  break;
-               case OperatorID::CHAR   : operandStack.push_back((astNode*)parseCharLit()); break;
+               case OpID::STRING : operandStack.push_back((astNode*)parseStrLit());  break;
+               case OpID::CHAR   : operandStack.push_back((astNode*)parseCharLit()); break;
                default: std::unreachable();
             }
             prevTokIsOperand = true;
@@ -147,7 +147,7 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
             if (prevTokIsOperand) { //function call, initializer list, subscript, or specializer
                ArgList* args = parseArgList(getCloser(id));
                operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::EXPR)) Expr{getInvoker(id),operandStack.pop_back(),args}));
-            } else if (id == OperatorID::LIST_OPEN) { //tuple
+            } else if (id == OpID::LIST_OPEN) { //tuple
                operandStack.push_back((astNode*)(parseArgList(getCloser(id))));
             } else { //block subexpression
                operandStack.push_back((astNode*)parseExpr());
@@ -169,7 +169,7 @@ clef::Scope* clef::Parser::parseProcedure() {
    Scope* scope = (Scope*)tree.allocNode(NodeType::SCOPE);
 
    while (tokIt < endtok) {
-      if (tryConsumeOperator(OperatorID::LIST_CLOSE)) {
+      if (tryConsumeOperator(OpID::LIST_CLOSE)) {
          return scope;
       }
       scope->push_back(parseStmt());
@@ -188,7 +188,7 @@ clef::Identifier* clef::Parser::tryParseIdentifier(Identifier* scopeName) {
    do {
       name = new (tree.allocNode(NodeType::IDEN)) Identifier{*tokIt, name};
       tmp = ++tokIt;
-   } while (!tryConsumeOperator(OperatorID::SCOPE_RESOLUTION) || !+(tokIt->type() & TokenType::CHAR));
+   } while (!tryConsumeOperator(OpID::SCOPE_RESOLUTION) || !+(tokIt->type() & TokenType::CHAR));
    
    tokIt = tmp;
    return name;
@@ -202,7 +202,7 @@ clef::Identifier* clef::Parser::parseIdentifier(Identifier* scopeName) {
    do {
       name = new (tree.allocNode(NodeType::IDEN)) Identifier{*tokIt, name};
       tmp = ++tokIt;
-   } while (!tryConsumeOperator(OperatorID::SCOPE_RESOLUTION) || !+(tokIt->type() & TokenType::CHAR));
+   } while (!tryConsumeOperator(OpID::SCOPE_RESOLUTION) || !+(tokIt->type() & TokenType::CHAR));
    
    if (tokIt != tmp || name == scopeName) { logError(ErrCode::PARSER_UNSPEC, "bad IDENTIFIER"); }
    return name;
@@ -222,7 +222,7 @@ clef::Decl* clef::Parser::parseDecl(Identifier* scopeName) {
 
 clef::Loop* clef::Parser::parseForLoop() {
    //open parens
-   consumeOperator(OperatorID::CALL_OPEN, "FOR loop without opening parens for condition");
+   consumeOperator(OpID::CALL_OPEN, "FOR loop without opening parens for condition");
 
    //params
    Stmt* decl = parseStmt();
@@ -230,10 +230,10 @@ clef::Loop* clef::Parser::parseForLoop() {
    Expr* inc = parseExpr();
 
    //closing parens
-   consumeOperator(OperatorID::CALL_CLOSE, "FOR loop without closing parens for condition");
+   consumeOperator(OpID::CALL_CLOSE, "FOR loop without closing parens for condition");
 
    //procedure
-   consumeOperator(OperatorID::LIST_OPEN, "bad FOR block");
+   consumeOperator(OpID::LIST_OPEN, "bad FOR block");
    Scope* proc = parseProcedure();
 
    //EOS
@@ -248,7 +248,7 @@ clef::Loop* clef::Parser::parseForLoop() {
 
 clef::Loop* clef::Parser::parseForeachLoop() {
    //open parens
-   consumeOperator(OperatorID::CALL_OPEN, "FOREACH loop without opening parens for condition");
+   consumeOperator(OpID::CALL_OPEN, "FOREACH loop without opening parens for condition");
 
    //iterator declaration
    TypeQualMask quals = parseQuals();
@@ -257,16 +257,16 @@ clef::Loop* clef::Parser::parseForeachLoop() {
    Identifier* itName = parseIdentifier();
 
    //IN operator
-   consumeOperator(OperatorID::LABEL_DELIM, "bad FOREACH params");
+   consumeOperator(OpID::LABEL_DELIM, "bad FOREACH params");
 
    //FOREACH target
    Expr* target = parseExpr();
 
    //closing parens
-   consumeOperator(OperatorID::CALL_CLOSE, "FOREACH loop without closing parens for condition");
+   consumeOperator(OpID::CALL_CLOSE, "FOREACH loop without closing parens for condition");
 
    //procedure
-   consumeOperator(OperatorID::LIST_OPEN, "bad FOREACH block");
+   consumeOperator(OpID::LIST_OPEN, "bad FOREACH block");
    Scope* proc = parseProcedure();
 
    //EOS
@@ -282,55 +282,55 @@ clef::Loop* clef::Parser::parseForeachLoop() {
 
 clef::Loop* clef::Parser::parseWhileLoop() {
    //open parens
-   consumeOperator(OperatorID::CALL_OPEN, "WHILE loop without opening parens for condition");
+   consumeOperator(OpID::CALL_OPEN, "WHILE loop without opening parens for condition");
 
    //condition
    Expr* condition = parseExpr();
 
    //closing parens
-   consumeOperator(OperatorID::CALL_CLOSE, "WHILE loop without closing parens for condition");
+   consumeOperator(OpID::CALL_CLOSE, "WHILE loop without closing parens for condition");
 
    //procedure
-   consumeOperator(OperatorID::LIST_OPEN, "bad WHILE block");
+   consumeOperator(OpID::LIST_OPEN, "bad WHILE block");
    Scope* proc = parseProcedure();
 
    //EOS
    consumeEOS("WHILE statement without EOS token");
 
    //return
-   return new (tree.allocNode(NodeType::LOOP)) Loop{OperatorID::WHILE, condition, proc};
+   return new (tree.allocNode(NodeType::LOOP)) Loop{OpID::WHILE, condition, proc};
 }
 
 clef::Loop* clef::Parser::parseDoWhileLoop() {
    //procedure
-   consumeOperator(OperatorID::LIST_OPEN, "bad DO WHILE block");
+   consumeOperator(OpID::LIST_OPEN, "bad DO WHILE block");
    Scope* proc = parseProcedure();
 
    //WHILE keyword
    consumeKeyword(KeywordID::WHILE, "DO WHILE without WHILE");
 
    //condition
-   consumeOperator(OperatorID::CALL_OPEN, "DO WHILE loop without opening parens for condition");
+   consumeOperator(OpID::CALL_OPEN, "DO WHILE loop without opening parens for condition");
    Expr* condition = parseExpr();
-   consumeOperator(OperatorID::CALL_CLOSE, "DO WHILE loop without closing parens for condition");
+   consumeOperator(OpID::CALL_CLOSE, "DO WHILE loop without closing parens for condition");
 
    //EOS
    consumeEOS("DO WHILE statement without EOS token");
 
    //return
-   return new (tree.allocNode(NodeType::LOOP)) Loop{OperatorID::DO_WHILE, condition, proc};
+   return new (tree.allocNode(NodeType::LOOP)) Loop{OpID::DO_WHILE, condition, proc};
 }
 
 #pragma endregion loop
 
 clef::If* clef::Parser::parseIf() {
    //condition
-   consumeOperator(OperatorID::CALL_OPEN, "IF statement without opening parens for condition");
+   consumeOperator(OpID::CALL_OPEN, "IF statement without opening parens for condition");
    Expr* condition = parseExpr();
-   consumeOperator(OperatorID::CALL_CLOSE, "IF statement without closing parens for condition");
+   consumeOperator(OpID::CALL_CLOSE, "IF statement without closing parens for condition");
 
    //procedure
-   consumeOperator(OperatorID::LIST_OPEN, "bad IF block");
+   consumeOperator(OpID::LIST_OPEN, "bad IF block");
    Scope* proc = parseProcedure();
 
    //EOS
@@ -342,7 +342,7 @@ clef::If* clef::Parser::parseIf() {
    consumeKeyword(KeywordID::ELSE, "IF statement without EOS token");
    switch (tokIt->type()) {
       case TokenType::OP: { //basic ELSE
-         consumeOperator(OperatorID::LIST_OPEN, "bad ELSE block");
+         consumeOperator(OpID::LIST_OPEN, "bad ELSE block");
          Scope* proc = parseProcedure();
          //EOS
          consumeEOS("DO WHILE statement without EOS token");
@@ -365,24 +365,24 @@ clef::If* clef::Parser::parseIf() {
 
 clef::Switch* clef::Parser::parseSwitch() {
    //condition
-   consumeOperator(OperatorID::CALL_OPEN, "SWITCH without opening parens for condition");
+   consumeOperator(OpID::CALL_OPEN, "SWITCH without opening parens for condition");
    Expr* condition = parseExpr();
-   consumeOperator(OperatorID::CALL_CLOSE, "SWITCH without closing parens for condition");
+   consumeOperator(OpID::CALL_CLOSE, "SWITCH without closing parens for condition");
 
    //procedure
-   consumeOperator(OperatorID::LIST_OPEN, "bad SWITCH block");
+   consumeOperator(OpID::LIST_OPEN, "bad SWITCH block");
    Scope* procedure = new (tree.allocNode(NodeType::SCOPE)) Scope{tree.allocBuf<Stmt*>()};
    SwitchCases* cases = new (tree.allocNode(NodeType::SWITCH_CASES)) SwitchCases{tree.allocBuf<mcsl::pair<Expr*,Stmt*>>(), procedure};
 
-   while (!tryConsumeOperator(OperatorID::LIST_CLOSE)) {
+   while (!tryConsumeOperator(OpID::LIST_CLOSE)) {
       if (tryConsumeKeyword(KeywordID::CASE)) { //CASE
          Expr* caseExpr = parseExpr();
-         consumeOperator(OperatorID::LABEL_DELIM, "bad CASE in SWITCH statement");
+         consumeOperator(OpID::LABEL_DELIM, "bad CASE in SWITCH statement");
          
          //!NOTE: UNFINISHED
 
       } else if (tryConsumeKeyword(KeywordID::DEFAULT)) { //DEFAULT
-         consumeOperator(OperatorID::LABEL_DELIM, "bad DEFAULT in SWITCH statement");
+         consumeOperator(OpID::LABEL_DELIM, "bad DEFAULT in SWITCH statement");
          
          //!NOTE: UNFINISHED
 
@@ -400,15 +400,15 @@ clef::Switch* clef::Parser::parseSwitch() {
 
 clef::Match* clef::Parser::parseMatch() {
    //condition
-   consumeOperator(OperatorID::CALL_OPEN, "MATCH without opening parens for condition");
+   consumeOperator(OpID::CALL_OPEN, "MATCH without opening parens for condition");
    Expr* condition = parseExpr();
-   consumeOperator(OperatorID::CALL_CLOSE, "MATCH without closing parens for condition");
+   consumeOperator(OpID::CALL_CLOSE, "MATCH without closing parens for condition");
 
    //procedure
-   consumeOperator(OperatorID::LIST_OPEN, "bad MATCH block");
+   consumeOperator(OpID::LIST_OPEN, "bad MATCH block");
    MatchCases* cases = new (tree.allocNode(NodeType::SWITCH_CASES)) MatchCases{tree.allocBuf<mcsl::pair<Expr*,Scope*>>()};
 
-   while (!tryConsumeOperator(OperatorID::LIST_CLOSE)) {
+   while (!tryConsumeOperator(OpID::LIST_CLOSE)) {
       Expr* caseExpr;
       if (tryConsumeKeyword(KeywordID::CASE)) { //CASE
          caseExpr = parseExpr();
@@ -416,8 +416,8 @@ clef::Match* clef::Parser::parseMatch() {
          consumeKeyword(KeywordID::DEFAULT, "bad MATCH block procedure");
          caseExpr = nullptr;   
       }
-      consumeOperator(OperatorID::LABEL_DELIM, "bad CASE or DEFAULT in MATCH statement");
-      consumeOperator(OperatorID::LIST_OPEN, "bad CASE or DEFAULT procedure in MATCH statement");
+      consumeOperator(OpID::LABEL_DELIM, "bad CASE or DEFAULT in MATCH statement");
+      consumeOperator(OpID::LIST_OPEN, "bad CASE or DEFAULT procedure in MATCH statement");
       Scope* procedure = parseProcedure();
       
       cases->emplace_back(caseExpr, procedure);
@@ -433,9 +433,9 @@ clef::Match* clef::Parser::parseMatch() {
 clef::TryCatch* clef::Parser::parseTryCatch() {
    Scope* procedure = parseProcedure();
    consumeKeyword(KeywordID::CATCH, "TRY block without CATCH block");
-   consumeOperator(OperatorID::CALL_OPEN, "CATCH block without opening parens");
+   consumeOperator(OpID::CALL_OPEN, "CATCH block without opening parens");
    Decl* decl = parseDecl();
-   consumeOperator(OperatorID::CALL_CLOSE, "CATCH block without closing parens");
+   consumeOperator(OpID::CALL_CLOSE, "CATCH block without closing parens");
    Scope* handler = parseProcedure();
    return new (tree.allocNode(NodeType::TRY_CATCH)) TryCatch{procedure, decl, handler};
 }
@@ -444,16 +444,16 @@ clef::Function* clef::Parser::parseFunction() {
    Identifier* name = tryParseIdentifier();
    
    //params
-   consumeOperator(OperatorID::CALL_OPEN, "FUNC without parameters");
+   consumeOperator(OpID::CALL_OPEN, "FUNC without parameters");
    ParamList* params = new (tree.allocNode(NodeType::FUNC_SIG)) ParamList{tree.allocBuf<Variable*>()};
-   if (!tryConsumeOperator(OperatorID::CALL_CLOSE)) {
+   if (!tryConsumeOperator(OpID::CALL_CLOSE)) {
       do {
          //parse parameter
          TypeQualMask quals = parseQuals();
          Type* paramType = parseTypename();
          Identifier* paramName = tryParseIdentifier();
          Expr* defaultVal;
-         if (tryConsumeOperator(OperatorID::ASSIGN)) {
+         if (tryConsumeOperator(OpID::ASSIGN)) {
             defaultVal = parseExprNoPrimaryComma();
             if (!defaultVal) { logError(ErrCode::PARSER_UNSPEC, "invalid FUNC parameter default value"); }
          } else { defaultVal = nullptr; }
@@ -461,13 +461,13 @@ clef::Function* clef::Parser::parseFunction() {
          //push to parameter list
          ((astNode*)paramName)->upCast(NodeType::VAR);
          params->push_back(new (paramName) Variable{paramType, paramName, defaultVal});
-      } while (tryConsumeOperator(OperatorID::COMMA));
-      consumeOperator(OperatorID::CALL_CLOSE, "bad FUNC parameter list");
+      } while (tryConsumeOperator(OpID::COMMA));
+      consumeOperator(OpID::CALL_CLOSE, "bad FUNC parameter list");
    }
    
 
    //return type
-   consumeOperator(OperatorID::MEMBER_OF_POINTER_ACCESS, "FUNC without trailing return type");
+   consumeOperator(OpID::MEMBER_OF_POINTER_ACCESS, "FUNC without trailing return type");
    TypeQualMask returnTypeQuals = parseQuals();
    Type* returnType = parseTypename();
 
@@ -485,7 +485,7 @@ clef::Function* clef::Parser::parseFunction() {
    }
 
    //definition
-   consumeOperator(OperatorID::LIST_OPEN, "bad FUNC definition");
+   consumeOperator(OpID::LIST_OPEN, "bad FUNC definition");
    Scope* procedure = parseProcedure();
 
    //EOS
@@ -513,17 +513,17 @@ clef::Interface* clef::Parser::parseInterface() {
    
    //inheritance
    InterfaceSpec* spec = new (tree.allocInterfaceSpec()) InterfaceSpec{};
-   if (tryConsumeOperator(OperatorID::LABEL_DELIM)) {
+   if (tryConsumeOperator(OpID::LABEL_DELIM)) {
       do {
          Interface* parentType = (Interface*)parseIdentifier();
             ((astNode*)parentType)->upCast(NodeType::INTERFACE);
          spec->inheritedInterfaces().push_back(parentType);
-      } while (tryConsumeOperator(OperatorID::COMMA));
+      } while (tryConsumeOperator(OpID::COMMA));
    }
 
    //definition
-   consumeOperator(OperatorID::LIST_OPEN, "bad INTERFACE definition");
-   while (!tryConsumeOperator(OperatorID::LIST_CLOSE)) {
+   consumeOperator(OpID::LIST_OPEN, "bad INTERFACE definition");
+   while (!tryConsumeOperator(OpID::LIST_CLOSE)) {
       TypeQualMask quals = parseQuals();
       consumeKeyword(KeywordID::FUNC, "INTERFACE can only contain functions");
       Function* func = parseFunction();
@@ -553,10 +553,10 @@ clef::Union* clef::Parser::parseUnion() {
       return new (name) Union{name};
    }
 
-   consumeOperator(OperatorID::LIST_OPEN, "bad UNION definition");
+   consumeOperator(OpID::LIST_OPEN, "bad UNION definition");
 
    ParameterList* members = new (tree.allocNode(NodeType::PARAM_LIST)) ParameterList{tree.allocBuf<Variable*>()};
-   while (!tryConsumeOperator(OperatorID::LIST_CLOSE)) {
+   while (!tryConsumeOperator(OpID::LIST_CLOSE)) {
       //parse member
       Type* memberType = (Type*)parseIdentifier();
          ((astNode*)memberType)->upCast(NodeType::TYPE);
@@ -582,7 +582,7 @@ clef::Union* clef::Parser::parseUnion() {
 clef::Enum* clef::Parser::parseEnum() {
    Identifier* name = tryParseIdentifier();
    Type* baseType;
-   if (tryConsumeOperator(OperatorID::LABEL_DELIM)) {
+   if (tryConsumeOperator(OpID::LABEL_DELIM)) {
       baseType = (Type*)parseIdentifier();
          ((astNode*)baseType)->upCast(NodeType::TYPE);
    } else { baseType = nullptr; }
@@ -595,21 +595,21 @@ clef::Enum* clef::Parser::parseEnum() {
       return new (name) Enum{baseType};
    }
 
-   consumeOperator(OperatorID::LIST_OPEN, "bad ENUM definition");
+   consumeOperator(OpID::LIST_OPEN, "bad ENUM definition");
    ParamList* enumerators = new (tree.allocNode(NodeType::PARAM_LIST)) ParamList{tree.allocBuf<Variable*>()};
-   if (!tryConsumeOperator(OperatorID::LIST_CLOSE)) {
+   if (!tryConsumeOperator(OpID::LIST_CLOSE)) {
       do {
          Identifier* enumerator = parseIdentifier();
          Expr* val;
-         if (tryConsumeOperator(OperatorID::ASSIGN)) {
+         if (tryConsumeOperator(OpID::ASSIGN)) {
             val = parseExprNoPrimaryComma();
          } else { val = nullptr; }
 
          ((astNode*)enumerator)->upCast(NodeType::VAR);
          enumerators->push_back(new (enumerator) Variable{baseType, enumerator, val});
 
-      } while (tryConsumeOperator(OperatorID::COMMA));
-      consumeOperator(OperatorID::LIST_CLOSE, "bad ENUM enumerator");
+      } while (tryConsumeOperator(OpID::COMMA));
+      consumeOperator(OpID::LIST_CLOSE, "bad ENUM enumerator");
    }
    
    //EOS

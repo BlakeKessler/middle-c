@@ -27,11 +27,11 @@ class clef::Parser {
       bool parseNumLit(SyntaxTree& tree, const Token*& tokIt, const Token* endtok);
 
       /*inline*/ bool consumeKeyword(const KeywordID, const char* errStr);
-      /*inline*/ bool consumeOperator(const OperatorID, const char* errStr);
+      /*inline*/ bool consumeOperator(const OpID, const char* errStr);
       /*inline*/ bool consumeEOS(const char* errStr);
 
       /*inline*/ bool tryConsumeKeyword(const KeywordID);
-      /*inline*/ bool tryConsumeOperator(const OperatorID);
+      /*inline*/ bool tryConsumeOperator(const OpID);
       /*inline*/ bool tryConsumeEOS();
 
       //parsing functions
@@ -39,7 +39,7 @@ class clef::Parser {
       Expr* parseExprNoPrimaryComma(); //expression that cannot have the comma operator as its principal connective
       Stmt* parseStmt();
       Scope* parseProcedure();
-      ArgList* parseArgList(const OperatorID closer);
+      ArgList* parseArgList(const OpID closer);
 
       void skipBlockComment();
       void skipLineComment();

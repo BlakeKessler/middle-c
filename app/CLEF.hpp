@@ -15,7 +15,6 @@ namespace clef {
 
    //objects for encoding Middle C specification data
    struct OpData;
-   struct OpGroup;
    template <uint _size> struct OpDecoder;
    struct DelimPair;
    struct KeywordSpec;

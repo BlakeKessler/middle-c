@@ -90,7 +90,7 @@ uint clef::Lexer::emplaceOps(mcsl::dyn_arr<Token>& toks, mcsl::raw_str_span toks
       }
 
       //emplace token
-      toks.emplace_back(tokstr.begin(), group.toString().size(), group.type());
+      toks.emplace_back(tokstr.begin(), group.toString().size(), group.tokType());
       tokstr.inc_begin(group.toString().size());
       ++opCount;
    }

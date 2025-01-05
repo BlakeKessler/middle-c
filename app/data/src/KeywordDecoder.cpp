@@ -136,6 +136,7 @@ auto clef::GET_ALL_KEYWORDS() {
 
       KeywordSpec{mcsl::raw_str{"assert"}, ASSERT},
       KeywordSpec{mcsl::raw_str{"static_assert"}, STATIC_ASSERT},
+      KeywordSpec{mcsl::raw_str{"debug_assert"}, DEBUG_ASSERT},
 
       KeywordSpec{mcsl::raw_str{"true"}, TRUE},
       KeywordSpec{mcsl::raw_str{"false"}, FALSE},
