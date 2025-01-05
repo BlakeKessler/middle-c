@@ -119,7 +119,7 @@ bool clef::Parser::parseNumLit(SyntaxTree& tree, const Token*& tokIt, const Toke
    const Token* it = tokIt + 1;
    if (it >= endtok) { goto STR_TO_NUM; }
    //radix point
-   if (it->type() == TokenType::OP && OPERATORS[*it] == RADIX_POINT) {
+   if (it->type() == TokenType::OP && OPERATORS[*it] == OpID::RADIX_POINT) {
       ++it;
       if (it >= endtok) { goto STR_TO_NUM; }
       if (it->type() == TokenType::NUM || it->type() == TokenType::DGIT || it->type() == TokenType::XDGT) {
@@ -135,7 +135,7 @@ bool clef::Parser::parseNumLit(SyntaxTree& tree, const Token*& tokIt, const Toke
       ++it;
       if (it >= endtok) { goto STR_TO_NUM; }
       //sign
-      if (it->type() == TokenType::OP && [&](){ const auto tmp = OPERATORS[*it]; return tmp == ADDITION || tmp == SUBTRACTION; }()) {
+      if (it->type() == TokenType::OP && (OPERATORS[*it] == OpID::ADD || OPERATORS[*it] == OpID::SUB)) {
          ++it;
          if (it >= endtok) { goto STR_TO_NUM; }
       }
@@ -150,7 +150,7 @@ bool clef::Parser::parseNumLit(SyntaxTree& tree, const Token*& tokIt, const Toke
          ++it;
          if (it >= endtok) { goto STR_TO_NUM; }
          //sign
-         if (it->type() == TokenType::OP && [&](){ const auto tmp = OPERATORS[*it]; return tmp == ADDITION || tmp == SUBTRACTION; }()) {
+         if (it->type() == TokenType::OP && (OPERATORS[*it] == OpID::ADD || OPERATORS[*it] == OpID::SUB)) {
             ++it;
             if (it >= endtok) { goto STR_TO_NUM; }
          }

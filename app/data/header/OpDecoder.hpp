@@ -21,9 +21,9 @@ template <uint _size> struct clef::OpDecoder {
       constexpr uint size() { return _opCount; } //number of operator groups
       constexpr uint capacity() { return _size; } //number of operators
 
-      template<mcsl::str_t str_t> constexpr OpData operator[](const str_t& str) const;
-      template<uint len> constexpr OpData operator[](const char (&str)[len]) const { return self[mcsl::raw_str(str)]; }
-      constexpr mcsl::pair<uint,uint> operator[](const char i) const { return _firstCharBuckets[i % OP_DECODER_HASH_BASE]; }
+      template<mcsl::str_t str_t> [[gnu::const]] constexpr OpData operator[](const str_t& str) const;
+      template<uint len> [[gnu::const]] constexpr OpData operator[](const char (&str)[len]) const { return self[mcsl::raw_str(str)]; }
+      [[gnu::const]] constexpr mcsl::pair<uint,uint> operator[](const char i) const { return _firstCharBuckets[i % OP_DECODER_HASH_BASE]; }
 };
 
 #pragma region CTAD

@@ -71,11 +71,11 @@ uint clef::Lexer::emplaceOps(mcsl::dyn_arr<Token>& toks, mcsl::raw_str_span toks
    //process operator block
    while (tokstr.size()) {
       //deduce operator
-      OpGroup group = ALL_OPLIKES[tokstr];
+      OpData data = OPERATORS[tokstr];
 
       //unable to deduce operator - part of invalid operator block
       //!NOTE: needs to be accounted for because they only cause syntax errors if not inside of plaintext blocks
-      if (!group) {
+      if (!data) {
          ++invalids;
          tokstr.inc_begin(1);
          continue;
@@ -90,8 +90,8 @@ uint clef::Lexer::emplaceOps(mcsl::dyn_arr<Token>& toks, mcsl::raw_str_span toks
       }
 
       //emplace token
-      toks.emplace_back(tokstr.begin(), group.toString().size(), group.tokType());
-      tokstr.inc_begin(group.toString().size());
+      toks.emplace_back(tokstr.begin(), data.toString().size(), data.tokType());
+      tokstr.inc_begin(data.toString().size());
       ++opCount;
    }
 

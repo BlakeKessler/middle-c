@@ -25,11 +25,8 @@ requires ( sizeof...(Argv_t) == _size )
       OpData* bufEnd = _opBuf.end();
 
       while (++it < bufEnd) { //!NOTE: TEST THIS
-         if (it->id() == back->id()) {
-            assert(it->toString() == back->toString());
-            assert(it->precedence() == back->precedence());
-
-            it->combineWith(*back);
+         if (it->opID() == back->opID()) {
+            assert(it->combineWith(*back));
          } else {
             *++back = *it;
          }
@@ -42,16 +39,16 @@ requires ( sizeof...(Argv_t) == _size )
    uint start = 0;
    for (uint i = 1; i < _opCount; ++i) {
       //check for end of group
-      if (_opBuf[_groupBuf[i].first].toString()[0] != _opBuf[_groupBuf[start].first].toString()[0]) {
-         _firstCharBuckets[_opBuf[_groupBuf[start].first].toString()[0] % _firstCharBuckets.size()] = {start, i-start};
+      if (_opBuf[i].toString()[0] != _opBuf[start].toString()[0]) {
+         _firstCharBuckets[_opBuf[start].toString()[0] % _firstCharBuckets.size()] = {start, i};
          start = i;
       }
    }
    //handle last group
-   _firstCharBuckets[_opBuf[_groupBuf[start].first].toString()[0] % _firstCharBuckets.size()] = {start, _opCount-start};
+   _firstCharBuckets[_opBuf[start].toString()[0] % _firstCharBuckets.size()] = {start, _opCount};
 }
 
-template <uint _size> template<mcsl::str_t str_t> constexpr clef::OpData clef::OpDecoder<_size>::operator[](const str_t& str) const {
+template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef::OpData clef::OpDecoder<_size>::operator[](const str_t& str) const {
    //check string size
    if (!str.size()) {
       return OpData{};
@@ -59,11 +56,10 @@ template <uint _size> template<mcsl::str_t str_t> constexpr clef::OpData clef::O
 
    //find operator group
    const auto bucketBounds = self[str[0]];
-   //!NOTE: UPDATE
-   assert(str[0] == _opBuf[_groupBuf[bucketBounds.first].first].toString()[0]); //check that the first character is correct
+   assert(str[0] == _opBuf[bucketBounds.first].toString()[0]); //check that the first character is correct
    for (uint i = bucketBounds.first; i < bucketBounds.second; ++i) {
-      if (!_opBuf[_groupBuf[i].first].toString().substrcmp(str)) {
-         return OpData{const_cast<OpData*>(_opBuf.begin()) + _groupBuf[i].first, _groupBuf[i].second};
+      if (!_opBuf[i].toString().substrcmp(str)) {
+         return _opBuf[i];
       }
    }
    //no operator group found - return null group
