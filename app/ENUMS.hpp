@@ -605,6 +605,7 @@ namespace clef {
    constexpr OpProps operator^(const OpProps lhs, const OpProps rhs) noexcept { return (OpProps)((+lhs) ^ (+rhs)); }
    constexpr OpProps operator|(const OpProps lhs, const OpProps rhs) noexcept { return (OpProps)((+lhs) | (+rhs)); }
    constexpr uint8 precedence(const OpProps x) { return +(x & OpProps::__PRECEDENCE_BITS); }
+   constexpr bool isBinary(const OpProps x) { return +(x & OpProps::CAN_BE_BINARY); }
    constexpr OpProps makeOpProps(const bool canBePostfix, const bool canBePrefix, const bool canBeBinary, const bool isLeftAssocWhenBinary, const uint8 precedence) {
       assert(precedence == (precedence & +OpProps::__PRECEDENCE_BITS)); //maybe make debug_assert?
       OpProps post = canBePostfix ? OpProps::CAN_BE_POSTFIX : OpProps::NULL;

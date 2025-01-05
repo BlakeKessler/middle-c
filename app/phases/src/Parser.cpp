@@ -10,7 +10,7 @@ clef::Stmt* clef::Parser::parseStmt() {
    Expr* expr = nullptr;
 
    TypeQualMask quals = parseQuals();
-   Identifier* begin = parseIdentifier(); //might just be a standard identifier
+   Identifier* begin = parseIdentifier();
    if (!begin) {
       logError(ErrCode::PARSER_UNSPEC, "bad statement start");   
    }
@@ -95,12 +95,12 @@ clef::Expr* clef::Parser::parseExpr() {
 }
 
 clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
-   mcsl::dyn_arr<OpID> operatorStack;
+   mcsl::dyn_arr<OpData> operatorStack;
    mcsl::dyn_arr<astNode*> operandStack;
    bool prevTokIsOperand = false;
 
    auto eval = [&]() { //evaluate the subexpression on the top of the stacks
-      OpID op = operatorStack.pop_back();
+      OpData op = operatorStack.pop_back();
       if (!operandStack.size()) { logError(ErrCode::PARSER_UNSPEC, "bad expression (missing RHS on stack)"); }
       astNode* rhs = operandStack.pop_back();
       astNode* lhs;
@@ -109,7 +109,7 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
          lhs = operandStack.pop_back();
       } else { lhs = nullptr; }
 
-      operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::EXPR)) Expr{op, lhs, rhs}));
+      operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::EXPR)) Expr{op.opID(), lhs, rhs}));
    };
 
    do {
@@ -117,41 +117,43 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
          operandStack.push_back(tokIt);
          prevTokIsOperand = true;
       } else if (isOperator(tokIt->type())) { //handle operator
-         OpID id = OPERATORS[*tokIt].opID();
-         if (id == OpID::EOS || (id == OpID::COMMA && operatorStack.size())) { //operator that cannot be part of this type of expression
+         OpData op = OPERATORS[*tokIt];
+         if (op == OpID::EOS || (op == OpID::COMMA && operatorStack.size())) { //operator that cannot be part of this type of expression
             break;
          }
 
          if (prevTokIsOperand) { //binary or postfix unary
-            while (operatorStack.size() && precedence(operatorStack.back()) >= precedence(id)) {
+            while (operatorStack.size() && precedence(operatorStack.back()) >= precedence(op)) { //!NOTE: UNFINISHED (does not consider associativity yet)
                eval();
             }
-            operatorStack.push_back(id);
+            op.removeProps(OpProps::PREFIX);
+            operatorStack.push_back(op);
          } else { //prefix unary
-            operatorStack.push_back(id); //!NOTE: NEEDS TO ACTUALLY INDICATE THAT THE OPERATOR IS UNARY
+            op.removeProps(OpProps::POSTFIX | OpProps::INFIX_LEFT | OpProps::INFIX_RIGHT);
+            operatorStack.push_back(op);
          }
          prevTokIsOperand = false;
       } else if (isBlockLike(tokIt->type())) { //handle block delimiter
-         OpID id = OPERATORS[*tokIt].opID();
-         if (isStringLike(id)) { //string and character literals
-            switch (id) {
-               case OpID::STRING : operandStack.push_back((astNode*)parseStrLit());  break;
+         OpData op = OPERATORS[*tokIt];
+         if (isStringLike(op)) { //string and character literals
+            switch (op.opID()) {
+               case OpID::STRING : operandStack.push_back((astNode*)parseStringLit()); break;
                case OpID::CHAR   : operandStack.push_back((astNode*)parseCharLit()); break;
                default: std::unreachable();
             }
             prevTokIsOperand = true;
          }
          else { //blocks
-            if (!isOpener(id)) { logError(ErrCode::PARSER_UNSPEC, "floating closing block delimiter"); }
+            if (!isOpener(op)) { logError(ErrCode::PARSER_UNSPEC, "floating closing block delimiter"); }
             ++tokIt;
             if (prevTokIsOperand) { //function call, initializer list, subscript, or specializer
-               ArgList* args = parseArgList(getCloser(id));
-               operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::EXPR)) Expr{getInvoker(id),operandStack.pop_back(),args}));
-            } else if (id == OpID::LIST_OPEN) { //tuple
-               operandStack.push_back((astNode*)(parseArgList(getCloser(id))));
+               ArgList* args = parseArgList(getCloser(op));
+               operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::EXPR)) Expr{getInvoker(op),operandStack.pop_back(),args}));
+            } else if (op == OpID::LIST_OPEN) { //tuple
+               operandStack.push_back((astNode*)(parseArgList(getCloser(op))));
             } else { //block subexpression
                operandStack.push_back((astNode*)parseExpr());
-               if (!isBlockLike(tokIt->type()) || getCloser(id) != OPERATORS[*tokIt].opID()) { logError(ErrCode::PARSER_UNSPEC, "bad block subexpression"); }
+               if (!isBlockLike(tokIt->type()) || getCloser(op) != OPERATORS[*tokIt]) { logError(ErrCode::PARSER_UNSPEC, "bad block subexpression"); }
             }
             prevTokIsOperand = true;
          }

@@ -37,6 +37,9 @@ struct alignas(8) clef::OpData {
          _props = _props | other.props();
          return true;
       }
+      constexpr OpProps removeProps(const OpProps props) {
+         _props = _props & (~props | OpProps::__PRECEDENCE_BITS);
+      }
 
       template<mcsl::str_t str_t> constexpr bool operator<=>(const str_t& str) { return _opStr <=> str; }
       template<mcsl::str_t str_t> constexpr bool operator==(const str_t& str) { return _opStr == str; }
@@ -51,6 +54,7 @@ struct alignas(8) clef::OpData {
 
       constexpr operator bool() const { return +_id; }
       constexpr operator OpID() const { return _id; }
+      constexpr operator OpProps() const { return _props; }
 
       void printf() const { return _opStr.printf(); }
 };
