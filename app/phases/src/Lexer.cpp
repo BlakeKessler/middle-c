@@ -45,6 +45,14 @@ clef::SourceTokens clef::Lexer::LexSource(Source&& src) {
                if (+(type & TokenType::OPLIKE)) {  //needs to be partitioned
                   emplaceOps(toks, {tokStart, curr});
                } else {                            //does not need to be partitioned
+                  switch (tokType(*tokStart)) {
+                     case TokenType::CHAR: type = TokenType::STRT; break;
+                     case TokenType::XDGT: type = TokenType::STRT; break;
+
+                     case TokenType::DGIT: type = TokenType::NUM;  break;
+
+                     default: std::unreachable();
+                  }
                   toks.emplace_back(tokStart, curr, type);
                }
             }

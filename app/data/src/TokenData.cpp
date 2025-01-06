@@ -10,7 +10,7 @@ constexpr clef::TokenType clef::tokType(const char c) {
          return clef::TokenType::NONE;
 
       //OPERATORS
-      case '!': case '#': case '$': case '%': case '&': case '+': case ',': case '-': case '.': case ':': case '=': case '?': case '@': case '^': case '`': case '|': case '~': 
+      case '!': case '#': case '$': case '%': case '&': case '+': case ',': case '-': case '.': case '=': case '?': case '@': case '^': case '`': case '|': case '~': 
          return clef::TokenType::OP;
 
       //PLAINTEXT DELIMITERS
@@ -26,7 +26,7 @@ constexpr clef::TokenType clef::tokType(const char c) {
          return clef::TokenType::CMNT;
 
       //BLOCK DELIMITER or OPERATOR
-      case '<': case '>':
+      case '<': case '>': case ':':
          return clef::TokenType::DLIM;
 
       //DECIMAL DIGITS
