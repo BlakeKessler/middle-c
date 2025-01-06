@@ -107,7 +107,7 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
       if (isBinary(op)) { //!NOTE: PRIORITIZES BINARY OVER POSTFIX-UNARY
          if (!operandStack.size()) { logError(ErrCode::BAD_EXPR, "bad expression (missing LHS on stack)"); }
          lhs = operandStack.pop_back();
-      } else { lhs = nullptr; }
+      } else { debug_assert(+(op & OpProps::POSTFIX)); lhs = nullptr; }
 
       operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::EXPR)) Expr{op.opID(), lhs, rhs}));
    };
