@@ -9,17 +9,20 @@ namespace mcsl {
    //char/string const
    constexpr byte ASCII_CASE_BIT = 'a' ^ 'A';
 
+   constexpr inline char to_lower(const char ch) {
+      return ch | ASCII_CASE_BIT;
+   }
+   constexpr inline char to_upper(const char ch) {
+      return ch &~ASCII_CASE_BIT;
+   }
    constexpr inline bool is_lower(const char ch) {
       return (ch >= 'a') && (ch <= 'z');
    }
    constexpr inline bool is_upper(const char ch) {
       return (ch <= 'Z') && (ch >= 'A');
    }
-   constexpr inline char to_lower(const char ch) {
-      return is_upper(ch) ? ch ^ ASCII_CASE_BIT : ch;
-   }
-   constexpr inline char to_upper(const char ch) {
-      return is_lower(ch) ? ch ^ ASCII_CASE_BIT : ch;
+   constexpr bool is_letter(const char ch) {
+      return is_lower(to_lower(ch));
    }
 
    constexpr inline bool is_whitespace(const char ch) {

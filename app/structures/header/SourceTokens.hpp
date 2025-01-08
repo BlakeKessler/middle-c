@@ -14,16 +14,15 @@ class clef::SourceTokens {
       Source _src;
 
       mcsl::dyn_arr<Token> _tokens;
-      mcsl::array<mcsl::dyn_arr_span<Token>> _tokLines;
 
       static constexpr const mcsl::raw_str _nameof = "SourceTokens";
    public:
       static constexpr const auto& nameof() { return _nameof; }
 
       //constructors
-      SourceTokens():_src(),_tokens(),_tokLines() {}
-      SourceTokens(Source&& src):_src(std::move(src)),_tokens(),_tokLines(_src.lineCount()) {}
-      void release() { _src.release(); _tokens.release(); _tokLines.release(); }
+      SourceTokens():_src(),_tokens() {}
+      SourceTokens(Source&& src):_src(std::move(src)),_tokens() {}
+      void release() { _src.release(); _tokens.release(); }
 
       //properties
       uint size() const { return _tokens.size(); }
@@ -44,11 +43,6 @@ class clef::SourceTokens {
 
       mcsl::dyn_arr<Token>& tokens() { return _tokens; }
       const mcsl::dyn_arr<Token>& tokens() const { return _tokens; }
-      mcsl::dyn_arr_span<Token>& line(const uint i) { return _tokLines[i]; }
-      const mcsl::dyn_arr_span<Token>& line(const uint i) const { return _tokLines[i]; }
-      mcsl::array<mcsl::dyn_arr_span<Token>>& lines() { return _tokLines; }
-      const mcsl::array<mcsl::dyn_arr_span<Token>>& lines() const { return _tokLines; }
-      uint lineCount() const { return _tokLines.size(); }
       Source& source() { return _src; }
       const Source& source() const { return _src; }
 

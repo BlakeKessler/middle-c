@@ -9,8 +9,10 @@ namespace clef {
    extern constexpr TokenType tokType(const char c);
    template<mcsl::str_t str_t> constexpr TokenType tokType(const str_t& str);
 
-   constexpr const char RADIX_SEPARATOR = 'p';
-   constexpr const char DECIMAL_RADIX_SEPARATOR = 'e';
+   constexpr const char RADIX_POINT = '.';
+   constexpr const char RADIX_SEPARATOR = '_';
+   // constexpr const char RADIX_SEPARATOR = 'p';
+   // constexpr const char DECIMAL_RADIX_SEPARATOR = 'e';
 }
 
 #include "../src/TokenData.cpp"
