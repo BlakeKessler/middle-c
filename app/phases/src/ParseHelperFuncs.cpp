@@ -23,7 +23,7 @@
 }
 
 /*inline*/ bool clef::Parser::consumeOperator(const OpID id, const char* errStr) {
-   if (tokIt->type() != TokenType::OP || OPERATORS[*tokIt].opID() != id) {
+   if (tokIt->type() != TokenType::OP || tokIt->opID() != id) {
       logError(ErrCode::BAD_KEYWORD, errStr);
       return false;
    }
@@ -31,7 +31,7 @@
    return true;
 }
 /*inline*/ bool clef::Parser::tryConsumeOperator(const OpID id) {
-   if (tokIt->type() != TokenType::OP || OPERATORS[*tokIt].opID() != id) {
+   if (tokIt->type() != TokenType::OP || tokIt->opID() != id) {
       return false;
    }
    ++tokIt;

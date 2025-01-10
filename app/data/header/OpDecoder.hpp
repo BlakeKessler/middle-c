@@ -33,7 +33,7 @@ namespace clef {
 #pragma endregion CTAD
 
 namespace clef {
-   constexpr auto GetAllOplikesData();
+   [[gnu::const]] constexpr auto GetAllOplikesData();
 };
 
 #include "../src/OpDecoder.cpp"

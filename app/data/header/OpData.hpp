@@ -18,10 +18,10 @@ struct alignas(8) clef::OpData {
       
    public:
       constexpr OpData():_opStr{},_id{},_props{},_tokType{} {}
-      template<mcsl::str_t str_t> constexpr OpData(const str_t& str, const OpID id, const OpProps props)
-         :_opStr{str},_id{id},_props{props},_tokType{clef::tokType(_opStr)} {}
-      constexpr OpData(const char str[MAX_OP_LEN + 1], const OpID id, const OpProps props)
-         :_opStr{str},_id{id},_props{props},_tokType{clef::tokType(_opStr)} {}
+      template<mcsl::str_t str_t> constexpr OpData(const str_t& str, const OpID id, const OpProps props, const TokenType tokType)
+         :_opStr{str},_id{id},_props{props},_tokType{tokType} {}
+      constexpr OpData(const char str[MAX_OP_LEN + 1], const OpID id, const OpProps props, const TokenType tokType)
+         :_opStr{str},_id{id},_props{props},_tokType{tokType} {}
 
       constexpr uint size() const { return _opStr.size(); }
       constexpr OpID opID() const { return _id; }

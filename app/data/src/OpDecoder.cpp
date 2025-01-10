@@ -66,108 +66,109 @@ template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef:
    return OpData{};
 }
 
-constexpr auto clef::GetAllOplikesData() {
+[[gnu::const]] constexpr auto clef::GetAllOplikesData() {
    using enum clef::OpProps;
    byte prec = +__PRECEDENCE_BITS;
    return OpDecoder{
-      OpData("#",     OpID::PREPROCESSOR, makeOpProps(PREFIX, prec)),
-      OpData("::",    OpID::SCOPE_RESOLUTION, makeOpProps(INFIX_LEFT, prec)),  //scope resolution
-      OpData("\\",    OpID::ESCAPE, makeOpProps(PREFIX, prec)),      //escape character
-      OpData(";",     OpID::EOS, makeOpProps(PREFIX, prec)),      //end of statement
-      OpData("//",    OpID::LINE_CMNT, makeOpProps(PREFIX, prec)),      //line comment
-      OpData("/*",    OpID::BLOCK_CMNT_OPEN, makeOpProps(OPEN_DELIM, prec)), //block comment
-      OpData("*/",    OpID::BLOCK_CMNT_CLOSE, makeOpProps(CLOSE_DELIM, prec)), //block comment
-      OpData("\"",    OpID::STRING, makeOpProps(DELIM, prec)), //string
-      OpData("\'",    OpID::CHAR, makeOpProps(DELIM, prec)), //char
+      OpData("#",     OpID::PREPROCESSOR, makeOpProps(PREFIX, prec), TokenType::PREPROC_INIT),
+      OpData("::",    OpID::SCOPE_RESOLUTION, makeOpProps(INFIX_LEFT, prec), TokenType::OP),  //scope resolution
+      OpData("\\",    OpID::ESCAPE, makeOpProps(PREFIX, prec), TokenType::ESC),      //escape character
+      OpData(";",     OpID::EOS, makeOpProps(PREFIX, prec), TokenType::EOS),      //end of statement
+      OpData("//",    OpID::LINE_CMNT, makeOpProps(PREFIX, prec), TokenType::BLOCK_DELIM),      //line comment
+      OpData("/*",    OpID::BLOCK_CMNT_OPEN, makeOpProps(OPEN_DELIM, prec), TokenType::BLOCK_DELIM), //block comment
+      OpData("*/",    OpID::BLOCK_CMNT_CLOSE, makeOpProps(CLOSE_DELIM, prec), TokenType::BLOCK_DELIM), //block comment
+      OpData("\'",    OpID::CHAR, makeOpProps(DELIM, prec), TokenType::BLOCK_DELIM), //char
+      OpData("\"",    OpID::STRING, makeOpProps(DELIM, prec), TokenType::BLOCK_DELIM), //string
+      OpData("`",     OpID::STRING, makeOpProps(DELIM, prec), TokenType::BLOCK_DELIM), //interpolated string
 
 
-      OpData("(",     OpID::CALL_OPEN, makeOpProps(OPEN_DELIM, --prec)), //function calls/functional casts
-      OpData(")",     OpID::CALL_CLOSE, makeOpProps(CLOSE_DELIM, prec)), //function calls/functional casts
-      OpData("[",     OpID::SUBSCRIPT_OPEN, makeOpProps(OPEN_DELIM, prec)), //subscript
-      OpData("]",     OpID::SUBSCRIPT_CLOSE, makeOpProps(CLOSE_DELIM, prec)), //subscript
-      OpData("{",     OpID::LIST_OPEN, makeOpProps(OPEN_DELIM, prec)), //scope/functional casts
-      OpData("}",     OpID::LIST_CLOSE, makeOpProps(CLOSE_DELIM, prec)), //scope/functional casts
-      OpData("<:",    OpID::SPECIALIZER_OPEN, makeOpProps(OPEN_DELIM, prec)), //specifier
-      OpData(":>",    OpID::SPECIALIZER_CLOSE, makeOpProps(CLOSE_DELIM, prec)), //specifier
+      OpData("(",     OpID::CALL_OPEN, makeOpProps(OPEN_DELIM, --prec), TokenType::BLOCK_DELIM), //function calls/functional casts
+      OpData(")",     OpID::CALL_CLOSE, makeOpProps(CLOSE_DELIM, prec), TokenType::BLOCK_DELIM), //function calls/functional casts
+      OpData("[",     OpID::SUBSCRIPT_OPEN, makeOpProps(OPEN_DELIM, prec), TokenType::BLOCK_DELIM), //subscript
+      OpData("]",     OpID::SUBSCRIPT_CLOSE, makeOpProps(CLOSE_DELIM, prec), TokenType::BLOCK_DELIM), //subscript
+      OpData("{",     OpID::LIST_OPEN, makeOpProps(OPEN_DELIM, prec), TokenType::BLOCK_DELIM), //scope/functional casts
+      OpData("}",     OpID::LIST_CLOSE, makeOpProps(CLOSE_DELIM, prec), TokenType::BLOCK_DELIM), //scope/functional casts
+      OpData("<:",    OpID::SPECIALIZER_OPEN, makeOpProps(OPEN_DELIM, prec), TokenType::BLOCK_DELIM), //specifier
+      OpData(":>",    OpID::SPECIALIZER_CLOSE, makeOpProps(CLOSE_DELIM, prec), TokenType::BLOCK_DELIM), //specifier
 
 
 
 
 
-      OpData("++",    OpID::INC, makeOpProps(PREFIX, --prec)),            //pre-increment
-      OpData("--",    OpID::DEC, makeOpProps(PREFIX, prec)),            //pre-decrement
-      OpData(".",     OpID::MEMBER_ACCESS, makeOpProps(INFIX_LEFT, prec)),        //element access
-      OpData("->",    OpID::MEMBER_OF_POINTER_ACCESS, makeOpProps(INFIX_LEFT, prec)),        //element access
-      OpData("..",    OpID::RANGE, makeOpProps(INFIX_LEFT, prec)),        //range
-      OpData("...",   OpID::SPREAD, makeOpProps(INFIX_LEFT, prec)),        //array spread
+      OpData("++",    OpID::INC, makeOpProps(PREFIX, --prec), TokenType::OP),            //pre-increment
+      OpData("--",    OpID::DEC, makeOpProps(PREFIX, prec), TokenType::OP),            //pre-decrement
+      OpData(".",     OpID::MEMBER_ACCESS, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //element access
+      OpData("->",    OpID::MEMBER_OF_POINTER_ACCESS, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //element access
+      OpData("..",    OpID::RANGE, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //range
+      OpData("...",   OpID::SPREAD, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //array spread
 
-      OpData("++",    OpID::INC, makeOpProps(POSTFIX, --prec)),           //post-increment
-      OpData("--",    OpID::DEC, makeOpProps(POSTFIX, prec)),           //post-decrement
-      OpData("+",     OpID::UNARY_PLUS, makeOpProps(POSTFIX, prec)),           //unary plus
-      OpData("-",     OpID::UNARY_MINUS, makeOpProps(POSTFIX, prec)),           //integer negation
-      OpData("!",     OpID::LOGICAL_NOT, makeOpProps(POSTFIX, prec)),           //logical negation
-      OpData("~",     OpID::BIT_NOT, makeOpProps(POSTFIX, prec)),           //bitwise negation
-      OpData("&",     OpID::ADDRESS_OF, makeOpProps(PREFIX, prec)), //reference/address of
-      OpData("*",     OpID::DEREF, makeOpProps(PREFIX, prec)), //raw pointer/dereference
-      OpData("&",     OpID::REFERENCE, makeOpProps(TYPE_MOD, prec)), //reference/address of
-      OpData("*",     OpID::RAW_PTR, makeOpProps(TYPE_MOD, prec)), //raw pointer/dereference
-      OpData("@",     OpID::UNIQUE_PTR, makeOpProps(TYPE_MOD, prec)),          //unique pointer
-      OpData("$",     OpID::SHARED_PTR, makeOpProps(TYPE_MOD, prec)),          //shared pointer
-      OpData("`",     OpID::WEAK_PTR, makeOpProps(TYPE_MOD, prec)),          //weak pointer
-      OpData("%",     OpID::ITERATOR, makeOpProps(TYPE_MOD, prec)),          //iterator
+      OpData("++",    OpID::INC, makeOpProps(POSTFIX, --prec), TokenType::OP),           //post-increment
+      OpData("--",    OpID::DEC, makeOpProps(POSTFIX, prec), TokenType::OP),           //post-decrement
+      OpData("+",     OpID::UNARY_PLUS, makeOpProps(POSTFIX, prec), TokenType::OP),           //unary plus
+      OpData("-",     OpID::UNARY_MINUS, makeOpProps(POSTFIX, prec), TokenType::OP),           //integer negation
+      OpData("!",     OpID::LOGICAL_NOT, makeOpProps(POSTFIX, prec), TokenType::OP),           //logical negation
+      OpData("~",     OpID::BIT_NOT, makeOpProps(POSTFIX, prec), TokenType::OP),           //bitwise negation
+      OpData("&",     OpID::ADDRESS_OF, makeOpProps(PREFIX, prec), TokenType::OP), //reference/address of
+      OpData("*",     OpID::DEREF, makeOpProps(PREFIX, prec), TokenType::OP), //raw pointer/dereference
+      OpData("&",     OpID::REFERENCE, makeOpProps(TYPE_MOD, prec), TokenType::OP), //reference/address of
+      OpData("*",     OpID::RAW_PTR, makeOpProps(TYPE_MOD, prec), TokenType::OP), //raw pointer/dereference
+      OpData("@",     OpID::UNIQUE_PTR, makeOpProps(TYPE_MOD, prec), TokenType::OP),          //unique pointer
+      OpData("$",     OpID::SHARED_PTR, makeOpProps(TYPE_MOD, prec), TokenType::OP),          //shared pointer
+      OpData("`",     OpID::WEAK_PTR, makeOpProps(TYPE_MOD, prec), TokenType::OP),          //weak pointer
+      OpData("%",     OpID::ITERATOR, makeOpProps(TYPE_MOD, prec), TokenType::OP),          //iterator
       
-      OpData(".*",    OpID::POINTER_TO_MEMBER, makeOpProps(INFIX_LEFT, --prec)),        //pointer to member
-      OpData("->*",   OpID::POINTER_TO_MEMBER_OF_POINTER, makeOpProps(INFIX_LEFT, prec)),        //pointer to member
+      OpData(".*",    OpID::POINTER_TO_MEMBER, makeOpProps(INFIX_LEFT, --prec), TokenType::OP),        //pointer to member
+      OpData("->*",   OpID::POINTER_TO_MEMBER_OF_POINTER, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //pointer to member
 
-      OpData("^^",    OpID::EXP, makeOpProps(INFIX_LEFT, --prec)),        //exponentiation
+      OpData("^^",    OpID::EXP, makeOpProps(INFIX_LEFT, --prec), TokenType::OP),        //exponentiation
 
-      OpData("*",     OpID::MUL, makeOpProps(INFIX_LEFT, --prec)),        //multiplication
-      OpData("/",     OpID::DIV, makeOpProps(INFIX_LEFT, prec)),        //division
-      OpData("%",     OpID::MOD, makeOpProps(INFIX_LEFT, prec)),        //modulo
+      OpData("*",     OpID::MUL, makeOpProps(INFIX_LEFT, --prec), TokenType::OP),        //multiplication
+      OpData("/",     OpID::DIV, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //division
+      OpData("%",     OpID::MOD, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //modulo
 
-      OpData("+",     OpID::ADD, makeOpProps(INFIX_LEFT, --prec)),        //addition
-      OpData("-",     OpID::SUB, makeOpProps(INFIX_LEFT, prec)),        //subtraction
+      OpData("+",     OpID::ADD, makeOpProps(INFIX_LEFT, --prec), TokenType::OP),        //addition
+      OpData("-",     OpID::SUB, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //subtraction
 
-      OpData("<<",    OpID::SHIFT_LEFT, makeOpProps(INFIX_LEFT, --prec)),        //left bit-shift
-      OpData(">>",    OpID::SHIFT_RIGHT, makeOpProps(INFIX_LEFT, prec)),        //right bit-shift
+      OpData("<<",    OpID::SHIFT_LEFT, makeOpProps(INFIX_LEFT, --prec), TokenType::OP),        //left bit-shift
+      OpData(">>",    OpID::SHIFT_RIGHT, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //right bit-shift
 
-      OpData("<=>",   OpID::THREE_WAY_COMP, makeOpProps(INFIX_LEFT, --prec)),        //three-way comparison
+      OpData("<=>",   OpID::THREE_WAY_COMP, makeOpProps(INFIX_LEFT, --prec), TokenType::OP),        //three-way comparison
 
-      OpData("<",     OpID::LESSER, makeOpProps(INFIX_LEFT, --prec)),        //less than
-      OpData(">",     OpID::GREATER, makeOpProps(INFIX_LEFT, prec)),        //greater than
-      OpData("<=",    OpID::LESSER_OR_EQ, makeOpProps(INFIX_LEFT, prec)),        //less than or equal to
-      OpData(">=",    OpID::GREATER_OR_EQ, makeOpProps(INFIX_LEFT, prec)),        //greather than or equal to
+      OpData("<",     OpID::LESSER, makeOpProps(INFIX_LEFT, --prec), TokenType::OP),        //less than
+      OpData(">",     OpID::GREATER, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //greater than
+      OpData("<=",    OpID::LESSER_OR_EQ, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //less than or equal to
+      OpData(">=",    OpID::GREATER_OR_EQ, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //greather than or equal to
 
-      OpData("==",    OpID::IS_EQUAL, makeOpProps(INFIX_LEFT, --prec)),        //equality
-      OpData("!=",    OpID::IS_UNEQUAL, makeOpProps(INFIX_LEFT, prec)),        //inequality
-      // OpData("===",   OpID::SQUAM, makeOpProps(INFIX_LEFT, prec)),        //strict equality
-      // OpData("!==",   OpID::SQUAM, makeOpProps(INFIX_LEFT, prec)),        //strict inequality
+      OpData("==",    OpID::IS_EQUAL, makeOpProps(INFIX_LEFT, --prec), TokenType::OP),        //equality
+      OpData("!=",    OpID::IS_UNEQUAL, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //inequality
+      // OpData("===",   OpID::SQUAM, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //strict equality
+      // OpData("!==",   OpID::SQUAM, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //strict inequality
 
-      OpData("&",     OpID::BIT_AND, makeOpProps(INFIX_LEFT, --prec)),        //bitwise AND
-      OpData("^",     OpID::BIT_XOR, makeOpProps(INFIX_LEFT, --prec)),        //bitwise XOR
-      OpData("|",     OpID::BIT_OR, makeOpProps(INFIX_LEFT, --prec)),        //bitwise OR
-      OpData("&&",    OpID::LOGICAL_AND, makeOpProps(INFIX_LEFT, --prec)),        //logical AND
-      OpData("||",    OpID::LOGICAL_OR, makeOpProps(INFIX_LEFT, --prec)),        //logical OR
+      OpData("&",     OpID::BIT_AND, makeOpProps(INFIX_LEFT, --prec), TokenType::OP),        //bitwise AND
+      OpData("^",     OpID::BIT_XOR, makeOpProps(INFIX_LEFT, --prec), TokenType::OP),        //bitwise XOR
+      OpData("|",     OpID::BIT_OR, makeOpProps(INFIX_LEFT, --prec), TokenType::OP),        //bitwise OR
+      OpData("&&",    OpID::LOGICAL_AND, makeOpProps(INFIX_LEFT, --prec), TokenType::OP),        //logical AND
+      OpData("||",    OpID::LOGICAL_OR, makeOpProps(INFIX_LEFT, --prec), TokenType::OP),        //logical OR
 
-      OpData("??",    OpID::COALESCE, makeOpProps(INFIX_RIGHT, --prec)),       //null coalescing
-      OpData("?",     OpID::INLINE_IF, makeOpProps(INFIX_RIGHT, prec)),       //inline if
-      OpData(":",     OpID::INLINE_ELSE, makeOpProps(INFIX_RIGHT, prec)),       //inline else
-      OpData("=",     OpID::ASSIGN, makeOpProps(INFIX_RIGHT, prec)),       //direct assignment
-      // OpData(":=",    OpID::CONST_ASSIGN, makeOpProps(INFIX_RIGHT, prec)),       //const assignment
-      OpData("+=",    OpID::ADD_ASSIGN, makeOpProps(INFIX_RIGHT, prec)),       //compound assignment (add)
-      OpData("-=",    OpID::SUB_ASSIGN, makeOpProps(INFIX_RIGHT, prec)),       //compound assignment (sub)
-      OpData("*=",    OpID::MUL_ASSIGN, makeOpProps(INFIX_RIGHT, prec)),       //compound assignment (mul)
-      OpData("/=",    OpID::DIV_ASSIGN, makeOpProps(INFIX_RIGHT, prec)),       //compound assignment (div)
-      OpData("%=",    OpID::MOD_ASSIGN, makeOpProps(INFIX_RIGHT, prec)),       //compound assignment (mod)
-      OpData("^^=",   OpID::EXP_ASSIGN, makeOpProps(INFIX_RIGHT, prec)),       //compound assignment (exp)
-      OpData("<<=",   OpID::SHL_ASSIGN, makeOpProps(INFIX_RIGHT, prec)),       //compound assignment (shl)
-      OpData(">>=",   OpID::SHR_ASSIGN, makeOpProps(INFIX_RIGHT, prec)),       //compound assignment (shr)
-      OpData("&=",    OpID::AND_ASSIGN, makeOpProps(INFIX_RIGHT, prec)),       //compound assignment (AND)
-      OpData("^=",    OpID::XOR_ASSIGN, makeOpProps(INFIX_RIGHT, prec)),       //compound assignment (XOR)
-      OpData("|=",    OpID::OR_ASSIGN, makeOpProps(INFIX_RIGHT, prec)),       //compound assignment (OR)
-      OpData("??=",   OpID::COALESCE_ASSIGN, makeOpProps(INFIX_RIGHT, prec)),       //compound assignment (null coalescing)
+      OpData("??",    OpID::COALESCE, makeOpProps(INFIX_RIGHT, --prec), TokenType::OP),       //null coalescing
+      OpData("?",     OpID::INLINE_IF, makeOpProps(INFIX_RIGHT, prec), TokenType::OP),       //inline if
+      OpData(":",     OpID::INLINE_ELSE, makeOpProps(INFIX_RIGHT, prec), TokenType::OP),       //inline else
+      OpData("=",     OpID::ASSIGN, makeOpProps(INFIX_RIGHT, prec), TokenType::OP),       //direct assignment
+      // OpData(":=",    OpID::CONST_ASSIGN, makeOpProps(INFIX_RIGHT, prec), TokenType::OP),       //const assignment
+      OpData("+=",    OpID::ADD_ASSIGN, makeOpProps(INFIX_RIGHT, prec), TokenType::OP),       //compound assignment (add)
+      OpData("-=",    OpID::SUB_ASSIGN, makeOpProps(INFIX_RIGHT, prec), TokenType::OP),       //compound assignment (sub)
+      OpData("*=",    OpID::MUL_ASSIGN, makeOpProps(INFIX_RIGHT, prec), TokenType::OP),       //compound assignment (mul)
+      OpData("/=",    OpID::DIV_ASSIGN, makeOpProps(INFIX_RIGHT, prec), TokenType::OP),       //compound assignment (div)
+      OpData("%=",    OpID::MOD_ASSIGN, makeOpProps(INFIX_RIGHT, prec), TokenType::OP),       //compound assignment (mod)
+      OpData("^^=",   OpID::EXP_ASSIGN, makeOpProps(INFIX_RIGHT, prec), TokenType::OP),       //compound assignment (exp)
+      OpData("<<=",   OpID::SHL_ASSIGN, makeOpProps(INFIX_RIGHT, prec), TokenType::OP),       //compound assignment (shl)
+      OpData(">>=",   OpID::SHR_ASSIGN, makeOpProps(INFIX_RIGHT, prec), TokenType::OP),       //compound assignment (shr)
+      OpData("&=",    OpID::AND_ASSIGN, makeOpProps(INFIX_RIGHT, prec), TokenType::OP),       //compound assignment (AND)
+      OpData("^=",    OpID::XOR_ASSIGN, makeOpProps(INFIX_RIGHT, prec), TokenType::OP),       //compound assignment (XOR)
+      OpData("|=",    OpID::OR_ASSIGN, makeOpProps(INFIX_RIGHT, prec), TokenType::OP),       //compound assignment (OR)
+      OpData("??=",   OpID::COALESCE_ASSIGN, makeOpProps(INFIX_RIGHT, prec), TokenType::OP),       //compound assignment (null coalescing)
 
-      OpData(",",     OpID::COMMA, makeOpProps(INFIX_LEFT, --prec))         //comma
+      OpData(",",     OpID::COMMA, makeOpProps(INFIX_LEFT, --prec), TokenType::OP)         //comma
    };
 }
 

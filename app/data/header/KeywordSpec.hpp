@@ -15,12 +15,12 @@ struct alignas(8) clef::KeywordSpec {
       template<mcsl::str_t str_t> constexpr KeywordSpec(const str_t& str, const KeywordID id)
          :_id{id},_str{str} { assert(str.size() <= MAX_KEYWORD_LEN); }
       
-      uint size() const { return _str.size(); }
-      const mcsl::raw_str_span toString() const { return mcsl::raw_str_span(const_cast<mcsl::raw_buf_str<14>&>(_str)); }
+      constexpr uint size() const { return _str.size(); }
+      constexpr const mcsl::raw_str_span toString() const { return mcsl::raw_str_span(const_cast<mcsl::raw_buf_str<14>&>(_str)); }
 
-      operator bool() const { return +_id; }
-      operator KeywordID() const { return _id; }
-      operator const mcsl::raw_str_span() const { return mcsl::raw_str_span(const_cast<mcsl::raw_buf_str<14>&>(_str)); }
+      constexpr operator bool() const { return +_id; }
+      constexpr operator KeywordID() const { return _id; }
+      constexpr operator const mcsl::raw_str_span() const { return mcsl::raw_str_span(const_cast<mcsl::raw_buf_str<14>&>(_str)); }
 };
 
 #endif //KEYWORD_SPEC_HPP

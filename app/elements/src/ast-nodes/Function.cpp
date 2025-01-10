@@ -6,7 +6,7 @@
 clef::Function::Function(Identifier* name, Type* returnType, Block* params)
    :_name{name},_returnType{returnType},_params{params} {
       //check parameter block syntax
-      if (_params && _params->type() != BlockType::PARENS) {
+      if (_params && _params->type() != BlockType::CALL) {
          throwError(ErrCode::BAD_PARAM_BLOCK, "attempt to construct Function AST node with an invalid parameter block (%u)", +_params->type());
       }
 }

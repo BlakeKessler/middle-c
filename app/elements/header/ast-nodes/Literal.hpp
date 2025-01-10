@@ -17,6 +17,7 @@ struct clef::Literal {
          double _floatLit;
          char _charLit;
          mcsl::raw_str_span _strLit;
+         mcsl::raw_str_span _interpLit;
          mcsl::raw_str_span _formatLit;
          mcsl::raw_str_span _regexLit;
          Type* _typeid;
@@ -33,7 +34,7 @@ struct clef::Literal {
       Literal(mcsl::raw_str_span str):_strLit{str},_type{LitType::STRING} {}
       Literal(mcsl::raw_str_span str, const LitType type):_strLit{str},_type{type} {
          //check type
-         if (_type != LitType::STRING && _type != LitType::FORMAT && _type != LitType::REGEX) {
+         if (_type != LitType::STRING && _type != LitType::INTERP_STR && _type != LitType::FORMAT && _type != LitType::REGEX) {
             throwError(ErrCode::BAD_LITERAL, "attempt to construct string-like Literal node with non-string-like LitType");
          }
       }
@@ -65,15 +66,16 @@ struct clef::Literal {
       bool operator==(const Literal& other) const {
          if (_type != other._type) { return false; }
          switch(_type) {
-            case LitType::NONE  : return true;
-            case LitType::UINT  : return   _uintLit == other._uintLit;
-            case LitType::SINT  : return   _sintLit == other._sintLit;
-            case LitType::FLOAT : return  _floatLit == other._floatLit;
-            case LitType::CHAR  : return   _charLit == other._charLit;
-            case LitType::STRING: return    _strLit == other._strLit;
-            case LitType::FORMAT: return _formatLit == other._formatLit;
-            case LitType::REGEX : return  _regexLit == other._regexLit;
-            case LitType::TYPEID: return    _typeid == other._typeid || *_typeid == *other._typeid;
+            case LitType::NONE      : return true;
+            case LitType::UINT      : return   _uintLit == other._uintLit;
+            case LitType::SINT      : return   _sintLit == other._sintLit;
+            case LitType::FLOAT     : return  _floatLit == other._floatLit;
+            case LitType::CHAR      : return   _charLit == other._charLit;
+            case LitType::STRING    : return    _strLit == other._strLit;
+            case LitType::INTERP_STR: return _interpLit == other._interpLit;
+            case LitType::FORMAT    : return _formatLit == other._formatLit;
+            case LitType::REGEX     : return  _regexLit == other._regexLit;
+            case LitType::TYPEID    : return    _typeid == other._typeid || *_typeid == *other._typeid;
          }
       }
 };

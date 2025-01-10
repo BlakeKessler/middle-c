@@ -5,6 +5,9 @@
 #include "CLEF.hpp"
 #include <cstdio>
 #include <stdexcept>
+#ifdef MCSL
+   #undef NULL
+#endif
 
 namespace clef {
    extern const char* ERR_MSG_ARR[];

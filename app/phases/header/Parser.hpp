@@ -22,9 +22,6 @@ class clef::Parser {
       ErrCode _errno;
 
       //helper functions
-      char parseCharLitASCII(const char* begin, const char* end);
-      mcsl::string parseStrLitASCII(const char* begin, const char* end);
-      bool parseNumLit(SyntaxTree& tree, const Token*& tokIt, const Token* endtok);
 
       /*inline*/ bool consumeKeyword(const KeywordID, const char* errStr);
       /*inline*/ bool consumeOperator(const OpID, const char* errStr);
@@ -43,10 +40,6 @@ class clef::Parser {
 
       void skipBlockComment();
       void skipLineComment();
-
-      Literal* parseStringLit();
-      Literal* parseCharLit();
-      Literal* parseNumLit();
 
       TypeQualMask parseQuals();
 

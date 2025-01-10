@@ -4,12 +4,8 @@
 #include "SourceTokens.hpp"
 
 void clef::SourceTokens::printf() const {
-   for (uint i = 0; i < _tokLines.size(); ++i) {
-      std::printf("\033[4mline %u:\033[24m ", i + 1);
-      for (uint j = 0; j < _tokLines[i].size(); ++j) {
-         _tokLines[i][j].printf();
-         std::printf(" ");
-      }
+   for (const Token* it = _tokens.begin(); it < _tokens.end(); ++it) {
+      it->printf();
       std::printf("\n");
    }
 }

@@ -21,7 +21,7 @@ template<uint _size> clef::KeywordID clef::KeywordDecoder<_size>::operator[](con
 
 
 
-auto clef::GET_ALL_KEYWORDS() {
+[[gnu::const]] auto clef::GET_ALL_KEYWORDS() {
    using enum KeywordID;
    return KeywordDecoder{
       KeywordSpec{mcsl::raw_str{"void"}, VOID},

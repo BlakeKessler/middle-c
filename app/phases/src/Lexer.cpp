@@ -5,6 +5,7 @@
 #include "Source.hpp"
 #include "TokenData.hpp"
 #include "OperatorData.hpp"
+#include "KeywordData.hpp"
 
 #include "char_type.hpp"
 #include "str_to_num.hpp"
@@ -23,9 +24,9 @@ clef::SourceTokens clef::Lexer::LexSource(Source&& src) {
 
    uint radix;
    bool isReal;
+   bool lexingPreprocStmt = false;
 
-   assert(curr < end);
-   do {
+   while (curr < end) {
       //reset data
       tokBegin = curr;
 
@@ -108,69 +109,165 @@ PUSH_NUM_TOK:
          //IDENTIFIERS
          case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'X': case 'o': case 'G': case 'H': case 'I': case 'J': case 'K': case 'L': case 'M': case 'N': case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V': case 'W': case 'Y': case 'Z':
          case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'x': case 'O': case 'g': case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'y': case 'z':
-         case '_':
+         case '_': {
             while (++curr < end && (mcsl::is_digit(*curr, 36) || *curr == '_')) {}
-            //!NOTE: UNFINISHED (check for keywords)
-            toks.emplace_back(mcsl::raw_str_span{tokBegin, curr});
+            mcsl::raw_str_span name{tokBegin,curr};
+            KeywordID id = ALL_KEYWORDS[name];
+            if (+id) {
+               toks.emplace_back(id);
+            } else {
+               toks.emplace_back(name);
+            }
+         } break;
+
+
+         //EOS
+         case EOS:
+            toks.emplace_back(TokenType::EOS);
+            ++curr;
             break;
 
+         //ESCAPE CHAR
+         case ESCAPE_CHAR:
+            // toks.emplace_back(TokenType::ESC);
+            curr += 2;
+            break;
 
-
-         //!NOTE: UNFINISHED
+         //PREPROCESSOR
+         case PREPROC_INIT:
+            lexingPreprocStmt = true;
+            toks.emplace_back(TokenType::PREPROC_INIT);
+            ++curr;
+            break;
+         //NEWLINE
+         case '\n':
+            if (lexingPreprocStmt) {
+               toks.emplace_back(TokenType::PREPROC_EOS);
+               lexingPreprocStmt = false;
+            }
+            [[fallthrough]];
+         //OTHER WHITESPACE
+         case  ' ': case '\t': case '\v': case '\f': case '\r':
+            ++curr;
+            break;
          
+         //OPERATORS
+         case '!': case '$': case '%': case '&': case '+': case ',': case '-': case '.': case '=': case '?': case '@': case '^': case '|': case '~': case '(': case ')': case '[': case ']': case '{': case '}': case '*': case '/': case '<': case '>': case ':': {
+            OpData op = OPERATORS[mcsl::raw_str_span{curr, end}];
+            curr += op.size();
+            switch (op.tokType()) {
+               case TokenType::OP: toks.emplace_back(op); break;
+               case TokenType::BLOCK_DELIM:
+                  switch (op.opID()) {
+                     case OpID::CALL_INVOKE: toks.emplace_back(BlockType::CALL, BlockDelimRole::OPEN); toks.emplace_back(BlockType::CALL, BlockDelimRole::CLOSE); break;
+                     case OpID::CALL_OPEN  : toks.emplace_back(BlockType::CALL, BlockDelimRole::OPEN); break;
+                     case OpID::CALL_CLOSE : toks.emplace_back(BlockType::CALL, BlockDelimRole::CLOSE); break;
+
+                     case OpID::SUBSCRIPT_INVOKE: toks.emplace_back(BlockType::SUBSCRIPT, BlockDelimRole::OPEN); toks.emplace_back(BlockType::SUBSCRIPT, BlockDelimRole::CLOSE); break;
+                     case OpID::SUBSCRIPT_OPEN  : toks.emplace_back(BlockType::SUBSCRIPT, BlockDelimRole::OPEN); break;
+                     case OpID::SUBSCRIPT_CLOSE : toks.emplace_back(BlockType::SUBSCRIPT, BlockDelimRole::CLOSE); break;
+                     
+                     case OpID::LIST_INVOKE: toks.emplace_back(BlockType::INIT_LIST, BlockDelimRole::OPEN); toks.emplace_back(BlockType::INIT_LIST, BlockDelimRole::CLOSE); break;
+                     case OpID::LIST_OPEN  : toks.emplace_back(BlockType::INIT_LIST, BlockDelimRole::OPEN); break;
+                     case OpID::LIST_CLOSE : toks.emplace_back(BlockType::INIT_LIST, BlockDelimRole::CLOSE); break;
+
+                     case OpID::SPECIALIZER_INVOKE: toks.emplace_back(BlockType::SPECIALIZER, BlockDelimRole::OPEN); toks.emplace_back(BlockType::SPECIALIZER, BlockDelimRole::CLOSE); break;
+                     case OpID::SPECIALIZER_OPEN  : toks.emplace_back(BlockType::SPECIALIZER, BlockDelimRole::OPEN); break;
+                     case OpID::SPECIALIZER_CLOSE : toks.emplace_back(BlockType::SPECIALIZER, BlockDelimRole::CLOSE); break;
+
+                     default: std::unreachable();
+                  }
+                  break;
+               case TokenType::PTXT_SEG: //comments (strings and chars handled separately)
+                  switch (op.opID()) {
+                     case OpID::BLOCK_CMNT: break;
+                     case OpID::BLOCK_CMNT_OPEN: 
+                        do {
+                           if (curr >= end) { throwError(ErrCode::BAD_CMNT, "unclosed block comment"); }
+                           OpData tmp = OPERATORS[mcsl::raw_str_span{curr,end}];
+                           if (tmp == OpID::BLOCK_CMNT_CLOSE) { curr += tmp.size(); break; }
+                           ++curr;
+                        } while (true);
+                        break;
+                     case OpID::BLOCK_CMNT_CLOSE: throwError(ErrCode::BAD_CMNT, "floating block comment closing delimiter");
+
+                     case OpID::LINE_CMNT:
+                        while (curr < end) {
+                           if (*curr == '\n') { ++curr; break; }
+                           if (*curr == '\\') { ++curr; }
+                           ++curr;
+                        }
+                        break;
+
+                     default: std::unreachable();
+                  }
+                  break;
+
+               default: std::unreachable();
+            }
+
+         } break;
+
+         //CHARS
+         case CHAR_DELIM: {
+            ++curr;
+            const char tmp = parseChar(curr, end);
+            if (curr >= end || *curr != CHAR_DELIM) { throwError(ErrCode::BAD_LITERAL, "invalid character literal"); }
+            toks.emplace_back(tmp);
+         } break;
+
+         //STRINGS
+         case STR_DELIM:
+            while (++curr >= end && *curr != STR_DELIM) {
+               if (*curr == ESCAPE_CHAR) {
+                  ++curr;
+                  continue;
+               }
+            }
+            if (curr >= end || *curr != STR_DELIM) {
+               throwError(ErrCode::BAD_LITERAL, "unclosed string literal");
+            }
+            ++curr;
+            toks.emplace_back(mcsl::raw_str_span{tokBegin,curr}, PtxtType::UNPROCESSED_STR);
+            break;
+
+         //INTERPOLATED STRINGS
+         case INTERP_STR_DELIM:
+            while (++curr >= end && *curr != INTERP_STR_DELIM) {
+               if (*curr == ESCAPE_CHAR) {
+                  ++curr;
+                  continue;
+               }
+               if (*curr == PLACEHOLDER_INIT) {
+                  ++curr;
+                  if (curr < end) {
+                     if (*curr == PLACEHOLDER_OPEN) {
+                        //!NOTE: UNFINISHED (can't properly support expressions containing curly brackets)
+                        while (++curr < end && *curr != PLACEHOLDER_CLOSE) {
+                           lexExpr(curr, end, toks);
+                        }
+                        if (curr >= end) {
+                           throwError(ErrCode::BAD_LITERAL, "unclosed interpolated string literal");
+                        }
+                     }
+                  }
+               }
+            }
+            if (curr >= end || *curr != INTERP_STR_DELIM) {
+               throwError(ErrCode::BAD_LITERAL, "unclosed interpolated string literal");
+            }
+            ++curr;
+            toks.emplace_back(mcsl::raw_str_span{tokBegin,curr}, PtxtType::UNPROCESSED_STR);
+            break;
+         
+         //UNPRINTABLE CHAR (illegal)
+         default:
+            debug_assert(*curr < 32 || *curr > 126);
+            throwError(ErrCode::LEXER_UNSPEC, "invalid character (%hhu)", *curr);
       }
-   } while (curr < end);
+   }
 
    return tokens;
 }
-
-
-//!helper function for creating operator-like tokens
-//!   toks: tokens buffer to push to
-//!   begin: beginning of token block
-//!   end: end of token block
-//!return value: number of operators from block
-uint clef::Lexer::emplaceOps(mcsl::dyn_arr<Token>& toks, mcsl::raw_str_span tokstr) {
-   //init
-   uint opCount = 0;
-   uint invalids = 0;
-   //process operator block
-   while (tokstr.size()) {
-      //deduce operator
-      OpData data = OPERATORS[tokstr];
-
-      //unable to deduce operator - part of invalid operator block
-      //!NOTE: needs to be accounted for because they only cause syntax errors if not inside of plaintext blocks
-      if (!data) {
-         ++invalids;
-         tokstr.inc_begin(1);
-         continue;
-      }
-
-
-      //handle invalid operator block if necessary
-      if (invalids) {
-         ++opCount;
-         toks.emplace_back(tokstr.begin()-invalids, invalids, TokenType::NONE);
-         invalids = 0;
-      }
-
-      //emplace token
-      toks.emplace_back(tokstr.begin(), data.toString().size(), data.tokType());
-      tokstr.inc_begin(data.toString().size());
-      ++opCount;
-   }
-
-
-   //handle a trailing invalid operator block if necessary
-   if (invalids) {
-      toks.emplace_back(tokstr.begin()-invalids, invalids, TokenType::NONE);
-      ++opCount;
-   }
-
-   //return
-   return opCount;
-}
-
 
 #endif //LEXER_CPP

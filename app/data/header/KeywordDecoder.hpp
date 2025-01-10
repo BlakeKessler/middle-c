@@ -29,7 +29,7 @@ namespace clef {
 #pragma endregion CTAD
 
 namespace clef {
-   auto GET_ALL_KEYWORDS();
+   [[gnu::const]] auto GET_ALL_KEYWORDS();
 };
 
 #include "../src/KeywordDecoder.cpp"

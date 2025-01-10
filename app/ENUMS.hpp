@@ -7,7 +7,7 @@
 #include <utility>
 #include <bit>
 
-#include <cassert>
+#include <assert.hpp>
 
 namespace clef {
    //!enum of CLEF error codes
@@ -256,9 +256,9 @@ namespace clef {
       RADIX_POINT = MEMBER_ACCESS,
 
       //helpers
-      __FIRST_PSEUDO_OP,
-      __FIRST_LOOP,
-      __LAST_LOOP,
+      __FIRST_PSEUDO_OP = FOR,
+      __FIRST_LOOP = FOR,
+      __LAST_LOOP = DO_WHILE,
    };
 
    constexpr auto operator+(const OpID x) { return std::to_underlying(x); }
@@ -511,7 +511,7 @@ namespace clef {
    enum class BlockType : uint8 {
       NONE = 0,      //not a block type
 
-      PARENS = 3_m,     //PARENTHESES
+      CALL = 3_m,       //PARENTHESES
       SUBSCRIPT,        //SQUARE BRACKETS
       INIT_LIST,        //CURLY BRACKETS
       SPECIALIZER,      //TRIANGLE BRACKETS
@@ -554,7 +554,13 @@ namespace clef {
       STR16,   //!NOTE: CURRENETLY UNSUPPORTED
       STR32,   //!NOTE: CURRENETLY UNSUPPORTED
 
-      __STR_TYPE,
+      UNPROCESSED_STR = 25,
+      UNPROCESSED_WSTR,    //!NOTE: CURRENETLY UNSUPPORTED
+      UNPROCESSED_STR8,    //!NOTE: CURRENETLY UNSUPPORTED
+      UNPROCESSED_STR16,   //!NOTE: CURRENETLY UNSUPPORTED
+      UNPROCESSED_STR32,   //!NOTE: CURRENETLY UNSUPPORTED
+
+      __STR_TYPE = 8,
    };
    constexpr auto operator+(const PtxtType t) noexcept { return std::to_underlying(t); }
    constexpr bool isChar(const PtxtType t) { return +t && !(+t & +PtxtType::__STR_TYPE); }
@@ -607,7 +613,7 @@ namespace clef {
 
    //!symbol properties bitmask
    enum class [[clang::flag_enum]] SymbolProp : uint64 {
-      NIL            = 0_m,
+      NULL           = 0_m,
       
       HAS_NAME_TABLE = 1_m,
 

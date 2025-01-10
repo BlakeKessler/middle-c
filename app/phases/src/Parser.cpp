@@ -114,14 +114,14 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
 
    do {
       if (isOperand(tokIt->type())) { //push operand
-         if (tokIt->type() == TokenType::CHAR || tokIt->type() == TokenType::IDEN || tokIt->type() == TokenType::STRT) {
+         if (tokIt->type() == TokenType::IDEN) {
             operandStack.push_back((astNode*)parseIdentifier());
          } else {
-            operandStack.push_back((astNode*)parseNumLit());
+            operandStack.push_back((astNode*)tokIt);
          }
          prevTokIsOperand = true;
       } else if (isOperator(tokIt->type())) { //handle operator
-         OpData op = OPERATORS[*tokIt];
+         OpData op = tokIt->op();
          if (op == OpID::EOS || (op == OpID::COMMA && operatorStack.size())) { //operator that cannot be part of this type of expression
             break;
          }
@@ -138,14 +138,13 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
          }
          prevTokIsOperand = false;
       } else if (isBlockLike(tokIt->type())) { //handle block delimiter
-         OpData op = OPERATORS[*tokIt];
+         OpData op = tokIt->op();
          if (isStringLike(op)) { //string and character literals
             switch (op.opID()) {
-               case OpID::STRING : operandStack.push_back((astNode*)parseStringLit()); break;
-               case OpID::CHAR   : operandStack.push_back((astNode*)parseCharLit()); break;
+               // case OpID::STRING : operandStack.push_back((astNode*)parseStringLit()); break;
+               // case OpID::CHAR   : operandStack.push_back((astNode*)parseCharLit()); break;
                default: std::unreachable();
             }
-            prevTokIsOperand = true;
          }
          else { //blocks
             if (!isOpener(op)) { logError(ErrCode::BAD_BLOCK_DELIM, "floating closing block delimiter"); }
@@ -157,10 +156,10 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
                operandStack.push_back((astNode*)(parseArgList(getCloser(op))));
             } else { //block subexpression
                operandStack.push_back((astNode*)parseExpr());
-               if (!isBlockLike(tokIt->type()) || getCloser(op) != OPERATORS[*tokIt]) { logError(ErrCode::BAD_BLOCK_DELIM, "bad block subexpression"); }
+               if (!isBlockLike(tokIt->type()) || getCloser(op) != tokIt->opID()) { logError(ErrCode::BAD_BLOCK_DELIM, "bad block subexpression"); }
             }
-            prevTokIsOperand = true;
          }
+         prevTokIsOperand = true;
       } else {
          break;
       }
@@ -186,29 +185,29 @@ clef::Scope* clef::Parser::parseProcedure() {
 }
 
 clef::Identifier* clef::Parser::tryParseIdentifier(Identifier* scopeName) {
-   if (!+(tokIt->type() & TokenType::CHAR)) { return nullptr; }
+   if (tokIt->type() != TokenType::IDEN) { return nullptr; }
 
    Identifier* name = scopeName;
    const Token* tmp;
 
    do {
-      name = new (tree.allocNode(NodeType::IDEN)) Identifier{*tokIt, name};
+      name = new (tree.allocNode(NodeType::IDEN)) Identifier{tokIt->name(), name};
       tmp = ++tokIt;
-   } while (!tryConsumeOperator(OpID::SCOPE_RESOLUTION) || !+(tokIt->type() & TokenType::CHAR));
+   } while (tryConsumeOperator(OpID::SCOPE_RESOLUTION) && tokIt->type() == TokenType::IDEN);
    
    tokIt = tmp;
    return name;
 }
 clef::Identifier* clef::Parser::parseIdentifier(Identifier* scopeName) {
-   if (!+(tokIt->type() & TokenType::CHAR)) { logError(ErrCode::BAD_IDEN, "bad IDENTIFIER"); }
+   if (tokIt->type() != TokenType::IDEN) { logError(ErrCode::BAD_IDEN, "bad IDENTIFIER"); }
 
    Identifier* name = scopeName;
    const Token* tmp;
 
    do {
-      name = new (tree.allocNode(NodeType::IDEN)) Identifier{*tokIt, name};
+      name = new (tree.allocNode(NodeType::IDEN)) Identifier{tokIt->name(), name};
       tmp = ++tokIt;
-   } while (!tryConsumeOperator(OpID::SCOPE_RESOLUTION) || !+(tokIt->type() & TokenType::CHAR));
+   } while (tryConsumeOperator(OpID::SCOPE_RESOLUTION) && tokIt->type() == TokenType::IDEN);
    
    if (tokIt != tmp || name == scopeName) { logError(ErrCode::BAD_IDEN, "bad IDENTIFIER"); }
    return name;

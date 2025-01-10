@@ -4,7 +4,7 @@
 #include "Source.hpp"
 #include <cstdio>
 #include <filesystem>
-#include <cassert>
+#include "assert.hpp"
 
 namespace fs = std::filesystem;
 

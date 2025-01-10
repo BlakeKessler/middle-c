@@ -13,7 +13,7 @@ struct clef::Symbol {
       SymbolTable* _table;
    public:
       Symbol();
-      template<mcsl::str_t str_t> Symbol(const str_t& name, const SymbolProp props = SymbolProp::NIL, SymbolTable* childSymbols = nullptr);
+      template<mcsl::str_t str_t> Symbol(const str_t& name, const SymbolProp props = SymbolProp::NULL, SymbolTable* childSymbols = nullptr);
       ~Symbol();
       bool update_alloc();
 
