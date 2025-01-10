@@ -6,7 +6,7 @@
 #include "alloc.hpp"
 
 #include <memory>
-#include <cassert>
+#include "assert.hpp"
 
 template<typename T, uint _capacity> class mcsl::heap_buf : mcsl::contig_base<T> {
    private:

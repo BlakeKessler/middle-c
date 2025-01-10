@@ -5,14 +5,15 @@
 #include "MCSL.hpp"
 #include <stdexcept>
 #include <cstdio>
+#ifdef MCSL
+   #undef NULL
+#endif 
 
 namespace mcsl {
    extern const char* ERR_MSG_ARR[];
    [[noreturn, gnu::format(printf,2,3)]] void mcsl_throw(const ErrCode code, const char* formatStr, auto&&... args);
    [[noreturn, gnu::format(printf,3,4)]] void mcsl_throw(const ErrCode code, const uint lineNum, const char* formatStr, auto&&... args);
 }
-
-#define debug_assert assert
 
 
 

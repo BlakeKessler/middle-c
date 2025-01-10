@@ -4,8 +4,7 @@
 
 #include "MCSL.hpp"
 #include "str_base.hpp"
-
-#include <cassert>
+#include "assert.hpp"
 
 //!null-terminated string literal
 template<uint _size> class [[clang::trivial_abi]] mcsl::raw_str : public str_base<char> {

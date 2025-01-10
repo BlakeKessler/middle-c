@@ -5,7 +5,7 @@
 #include "MCSL.hpp"
 
 #include <memory>
-#include <cassert>
+#include "assert.hpp"
 
 template<typename T, uint _capacity> class [[clang::trivial_abi]] mcsl::buf : mcsl::contig_base<T> {
    private:

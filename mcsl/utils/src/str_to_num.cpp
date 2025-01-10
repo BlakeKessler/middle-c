@@ -4,9 +4,9 @@
 #include "str_to_num.hpp"
 #include "carry.hpp"
 #include "uint_n.hpp"
+#include "assert.hpp"
 
 #include <cmath>
-#include <cassert>
 
 //!convert string to unsigned integer
 //!legal radices: {0, 2, ... , 36}

@@ -2,6 +2,8 @@
 #ifndef MCSL_DEFINES_HPP
 #define MCSL_DEFINES_HPP
 
+#define MCSL
+
 #include <cstdint>
 // #include <stdfloat>
 #include <utility>
@@ -55,6 +57,7 @@ using soverlong = sint128; //must be large enough to hold the full result of lon
 namespace mcsl {
    enum class ErrCode {
       UNSPEC = 0,
+      ASSERT_FAIL,
       SEGFAULT,
       ALLOC_FAIL,
       INT_OVERFLOW,
@@ -93,8 +96,5 @@ constexpr const uint DEFAULT_BUCKET_SIZE = 4;
 constexpr unsigned long long operator"" _m(const unsigned long long x) {
    return x ? 1LU << (x - 1) : 0;
 }
-
-//other
-#define debug_assert assert
 
 #endif //MCSL_DEFINES_HPP

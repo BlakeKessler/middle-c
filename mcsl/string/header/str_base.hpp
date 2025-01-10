@@ -8,6 +8,9 @@
 #include "dyn_arr.hpp"
 
 #include <cstdio>
+#ifdef MCSL
+   #undef NULL
+#endif
 
 //!IMPLEMENTATION GUIDE:
 //!   consider null-termination

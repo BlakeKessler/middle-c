@@ -2,8 +2,8 @@
 #define MCSL_ALLOC_CPP
 
 #include "alloc.hpp"
+#include "assert.hpp"
 
-#include <cassert>
 #include <cstdlib>
 #include <cwchar>
 #include <cstring>

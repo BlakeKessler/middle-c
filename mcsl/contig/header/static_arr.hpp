@@ -5,8 +5,8 @@
 #include "MCSL.hpp"
 #include "contig_base.hpp"
 #include "raw_str.hpp"
+#include "assert.hpp"
 
-#include <cassert>
 #include <utility>
 
 template <typename T, uint _size> class [[clang::trivial_abi]] mcsl::static_arr : public contig_base<T> {
