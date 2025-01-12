@@ -380,4 +380,8 @@ char clef::Lexer::parseChar(char*& curr, char* const end) {
    return ch;
 }
 
+bool clef::Lexer::lexExpr(char*& curr, char* const end, mcsl::dyn_arr<clef::Token>& toks) {
+   throwError(ErrCode::LEXER_NOT_IMPLEMENTED, "lexExpr not yet implemented");
+}
+
 #endif //LEXER_CPP

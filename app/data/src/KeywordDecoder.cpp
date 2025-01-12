@@ -3,25 +3,25 @@
 
 #include "KeywordDecoder.hpp"
 
-template<uint _size> template <mcsl::is_t<clef::KeywordSpec>... Argv_t>
-clef::KeywordDecoder<_size>::KeywordDecoder(const Argv_t... initList)
-requires ( sizeof...(Argv_t) == _size ):_buf{initList...},_map{} {
-   for (uint i = 0; i < _buf.size(); ++i) {
-      _map[_buf[i].toString()] = i;
-   }
-}
+// template<uint _size> template <mcsl::is_t<clef::KeywordSpec>... Argv_t>
+// clef::KeywordDecoder<_size>::KeywordDecoder(const Argv_t... initList)
+// requires ( sizeof...(Argv_t) == _size ):_buf{initList...},_map{} {
+//    for (uint i = 0; i < _buf.size(); ++i) {
+//       _map[_buf[i].toString()] = i;
+//    }
+// }
 
-template<uint _size> clef::KeywordID clef::KeywordDecoder<_size>::operator[](const mcsl::raw_str_span& tok) const {
-   const auto tmp = _map.find(tok);
-   if (tmp == _map.end()) {
-      return KeywordID::_NOT_A_KEYWORD;
-   }
-   return _buf[tmp->second];
-}
+// template<uint _size> clef::KeywordID clef::KeywordDecoder<_size>::operator[](const mcsl::raw_str_span& tok) const {
+//    const auto tmp = _map.find(tok);
+//    if (tmp == _map.end()) {
+//       return KeywordID::_NOT_A_KEYWORD;
+//    }
+//    return _buf[tmp->second];
+// }
 
 
 
-[[gnu::const]] auto clef::GET_ALL_KEYWORDS() {
+[[gnu::const]] clef::KeywordDecoder<90> clef::GET_ALL_KEYWORDS() {
    using enum KeywordID;
    return KeywordDecoder{
       KeywordSpec{mcsl::raw_str{"void"}, VOID},

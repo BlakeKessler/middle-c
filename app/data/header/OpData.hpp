@@ -19,9 +19,9 @@ struct alignas(8) clef::OpData {
    public:
       constexpr OpData():_opStr{},_id{},_props{},_tokType{} {}
       template<mcsl::str_t str_t> constexpr OpData(const str_t& str, const OpID id, const OpProps props, const TokenType tokType)
-         :_opStr{str},_id{id},_props{props},_tokType{tokType} {}
+         :_opStr{str},_id{id},_props{+(props & OpProps::CAN_BE_BINARY) ? props : (props & ~OpProps::__PRECEDENCE_BITS)},_tokType{tokType} {}
       constexpr OpData(const char str[MAX_OP_LEN + 1], const OpID id, const OpProps props, const TokenType tokType)
-         :_opStr{str},_id{id},_props{props},_tokType{tokType} {}
+         :_opStr{str},_id{id},_props{+(props & OpProps::CAN_BE_BINARY) ? props : (props & ~OpProps::__PRECEDENCE_BITS)},_tokType{tokType} {}
 
       constexpr uint size() const { return _opStr.size(); }
       constexpr OpID opID() const { return _id; }
@@ -31,7 +31,7 @@ struct alignas(8) clef::OpData {
       constexpr auto toString() const { return _opStr; }
 
       constexpr bool combineWith(const OpData other) { //merge other into self
-         if (toString() != other.toString() || precedence() != other.precedence()) {
+         if (toString() != other.toString() || (precedence() != other.precedence() && !precedence() && !other.precedence())) {
             return false;
          }
          _props = _props | other.props();

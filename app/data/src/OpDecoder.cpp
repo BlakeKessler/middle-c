@@ -82,7 +82,7 @@ template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef:
       OpData("`",     OpID::STRING, makeOpProps(DELIM, prec), TokenType::BLOCK_DELIM), //interpolated string
 
 
-      OpData("(",     OpID::CALL_OPEN, makeOpProps(OPEN_DELIM, --prec), TokenType::BLOCK_DELIM), //function calls/functional casts
+      OpData("(",     OpID::CALL_OPEN, makeOpProps(OPEN_DELIM, prec), TokenType::BLOCK_DELIM), //function calls/functional casts
       OpData(")",     OpID::CALL_CLOSE, makeOpProps(CLOSE_DELIM, prec), TokenType::BLOCK_DELIM), //function calls/functional casts
       OpData("[",     OpID::SUBSCRIPT_OPEN, makeOpProps(OPEN_DELIM, prec), TokenType::BLOCK_DELIM), //subscript
       OpData("]",     OpID::SUBSCRIPT_CLOSE, makeOpProps(CLOSE_DELIM, prec), TokenType::BLOCK_DELIM), //subscript
@@ -95,14 +95,14 @@ template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef:
 
 
 
-      OpData("++",    OpID::INC, makeOpProps(PREFIX, --prec), TokenType::OP),            //pre-increment
+      OpData("++",    OpID::INC, makeOpProps(PREFIX, prec), TokenType::OP),            //pre-increment
       OpData("--",    OpID::DEC, makeOpProps(PREFIX, prec), TokenType::OP),            //pre-decrement
       OpData(".",     OpID::MEMBER_ACCESS, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //element access
       OpData("->",    OpID::MEMBER_OF_POINTER_ACCESS, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //element access
       OpData("..",    OpID::RANGE, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //range
       OpData("...",   OpID::SPREAD, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //array spread
 
-      OpData("++",    OpID::INC, makeOpProps(POSTFIX, --prec), TokenType::OP),           //post-increment
+      OpData("++",    OpID::INC, makeOpProps(POSTFIX, prec), TokenType::OP),           //post-increment
       OpData("--",    OpID::DEC, makeOpProps(POSTFIX, prec), TokenType::OP),           //post-decrement
       OpData("+",     OpID::UNARY_PLUS, makeOpProps(POSTFIX, prec), TokenType::OP),           //unary plus
       OpData("-",     OpID::UNARY_MINUS, makeOpProps(POSTFIX, prec), TokenType::OP),           //integer negation
