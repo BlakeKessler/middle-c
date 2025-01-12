@@ -20,7 +20,7 @@ class [[clang::trivial_abi]] mcsl::raw_buf_str : public str_base<char> {
       constexpr raw_buf_str():_buf{},_size{} {}
       constexpr raw_buf_str(const char* str, const size_t strlen);
       constexpr raw_buf_str(const char* str);
-      constexpr raw_buf_str(const str_base<char>& other): raw_buf_str(other.data(), other.size()) {}
+      constexpr raw_buf_str(const str_t auto& other): raw_buf_str(other.data(), other.size()) {}
 
       //properties
       [[gnu::pure]] constexpr size_t size() const { return _size; }

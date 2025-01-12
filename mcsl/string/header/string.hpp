@@ -48,7 +48,7 @@ class mcsl::string : public str_base<char> {
       char pop_back() { const char tmp = back(); _buf.pop_back(); _buf.back() = '\0'; return tmp; }
 
 
-      string& operator+=(const str_base<char>& other);
+      string& operator+=(const str_t auto& other);
       string& operator*=(const uint repeatCount);
 };
 

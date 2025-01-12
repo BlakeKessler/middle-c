@@ -7,7 +7,7 @@
 
 
 //!concatenate other onto the end of this
-mcsl::string& mcsl::string::operator+=(const str_base<char>& other) {
+mcsl::string& mcsl::string::operator+=(const str_t auto& other) {
    char* addr = end();
    resize(size() + other.size());
    //copy other
