@@ -9,8 +9,6 @@
 
 #include "char_type.hpp"
 #include "str_to_num.hpp"
-// #include <cstring>
-// #include <cstdio>
 
 //!creates a SourceTokens from results of file reader
 clef::SourceTokens clef::Lexer::LexSource(Source&& src) {
@@ -175,7 +173,7 @@ PUSH_NUM_TOK:
                      case OpID::SPECIALIZER_OPEN  : toks.emplace_back(BlockType::SPECIALIZER, BlockDelimRole::OPEN); break;
                      case OpID::SPECIALIZER_CLOSE : toks.emplace_back(BlockType::SPECIALIZER, BlockDelimRole::CLOSE); break;
 
-                     default: std::unreachable();
+                     default: UNREACHABLE;
                   }
                   break;
                case TokenType::PTXT_SEG: //comments (strings and chars handled separately)
@@ -199,11 +197,11 @@ PUSH_NUM_TOK:
                         }
                         break;
 
-                     default: std::unreachable();
+                     default: UNREACHABLE;
                   }
                   break;
 
-               default: std::unreachable();
+               default: UNREACHABLE;
             }
 
          } break;
