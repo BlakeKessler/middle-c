@@ -58,6 +58,7 @@ namespace mcsl {
    enum class ErrCode {
       UNSPEC = 0,
       ASSERT_FAIL,
+      UNREACHABLE_REACHED,
       SEGFAULT,
       ALLOC_FAIL,
       INT_OVERFLOW,
