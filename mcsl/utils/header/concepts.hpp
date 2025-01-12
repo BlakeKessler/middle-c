@@ -55,7 +55,7 @@ namespace mcsl {
       { f(obj) } -> int_t;
    };
    template<typename T, typename func> concept cmp_t = requires (T lhs, T rhs, func f) {
-      { f(lhs,rhs) } -> castable_to<bool>;
+      { f(lhs,rhs) } -> same_t<bool>;
    };
 
    template<typename func_t, typename ...Args> concept callable_t = requires (func_t f, Args... args) {

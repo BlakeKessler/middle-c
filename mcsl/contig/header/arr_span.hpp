@@ -4,6 +4,7 @@
 
 #include "MCSL.hpp"
 #include "contig_base.hpp"
+#include "raw_str.hpp"
 #include <memory>
 #include <utility>
 

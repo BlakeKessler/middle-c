@@ -19,6 +19,4 @@ namespace mcsl {
    void __assert_fail(const char* file, const uint line, const char* func, const char* exprStr);
 };
 
-#include "../src/assert.cpp"
-
 #endif //MCSL_ASSERT_HPP

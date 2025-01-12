@@ -8,7 +8,7 @@
 #include "OpDecoder.hpp"
 
 namespace clef {
-   constexpr const OpDecoder OPERATORS = GetAllOplikesData();
+   /*constexpr*/ const OpDecoder OPERATORS = GetAllOplikesData();
 };
 
 #endif //OPERATOR_DATA_HPP

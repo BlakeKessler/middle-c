@@ -15,6 +15,7 @@ namespace clef {
       UNSPEC = 0,
 
       LEXER_UNSPEC,
+      LEXER_NOT_IMPLEMENTED,
 
       PARSER_UNSPEC,
       PARSER_NOT_IMPLEMENTED,

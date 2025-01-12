@@ -1,0 +1,76 @@
+#directories and files
+MODULES := mcsl app
+
+ALL_CODE_DIRS := $(foreach dir, $(MODULES),${shell find $(dir) -type d -print})
+ALL_SRC_FILES := $(foreach dir, $(ALL_CODE_DIRS), $(wildcard $(dir)/*.cpp))
+ALL_HEADER_FILES := $(foreach dir, $(ALL_CODE_DIRS), $(wildcard $(dir)/*.hpp))
+
+ALL_TESTS := $(wildcard test/src/*.cpp)
+
+ALL_AUTO_MAKEFILES := $(ALL_SRC_FILES:%.cpp=_build/%.mk) $(ALL_TESTS:%.cpp=_build/%.mk)
+ALL_OBJ_FILES := $(ALL_SRC_FILES:%.cpp=_build/%.o)
+# ALL_PCH_FILES := $(ALL_HEADER_FILES:%=_build/%.pch)
+
+#compiler
+COMPILER := clang++ -std=c++23
+FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name -Wno-gcc-compat -Wno-trigraphs
+# COMPILER := g++-14 -std=c++23
+# FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -Wno-trigraphs
+
+#compile commands
+COMPILE := $(COMPILER) $(FLAGS) $(addprefix -I, $(MODULES) $(filter %/header, $(ALL_CODE_DIRS)))
+
+
+#set up directory structure
+.PHONY: setup
+setup:
+	mkdir -p $(addprefix _build/,$(ALL_CODE_DIRS))
+	mkdir -p _build/test/src _build/out
+
+#generate prereq makefiles
+$(ALL_AUTO_MAKEFILES): _build/%.mk : %.cpp
+	($(COMPILE) -MM $^) | (sed -E 's/([^ ]*)\.o([^u])?/_build\/\1.o _build\/\1.mk\2/') > $@
+#	($(COMPILE) -MM $^) | (sed -E 's/([^ ]*)\.o([^u])?/_build\/\1.mk\2/') | (sed -E 's/([^ ]*.hpp)/_build\/\1.pch/g') > $@
+
+# $(ALL_HEADER_FILES:%.hpp=_build/%.mk): _build/%.mk : %.hpp
+# 	($(COMPILE) -MM $^) | (sed -E 's/([^ ]*)\.o([^u])?/_build\/\1.mk\2/') | (sed -E 's/([^ ]*.hpp)/_build\/\1.pch/g') > $@
+
+#include prereq makefiles
+-include $(ALL_AUTO_MAKEFILES)
+-include $(ALL_HEADER_FILES:%.hpp=_build/%.mk)
+
+#include unit test makefiles
+-include $(wildcard _build/test/*.mk)
+
+
+# #precompile headers
+# $(ALL_PCH_FILES): _build/%.hpp.pch : %.hpp _build/%.mk
+# 	$(COMPILE) -c $^ -o $@
+
+#compile object files
+$(ALL_OBJ_FILES): _build/%.o : %.cpp
+	$(COMPILE) -c $^ -o $@
+
+
+#_build types of file
+.PHONY: makefiles
+makefiles: $(ALL_AUTO_MAKEFILES) $(ALL_HEADER_FILES:%.hpp=_build/%.mk)
+# .PHONY: headers
+# headers: $(ALL_PCH_FILES)
+.PHONY: objects
+objects: $(ALL_OBJ_FILES)
+
+#compile unit test files
+.PHONY: Lexer
+Lexer: _build/test/src/TestLexer.mk test/src/TestLexer.cpp | $(ALL_OBJ_FILES)
+	$(COMPILE) test/src/TestLexer.cpp $(shell find _build | grep "\.o") -o _build/out/$@.out
+.PHONY: Parser
+Parser: _build/test/src/TestParser.mk test/src/TestParser.cpp | $(ALL_OBJ_FILES)
+	$(COMPILE) test/src/TestParser.cpp $(shell find _build | grep "\.o") -o _build/out/$@.out
+#	$(COMPILE) test/src/TestParser.cpp $(ALL_SRC_FILES:%.cpp=_build/%.o) -o _build/out/$@.out
+
+
+#clean
+.PHONY: clean
+clean:
+	rm -rf _build

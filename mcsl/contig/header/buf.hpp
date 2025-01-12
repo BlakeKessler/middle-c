@@ -49,13 +49,13 @@ template<typename T, uint _capacity> constexpr mcsl::buf<T,_capacity>::buf(const
       }
 }
 template<typename T, uint _capacity> constexpr mcsl::buf<T,_capacity>::buf(castable_to<T> auto&&... initList):
-   _buf{},
+   _buf{initList...},
    _size(sizeof...(initList)) {
       assert(_size <= _capacity);
 
-      for (uint i = 0; i < _size; ++i) {
-         _buf[i] = initList[i];
-      }
+      // for (uint i = 0; i < _size; ++i) {
+      //    _buf[i] = initList[i];
+      // }
 }
 
 template<typename T, uint _capacity> T* mcsl::buf<T,_capacity>::push_back(T&& obj) {
@@ -77,7 +77,7 @@ template<typename T, uint _capacity> bool mcsl::buf<T,_capacity>::pop_back() {
       return false;
    }
    --_size;
-   std::destroy_at(end());
+   std::destroy_at(self.end());
    return true;
 }
 template<typename T, uint _capacity> T* mcsl::buf<T,_capacity>::emplace(const uint i, auto&&... args) {
@@ -85,8 +85,10 @@ template<typename T, uint _capacity> T* mcsl::buf<T,_capacity>::emplace(const ui
       mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i, nameof(), _size);
       return nullptr;
    }
-   std::construct_at(_buf + i, std::forward<decltype(args)>(args)...);
-   return _buf + i;
+   
+   return new (_buf + i) T{args...};
+   // std::construct_at(_buf + i, std::forward<decltype(args)>(args)...);
+   // return _buf + i;
 }
 template<typename T, uint _capacity> T* mcsl::buf<T,_capacity>::emplace_back(auto&&... args) {
    if (_size >= _capacity) {
