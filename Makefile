@@ -9,7 +9,7 @@ ALL_TESTS := $(wildcard test/src/*.cpp)
 
 ALL_AUTO_MAKEFILES := $(ALL_SRC_FILES:%.cpp=_build/%.mk) $(ALL_TESTS:%.cpp=_build/%.mk)
 ALL_OBJ_FILES := $(ALL_SRC_FILES:%.cpp=_build/%.o)
-# ALL_PCH_FILES := $(ALL_HEADER_FILES:%=_build/%.pch)
+ALL_PCH_FILES := $(ALL_HEADER_FILES:%=_build/%.pch)
 
 #compiler
 COMPILER := clang++ -std=c++23
@@ -32,8 +32,8 @@ $(ALL_AUTO_MAKEFILES): _build/%.mk : %.cpp
 	($(COMPILE) -MM $^) | (sed -E 's/([^ ]*)\.o([^u])?/_build\/\1.o _build\/\1.mk\2/') > $@
 #	($(COMPILE) -MM $^) | (sed -E 's/([^ ]*)\.o([^u])?/_build\/\1.mk\2/') | (sed -E 's/([^ ]*.hpp)/_build\/\1.pch/g') > $@
 
-# $(ALL_HEADER_FILES:%.hpp=_build/%.mk): _build/%.mk : %.hpp
-# 	($(COMPILE) -MM $^) | (sed -E 's/([^ ]*)\.o([^u])?/_build\/\1.mk\2/') | (sed -E 's/([^ ]*.hpp)/_build\/\1.pch/g') > $@
+$(ALL_HEADER_FILES:%.hpp=_build/%.mk): _build/%.mk : %.hpp
+	($(COMPILE) -MM $^) | (sed -E 's/([^ ]*)\.o([^u])?/_build\/\1.mk\2/') | (sed -E 's/([^ ]*.hpp)/_build\/\1.pch/g') > $@
 
 #include prereq makefiles
 -include $(ALL_AUTO_MAKEFILES)
@@ -43,9 +43,9 @@ $(ALL_AUTO_MAKEFILES): _build/%.mk : %.cpp
 -include $(wildcard _build/test/*.mk)
 
 
-# #precompile headers
-# $(ALL_PCH_FILES): _build/%.hpp.pch : %.hpp _build/%.mk
-# 	$(COMPILE) -c $^ -o $@
+#precompile headers
+$(ALL_PCH_FILES): _build/%.hpp.pch : %.hpp _build/%.mk
+	$(COMPILE) -c $^ -o $@
 
 #compile object files
 $(ALL_OBJ_FILES): _build/%.o : %.cpp
@@ -55,8 +55,8 @@ $(ALL_OBJ_FILES): _build/%.o : %.cpp
 #_build types of file
 .PHONY: makefiles
 makefiles: $(ALL_AUTO_MAKEFILES) $(ALL_HEADER_FILES:%.hpp=_build/%.mk)
-# .PHONY: headers
-# headers: $(ALL_PCH_FILES)
+.PHONY: headers
+headers: $(ALL_PCH_FILES)
 .PHONY: objects
 objects: $(ALL_OBJ_FILES)
 

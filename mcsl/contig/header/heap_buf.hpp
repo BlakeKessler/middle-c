@@ -78,7 +78,7 @@ template<typename T, uint _capacity> T* mcsl::heap_buf<T,_capacity>::push_back(c
    if (_size >= _capacity) {
       return nullptr;
    }
-   return new (_buf + (_size++)) T{std::forward<decltype(obj)>(obj)};
+   return new (begin() + (_size++)) T{std::forward<decltype(obj)>(obj)};
 }
 template<typename T, uint _capacity> bool mcsl::heap_buf<T,_capacity>::pop_back() {
    if (!_size) {
@@ -93,15 +93,13 @@ template<typename T, uint _capacity> T* mcsl::heap_buf<T,_capacity>::emplace(con
       mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i, nameof(), _size);
       return nullptr;
    }
-   std::construct_at(_buf + i, std::forward<decltype(args)>(args)...);
-   return _buf + i;
+   return new (begin() + i) T{args...};
 }
 template<typename T, uint _capacity> T* mcsl::heap_buf<T,_capacity>::emplace_back(auto&&... args) {
    if (_size >= _capacity) {
       return nullptr;
    }
-   std::construct_at(_buf + _size, std::forward<decltype(args)>(args)...);
-   return _buf + (_size++);
+   return new (begin() + (_size++)) T{args...};
 }
 
 

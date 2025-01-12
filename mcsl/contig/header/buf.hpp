@@ -62,15 +62,14 @@ template<typename T, uint _capacity> T* mcsl::buf<T,_capacity>::push_back(T&& ob
    if (_size >= _capacity) {
       return nullptr;
    }
-   new (&_buf[_size++]) T{std::forward<decltype(obj)>(obj)};
+   _buf[_size] = obj;
    return _buf + (_size++);
 }
 template<typename T, uint _capacity> T* mcsl::buf<T,_capacity>::push_back(const T& obj) {
    if (_size >= _capacity) {
       return nullptr;
    }
-   _buf[_size] = obj;
-   return _buf + (_size++);
+   return new (begin() + (_size++)) T{std::forward<decltype(obj)>(obj)};
 }
 template<typename T, uint _capacity> bool mcsl::buf<T,_capacity>::pop_back() {
    if (!_size) {
@@ -86,16 +85,13 @@ template<typename T, uint _capacity> T* mcsl::buf<T,_capacity>::emplace(const ui
       return nullptr;
    }
    
-   return new (_buf + i) T{args...};
-   // std::construct_at(_buf + i, std::forward<decltype(args)>(args)...);
-   // return _buf + i;
+   return new (begin() + i) T{args...};
 }
 template<typename T, uint _capacity> T* mcsl::buf<T,_capacity>::emplace_back(auto&&... args) {
    if (_size >= _capacity) {
       return nullptr;
    }
-   std::construct_at(_buf + _size, std::forward<decltype(args)>(args)...);
-   return _buf + (_size++);
+   return new (begin() + _size) T{args...};
 }
 
 

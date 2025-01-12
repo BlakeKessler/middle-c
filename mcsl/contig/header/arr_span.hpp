@@ -46,8 +46,7 @@ template<typename T> constexpr T* mcsl::arr_span<T>::emplace(const uint i, auto&
       mcsl_throw(ErrCode::SEGFAULT, "emplace at \033[4m%u\033[24m in %s of size \033[4m%u\033[24m", i,nameof(),_size);
       return nullptr;
    }
-   std::construct_at(_buf + i, std::forward<decltype(args)>(args)...);
-   return _buf + i;
+   return new (begin() + i) T{args...};
 }
 
 #pragma endregion src
