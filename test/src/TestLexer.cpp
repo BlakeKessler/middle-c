@@ -28,6 +28,7 @@ int main(int argc, char** argv) {
 
 
    //tokenize
+   std::printf("\nLexing file.\n");
    clef::SourceTokens tokens = clef::Lexer::LexSource(std::move(src));
 
    //print tokens

@@ -2,6 +2,7 @@
 #define TOKEN_CPP
 
 #include "Token.hpp"
+#include "assert.hpp"
 
 #include <cstdio>
 #ifdef MCSL
@@ -54,7 +55,7 @@ void clef::Token::printf() const {
          }
          break;
       
-      default: std::unreachable();
+      default: UNREACHABLE;
    }
 }
 

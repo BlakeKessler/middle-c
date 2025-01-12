@@ -14,6 +14,7 @@ ALL_PCH_FILES := $(ALL_HEADER_FILES:%=_build/%.pch)
 #compiler
 COMPILER := clang++ -std=c++23
 FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name -Wno-gcc-compat -Wno-trigraphs
+# FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name -Wno-gcc-compat -Wno-trigraphs -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
 # COMPILER := g++-14 -std=c++23
 # FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -Wno-trigraphs
 
@@ -45,7 +46,7 @@ $(ALL_HEADER_FILES:%.hpp=_build/%.mk): _build/%.mk : %.hpp
 
 #precompile headers
 $(ALL_PCH_FILES): _build/%.hpp.pch : %.hpp _build/%.mk
-	$(COMPILE) -c $^ -o $@
+	$(COMPILE) -c $< -o $@
 
 #compile object files
 $(ALL_OBJ_FILES): _build/%.o : %.cpp
