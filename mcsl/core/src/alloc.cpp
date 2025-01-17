@@ -25,7 +25,7 @@ template<typename T> [[gnu::malloc]] T* mcsl::malloc(const uint itemCount) {
    if (!itemCount) { return nullptr; }
    T* ptr;
    if constexpr (is_t<T,void>) {
-      ptr = std::malloc(itemCount * sizeof(byte));
+      ptr = std::malloc(itemCount * sizeof(ubyte));
    } else {
       ptr = static_cast<T*>(std::malloc(itemCount * sizeof(T)));
    }
@@ -37,7 +37,7 @@ template<typename T> [[gnu::malloc]] T* mcsl::calloc(const uint itemCount) {
    if (!itemCount) { return nullptr; }
    T* ptr;
    if constexpr (is_t<T,void>) {
-      ptr = std::calloc(itemCount, sizeof(byte));
+      ptr = std::calloc(itemCount, sizeof(ubyte));
    } else {
       ptr = static_cast<T*>(std::calloc(itemCount, sizeof(T)));
    }
@@ -49,7 +49,7 @@ template<typename T> [[gnu::malloc]] T* mcsl::dalloc(const uint itemCount) {
    if (!itemCount) { return nullptr; }
    T* ptr;
    if constexpr (is_t<T,void>) {
-      ptr = std::malloc(itemCount * sizeof(byte));
+      ptr = std::malloc(itemCount * sizeof(ubyte));
    } else {
       ptr = static_cast<T*>(std::malloc(itemCount * sizeof(T)));
    }
@@ -64,7 +64,7 @@ template<typename T> [[gnu::malloc]] T* mcsl::realloc(T* buf, const uint newItem
    if (!newItemCount) { return nullptr; }
    T* ptr;
    if constexpr (is_t<T,void>) {
-      ptr = std::realloc(buf, newItemCount * sizeof(byte));
+      ptr = std::realloc(buf, newItemCount * sizeof(ubyte));
    } else {
       ptr = static_cast<T*>(std::realloc(buf, newItemCount * sizeof(T)));
    }

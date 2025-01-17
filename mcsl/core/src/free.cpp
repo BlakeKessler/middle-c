@@ -7,9 +7,7 @@
 
 //!deallocate dynamically allocated memory
 void mcsl::free(void* ptr) {
-   if(ptr) {
-      std::free(ptr);
-   }
+   std::free(ptr);
 }
 
 #endif //MCSL_FREE_CPP

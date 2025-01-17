@@ -25,7 +25,7 @@ struct alignas(8) clef::OpData {
 
       constexpr uint size() const { return _opStr.size(); }
       constexpr OpID opID() const { return _id; }
-      constexpr byte precedence() const { return +(OpProps::__PRECEDENCE_BITS & _props); }
+      constexpr ubyte precedence() const { return +(OpProps::__PRECEDENCE_BITS & _props); }
       constexpr OpProps props() const { return _props; }
       constexpr TokenType tokType() const { return _tokType; }
       constexpr auto toString() const { return _opStr; }

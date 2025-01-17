@@ -25,18 +25,24 @@ using sint64  = int64_t;
 using sint128 = __int128_t;
 
 //!ARCHITECTURE-BASED INTEGER TYPES
-using byte = uint8;
-using word = uint64;
 
+using ubyte     = uint8;
 using ushort    = uint16;
 using uint      = uint32;
 using ulong     = uint64;
 using uoverlong = uint128; //must be large enough to hold the full result of long multiplication
 
+using uptr  = uintptr_t;
+using uword = uint64;
+
+using sbyte     = sint8;
 using sshort    = sint16;
 using sint      = sint32;
 using slong     = sint64;
 using soverlong = sint128; //must be large enough to hold the full result of long multiplication
+
+using sptr  = intptr_t;
+using sword = slong;
 
 //!FIXED-WIDTH FLOATING-POINT TYPES
 // using float16  = std::float16_t;

@@ -17,19 +17,19 @@ template<typename T> mcsl::dyn_arr<T>& clef::allocator::at(const index<T> i) {
 
 template<typename T> clef::index<T> clef::allocator::alloc() {
    index<T> i = _bufBuf.size();
-   _bufBuf.push_back(mcsl::dyn_arr<byte>{});
+   _bufBuf.push_back(mcsl::dyn_arr<ubyte>{});
    return i;
 }
 
 template<typename T> clef::index<T> clef::allocator::emplaceBuf(mcsl::is_t<T> auto... initList) {
    index<T> i = _bufBuf.size();
-   _bufBuf.push_back(reinterpret_cast<mcsl::dyn_arr<byte>>(mcsl::dyn_arr<T>{initList...}));
+   _bufBuf.push_back(reinterpret_cast<mcsl::dyn_arr<ubyte>>(mcsl::dyn_arr<T>{initList...}));
    return i;
 }
 
 template<typename T> clef::index<T> clef::allocator::takeOwnershipOf(mcsl::dyn_arr<T>&& buf) {
    index<T> i = _bufBuf.size();
-   _bufBuf.push_back(reinterpret_cast<mcsl::dyn_arr<byte>&>(buf));
+   _bufBuf.push_back(reinterpret_cast<mcsl::dyn_arr<ubyte>&>(buf));
    buf.release();
    return i;
 }

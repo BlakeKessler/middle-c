@@ -116,11 +116,11 @@ struct mcsl::str_base : public contig_base<char_t> {
 
 //hashing
 template<mcsl::str_t str_t> struct std::hash<str_t> {
-   word operator()(const str_t& str) const noexcept { //FNV HASH
-      word hash = 0;
+   uword operator()(const str_t& str) const noexcept { //FNV HASH
+      uword hash = 0;
       for (uint i = str.size(); i;) {
          --i;
-         hash = (hash << 8) + (uint8_t)(str[i]);
+         hash = (hash << 8) + (uint8)(str[i]);
          // hash = (hash << 8) + (byte)(str[i]);
       }
       return hash;

@@ -27,7 +27,7 @@ namespace mcsl {
    class dyn_str_span;
    template<uint _size> class raw_str;
    class raw_str_span;
-   template<uint _size, typename size_t = byte> class raw_buf_str;
+   template<uint _size, typename size_t = ubyte> class raw_buf_str;
 
    struct str_hash_func;
    template<typename T> struct hash_func;
