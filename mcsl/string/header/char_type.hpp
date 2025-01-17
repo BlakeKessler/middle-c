@@ -7,7 +7,7 @@
 //!NOTE: implement character locales as a singleton
 namespace mcsl {
    //char/string const
-   constexpr byte ASCII_CASE_BIT = 'a' ^ 'A';
+   constexpr char ASCII_CASE_BIT = 'a' ^ 'A';
 
    constexpr inline char to_lower(const char ch) {
       return ch | ASCII_CASE_BIT;

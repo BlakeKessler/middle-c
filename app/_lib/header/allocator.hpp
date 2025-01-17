@@ -12,7 +12,7 @@
 //  should probably also make that only active in debug mode for efficiency
 class clef::allocator {
    private:
-      mcsl::dyn_arr<mcsl::dyn_arr<byte>> _bufBuf;
+      mcsl::dyn_arr<mcsl::dyn_arr<ubyte>> _bufBuf;
    public:
       static allocator* active;
       

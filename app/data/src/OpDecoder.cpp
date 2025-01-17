@@ -68,7 +68,7 @@ template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef:
 
 [[gnu::const]] constexpr auto clef::GetAllOplikesData() {
    using enum clef::OpProps;
-   byte prec = +__PRECEDENCE_BITS;
+   ubyte prec = +__PRECEDENCE_BITS;
    return OpDecoder{
       OpData("#",     OpID::PREPROCESSOR, makeOpProps(PREFIX, prec), TokenType::PREPROC_INIT),
       OpData("::",    OpID::SCOPE_RESOLUTION, makeOpProps(INFIX_LEFT, prec), TokenType::OP),  //scope resolution

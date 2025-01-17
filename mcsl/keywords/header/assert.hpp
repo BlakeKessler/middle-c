@@ -3,6 +3,8 @@
 
 #include "MCSL.hpp"
 
+//!NOTE: maybe rewrite using [std::source_location](https://en.cppreference.com/w/cpp/utility/source_location)
+
 #ifndef assert
    #define assert(expr) (static_cast<bool>(expr) ? void(0) : mcsl::__assert_fail(__FILE__, __LINE__, __func__, #expr))
 #endif
