@@ -9,6 +9,7 @@
 
 #include "char_type.hpp"
 #include "str_to_num.hpp"
+#include "unreachable.hpp"
 
 //!creates a SourceTokens from results of file reader
 clef::SourceTokens clef::Lexer::LexSource(Source&& src) {

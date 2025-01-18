@@ -13,7 +13,7 @@ struct alignas(8) clef::KeywordSpec {
    public:
       constexpr KeywordSpec():_id{},_str{} {}
       template<mcsl::str_t str_t> constexpr KeywordSpec(const str_t& str, const KeywordID id)
-         :_id{id},_str{str} { assert(str.size() <= MAX_KEYWORD_LEN); }
+         :_id{id},_str{str} {}
       
       constexpr uint size() const { return _str.size(); }
       constexpr const mcsl::raw_str_span toString() const { return mcsl::raw_str_span(const_cast<mcsl::raw_buf_str<14>&>(_str)); }
