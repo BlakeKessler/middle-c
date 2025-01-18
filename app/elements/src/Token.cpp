@@ -2,7 +2,7 @@
 #define TOKEN_CPP
 
 #include "Token.hpp"
-#include "assert.hpp"
+#include "unreachable.hpp"
 
 #include <cstdio>
 #ifdef MCSL

@@ -4,6 +4,7 @@
 #include "OpDecoder.hpp"
 
 #include "raw_str_span.hpp"
+#include "assert.hpp"
 #include <algorithm>
 
 template <uint _size> template <mcsl::is_t<clef::OpData>... Argv_t>
@@ -26,7 +27,7 @@ requires ( sizeof...(Argv_t) == _size )
 
       while (++it < bufEnd) { //!NOTE: TEST THIS
          if (it->opID() == back->opID()) {
-            assert(it->combineWith(*back));
+            assert(it->combineWith(*back), "invalid operator combination (conflicting strings or precedences)");
          } else {
             *++back = *it;
          }
@@ -56,10 +57,11 @@ template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef:
 
    //find operator group
    const auto bucketBounds = self[str[0]];
-   assert(str[0] == _opBuf[bucketBounds.first].toString()[0]); //check that the first character is correct
-   for (uint i = bucketBounds.first; i < bucketBounds.second; ++i) {
-      if (!_opBuf[i].toString().substrcmp(str)) {
-         return _opBuf[i];
+   if (str[0] == _opBuf[bucketBounds.first].toString()[0]) { //check that the first character is correct
+      for (uint i = bucketBounds.first; i < bucketBounds.second; ++i) {
+         if (!_opBuf[i].toString().substrcmp(str)) {
+            return _opBuf[i];
+         }
       }
    }
    //no operator group found - return null group

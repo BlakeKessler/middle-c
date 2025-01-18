@@ -322,7 +322,7 @@ namespace clef {
    constexpr uint8 precedence(const OpProps x) { return +(x & OpProps::__PRECEDENCE_BITS); }
    constexpr bool isBinary(const OpProps x) { return +(x & OpProps::CAN_BE_BINARY); }
    constexpr OpProps makeOpProps(const bool canBePostfix, const bool canBePrefix, const bool canBeBinary, const bool isLeftAssocWhenBinary, const uint8 precedence) {
-      assert(precedence == (precedence & +OpProps::__PRECEDENCE_BITS)); //maybe make debug_assert?
+      assert(precedence <= +OpProps::__PRECEDENCE_BITS, "precedence value overflows into property flag bits"); //maybe make debug_assert
       OpProps post = canBePostfix ? OpProps::CAN_BE_POSTFIX : OpProps::NULL;
       OpProps pre  = canBePrefix  ? OpProps::CAN_BE_PREFIX  : OpProps::NULL;
       OpProps bin  = canBeBinary  ? OpProps::CAN_BE_BINARY  : OpProps::NULL;
@@ -330,14 +330,14 @@ namespace clef {
       return post | pre | bin | left | (OpProps)precedence;
    }
    constexpr OpProps makeOpProps(const uint8 flags, const uint8 precedence) {
-      assert(flags      == (flags      & +OpProps::__PRECEDENCE_BITS)); //maybe make debug_assert?
-      assert(precedence == (precedence & +OpProps::__PRECEDENCE_BITS)); //maybe make debug_assert?
+      assert(flags      <= +OpProps::__PRECEDENCE_BITS, "property flag bits underflow into precedence bits"); //maybe make debug_assert
+      assert(precedence <= +OpProps::__PRECEDENCE_BITS, "precedence value overflows into property flag bits"); //maybe make debug_assert
 
       return (OpProps)((flags << 4) | precedence);
    }
    constexpr OpProps makeOpProps(const OpProps flags, const uint8 precedence) {
-      assert(flags      == (flags      & ~OpProps::__PRECEDENCE_BITS)); //maybe make debug_assert?
-      assert(precedence == (precedence & +OpProps::__PRECEDENCE_BITS)); //maybe make debug_assert?
+      assert(+flags     >  +OpProps::__PRECEDENCE_BITS, "property flag bits underflow into precedence bits"); //maybe make debug_assert
+      assert(precedence <= +OpProps::__PRECEDENCE_BITS, "precedence value overflows into property flag bits"); //maybe make debug_assert
 
       return (OpProps)(+flags | precedence);
    }
