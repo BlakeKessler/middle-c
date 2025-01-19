@@ -281,7 +281,7 @@ char clef::Lexer::parseChar(char*& curr, char* const end) {
             #pragma region numescseq
             case 'b': case 'B': { //1-8 binary digits
                char* numBegin = ++curr;
-               char* numEnd = numBegin + 8;
+               char* numEnd = numBegin + MAX_BIN_CHAR_LIT_DIGITS;
                while (curr < end && curr < numEnd) {
                   if (!mcsl::is_digit(*curr, 2)) {
                      numEnd = curr;
@@ -296,7 +296,7 @@ char clef::Lexer::parseChar(char*& curr, char* const end) {
             case 'o': case 'O': { //1-3 octal digits
                //extract digit sequence
                char* numBegin = ++curr;
-               char* numEnd = numBegin + 3;
+               char* numEnd = numBegin + MAX_OCT_CHAR_LIT_DIGITS;
                while (curr < end && curr < numEnd) {
                   if (!mcsl::is_digit(*curr, 8)) {
                      numEnd = curr;
@@ -318,7 +318,7 @@ char clef::Lexer::parseChar(char*& curr, char* const end) {
             case 'd': case 'D': { //1-3 decimal digits
                //extract digit sequence
                char* numBegin = ++curr;
-               char* numEnd = numBegin + 3;
+               char* numEnd = numBegin + MAX_DEC_CHAR_LIT_DIGITS;
                while (curr < end && curr < numEnd) {
                   if (!mcsl::is_digit(*curr, 10)) {
                      numEnd = curr;
@@ -339,7 +339,7 @@ char clef::Lexer::parseChar(char*& curr, char* const end) {
             }
             case 'x': case 'X': { //1-2 hex digits
                char* numBegin = ++curr;
-               char* numEnd = numBegin + 2;
+               char* numEnd = numBegin + MAX_HEX_CHAR_LIT_DIGITS;
                while (curr < end && curr < numEnd) {
                   if (!mcsl::is_digit(*curr, 16)) {
                      numEnd = curr;
