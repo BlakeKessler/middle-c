@@ -153,6 +153,7 @@ PUSH_NUM_TOK:
          //OPERATORS
          case '!': case '$': case '%': case '&': case '+': case ',': case '-': case '.': case '=': case '?': case '@': case '^': case '|': case '~': case '(': case ')': case '[': case ']': case '{': case '}': case '*': case '/': case '<': case '>': case ':': {
             OpData op = OPERATORS[mcsl::raw_str_span{curr, end}];
+            debug_assert(op);
             curr += op.size();
             switch (op.tokType()) {
                case TokenType::OP: toks.emplace_back(op); break;
