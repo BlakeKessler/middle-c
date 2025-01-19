@@ -228,7 +228,7 @@ PUSH_NUM_TOK:
                throwError(ErrCode::BAD_LITERAL, "unclosed string literal");
             }
             ++curr;
-            toks.emplace_back(mcsl::raw_str_span{tokBegin,curr}, PtxtType::UNPROCESSED_STR);
+            toks.emplace_back(mcsl::raw_str_span{tokBegin+1,curr-1}, PtxtType::UNPROCESSED_STR);
             break;
 
          //INTERPOLATED STRINGS
@@ -257,7 +257,7 @@ PUSH_NUM_TOK:
                throwError(ErrCode::BAD_LITERAL, "unclosed interpolated string literal");
             }
             ++curr;
-            toks.emplace_back(mcsl::raw_str_span{tokBegin,curr}, PtxtType::UNPROCESSED_STR);
+            toks.emplace_back(mcsl::raw_str_span{tokBegin+1,curr-1}, PtxtType::UNPROCESSED_STR);
             break;
          
          //UNPRINTABLE CHAR (illegal)
