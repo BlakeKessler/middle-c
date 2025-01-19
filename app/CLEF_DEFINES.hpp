@@ -11,7 +11,7 @@
 #define MAX_OPS_PER_GROUP 7
 #define MAX_KEYWORD_LEN 14
 
-#define OP_DECODER_HASH_BASE 38
+#define OP_DECODER_HASH_BASE 37
 
 //language parameters
 
