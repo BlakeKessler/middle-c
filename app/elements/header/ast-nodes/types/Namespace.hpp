@@ -3,7 +3,6 @@
 #define NAMESPACE_HPP
 
 #include "CLEF.hpp"
-#include "astNode.hpp"
 #include "ast-nodes/Type.hpp"
 
 #include "dyn_arr.hpp"

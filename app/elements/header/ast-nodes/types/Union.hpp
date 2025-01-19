@@ -3,7 +3,6 @@
 #define UNION_HPP
 
 #include "CLEF.hpp"
-#include "astNode.hpp"
 #include "ast-nodes/Type.hpp"
 
 struct clef::Union : public clef::Type {

@@ -4,6 +4,8 @@
 
 #include "CLEF.hpp"
 
+#include "ast-nodes/Statement.hpp"
+
 struct clef::TryCatch : public clef::Statement {
    private:
 

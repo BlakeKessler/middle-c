@@ -583,7 +583,7 @@ namespace clef {
 
       TYPEID,
    };
-   auto operator+(const LitType t) noexcept { return std::to_underlying(t); }
+   constexpr auto operator+(const LitType t) noexcept { return std::to_underlying(t); }
 
    //!type qualifier bitmask
    enum class [[clang::flag_enum]] TypeQualMask : uint16 {
