@@ -7,11 +7,11 @@
 
 #include "static_arr.hpp"
 #include "arr_span.hpp"
-#include "raw_str.hpp"
+#include "raw_buf_str.hpp"
 
 struct alignas(8) clef::OpData {
    private:
-      mcsl::raw_str<MAX_OP_LEN> _opStr;
+      mcsl::raw_buf_str<MAX_OP_LEN, ubyte> _opStr;
       OpID _id;
       OpProps _props;
       TokenType _tokType;
@@ -23,7 +23,7 @@ struct alignas(8) clef::OpData {
       constexpr OpData(const char str[MAX_OP_LEN + 1], const OpID id, const OpProps props, const TokenType tokType)
          :_opStr{str},_id{id},_props{+(props & OpProps::CAN_BE_BINARY) ? props : (props & ~OpProps::__PRECEDENCE_BITS)},_tokType{tokType} {}
 
-      constexpr uint size() const { return _opStr.size(); }
+      constexpr ubyte size() const { return _opStr.size(); }
       constexpr OpID opID() const { return _id; }
       constexpr ubyte precedence() const { return +(OpProps::__PRECEDENCE_BITS & _props); }
       constexpr OpProps props() const { return _props; }
