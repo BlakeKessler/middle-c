@@ -3,7 +3,7 @@
 
 #include "allocator.hpp"
 
-clef::allocator& clef::allocator::merge(allocator&& other) {
+inline clef::allocator& clef::allocator::merge(allocator&& other) {
    for (uint i = 0; i < other._bufBuf.size(); ++i) {
       _bufBuf.push_back(std::move(other._bufBuf[i]));
    }

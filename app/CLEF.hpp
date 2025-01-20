@@ -18,11 +18,13 @@ namespace clef {
    template <uint _size> struct OpDecoder;
    struct DelimPair;
    struct KeywordSpec;
-   template <uint _size> struct KeywordDecoder;
+   class KeywordDecoder;
+   // template <uint _size> struct KeywordDecoder;
 
    //atomic compilation elements
    struct Token;
    struct astNode;
+      struct Keyword;
       struct Identifier;
          struct Variable;
          struct Function;

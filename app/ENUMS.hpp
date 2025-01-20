@@ -43,6 +43,7 @@ namespace clef {
       ERROR = 0xFF,  //CLEF INTERNAL ERROR
       NONE = 0x00,   //to-be determined
 
+      KEYWORD,
       IDEN,
          VAR,
          FUNC,
@@ -378,12 +379,16 @@ namespace clef {
       USHORT,
       UINT,
       ULONG,
+      UPTR,
+      UWORD,
 
       SIGN_T         = __TYPE | __NUMERIC | __SIGNED,
       SBYTE,
       SSHORT,
       SINT,
       SLONG,
+      SPTR,
+      SWORD,
 
 
       UINT_8         = __TYPE | __NUMERIC | __FIXED_WIDTH | _8_BITS,
@@ -486,7 +491,7 @@ namespace clef {
 
       USING,
 
-      // ASM,
+      ASM,
 
       TEMPLATE,
    };

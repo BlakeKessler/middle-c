@@ -11,6 +11,7 @@
 #include "ast-nodes/Type.hpp"
 #include "ast-nodes/ForLoopParams.hpp"
 #include "ast-nodes/ForeachLoopParams.hpp"
+#include "ast-nodes/Keyword.hpp"
 #include "ast-nodes/Identifier.hpp"
 #include "ast-nodes/Statement.hpp"
 #include "ast-nodes/Variable.hpp"
@@ -45,6 +46,7 @@
 struct clef::astNode {
    private:
       union {
+         Keyword _keyword;
          Identifier _identifier;
          Variable _variable;
          Function _function;
@@ -86,6 +88,7 @@ struct clef::astNode {
       #pragma region constructor
       /*unsafe<UNINIT_MEM>*/ astNode(const NodeType type = NodeType::NONE):_nodeType{type} {}
       #define _def_ctor(varName) astNode(decltype(varName)& node):varName{node},_nodeType{node.nodeType()} {}
+      _def_ctor(_keyword)
       _def_ctor(_identifier)
       _def_ctor(_variable)
       _def_ctor(_function)

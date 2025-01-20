@@ -111,7 +111,7 @@ PUSH_NUM_TOK:
          case '_': {
             while (++curr < end && (mcsl::is_digit(*curr, 36) || *curr == '_')) {}
             mcsl::raw_str_span name{tokBegin,curr};
-            KeywordID id = ALL_KEYWORDS[name];
+            KeywordID id = decodeKeyword(name);
             if (+id) {
                toks.emplace_back(id);
             } else {

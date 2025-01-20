@@ -11,9 +11,6 @@ clef::Stmt* clef::Parser::parseStmt() {
 
    TypeQualMask quals = parseQuals();
    Identifier* begin = parseIdentifier();
-   if (!begin) {
-      logError(ErrCode::BAD_STMT, "bad statement start");   
-   }
 
 
    KeywordID keywordID = begin->keywordID();
@@ -26,6 +23,7 @@ clef::Stmt* clef::Parser::parseStmt() {
       case KeywordID::VOID    : [[fallthrough]];
       case KeywordID::AUTO    : [[fallthrough]];
       case KeywordID::_NOT_A_KEYWORD:
+         debug_assert(keywordID != KeywordID::_NOT_A_KEYWORD || !begin->scopeName());
          switch (tokIt->type()) {
             //!NOTE: UNFINISHED
          }
@@ -185,31 +183,38 @@ clef::Scope* clef::Parser::parseProcedure() {
 }
 
 clef::Identifier* clef::Parser::tryParseIdentifier(Identifier* scopeName) {
+   //handle keywords
+   if (tokIt->type() == TokenType::KEYWORD) {
+      Identifier* keyword = new (tree.allocNode(NodeType::KEYWORD)) Identifier{tokIt->keywordID()};
+      ++tokIt;
+      if (tryConsumeOperator(OpID::SCOPE_RESOLUTION)) {
+         logError(ErrCode::BAD_KEYWORD, "keywords may not name scopes");
+      }
+      return keyword;
+   }
+
+   //handle other identifiers
    if (tokIt->type() != TokenType::IDEN) { return nullptr; }
 
    Identifier* name = scopeName;
-   const Token* tmp;
 
    do {
       name = new (tree.allocNode(NodeType::IDEN)) Identifier{tokIt->name(), name};
-      tmp = ++tokIt;
-   } while (tryConsumeOperator(OpID::SCOPE_RESOLUTION) && tokIt->type() == TokenType::IDEN);
+      
+      ++tokIt;
+      if (!tryConsumeOperator(OpID::SCOPE_RESOLUTION)) { break; }
+
+      if   (tokIt->type() == TokenType::KEYWORD) { logError(ErrCode::BAD_IDEN, "keywords may not name or be members of scopes"); }
+      else if (tokIt->type() != TokenType::IDEN) { logError(ErrCode::BAD_IDEN, "only identifiers may name or be members of scopes (%hhu)", +tokIt->type()); }
+   } while (true);
    
-   tokIt = tmp;
    return name;
 }
 clef::Identifier* clef::Parser::parseIdentifier(Identifier* scopeName) {
-   if (tokIt->type() != TokenType::IDEN) { logError(ErrCode::BAD_IDEN, "bad IDENTIFIER"); }
-
-   Identifier* name = scopeName;
-   const Token* tmp;
-
-   do {
-      name = new (tree.allocNode(NodeType::IDEN)) Identifier{tokIt->name(), name};
-      tmp = ++tokIt;
-   } while (tryConsumeOperator(OpID::SCOPE_RESOLUTION) && tokIt->type() == TokenType::IDEN);
-   
-   if (tokIt != tmp || name == scopeName) { logError(ErrCode::BAD_IDEN, "bad IDENTIFIER"); }
+   Identifier* name = tryParseIdentifier(scopeName);
+   if (!name) {
+      logError(ErrCode::BAD_IDEN, "expected an identifier");
+   }
    return name;
 }
 clef::Type* clef::Parser::parseTypename(Identifier* scopeName) {
@@ -257,8 +262,7 @@ clef::Loop* clef::Parser::parseForeachLoop() {
 
    //iterator declaration
    TypeQualMask quals = parseQuals();
-   Type* itType = (Type*)parseIdentifier();
-      ((astNode*)itType)->upCast(NodeType::TYPE);
+   Type* itType = parseTypename();
    Identifier* itName = parseIdentifier();
 
    //IN operator
@@ -563,8 +567,7 @@ clef::Union* clef::Parser::parseUnion() {
    ParameterList* members = new (tree.allocNode(NodeType::PARAM_LIST)) ParameterList{tree.allocBuf<Variable*>()};
    while (!tryConsumeOperator(OpID::LIST_CLOSE)) {
       //parse member
-      Type* memberType = (Type*)parseIdentifier();
-         ((astNode*)memberType)->upCast(NodeType::TYPE);
+      Type* memberType = parseTypename();
       Identifier* memberName = parseIdentifier();
       consumeEOS("bad UNION member");
       
@@ -588,8 +591,7 @@ clef::Enum* clef::Parser::parseEnum() {
    Identifier* name = tryParseIdentifier();
    Type* baseType;
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
-      baseType = (Type*)parseIdentifier();
-         ((astNode*)baseType)->upCast(NodeType::TYPE);
+      baseType = parseTypename();
    } else { baseType = nullptr; }
 
    if (tryConsumeEOS()) { //forward declaration

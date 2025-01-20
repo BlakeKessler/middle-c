@@ -20,9 +20,9 @@ class clef::allocator {
       allocator(allocator&& other):_bufBuf{std::move(other._bufBuf)} { other._bufBuf.release(); }
       allocator(allocator&) = delete;
 
-      allocator& merge(allocator&& other);
+      inline allocator& merge(allocator&& other);
 
-      void free() { _bufBuf.free(); }
+      inline void free() { _bufBuf.free(); }
 
       template<typename T> mcsl::dyn_arr<T>& at(const index<T>);
 

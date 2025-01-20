@@ -2,14 +2,12 @@
 #define IDENTIFIER_CPP
 
 #include "ast-nodes/Identifier.hpp"
-#include "KeywordData.hpp"
 
-clef::KeywordID clef::Identifier::keywordID() const {
-   KeywordID id = decodeKeyword(_name);
-   if (+id && _scopeName) {
-      throwError(ErrCode::BAD_IDEN, "cannot use keyword with scope resolution");
+bool clef::Identifier::operator==(const Identifier& other) const {
+   if (+_keywordID || +other._keywordID) {
+      return _keywordID == other._keywordID;
    }
-   return id;
+   return sameName(other) && sameScope(other);
 }
 
 #endif //IDENTIFIER_CPP
