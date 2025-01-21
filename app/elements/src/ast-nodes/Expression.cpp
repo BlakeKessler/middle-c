@@ -12,6 +12,14 @@ clef::Expression::Expression(OpID op, astNode* lhs, astNode* rhs):
    _lhs{lhs},_rhs{rhs},_extra{} {
 
 }
+clef::Expression::Expression(OpID op, Type* type, ArgList* ctorArgs):
+   _op{op},
+   _lhsType{NodeType::TYPE},
+   _rhsType{NodeType::ARG_LIST},
+   _extraType{NodeType::NONE},
+   _lhs{type},_rhs{ctorArgs},_extra{} {
+      debug_assert(op == OpID::CALL_INVOKE || op == OpID::LIST_INVOKE);
+}
 clef::Expression::Expression(OpID op, astNode* lhs, astNode* rhs, astNode* extra):
    _op{op},
    _lhsType{lhs?lhs->nodeType():NodeType::NONE},

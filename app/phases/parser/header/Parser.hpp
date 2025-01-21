@@ -25,30 +25,38 @@ class clef::Parser {
 
       /*inline*/ bool consumeKeyword(const KeywordID, const char* errStr);
       /*inline*/ bool consumeOperator(const OpID, const char* errStr);
+      /*inline*/ bool consumeBlockDelim(const BlockType, const BlockDelimRole, const char* errStr);
       /*inline*/ bool consumeEOS(const char* errStr);
 
       /*inline*/ bool tryConsumeKeyword(const KeywordID);
       /*inline*/ bool tryConsumeOperator(const OpID);
+      /*inline*/ bool tryConsumeBlockDelim(const BlockType, const BlockDelimRole);
       /*inline*/ bool tryConsumeEOS();
 
       //parsing functions
       Expr* parseExpr();
       Expr* parseExprNoPrimaryComma(); //expression that cannot have the comma operator as its principal connective
       Stmt* parseStmt();
+      Stmt* parsePreprocStmt();
       Scope* parseProcedure();
-      ArgList* parseArgList(const OpID closer);
+      ArgList* parseArgList(const BlockType closer);
+      ParamList* parseParamList(const BlockType closer);
+
+      Expr* parseCast(const KeywordID);
 
       void skipBlockComment();
       void skipLineComment();
 
-      TypeQualMask parseQuals();
+      TypeQualMask parseQuals(const TypeQualMask illegalQuals = {});
 
       Identifier* tryParseIdentifier(Identifier* scopeName = {});
       Identifier* parseIdentifier(Identifier* scopeName = {});
       Decl* parseDecl(Identifier* scopeName = {});
+      Function* parseFuncDecl(Identifier* scopeName = {});
       Stmt* parseForwardDecl(Identifier* scopeName = {});
       Stmt* parseDeclStmt(Identifier* scopeName = {});
       Type* parseTypename(Identifier* scopeName = {});
+      Variable* parseVariable(Identifier* scopeName = {});
 
       Loop* parseForLoop();
       Loop* parseForeachLoop();

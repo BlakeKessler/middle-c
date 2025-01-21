@@ -37,6 +37,12 @@ struct clef::Expression {
       Expression(OpID op, Identifier* lhs, Expr* rhs);
       Expression(OpID op, Expr* lhs, Identifier* rhs);
       Expression(OpID op, Identifier* lhs, Identifier* rhs);
+      Expression(OpID op, Type* type, ArgList* ctorArgs);
+      Expression(OpID unaryOp, Expr* lhs);
+      Expression(OpID unaryOp, Identifier* lhs);
+      Expression(OpID nullaryOp);
+      Expression(KeywordID oplikeKeyword, Expr* operand = {});
+      Expression(KeywordID funclikeKeyword, ArgList* args);
       
       Expression(OpID op, astNode* lhs, astNode* rhs);
       Expression(OpID op, astNode* lhs, astNode* rhs, astNode* extra);

@@ -138,17 +138,17 @@ namespace clef {
          BLOCK_CMNT_CLOSE,
 
       CALL_INVOKE, //parens
-         CALL_OPEN,
-         CALL_CLOSE,
+         // CALL_OPEN,
+         // CALL_CLOSE,
       SUBSCRIPT_INVOKE, //square brackets
-         SUBSCRIPT_OPEN,
-         SUBSCRIPT_CLOSE,
+         // SUBSCRIPT_OPEN,
+         // SUBSCRIPT_CLOSE,
       LIST_INVOKE, //curly brackets
-         LIST_OPEN,
-         LIST_CLOSE,
+         // LIST_OPEN,
+         // LIST_CLOSE,
       SPECIALIZER_INVOKE, //triangle brackets
-         SPECIALIZER_OPEN,
-         SPECIALIZER_CLOSE,
+         // SPECIALIZER_OPEN,
+         // SPECIALIZER_CLOSE,
 
 
       PREPROCESSOR,
@@ -232,6 +232,9 @@ namespace clef {
       WHILE,
       DO_WHILE,
 
+      GOTO,
+      GOTO_CASE,
+
       IF,
 
       SWITCH,
@@ -239,6 +242,14 @@ namespace clef {
 
       TRY_CATCH,
       ASM,
+
+      BREAK,
+      CONTINUE,
+      
+      THROW,
+      ASSERT,
+      STATIC_ASSERT,
+      RETURN,
 
       //other pseudo-operators
       DECL,
@@ -283,15 +294,7 @@ namespace clef {
    constexpr bool isMatch(const OpID op) { return op == OpID::MATCH; }
 
    constexpr bool isStringLike(const OpID op) { return op == OpID::STRING || op == OpID::CHAR; }
-   constexpr bool isOpener(const OpID op) { return op == OpID::CALL_OPEN || op == OpID::SUBSCRIPT_OPEN || op == OpID::LIST_OPEN || op == OpID::SPECIALIZER_OPEN; }
-   constexpr OpID getCloser(const OpID opener) {
-      debug_assert(isOpener(opener));
-      return (OpID)(+opener + 1);
-   }
-   constexpr OpID getInvoker(const OpID opener) {
-      debug_assert(isOpener(opener));
-      return (OpID)(+opener - 1);
-   }
+   constexpr OpID getInvoker(const BlockType t);
 
    //operator properties bitmask
    enum class [[clang::flag_enum]] OpProps : uint8 {
@@ -511,6 +514,9 @@ namespace clef {
       constexpr bool isCast(const KeywordID id) noexcept { return ~(+id & (+KeywordID::__TYPE_ADJACENT | +KeywordID::__CAST)) & (+KeywordID::__TYPE | +KeywordID::__OBJECT_TYPE | +KeywordID::__QUALIFIER); }
    constexpr bool isControlFlow(const KeywordID id) noexcept { return ~(+id & +KeywordID::__CONTROL_FLOW) & +KeywordID::__NUMERIC_TYPE; }
    constexpr bool isUnspec(const KeywordID id) noexcept { return +id < +KeywordID::___LAST_SPEC; }
+   
+   constexpr bool isValue(const KeywordID id) noexcept;
+   constexpr bool isC_FunctionLike(const KeywordID id) noexcept; //no specializer parameters
    #pragma endregion keyword
 
    //delimiter pair specification

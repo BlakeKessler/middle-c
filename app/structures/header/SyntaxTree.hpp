@@ -27,6 +27,9 @@ class clef::SyntaxTree {
       astNode* root() { return _root; }
       const astNode* root() const { return _root; }
 
+      constexpr FundType* getFundType(const KeywordID fundTypeKeyword);
+      constexpr Expr* getValueKeyword(const KeywordID valueKeyword);
+
       void printf() const;
       void print() const;
 
