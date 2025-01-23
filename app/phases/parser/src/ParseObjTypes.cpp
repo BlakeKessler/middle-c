@@ -39,7 +39,7 @@ clef::Class* clef::Parser::parseClass() {
          continue;
       }
       MEMB_VAR_DECL:
-      spec->members().push_back(parseVariable()); //!NOTE: does not account for static functions
+      spec->members().push_back(parseVariable()); //!NOTE: does not yet account for static functions
    }
 
    //EOS

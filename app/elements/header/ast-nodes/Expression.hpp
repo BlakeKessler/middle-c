@@ -25,23 +25,24 @@ struct clef::Expression {
       // friend struct Asm;
 
       Expression(OpID op, NodeType lhsType, NodeType rhsType, NodeType extraType, void* lhs, void* rhs, void* extra):_op{op},_lhsType{lhsType},_rhsType{rhsType},_extraType{extraType},_lhs{lhs},_rhs{rhs},_extra{extra} {}
-      Expression(OpID op, NodeType lhsType, NodeType rhsType, void* lhs, void* rhs):_op{op},_lhsType{lhsType},_rhsType{rhsType},_extraType{NodeType::NONE},_lhs{lhs},_rhs{rhs},_extra{nullptr} {}
-      template<astNode_t lhs_t, astNode_t rhs_t, astNode_t extra_t> Expression(OpID op, lhs_t* lhs, rhs_t* rhs, rhs_t* extra):
+      Expression(OpID op, NodeType lhsType, NodeType rhsType, void* lhs, void* rhs):Expression{op, lhsType, rhsType, NodeType::NONE, lhs, rhs, nullptr} {}
+      Expression(OpID op, NodeType lhsType, void* lhs):Expression{op, lhsType, NodeType::NONE, lhs, nullptr} {}
+      template<astNode_t lhs_t, astNode_t rhs_t, astNode_t extra_t> Expression(OpID op, lhs_t* lhs, rhs_t* rhs, extra_t* extra):
          _op{op},_lhsType{lhs_t::nodeType()},_rhsType{rhs_t::nodeType()},_extraType{extra_t::nodeType()},
          _lhs{lhs},_rhs{rhs},_extra{extra} {}
    public:
       static constexpr NodeType nodeType() { return NodeType::EXPR; }
 
       Expression():_op{},_lhsType{},_rhsType{},_lhs{},_rhs{} {}
-      Expression(OpID op, Expr* lhs, Expr* rhs);
-      Expression(OpID op, Identifier* lhs, Expr* rhs);
-      Expression(OpID op, Expr* lhs, Identifier* rhs);
-      Expression(OpID op, Identifier* lhs, Identifier* rhs);
-      Expression(OpID op, Type* type, ArgList* ctorArgs);
-      Expression(OpID unaryOp, Expr* lhs);
-      Expression(OpID unaryOp, Identifier* lhs);
+
+      template<operand_t lhs_t, operand_t rhs_t> Expression(OpID binaryOp, lhs_t* lhs, rhs_t* rhs):Expression{binaryOp, lhs_t::nodeType(), rhs_t::nodeType(), lhs, rhs} {}
+      template<operand_t lhs_t>Expression(OpID unaryOp, lhs_t* lhs):Expression{unaryOp, lhs_t::nodeType(), lhs} {}
       Expression(OpID nullaryOp);
-      Expression(KeywordID oplikeKeyword, Expr* operand = {});
+
+      Expression(OpID op, Type* type, ArgList* ctorArgs);
+      
+      Expression(KeywordID oplikeKeyword);
+      template<operand_t lhs_t>Expression(KeywordID oplikeKeyword, lhs_t* operand);
       Expression(KeywordID funclikeKeyword, ArgList* args);
       
       Expression(OpID op, astNode* lhs, astNode* rhs);
