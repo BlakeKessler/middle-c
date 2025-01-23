@@ -34,8 +34,8 @@ class clef::Parser {
       /*inline*/ bool tryConsumeEOS();
 
       //parsing functions
-      Expr* parseExpr();
-      Expr* parseExprNoPrimaryComma(); //expression that cannot have the comma operator as its principal connective
+      Expr* parseExpr(astNode* initOperand = {});
+      Expr* parseExprNoPrimaryComma(astNode* initOperand = {}); //expression that cannot have the comma operator as its principal connective
       Stmt* parseStmt();
       Stmt* parsePreprocStmt();
       Scope* parseProcedure();
@@ -51,12 +51,14 @@ class clef::Parser {
 
       Identifier* tryParseIdentifier(Identifier* scopeName = {});
       Identifier* parseIdentifier(Identifier* scopeName = {});
+      Decl* parseDecl(Type* type, Identifier* scopeName = {});
       Decl* parseDecl(Identifier* scopeName = {});
       Function* parseFuncDecl(Identifier* scopeName = {});
       Stmt* parseForwardDecl(Identifier* scopeName = {});
       Stmt* parseDeclStmt(Identifier* scopeName = {});
       Type* parseTypename(Identifier* scopeName = {});
       Variable* parseVariable(Identifier* scopeName = {});
+      mcsl::pair<Variable*,Decl*> parseVarDecl(Identifier* scopeName = {});
 
       Loop* parseForLoop();
       Loop* parseForeachLoop();

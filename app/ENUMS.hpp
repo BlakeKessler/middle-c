@@ -138,17 +138,17 @@ namespace clef {
          BLOCK_CMNT_CLOSE,
 
       CALL_INVOKE, //parens
-         // CALL_OPEN,
-         // CALL_CLOSE,
+         CALL_OPEN,
+         CALL_CLOSE,
       SUBSCRIPT_INVOKE, //square brackets
-         // SUBSCRIPT_OPEN,
-         // SUBSCRIPT_CLOSE,
+         SUBSCRIPT_OPEN,
+         SUBSCRIPT_CLOSE,
       LIST_INVOKE, //curly brackets
-         // LIST_OPEN,
-         // LIST_CLOSE,
+         LIST_OPEN,
+         LIST_CLOSE,
       SPECIALIZER_INVOKE, //triangle brackets
-         // SPECIALIZER_OPEN,
-         // SPECIALIZER_CLOSE,
+         SPECIALIZER_OPEN,
+         SPECIALIZER_CLOSE,
 
 
       PREPROCESSOR,
@@ -251,6 +251,8 @@ namespace clef {
       STATIC_ASSERT,
       RETURN,
 
+      ALIAS,
+
       //other pseudo-operators
       DECL,
 
@@ -294,7 +296,6 @@ namespace clef {
    constexpr bool isMatch(const OpID op) { return op == OpID::MATCH; }
 
    constexpr bool isStringLike(const OpID op) { return op == OpID::STRING || op == OpID::CHAR; }
-   constexpr OpID getInvoker(const BlockType t);
 
    //operator properties bitmask
    enum class [[clang::flag_enum]] OpProps : uint8 {
@@ -538,6 +539,7 @@ namespace clef {
       COMMENT_LINE,     //COMMENTED OUT CODE
    };
    constexpr auto operator+(const BlockType t) noexcept { return std::to_underlying(t); }
+   constexpr OpID getInvoker(const BlockType t);
    //block delimiter token role
    //!NOTE: could merge into BlockType, but that would not provide any performance advantages because significantly more bytes are going to be used for other Token types anyway
    enum class BlockDelimRole : uint8 {

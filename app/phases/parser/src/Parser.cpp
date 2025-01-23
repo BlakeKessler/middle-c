@@ -7,8 +7,6 @@
 
 clef::Stmt* clef::Parser::parseStmt() {
 START_PARSE_STMT:
-
-
    switch (tokIt->type()) {
       case TokenType::NONE        : UNREACHABLE;
       
@@ -16,12 +14,11 @@ START_PARSE_STMT:
          switch (tokIt->keywordID()) {
             case KeywordID::VOID    : [[fallthrough]];
             case KeywordID::AUTO    : [[fallthrough]];
-            default:
+            default: {
                debug_assert(isType(tokIt->keywordID()));
-               Variable* var = parseVariable();
-               //!NOTE: UNFINISHED
-               break;
-
+               auto [var, decl] = parseVarDecl();
+               return (Stmt*)decl;
+            } break;
             case KeywordID::NULLPTR : [[fallthrough]];
             case KeywordID::THIS    : [[fallthrough]];
             case KeywordID::SELF    :
@@ -99,11 +96,25 @@ START_PARSE_STMT:
                return new (tree.allocNode(NodeType::STMT)) Stmt{kw, expr};
             }
 
-            case KeywordID::USING         : break; //!NOTE: UNFINISHED
+            case KeywordID::USING         : {
+               Identifier* alias = parseIdentifier();
+               Expr* val = parseExpr((astNode*)alias);
+            }
 
             case KeywordID::_NOT_A_KEYWORD: UNREACHABLE;
          }
-      case TokenType::IDEN        : break; //!NOTE: UNFINISHED
+      case TokenType::IDEN        : {
+         astNode* tmp = (astNode*)parseIdentifier();
+         if (tokIt->type() == TokenType::IDEN) {
+            tmp->upCast(NodeType::TYPE);
+            Decl* decl = parseDecl((Type*)tmp);
+            tmp = (astNode*)decl;
+         }
+         Expr* stmtContents = parseExpr(tmp);
+         consumeEOS("invalid statement");
+         ((astNode*)stmtContents)->upCast(NodeType::STMT);
+         return (Stmt*)stmtContents;
+      }
       
       case TokenType::INT_NUM     : [[fallthrough]];
       case TokenType::REAL_NUM    : [[fallthrough]];
@@ -123,20 +134,24 @@ START_PARSE_STMT:
 
       default: UNREACHABLE;
    }
+   UNREACHABLE;
 }
 
-clef::Expr* clef::Parser::parseExpr() {
-   Expr* expr = parseExprNoPrimaryComma();
+clef::Expr* clef::Parser::parseExpr(astNode* initOperand) {
+   Expr* expr = parseExprNoPrimaryComma(initOperand);
    while (tryConsumeOperator(OpID::COMMA)) {
       expr = new (tree.allocNode(NodeType::EXPR)) Expr{OpID::COMMA, expr, parseExprNoPrimaryComma()};
    }
    return expr;
 }
-
-clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
+clef::Expr* clef::Parser::parseExprNoPrimaryComma(astNode* initOperand) {
    mcsl::dyn_arr<OpData> operatorStack;
    mcsl::dyn_arr<astNode*> operandStack;
    bool prevTokIsOperand = false;
+
+   if (initOperand) {
+      operandStack.push_back(initOperand);
+   }
 
    auto eval = [&]() { //evaluate the subexpression on the top of the stacks
       OpData op = operatorStack.pop_back();
@@ -191,11 +206,24 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma() {
          }
 
          case TokenType::IDEN: operandStack.push_back((astNode*)parseIdentifier()); goto PARSE_EXPR_CONTINUE;
-         case TokenType::INT_NUM: //!NOTE: UNFINISHED
-         case TokenType::REAL_NUM: //!NOTE: UNFINISHED
-         case TokenType::PTXT_SEG: //!NOTE: UNFINISHED
+         case TokenType::INT_NUM:
+            operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::LITERAL)) Literal{tokIt++->intVal()}));
+            goto PARSE_EXPR_CONTINUE;
+         case TokenType::REAL_NUM:
+            operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::LITERAL)) Literal{tokIt++->realVal()}));
+            goto PARSE_EXPR_CONTINUE;
+         case TokenType::PTXT_SEG:
+            switch (tokIt->ptxtType()) {
+               case PtxtType::CHAR:
+                  operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::LITERAL)) Literal{tokIt++->charVal()}));
+                  goto PARSE_EXPR_CONTINUE;
+               case PtxtType::UNPROCESSED_STR:
+                  operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::LITERAL)) Literal{tokIt++->unprocessedStrVal()}));
+                  goto PARSE_EXPR_CONTINUE;
 
-         UNREACHABLE;
+               default: logError(ErrCode::PARSER_NOT_IMPLEMENTED, "cannot currently parse this plaintext segment type (%hhu)", +tokIt->ptxtType());
+            }
+            UNREACHABLE;
 
          case TokenType::EOS: goto END_OF_EXPR;
          case TokenType::OP:
@@ -304,6 +332,10 @@ clef::Type* clef::Parser::parseTypename(Identifier* scopeName) {
    return name;
 }
 
+clef::Decl* clef::Parser::parseDecl(Type* type, Identifier* scopeName) {
+   Identifier* name = parseIdentifier(scopeName);
+   return new (tree.allocNode(NodeType::DECL)) Decl{type, name};
+}
 clef::Decl* clef::Parser::parseDecl(Identifier* scopeName) {
    if (tryConsumeKeyword(KeywordID::FUNC)) {
       Function* func = parseFuncDecl(scopeName);
@@ -329,7 +361,7 @@ clef::Function* clef::Parser::parseFuncDecl(Identifier* scopeName) {
 
 clef::Variable* clef::Parser::parseVariable(Identifier* scopeName) {
    Decl* decl = parseDecl(scopeName);
-   if (tryConsumeEOS()) {
+   if (tryConsumeEOS()) { //forward declaration
       Variable* var = new (decl) Variable{decl->type(), decl->name()};
          ((astNode*)var)->anyCast(NodeType::VAR);
       return var;
@@ -352,6 +384,31 @@ clef::Variable* clef::Parser::parseVariable(Identifier* scopeName) {
       Variable* var = new (decl) Variable{decl->type(), decl->name(), invoke};
          ((astNode*)var)->anyCast(NodeType::VAR);
       return var;
+   }
+   logError(ErrCode::BAD_DECL, "bad variable definition");
+}
+
+mcsl::pair<clef::Variable*,clef::Decl*> clef::Parser::parseVarDecl(Identifier* scopeName) {
+   Decl* decl = parseDecl(scopeName);
+   if (tryConsumeEOS()) {
+      Variable* var = new (tree.allocNode(NodeType::VAR)) Variable{decl->type(), decl->name()};
+      return {var,decl};
+   }
+   if (tryConsumeOperator(OpID::ASSIGN)) {
+      Variable* var = new (tree.allocNode(NodeType::VAR)) Variable{decl->type(), decl->name(), parseExpr()};
+      return {var,decl};
+   }
+   if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN)) {
+      ArgList* args = parseArgList(BlockType::INIT_LIST);
+      Expr* invoke = new (tree.allocNode(NodeType::EXPR)) Expr{OpID::LIST_INVOKE, decl->type(), args};
+      Variable* var = new (tree.allocNode(NodeType::VAR)) Variable{decl->type(), decl->name(), invoke};
+      return {var,decl};
+   }
+   if (tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN)) {
+      ArgList* args = parseArgList(BlockType::CALL);
+      Expr* invoke = new (tree.allocNode(NodeType::EXPR)) Expr{OpID::CALL_INVOKE, decl->type(), args};
+      Variable* var = new (tree.allocNode(NodeType::VAR)) Variable{decl->type(), decl->name(), invoke};
+      return {var,decl};
    }
    logError(ErrCode::BAD_DECL, "bad variable definition");
 }
@@ -516,12 +573,16 @@ clef::Switch* clef::Parser::parseSwitch() {
          Expr* caseExpr = parseExpr();
          consumeOperator(OpID::LABEL_DELIM, "bad CASE in SWITCH statement");
          
-         //!NOTE: UNFINISHED
+         Stmt* firstStmt = parseStmt();
+         procedure->push_back(firstStmt);
+         cases->push_back({caseExpr, firstStmt});
 
       } else if (tryConsumeKeyword(KeywordID::DEFAULT)) { //DEFAULT
          consumeOperator(OpID::LABEL_DELIM, "bad DEFAULT in SWITCH statement");
          
-         //!NOTE: UNFINISHED
+         Stmt* firstStmt = parseStmt();
+         procedure->push_back(firstStmt);
+         cases->push_back({nullptr, firstStmt});
 
       } else { //standard statement
          procedure->push_back(parseStmt());
