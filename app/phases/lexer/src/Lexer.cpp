@@ -382,7 +382,7 @@ bool clef::Lexer::lexInterpStr(char*& curr, char* const end, char* const tokBegi
       ++curr;
       if (curr < end) {
          if (*curr == PLACEHOLDER_OPEN) {
-            debug_assert(OPERATORS[mcsl::raw_str_span{const_cast<char*>(&PLACEHOLDER_INIT)}] == OpID::LIST_OPEN);
+            debug_assert((OPERATORS[mcsl::raw_str_span{const_cast<char*>(&PLACEHOLDER_INIT), 1}] == OpID::LIST_OPEN));
             while (++curr < end && *curr != PLACEHOLDER_CLOSE) {
                lexExpr(curr, end, toks);
             }
