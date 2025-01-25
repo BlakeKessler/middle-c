@@ -11,6 +11,7 @@
 struct clef::Literal {
    private:
       union {
+         void* _ptrLit;
          ulong _uintLit;
          slong _sintLit;
          double _floatLit;
@@ -39,6 +40,8 @@ struct clef::Literal {
       }
       Literal(Type* typeID):_typeid{typeID},_type{LitType::TYPEID} {}
 
+      Literal(void* ptr):_ptrLit{ptr},_type{LitType::POINTER} {}
+
       Literal(Literal& other) {
          if (this != &other) {
             assert(absdif(this, &other) >= 8*(slong)sizeof(Literal));
@@ -60,12 +63,15 @@ struct clef::Literal {
       // operator mcsl::regex()  const { if (_type == LitType::REGEX)  { return _regexLit;  } else { throwCastErr(LitType::REGEX);  } }
       operator Type*() { if(_type == LitType::TYPEID) { return _typeid; } else { throwCastErr(LitType::TYPEID); }}
       operator const Type*() const { if(_type == LitType::TYPEID) { return _typeid; } else { throwCastErr(LitType::TYPEID); }}
+      operator void*() { if (_type == LitType::POINTER) { return _ptrLit; } else { throwCastErr(LitType::POINTER); }}
+      operator const void*() const { if (_type == LitType::POINTER) { return _ptrLit; } else { throwCastErr(LitType::POINTER); }}
       #pragma endregion cast
 
       bool operator==(const Literal& other) const {
          if (_type != other._type) { return false; }
          switch(_type) {
             case LitType::NONE      : return true;
+            case LitType::POINTER   : return    _ptrLit == other._ptrLit;
             case LitType::UINT      : return   _uintLit == other._uintLit;
             case LitType::SINT      : return   _sintLit == other._sintLit;
             case LitType::FLOAT     : return  _floatLit == other._floatLit;
