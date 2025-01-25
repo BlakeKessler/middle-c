@@ -7,6 +7,9 @@
 class clef::Lexer {
    protected:
       static constexpr const mcsl::raw_str _nameof = "Lexer";
+      static bool lexChar(char*& curr, char* const end, mcsl::dyn_arr<clef::Token>& toks);
+      static bool lexStr(char*& curr, char* const end, char* const tokBegin, mcsl::dyn_arr<clef::Token>& toks);
+      static bool lexInterpStr(char*& curr, char* const end, char* const tokBegin, mcsl::dyn_arr<clef::Token>& toks);
       static bool lexExpr(char*& curr, char* const end, mcsl::dyn_arr<clef::Token>& toks);
    public:
       static constexpr const auto& nameof() { return _nameof; }
