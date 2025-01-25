@@ -23,14 +23,22 @@ namespace clef {
    std::fprintf(stderr, "\033[31;1;4mCLEF ERROR:\033[0m %s", ERR_MSG_ARR[+code]);
    std::fprintf(stderr, formatStr, args...);
    std::fprintf(stderr, "\n");
-   std::exit(EXIT_FAILURE);
+   #ifdef NDEBUG
+      std::exit(EXIT_FAILURE);
+   #else
+      std::abort();
+   #endif
 }
 //!CLEF formatted error thrower with line num
 [[noreturn, gnu::format(printf,3,4)]] void clef::throwError(const clef::ErrCode code, const uint lineNum, const char* formatStr, auto&&... args) {
    std::fprintf(stderr, "\033[31;1;4mCLEF ERROR:\033[0m %s", ERR_MSG_ARR[+code]);
    std::fprintf(stderr, formatStr, args...);
    std::fprintf(stderr, " \033[35m(line %u)\033[0m\n", lineNum);
-   std::exit(EXIT_FAILURE);
+   #ifdef NDEBUG
+      std::exit(EXIT_FAILURE);
+   #else
+      std::abort();
+   #endif
 }
 
 #pragma GCC diagnostic pop
