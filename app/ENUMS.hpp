@@ -154,6 +154,7 @@ namespace clef {
       SPECIALIZER_INVOKE, //triangle brackets
          SPECIALIZER_OPEN,
          SPECIALIZER_CLOSE,
+
       CHAR_INVOKE,
       STR_INVOKE,
       INTERP_STR_INVOKE,
@@ -660,6 +661,8 @@ namespace clef {
    //!literal type specification
    enum class LitType : uint8 {
       NONE = 0,
+      
+      POINTER,
 
       UINT,
       SINT,
@@ -763,7 +766,37 @@ namespace clef {
    enum class FundTypeID : uint8 {
       NULL,
       FUNCTION_SIGNATURE,
-      //!NOTE: UNFINISHED
+      
+      VOID,
+      AUTO,
+
+      CHAR,
+      CHAR8,
+      CHAR16,
+      CHAR32,
+
+      BOOL,
+      UINT8,
+      UINT16,
+      UINT32,
+      UINT64,
+      UINT128,
+      UINT256,
+
+      SIGN_T,
+      SINT8,
+      SINT16,
+      SINT32,
+      SINT64,
+      SINT128,
+      SINT256,
+
+      FLOAT,
+      FLOAT16,
+      FLOAT32,
+      FLOAT64,
+      FLOAT128,
+      FLOAT256,
    };
 }
 
