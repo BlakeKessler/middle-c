@@ -13,7 +13,7 @@ clef::Class* clef::Parser::parseClass() {
    }
 
    //inheritance (including implemented interfaces)
-   ObjTypeSpec* spec = new (tree.allocInterfaceSpec()) ObjTypeSpec{};
+   ObjTypeSpec* spec = new (tree.allocObjTypeSpec()) ObjTypeSpec{};
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
       do {
          Type* parentType = parseTypename();
@@ -177,6 +177,44 @@ clef::Mask* clef::Parser::parseMask() {
    astNode* mask = (astNode*)parseEnum();
    mask->anyCast(NodeType::MASK);
    return (Mask*)mask;
+}
+
+clef::Namespace* clef::Parser::parseNamespace() {
+   Identifier* name = parseIdentifier();
+   
+   if (tryConsumeEOS()) { //forward declaration
+      ((astNode*)name)->upCast(NodeType::NAMESPACE);
+      return new (name) Namespace{(Type*)name};
+   }
+
+   //definition
+   NamespaceSpec* spec = new (tree.allocNamespaceSpec()) NamespaceSpec{};
+   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad CLASS definition");
+   while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
+      if (tokIt->type() == TokenType::KEYWORD) {
+         switch (tokIt->keywordID()) {
+            case KeywordID::CLASS    : ++tokIt; spec->types().push_back(parseClass()); break;
+            case KeywordID::STRUCT   : ++tokIt; spec->types().push_back(parseStruct()); break;
+            case KeywordID::INTERFACE: ++tokIt; spec->types().push_back(parseInterface()); break;
+            case KeywordID::UNION    : ++tokIt; spec->types().push_back(parseUnion()); break;
+            case KeywordID::ENUM     : ++tokIt; spec->types().push_back(parseEnum()); break;
+            case KeywordID::MASK     : ++tokIt; spec->types().push_back(parseMask()); break;
+            case KeywordID::NAMESPACE: ++tokIt; spec->types().push_back(parseNamespace()); break;
+            case KeywordID::FUNC     : ++tokIt; spec->funcs().push_back(parseFunction()); break; //!NOTE: does not account for static functions
+            default: goto MEMB_VAR_DECL;
+         }
+         continue;
+      }
+      MEMB_VAR_DECL:
+      spec->vars().push_back(parseVariable()); //!NOTE: does not yet account for static functions
+   }
+
+   //EOS
+   consumeEOS("NAMESPACE without EOS");
+
+   //return
+   ((astNode*)name)->upCast(NodeType::NAMESPACE);
+   return new (name) Namespace{spec, (Type*)name};
 }
 
 #endif
