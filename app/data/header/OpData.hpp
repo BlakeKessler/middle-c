@@ -31,7 +31,7 @@ struct alignas(8) clef::OpData {
       constexpr auto toString() const { return _opStr; }
 
       constexpr bool combineWith(const OpData other) { //merge other into self
-         if (toString() != other.toString() || precedence() != other.precedence()) {
+         if (toString() != other.toString() || (precedence() && precedence() != other.precedence())) {
             return false;
          }
          _props = _props | other.props();
