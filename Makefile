@@ -9,7 +9,7 @@ ALL_TESTS := $(wildcard test/src/*.cpp)
 
 ALL_AUTO_MAKEFILES := $(ALL_SRC_FILES:%.cpp=_build/%.mk) $(ALL_TESTS:%.cpp=_build/%.mk)
 ALL_OBJ_FILES := $(ALL_SRC_FILES:%.cpp=_build/%.o)
-ALL_PCH_FILES := $(ALL_HEADER_FILES:%=_build/%.pch)
+# ALL_PCH_FILES := $(ALL_HEADER_FILES:%=_build/%.pch)
 
 #compiler
 COMPILER := clang++ -std=c++23
@@ -17,6 +17,8 @@ FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=
 # FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name -Wno-gcc-compat -Wno-trigraphs -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
 # COMPILER := g++-14 -std=c++23
 # FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -Wno-trigraphs
+
+LINKER_FLAGS := -lbacktrace
 
 #compile commands
 COMPILE := $(COMPILER) $(FLAGS) $(addprefix -I, $(MODULES) $(filter %/header, $(ALL_CODE_DIRS)))
@@ -30,44 +32,44 @@ setup:
 
 #generate prereq makefiles
 $(ALL_AUTO_MAKEFILES): _build/%.mk : %.cpp
-	($(COMPILE) -MM $^) | (sed -E 's/([^ ]*)\.o([^u])?/_build\/\1.o _build\/\1.mk\2/') > $@
+	(($(COMPILE) -MM $^) | (sed -E 's/([^ ]*)\.o([^u])?/_build\/\1.o _build\/\1.mk\2/') > $@) && echo $@
 #	($(COMPILE) -MM $^) | (sed -E 's/([^ ]*)\.o([^u])?/_build\/\1.mk\2/') | (sed -E 's/([^ ]*.hpp)/_build\/\1.pch/g') > $@
 
-$(ALL_HEADER_FILES:%.hpp=_build/%.mk): _build/%.mk : %.hpp
-	($(COMPILE) -MM $^) | (sed -E 's/([^ ]*)\.o([^u])?/_build\/\1.mk\2/') | (sed -E 's/([^ ]*.hpp)/_build\/\1.pch/g') > $@
+# $(ALL_HEADER_FILES:%.hpp=_build/%.mk): _build/%.mk : %.hpp
+# 	($(COMPILE) -MM $^) | (sed -E 's/([^ ]*)\.o([^u])?/_build\/\1.mk\2/') | (sed -E 's/([^ ]*.hpp)/_build\/\1.pch/g') > $@
 
 #include prereq makefiles
 -include $(ALL_AUTO_MAKEFILES)
--include $(ALL_HEADER_FILES:%.hpp=_build/%.mk)
+# -include $(ALL_HEADER_FILES:%.hpp=_build/%.mk)
 
 #include unit test makefiles
 -include $(wildcard _build/test/*.mk)
 
 
-#precompile headers
-$(ALL_PCH_FILES): _build/%.hpp.pch : %.hpp _build/%.mk
-	$(COMPILE) -c $< -o $@
+# #precompile headers
+# $(ALL_PCH_FILES): _build/%.hpp.pch : %.hpp _build/%.mk
+# 	$(COMPILE) -c $< -o $@
 
 #compile object files
 $(ALL_OBJ_FILES): _build/%.o : %.cpp
-	$(COMPILE) -c $^ -o $@
+	($(COMPILE) -c $^ -o $@) && echo $@
 
 
 #_build types of file
 .PHONY: makefiles
-makefiles: $(ALL_AUTO_MAKEFILES) $(ALL_HEADER_FILES:%.hpp=_build/%.mk)
-.PHONY: headers
-headers: $(ALL_PCH_FILES)
+makefiles: $(ALL_AUTO_MAKEFILES) #$(ALL_HEADER_FILES:%.hpp=_build/%.mk)
+# .PHONY: headers
+# headers: $(ALL_PCH_FILES)
 .PHONY: objects
 objects: $(ALL_OBJ_FILES)
 
 #compile unit test files
 .PHONY: Lexer
-Lexer: _build/test/src/TestLexer.mk test/src/TestLexer.cpp | $(ALL_OBJ_FILES)
-	$(COMPILE) test/src/TestLexer.cpp $(shell find _build | grep "\.o") -o _build/out/$@.out
+Lexer: makefiles _build/test/src/TestLexer.mk test/src/TestLexer.cpp | $(ALL_OBJ_FILES)
+	$(COMPILE) test/src/TestLexer.cpp $(shell find _build | grep "\.o") -o _build/out/$@.out $(LINKER_FLAGS)
 .PHONY: Parser
-Parser: _build/test/src/TestParser.mk test/src/TestParser.cpp | $(ALL_OBJ_FILES)
-	$(COMPILE) test/src/TestParser.cpp $(shell find _build | grep "\.o") -o _build/out/$@.out
+Parser: makefiles _build/test/src/TestParser.mk test/src/TestParser.cpp | $(ALL_OBJ_FILES)
+	$(COMPILE) test/src/TestParser.cpp $(shell find _build | grep "\.o") -o _build/out/$@.out $(LINKER_FLAGS)
 #	$(COMPILE) test/src/TestParser.cpp $(ALL_SRC_FILES:%.cpp=_build/%.o) -o _build/out/$@.out
 
 
