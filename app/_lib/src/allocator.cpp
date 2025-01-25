@@ -3,7 +3,7 @@
 
 #include "allocator.hpp"
 
-clef::allocator::allocator(const allocator& other):
+inline clef::allocator::allocator(const allocator& other):
    _bufBuf{other._bufBuf.size()} {
       //deep copy
       for (uint i = 0; i < _bufBuf.size(); ++i) {
