@@ -72,52 +72,52 @@ template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef:
    using enum clef::OpProps;
    ubyte prec = +__PRECEDENCE_BITS;
    return OpDecoder{
-      OpData("#",     OpID::PREPROCESSOR, makeOpProps(PREFIX, prec), TokenType::PREPROC_INIT),
-      OpData("::",    OpID::SCOPE_RESOLUTION, makeOpProps(INFIX_LEFT, prec), TokenType::OP),  //scope resolution
-      OpData("\\",    OpID::ESCAPE, makeOpProps(PREFIX, prec), TokenType::ESC),      //escape character
-      OpData(";",     OpID::EOS, makeOpProps(PREFIX, prec), TokenType::EOS),      //end of statement
-      OpData("//",    OpID::LINE_CMNT, makeOpProps(PREFIX, prec), TokenType::BLOCK_DELIM),      //line comment
-      OpData("/*",    OpID::BLOCK_CMNT_OPEN, makeOpProps(OPEN_DELIM, prec), TokenType::BLOCK_DELIM), //block comment
-      OpData("*/",    OpID::BLOCK_CMNT_CLOSE, makeOpProps(CLOSE_DELIM, prec), TokenType::BLOCK_DELIM), //block comment
-      OpData("\'",    OpID::CHAR, makeOpProps(DELIM, prec), TokenType::BLOCK_DELIM), //char
-      OpData("\"",    OpID::STRING, makeOpProps(DELIM, prec), TokenType::BLOCK_DELIM), //string
-      OpData("`",     OpID::STRING, makeOpProps(DELIM, prec), TokenType::BLOCK_DELIM), //interpolated string
+      OpData("#",     OpID::PREPROCESSOR, makeOpProps(PREFIX, 0), TokenType::PREPROC_INIT),
+      OpData("::",    OpID::SCOPE_RESOLUTION, makeOpProps(INFIX_LEFT, 0), TokenType::OP),  //scope resolution
+      OpData("\\",    OpID::ESCAPE, makeOpProps(PREFIX, 0), TokenType::ESC),      //escape character
+      OpData(";",     OpID::EOS, makeOpProps(PREFIX, 0), TokenType::EOS),      //end of statement
+      OpData("//",    OpID::LINE_CMNT, makeOpProps(PREFIX, 0), TokenType::BLOCK_DELIM),      //line comment
+      OpData("/*",    OpID::BLOCK_CMNT_OPEN, makeOpProps(OPEN_DELIM, 0), TokenType::BLOCK_DELIM), //block comment
+      OpData("*/",    OpID::BLOCK_CMNT_CLOSE, makeOpProps(CLOSE_DELIM, 0), TokenType::BLOCK_DELIM), //block comment
+      OpData("\'",    OpID::CHAR, makeOpProps(DELIM, 0), TokenType::BLOCK_DELIM), //char
+      OpData("\"",    OpID::STRING, makeOpProps(DELIM, 0), TokenType::BLOCK_DELIM), //string
+      OpData("`",     OpID::STRING, makeOpProps(DELIM, 0), TokenType::BLOCK_DELIM), //interpolated string
 
 
-      OpData("(",     OpID::CALL_OPEN, makeOpProps(OPEN_DELIM, --prec), TokenType::BLOCK_DELIM), //function calls/functional casts
-      OpData(")",     OpID::CALL_CLOSE, makeOpProps(CLOSE_DELIM, prec), TokenType::BLOCK_DELIM), //function calls/functional casts
-      OpData("[",     OpID::SUBSCRIPT_OPEN, makeOpProps(OPEN_DELIM, prec), TokenType::BLOCK_DELIM), //subscript
-      OpData("]",     OpID::SUBSCRIPT_CLOSE, makeOpProps(CLOSE_DELIM, prec), TokenType::BLOCK_DELIM), //subscript
-      OpData("{",     OpID::LIST_OPEN, makeOpProps(OPEN_DELIM, prec), TokenType::BLOCK_DELIM), //scope/functional casts
-      OpData("}",     OpID::LIST_CLOSE, makeOpProps(CLOSE_DELIM, prec), TokenType::BLOCK_DELIM), //scope/functional casts
-      OpData("<:",    OpID::SPECIALIZER_OPEN, makeOpProps(OPEN_DELIM, prec), TokenType::BLOCK_DELIM), //specifier
-      OpData(":>",    OpID::SPECIALIZER_CLOSE, makeOpProps(CLOSE_DELIM, prec), TokenType::BLOCK_DELIM), //specifier
+      OpData("(",     OpID::CALL_OPEN, makeOpProps(OPEN_DELIM, 0), TokenType::BLOCK_DELIM), //function calls/functional casts
+      OpData(")",     OpID::CALL_CLOSE, makeOpProps(CLOSE_DELIM, 0), TokenType::BLOCK_DELIM), //function calls/functional casts
+      OpData("[",     OpID::SUBSCRIPT_OPEN, makeOpProps(OPEN_DELIM, 0), TokenType::BLOCK_DELIM), //subscript
+      OpData("]",     OpID::SUBSCRIPT_CLOSE, makeOpProps(CLOSE_DELIM, 0), TokenType::BLOCK_DELIM), //subscript
+      OpData("{",     OpID::LIST_OPEN, makeOpProps(OPEN_DELIM, 0), TokenType::BLOCK_DELIM), //scope/functional casts
+      OpData("}",     OpID::LIST_CLOSE, makeOpProps(CLOSE_DELIM, 0), TokenType::BLOCK_DELIM), //scope/functional casts
+      OpData("<:",    OpID::SPECIALIZER_OPEN, makeOpProps(OPEN_DELIM, 0), TokenType::BLOCK_DELIM), //specifier
+      OpData(":>",    OpID::SPECIALIZER_CLOSE, makeOpProps(CLOSE_DELIM, 0), TokenType::BLOCK_DELIM), //specifier
 
 
 
 
 
-      OpData("++",    OpID::INC, makeOpProps(PREFIX, --prec), TokenType::OP),            //pre-increment
-      OpData("--",    OpID::DEC, makeOpProps(PREFIX, prec), TokenType::OP),            //pre-decrement
-      OpData(".",     OpID::MEMBER_ACCESS, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //element access
-      OpData("->",    OpID::MEMBER_OF_POINTER_ACCESS, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //element access
-      OpData("..",    OpID::RANGE, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //range
-      OpData("...",   OpID::SPREAD, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //array spread
+      OpData("++",    OpID::INC, makeOpProps(PREFIX, 0), TokenType::OP),            //pre-increment
+      OpData("--",    OpID::DEC, makeOpProps(PREFIX, 0), TokenType::OP),            //pre-decrement
+      OpData(".",     OpID::MEMBER_ACCESS, makeOpProps(INFIX_LEFT, 0), TokenType::OP),        //element access
+      OpData("->",    OpID::MEMBER_OF_POINTER_ACCESS, makeOpProps(INFIX_LEFT, 0), TokenType::OP),        //element access
+      OpData("..",    OpID::RANGE, makeOpProps(INFIX_LEFT, 0), TokenType::OP),        //range
+      OpData("...",   OpID::SPREAD, makeOpProps(INFIX_LEFT, 0), TokenType::OP),        //array spread
 
-      OpData("++",    OpID::INC, makeOpProps(POSTFIX, --prec), TokenType::OP),           //post-increment
+      OpData("++",    OpID::INC, makeOpProps(POSTFIX, 0), TokenType::OP),           //post-increment
       OpData("--",    OpID::DEC, makeOpProps(POSTFIX, prec), TokenType::OP),           //post-decrement
-      OpData("+",     OpID::UNARY_PLUS, makeOpProps(POSTFIX, prec), TokenType::OP),           //unary plus
-      OpData("-",     OpID::UNARY_MINUS, makeOpProps(POSTFIX, prec), TokenType::OP),           //integer negation
-      OpData("!",     OpID::LOGICAL_NOT, makeOpProps(POSTFIX, prec), TokenType::OP),           //logical negation
-      OpData("~",     OpID::BIT_NOT, makeOpProps(POSTFIX, prec), TokenType::OP),           //bitwise negation
-      OpData("&",     OpID::ADDRESS_OF, makeOpProps(PREFIX, prec), TokenType::OP), //reference/address of
-      OpData("*",     OpID::DEREF, makeOpProps(PREFIX, prec), TokenType::OP), //raw pointer/dereference
-      OpData("&",     OpID::REFERENCE, makeOpProps(TYPE_MOD, prec), TokenType::OP), //reference/address of
-      OpData("*",     OpID::RAW_PTR, makeOpProps(TYPE_MOD, prec), TokenType::OP), //raw pointer/dereference
-      OpData("@",     OpID::UNIQUE_PTR, makeOpProps(TYPE_MOD, prec), TokenType::OP),          //unique pointer
-      OpData("$",     OpID::SHARED_PTR, makeOpProps(TYPE_MOD, prec), TokenType::OP),          //shared pointer
-      OpData("`",     OpID::WEAK_PTR, makeOpProps(TYPE_MOD, prec), TokenType::OP),          //weak pointer
-      OpData("%",     OpID::ITERATOR, makeOpProps(TYPE_MOD, prec), TokenType::OP),          //iterator
+      OpData("+",     OpID::UNARY_PLUS, makeOpProps(POSTFIX, 0), TokenType::OP),           //unary plus
+      OpData("-",     OpID::UNARY_MINUS, makeOpProps(POSTFIX, 0), TokenType::OP),           //integer negation
+      OpData("!",     OpID::LOGICAL_NOT, makeOpProps(POSTFIX, 0), TokenType::OP),           //logical negation
+      OpData("~",     OpID::BIT_NOT, makeOpProps(POSTFIX, 0), TokenType::OP),           //bitwise negation
+      OpData("&",     OpID::ADDRESS_OF, makeOpProps(PREFIX, 0), TokenType::OP), //reference/address of
+      OpData("*",     OpID::DEREF, makeOpProps(PREFIX, 0), TokenType::OP), //raw pointer/dereference
+      OpData("&",     OpID::REFERENCE, makeOpProps(TYPE_MOD, 0), TokenType::OP), //reference/address of
+      OpData("*",     OpID::RAW_PTR, makeOpProps(TYPE_MOD, 0), TokenType::OP), //raw pointer/dereference
+      OpData("@",     OpID::UNIQUE_PTR, makeOpProps(TYPE_MOD, 0), TokenType::OP),          //unique pointer
+      OpData("$",     OpID::SHARED_PTR, makeOpProps(TYPE_MOD, 0), TokenType::OP),          //shared pointer
+      OpData("`",     OpID::WEAK_PTR, makeOpProps(TYPE_MOD, 0), TokenType::OP),          //weak pointer
+      OpData("%",     OpID::ITERATOR, makeOpProps(TYPE_MOD, 0), TokenType::OP),          //iterator
       
       OpData(".*",    OpID::POINTER_TO_MEMBER, makeOpProps(INFIX_LEFT, --prec), TokenType::OP),        //pointer to member
       OpData("->*",   OpID::POINTER_TO_MEMBER_OF_POINTER, makeOpProps(INFIX_LEFT, prec), TokenType::OP),        //pointer to member
