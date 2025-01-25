@@ -49,7 +49,7 @@ namespace clef {
          struct Switch;
          struct Match;
          struct TryCatch;
-         // struct Asm;
+         struct Asm;
       struct ForLoopParams;
       struct ForeachLoopParams;
       struct SwitchCases;

@@ -37,13 +37,14 @@ struct clef::Expression {
 
       template<operand_t lhs_t, operand_t rhs_t> Expression(OpID binaryOp, lhs_t* lhs, rhs_t* rhs):Expression{binaryOp, lhs_t::nodeType(), rhs_t::nodeType(), lhs, rhs} {}
       template<operand_t lhs_t>Expression(OpID unaryOp, lhs_t* lhs):Expression{unaryOp, lhs_t::nodeType(), lhs} {}
-      Expression(OpID nullaryOp);
+      Expression(OpID nullaryOp):Expression{nullaryOp, NodeType::NONE, nullptr} {}
 
       Expression(OpID op, Type* type, ArgList* ctorArgs);
       
-      Expression(KeywordID oplikeKeyword);
-      template<operand_t lhs_t>Expression(KeywordID oplikeKeyword, lhs_t* operand);
-      Expression(KeywordID funclikeKeyword, ArgList* args);
+      Expression(KeywordID oplikeKeyword):Expression{toOpID(oplikeKeyword)} {}
+      template<operand_t lhs_t>Expression(KeywordID oplikeKeyword, lhs_t* operand):Expression{toOpID(oplikeKeyword), operand} {}
+      template<operand_t lhs_t, operand_t rhs_t>Expression(KeywordID oplikeKeyword, lhs_t* lhs, rhs_t* rhs):Expression{toOpID(oplikeKeyword), lhs, rhs} {}
+      Expression(KeywordID funclikeKeyword, ArgList* args):Expression{toOpID(funclikeKeyword), NodeType::ARG_LIST, args} {}
       
       Expression(OpID op, astNode* lhs, astNode* rhs);
       Expression(OpID op, astNode* lhs, astNode* rhs, astNode* extra);

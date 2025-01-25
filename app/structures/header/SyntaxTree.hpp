@@ -10,7 +10,7 @@
 
 class clef::SyntaxTree {
    private:
-      SymbolTable _names;
+      // SymbolTable _names;
 
       mcsl::dyn_arr<astNode> _buf; //owning storage for member nodes
       mcsl::dyn_arr<InterfaceSpec> _intSpecBuf;
@@ -20,8 +20,8 @@ class clef::SyntaxTree {
 
       allocator _alloc;
    public:
-      SyntaxTree():_names{},_buf{},_root{},_back{},_alloc{} {}
-      SyntaxTree(const SyntaxTree& other);
+      SyntaxTree():/*_names{},*/_buf{},_root{},_back{},_alloc{} {}
+      SyntaxTree(const SyntaxTree& other):/*_names{other._names},*/_buf{other._buf},_intSpecBuf{other._intSpecBuf},_root{other._root},_back{other._back},_alloc{other._alloc} {}
       SyntaxTree(SyntaxTree&& other);
 
       astNode* root() { return _root; }

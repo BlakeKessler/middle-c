@@ -1,38 +1,22 @@
-// #ifndef SYNTAX_TREE_CPP
-// #define SYNTAX_TREE_CPP
+#ifndef SYNTAX_TREE_CPP
+#define SYNTAX_TREE_CPP
 
-// #include "SyntaxTree.hpp"
-// #include "carry.hpp"
+#include "SyntaxTree.hpp"
 
-// clef::Statement* clef::SyntaxTree::endStatement() {
-//    if (!_buf.size()) { //no nodes yet -> must be an empty statement
-//       _buf.emplace_back(Statement(nullptr, true));
-//       _root = _buf.begin();
-//       _back = _root;
+#include <cstdio>
 
-//       _spine.emplace_back(mcsl::pair<astNode*>{_back, nullptr});
-//    }
+void clef::SyntaxTree::print() const {
+   std::printf("ROOT: index = %ld, addr = %p", _buf.begin() - _root, (void*)_root);
+   for (uint i = 0; i < _buf.size(); ++i) {
+      std::printf("\n\t");
+      _buf[i].print();
+   }
+   std::printf("\n");
+}
 
+void clef::SyntaxTree::printf() const {
+   std::printf("HEY YOU! PROGRAMMING THIS! MAKE THIS ACTUALLY FORMATTED!\n");
+   print();
+}
 
-//    for (uint i = _spine.size(); mcsl::carry::SUB(i, 1);) {
-//       const auto& curr = _spine[i];
-//       switch(curr.first->type()) { //type of most recent scope
-//          case NodeType::EXPR    :
-//          case NodeType::STMT    :
-//             //must be an empty statement
-//             _buf.emplace_back(Statement(nullptr,true));
-//             break;
-//          case NodeType::STMT_SEQ:
-//          case NodeType::IDEN    :
-//          case NodeType::BLOCK   :
-//          case NodeType::TYPE    :
-//          case NodeType::LIT     :
-//          case NodeType::OBJ     :
-//          case NodeType::FUNC    :
-//          case NodeType::OP      :
-//          case NodeType::TEMPLATE:
-//       }
-//    }
-// }
-
-// #endif //SYNTAX_TREE_CPP
+#endif //SYNTAX_TREE_CPP

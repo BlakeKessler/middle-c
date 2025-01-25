@@ -5,6 +5,14 @@
 
 #include "dyn_arr.hpp"
 
+clef::SyntaxTree clef::Parser::parse(const SourceTokens& src) {
+   Parser parser{src};
+   while (parser.tokIt < parser.endtok) {
+      parser.parseStmt();
+   }
+   return parser.tree;
+}
+
 clef::Stmt* clef::Parser::parseStmt() {
 START_PARSE_STMT:
    switch (tokIt->type()) {
@@ -21,10 +29,12 @@ START_PARSE_STMT:
             } break;
             case KeywordID::NULLPTR : [[fallthrough]];
             case KeywordID::THIS    : [[fallthrough]];
-            case KeywordID::SELF    :
+            case KeywordID::SELF    : [[fallthrough]];
+            case KeywordID::TRUE    : [[fallthrough]];
+            case KeywordID::FALSE   :
                goto STMT_STARTS_WITH_VALUE;
 
-            // case KeywordID::ASM           : ++tokIt; return parseASM(); break;
+            case KeywordID::ASM           : ++tokIt; return (Stmt*)parseASM(); break;
             
             case KeywordID::CLASS         : ++tokIt; return (Stmt*)(new (tree.allocNode(NodeType::STMT)) Decl{tree.getFundType(KeywordID::CLASS), parseClass()});
             case KeywordID::STRUCT        : ++tokIt; return (Stmt*)(new (tree.allocNode(NodeType::STMT)) Decl{tree.getFundType(KeywordID::STRUCT), parseStruct()});
@@ -87,6 +97,7 @@ START_PARSE_STMT:
 
             case KeywordID::THROW         : [[fallthrough]];
             case KeywordID::ASSERT        : [[fallthrough]];
+            case KeywordID::DEBUG_ASSERT  : [[fallthrough]];
             case KeywordID::STATIC_ASSERT : [[fallthrough]];
             case KeywordID::RETURN        : {
                const KeywordID kw = tokIt->keywordID();
@@ -97,8 +108,24 @@ START_PARSE_STMT:
             }
 
             case KeywordID::USING         : {
+               ++tokIt;
                Identifier* alias = parseIdentifier();
-               Expr* val = parseExpr((astNode*)alias);
+               consumeOperator(OpID::ASSIGN, "alias definitions must use the assignment operator (and cannot be forward-declared)");
+               Expr* valExpr = parseExpr();
+               return (Stmt*)(new (tree.allocNode(NodeType::STMT)) Stmt{KeywordID::USING, alias, valExpr});
+            }
+
+            UNREACHABLE;
+
+            case KeywordID::CAST          : [[fallthrough]];
+            case KeywordID::UP_CAST       : [[fallthrough]];
+            case KeywordID::DYN_CAST      : [[fallthrough]];
+            case KeywordID::BIT_CAST      : [[fallthrough]];
+            case KeywordID::CONST_CAST    : {
+               Expr* stmtContents = parseExpr();
+               consumeEOS("bad cast statement");
+               ((astNode*)stmtContents)->upCast(NodeType::STMT);
+               return (Stmt*)stmtContents;
             }
 
             case KeywordID::_NOT_A_KEYWORD: UNREACHABLE;
@@ -169,6 +196,8 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma(astNode* initOperand) {
    while (tokIt < endtok) {
       switch (tokIt->type()) {
          case TokenType::NONE: UNREACHABLE;
+         case TokenType::__OPLIKE: UNREACHABLE;
+
          case TokenType::PREPROC_EOS: ++tokIt; goto PARSE_EXPR_CONTINUE;
          case TokenType::ESC: tokIt += 2; goto PARSE_EXPR_CONTINUE;
          
@@ -439,25 +468,7 @@ clef::Function* clef::Parser::parseFunction() {
    
    //params
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FUNC without parameters");
-   ParamList* params = new (tree.allocNode(NodeType::FUNC_SIG)) ParamList{tree.allocBuf<Variable*>()};
-   if (!tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE)) {
-      do {
-         //parse parameter
-         TypeQualMask quals = parseQuals();
-         Type* paramType = parseTypename();
-         Identifier* paramName = tryParseIdentifier();
-         Expr* defaultVal;
-         if (tryConsumeOperator(OpID::ASSIGN)) {
-            defaultVal = parseExprNoPrimaryComma();
-            if (!defaultVal) { logError(ErrCode::BAD_FUNC, "invalid FUNC parameter default value"); }
-         } else { defaultVal = nullptr; }
-
-         //push to parameter list
-         ((astNode*)paramName)->upCast(NodeType::VAR);
-         params->push_back(new (paramName) Variable{paramType, paramName, defaultVal});
-      } while (tryConsumeOperator(OpID::COMMA));
-      consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "bad FUNC parameter list");
-   }
+   ParamList* params = parseParamList(BlockType::CALL);
    
 
    //return type
@@ -495,4 +506,7 @@ clef::Function* clef::Parser::parseFunction() {
    }
 }
 
+clef::Asm* clef::Parser::parseASM() {
+   logError(ErrCode::PARSER_NOT_IMPLEMENTED, "inline assembly is not yet supported");
+}
 #endif //PARSER_CPP

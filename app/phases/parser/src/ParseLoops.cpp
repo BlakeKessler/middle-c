@@ -34,9 +34,7 @@ clef::Loop* clef::Parser::parseForeachLoop() {
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FOREACH loop without opening parens for condition");
 
    //iterator declaration
-   TypeQualMask quals = parseQuals();
-   Type* itType = parseTypename();
-   Identifier* itName = parseIdentifier();
+   Decl* decl = parseDecl();
 
    //IN operator
    consumeOperator(OpID::LABEL_DELIM, "bad FOREACH params");
@@ -55,7 +53,6 @@ clef::Loop* clef::Parser::parseForeachLoop() {
    consumeEOS("FOREACH statement without EOS token");
 
    //return
-   Decl* decl = new (tree.allocNode(NodeType::DECL)) Decl{itType, itName};
    ForeachLoopParams* params = new (tree.allocNode(NodeType::FOREACH_LOOP_PARAMS)) ForeachLoopParams{decl, target};
    Loop* loop = new (tree.allocNode(NodeType::LOOP)) Loop{params, proc};
 

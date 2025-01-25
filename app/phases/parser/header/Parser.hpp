@@ -15,9 +15,9 @@ class clef::Parser {
    private:
       //data members
       SyntaxTree tree;
+      const SourceTokens& src;
       const Token* tokIt;
       const Token* endtok;
-      const SourceTokens src;
 
       ErrCode _errno;
 
@@ -72,7 +72,7 @@ class clef::Parser {
       TryCatch* parseTryCatch();
 
       Function* parseFunction();
-      // Asm* parseASM();
+      Asm* parseASM();
       
       Class* parseClass();
       Struct* parseStruct();
@@ -85,7 +85,8 @@ class clef::Parser {
       //error logging
       void logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, auto&&... args);
       
-      
+      //constructors
+      Parser(const SourceTokens& s):tree{},src{s},tokIt{s.begin()},endtok{s.end()},_errno{} {}
       
       static constexpr const mcsl::raw_str _nameof = "Parser";
    public:

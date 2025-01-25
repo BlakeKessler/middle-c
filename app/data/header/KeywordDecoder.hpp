@@ -25,7 +25,7 @@ class clef::KeywordDecoder {
             KeywordID _id;
 
          public:
-            [[gnu::const]] constexpr keyword(mcsl::raw_buf_str<MAX_WORD_LENGTH, ubyte> name = "", KeywordID id = KeywordID::_NOT_A_KEYWORD):_name{name},_id{id} {}
+            constexpr keyword(mcsl::raw_buf_str<MAX_WORD_LENGTH, ubyte> name = "", KeywordID id = KeywordID::_NOT_A_KEYWORD):_name{name},_id{id} {}
 
             [[gnu::const]] constexpr auto name() const { return _name; }
             [[gnu::const]] constexpr auto id() const { return _id; }

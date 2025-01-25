@@ -18,7 +18,7 @@ class clef::allocator {
       
       allocator():_bufBuf{} {}
       allocator(allocator&& other):_bufBuf{std::move(other._bufBuf)} { other._bufBuf.release(); }
-      allocator(allocator&) = delete;
+      allocator(const allocator& other);
 
       inline allocator& merge(allocator&& other);
 

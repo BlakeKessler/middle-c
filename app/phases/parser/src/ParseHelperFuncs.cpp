@@ -4,28 +4,22 @@
 #include "Parser.hpp"
 
 /*inline*/ bool clef::Parser::consumeKeyword(const KeywordID keywordID, const char* errStr) {
-   Identifier* keyword = parseIdentifier();
-   if (!keyword || keyword->keywordID() != keywordID) {
-      logError(ErrCode::BAD_KEYWORD, errStr);
-      return false;
+   if (tryConsumeKeyword(keywordID)) {
+      return true;
    }
-   return true;
+   logError(ErrCode::MISSING_KEYWORD, errStr);
 }
 /*inline*/ bool clef::Parser::tryConsumeKeyword(const KeywordID keywordID) {
-   auto oldTokIt = tokIt;
-   Identifier* keyword = parseIdentifier();
-   if (keyword && keyword->keywordID() == keywordID) {
-      return true;
-   } else {
-      tokIt = oldTokIt;
+   if (tokIt->type() != TokenType::KEYWORD || tokIt->keywordID() != keywordID) {
       return false;
    }
+   ++tokIt;
+   return true;
 }
 
 /*inline*/ bool clef::Parser::consumeOperator(const OpID id, const char* errStr) {
    if (tokIt->type() != TokenType::OP || tokIt->opID() != id) {
-      logError(ErrCode::BAD_KEYWORD, errStr);
-      return false;
+      logError(ErrCode::MISSING_OPERATOR, errStr);
    }
    ++tokIt;
    return true;
@@ -39,12 +33,10 @@
 }
 
 /*inline*/ bool clef::Parser::consumeEOS(const char* errStr) {
-   if (tokIt->type() == TokenType::EOS) {
-      ++tokIt;
+   if (tryConsumeEOS()) {
       return true;
    }
    logError(ErrCode::MISSING_EOS, errStr);
-   return false;
 }
 /*inline*/ bool clef::Parser::tryConsumeEOS() {
    if (tokIt->type() == TokenType::EOS) {
@@ -54,6 +46,21 @@
    return false;
 }
 
+/*inline*/ bool clef::Parser::consumeBlockDelim(BlockType type, BlockDelimRole role, const char* errStr) {
+   if (tryConsumeBlockDelim(type, role)) {
+      return true;
+   }
+   logError(ErrCode::BAD_BLOCK_DELIM, errStr);
+}
+/*inline*/ bool clef::Parser::tryConsumeBlockDelim(BlockType type, BlockDelimRole role) {
+   if (tokIt->type() == TokenType::BLOCK_DELIM) {
+      if (tokIt->blockType() == type && tokIt->blockDelimRole() == role) {
+         ++tokIt;
+         return true;
+      }
+   }
+   return false;
+}
 
 
 clef::Scope* clef::Parser::parseProcedure() {
@@ -159,5 +166,49 @@ mcsl::pair<clef::Variable*,clef::Decl*> clef::Parser::parseVarDecl(Identifier* s
    logError(ErrCode::BAD_DECL, "bad variable definition");
 }
 
+
+
+clef::ArgList* clef::Parser::parseArgList(const BlockType closer) {
+   ArgList* args = new (tree.allocNode(NodeType::ARG_LIST)) ArgList{tree.allocBuf<Expr*>()};
+   if (tryConsumeBlockDelim(closer, BlockDelimRole::CLOSE)) {
+      return args;
+   }
+   do {
+      args->push_back(parseExpr());
+      if (tryConsumeOperator(OpID::COMMA)) {
+         continue;
+      }
+      consumeBlockDelim(closer, BlockDelimRole::CLOSE, "argument list must end with the correct closing delimiter");
+      break;
+   } while (true);
+   return args;
+}
+clef::ParamList* clef::Parser::parseParamList(const BlockType closer) {
+   ParamList* args = new (tree.allocNode(NodeType::PARAM_LIST)) ParamList{tree.allocBuf<Variable*>()};
+   if (tryConsumeBlockDelim(closer, BlockDelimRole::CLOSE)) {
+      return args;
+   }
+   do {
+      args->push_back(parseVariable());
+      if (tryConsumeOperator(OpID::COMMA)) {
+         continue;
+      }
+      consumeBlockDelim(closer, BlockDelimRole::CLOSE, "argument list must end with the correct closing delimiter");
+      break;
+   } while (true);
+   return args;
+}
+
+
+
+clef::TypeQualMask clef::Parser::parseQuals(const TypeQualMask illegalQuals) {
+   logError(ErrCode::PARSER_NOT_IMPLEMENTED, "type qualifiers are not yet supported");
+}
+clef::Stmt* clef::Parser::parsePreprocStmt() {
+   logError(ErrCode::PARSER_NOT_IMPLEMENTED, "preprocessor statements are not yet supported");
+}
+clef::Expr* clef::Parser::parseCast(KeywordID castID) {
+   logError(ErrCode::PARSER_NOT_IMPLEMENTED, "typecasting is not yet supported");
+}
 
 #endif //PARSER_HELPERS_CPP

@@ -25,7 +25,12 @@ namespace clef {
       BAD_CMNT,
       BAD_IDEN,
       BAD_KEYWORD,
+
+      MISSING_KEYWORD,
+      MISSING_OPERATOR,
+      MISSING_BLOCK_DELIM,
       MISSING_EOS,
+      
       BAD_STMT,
       BAD_EXPR,
       BAD_BLOCK_DELIM,
@@ -69,7 +74,7 @@ namespace clef {
             IF,
             SWITCH,
             MATCH,
-            // ASM,
+            ASM,
             TRY_CATCH,
       FOR_LOOP_PARAMS,
       FOREACH_LOOP_PARAMS,
@@ -149,6 +154,10 @@ namespace clef {
       SPECIALIZER_INVOKE, //triangle brackets
          SPECIALIZER_OPEN,
          SPECIALIZER_CLOSE,
+      CHAR_INVOKE,
+      STR_INVOKE,
+      INTERP_STR_INVOKE,
+      TERNARY_INVOKE,
 
 
       PREPROCESSOR,
@@ -248,6 +257,7 @@ namespace clef {
       
       THROW,
       ASSERT,
+      DEBUG_ASSERT,
       STATIC_ASSERT,
       RETURN,
 
@@ -516,8 +526,59 @@ namespace clef {
    constexpr bool isControlFlow(const KeywordID id) noexcept { return ~(+id & +KeywordID::__CONTROL_FLOW) & +KeywordID::__NUMERIC_TYPE; }
    constexpr bool isUnspec(const KeywordID id) noexcept { return +id < +KeywordID::___LAST_SPEC; }
    
-   constexpr bool isValue(const KeywordID id) noexcept;
-   constexpr bool isC_FunctionLike(const KeywordID id) noexcept; //no specializer parameters
+   constexpr bool isValue(const KeywordID id) noexcept {
+      using enum KeywordID;
+      switch (id) {
+         case THIS:
+         case SELF:
+         case TRUE:
+         case FALSE:
+         case NULLPTR:
+            return true;
+         
+         default:
+            return false;
+      }
+   }
+   constexpr bool isC_FunctionLike(const KeywordID id) noexcept {//no specializer parameters
+      using enum KeywordID;
+      switch (id) {
+         case ASSERT:
+         case DEBUG_ASSERT:
+         case STATIC_ASSERT:
+         
+         case RETURN:
+         case THROW:
+         
+         case TYPEOF:
+         case TYPEID:
+         case TYPENAME:
+         case SIZEOF:
+         case ARRLEN:
+         case ALIGNAS:
+         case ALIGNOF:
+            return true;
+         
+         default:
+            return false;
+      }
+   }
+   constexpr OpID toOpID(const KeywordID id) {
+      switch (id) {
+         case KeywordID::BREAK         : return OpID::BREAK;
+         case KeywordID::CONTINUE      : return OpID::CONTINUE;
+         
+         case KeywordID::THROW         : return OpID::THROW;
+         case KeywordID::ASSERT        : return OpID::ASSERT;
+         case KeywordID::DEBUG_ASSERT  : return OpID::DEBUG_ASSERT;
+         case KeywordID::STATIC_ASSERT : return OpID::STATIC_ASSERT;
+         case KeywordID::RETURN        : return OpID::RETURN;
+
+         case KeywordID::USING         : return OpID::ALIAS;
+
+         default: UNREACHABLE;
+      }
+   }
    #pragma endregion keyword
 
    //delimiter pair specification
@@ -539,7 +600,23 @@ namespace clef {
       COMMENT_LINE,     //COMMENTED OUT CODE
    };
    constexpr auto operator+(const BlockType t) noexcept { return std::to_underlying(t); }
-   constexpr OpID getInvoker(const BlockType t);
+   constexpr OpID getInvoker(const BlockType t) {
+      using enum BlockType;
+      switch (t) {
+         case CALL         : return OpID::CALL_INVOKE;
+         case SUBSCRIPT    : return OpID::SUBSCRIPT_INVOKE;
+         case INIT_LIST    : return OpID::LIST_INVOKE;
+         case SPECIALIZER  : return OpID::SPECIALIZER_INVOKE;
+
+         case QUOTES_CHAR  : return OpID::CHAR_INVOKE;
+         case QUOTES_STR   : return OpID::STR_INVOKE;
+         case QUOTES_INTERP: return OpID::INTERP_STR_INVOKE;
+
+         case TERNARY      : return OpID::TERNARY_INVOKE;
+
+         default: UNREACHABLE;
+      }
+   }
    //block delimiter token role
    //!NOTE: could merge into BlockType, but that would not provide any performance advantages because significantly more bytes are going to be used for other Token types anyway
    enum class BlockDelimRole : uint8 {

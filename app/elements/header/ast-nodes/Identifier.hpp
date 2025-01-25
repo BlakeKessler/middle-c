@@ -18,6 +18,9 @@ struct clef::Identifier {
       Identifier(const mcsl::raw_str_span name = {}, Identifier* scopeName = {}):_scopeName{scopeName},_name_buf{name.begin()},_name_size{name.size()},_keywordID{KeywordID::_NOT_A_KEYWORD} {}
       Identifier(const KeywordID id):_scopeName{},_name_buf{},_name_size{},_keywordID{id} {}
 
+      Identifier(const Identifier& other):_scopeName{other._scopeName},_name_buf{other._name_buf},_name_size{other._name_size},_keywordID{other._keywordID} {}
+      Identifier& operator=(const Identifier& other) { new (this) Identifier{other}; return self; }
+
       Identifier*& scopeName() { return _scopeName; }
       const Identifier* scopeName() const { return _scopeName; }
 

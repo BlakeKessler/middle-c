@@ -21,7 +21,7 @@
 #include "ast-nodes/exprs/Switch.hpp"
 #include "ast-nodes/exprs/Match.hpp"
 #include "ast-nodes/exprs/TryCatch.hpp"
-// #include "ast-nodes/exprs/Asm.hpp"
+#include "ast-nodes/exprs/Asm.hpp"
 #include "ast-nodes/node-lists/ArgumentList.hpp"
 #include "ast-nodes/node-lists/MatchCases.hpp"
 #include "ast-nodes/node-lists/ParameterList.hpp"
@@ -71,7 +71,7 @@ struct clef::astNode {
          Switch _switch;
          Match _match;
          TryCatch _tryCatch;
-         // Asm _asm;
+         Asm _asm;
          ForLoopParams _forLoopParams;
          ForeachLoopParams _foreachLoopParams;
          SwitchCases _switchCases;
@@ -87,6 +87,8 @@ struct clef::astNode {
    public:
       #pragma region constructor
       /*unsafe<UNINIT_MEM>*/ astNode(const NodeType type = NodeType::NONE):_nodeType{type} {}
+      astNode(const astNode& other) { std::memcpy(this, &other, sizeof(self)); }
+      astNode& operator=(const astNode& other) { new (this) astNode{other}; return self; }
       #define _def_ctor(varName) astNode(decltype(varName)& node):varName{node},_nodeType{node.nodeType()} {}
       _def_ctor(_keyword)
       _def_ctor(_identifier)
@@ -163,7 +165,7 @@ struct clef::astNode {
       _def_cast_func(_switch)
       _def_cast_func(_match)
       _def_cast_func(_tryCatch)
-      // _def_cast_func(_asm)
+      _def_cast_func(_asm)
       _def_cast_func(_forLoopParams)
       _def_cast_func(_foreachLoopParams)
       _def_cast_func(_switchCases)
@@ -175,6 +177,13 @@ struct clef::astNode {
 
       #undef _def_cast_func
       #pragma endregion cast
+
+      void print() const;
+      void printf() const;
+};
+
+namespace clef {
+   uint nodeSizeof(NodeType);
 };
 
 #endif //AST_NODE_HPP
