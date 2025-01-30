@@ -3,7 +3,7 @@
 
 #include "Parser.hpp"
 
-clef::Loop* clef::Parser::parseForLoop() {
+clef::ForLoop* clef::Parser::parseForLoop() {
    //open parens
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FOR loop without opening parens for condition");
 
@@ -24,12 +24,12 @@ clef::Loop* clef::Parser::parseForLoop() {
 
    //return
    ForLoopParams* params = new (tree.allocNode(NodeType::FOREACH_LOOP_PARAMS)) ForLoopParams{decl, condition, inc};
-   Loop* loop = new (tree.allocNode(NodeType::LOOP)) Loop{params, proc};
+   ForLoop* loop = new (tree.allocNode(NodeType::FOR_LOOP)) ForLoop{params, proc};
 
    return loop;
 }
 
-clef::Loop* clef::Parser::parseForeachLoop() {
+clef::ForeachLoop* clef::Parser::parseForeachLoop() {
    //open parens
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FOREACH loop without opening parens for condition");
 
@@ -54,12 +54,12 @@ clef::Loop* clef::Parser::parseForeachLoop() {
 
    //return
    ForeachLoopParams* params = new (tree.allocNode(NodeType::FOREACH_LOOP_PARAMS)) ForeachLoopParams{decl, target};
-   Loop* loop = new (tree.allocNode(NodeType::LOOP)) Loop{params, proc};
+   ForeachLoop* loop = new (tree.allocNode(NodeType::FOREACH_LOOP)) ForeachLoop{params, proc};
 
    return loop;
 }
 
-clef::Loop* clef::Parser::parseWhileLoop() {
+clef::WhileLoop* clef::Parser::parseWhileLoop() {
    //open parens
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "WHILE loop without opening parens for condition");
 
@@ -77,10 +77,10 @@ clef::Loop* clef::Parser::parseWhileLoop() {
    consumeEOS("WHILE statement without EOS token");
 
    //return
-   return new (tree.allocNode(NodeType::LOOP)) Loop{OpID::WHILE, condition, proc};
+   return new (tree.allocNode(NodeType::WHILE_LOOP)) WhileLoop{OpID::WHILE, condition, proc};
 }
 
-clef::Loop* clef::Parser::parseDoWhileLoop() {
+clef::DoWhileLoop* clef::Parser::parseDoWhileLoop() {
    //procedure
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad DO WHILE block");
    Scope* proc = parseProcedure();
@@ -97,7 +97,7 @@ clef::Loop* clef::Parser::parseDoWhileLoop() {
    consumeEOS("DO WHILE statement without EOS token");
 
    //return
-   return new (tree.allocNode(NodeType::LOOP)) Loop{OpID::DO_WHILE, condition, proc};
+   return new (tree.allocNode(NodeType::DO_WHILE_LOOP)) DoWhileLoop{OpID::DO_WHILE, condition, proc};
 }
 
 #endif //PARSE_LOOPS

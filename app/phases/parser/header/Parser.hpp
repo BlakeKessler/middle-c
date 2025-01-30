@@ -60,10 +60,10 @@ class clef::Parser {
       Variable* parseVariable(Identifier* scopeName = {});
       mcsl::pair<Variable*,Decl*> parseVarDecl(Identifier* scopeName = {});
 
-      Loop* parseForLoop();
-      Loop* parseForeachLoop();
-      Loop* parseWhileLoop();
-      Loop* parseDoWhileLoop();
+      ForLoop* parseForLoop();
+      ForeachLoop* parseForeachLoop();
+      WhileLoop* parseWhileLoop();
+      DoWhileLoop* parseDoWhileLoop();
 
       If* parseIf(); //parse if statement (including following else/else if blocks)
       Switch* parseSwitch();

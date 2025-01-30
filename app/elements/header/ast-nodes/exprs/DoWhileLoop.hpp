@@ -1,6 +1,6 @@
 #pragma once
-#ifndef WHILE_LOOP_HPP
-#define WHILE_LOOP_HPP
+#ifndef DO_WHILE_HPP
+#define DO_WHILE_HPP
 
 #include "CLEF.hpp"
 #include "ast-nodes/Statement.hpp"
@@ -20,4 +20,4 @@ struct clef::DoWhileLoop : public clef::Statement {
       index<const Scope> procedure() const { return _rhs; }
 };
 
-#endif //WHILE_LOOP_HPP
+#endif //DO_WHILE_HPP

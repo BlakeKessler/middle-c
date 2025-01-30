@@ -17,7 +17,10 @@
 #include "ast-nodes/Variable.hpp"
 #include "ast-nodes/exprs/Declaration.hpp"
 #include "ast-nodes/exprs/If.hpp"
-#include "ast-nodes/exprs/Loop.hpp"
+#include "ast-nodes/exprs/ForLoop.hpp"
+#include "ast-nodes/exprs/ForeachLoop.hpp"
+#include "ast-nodes/exprs/WhileLoop.hpp"
+#include "ast-nodes/exprs/DoWhileLoop.hpp"
 #include "ast-nodes/exprs/Switch.hpp"
 #include "ast-nodes/exprs/Match.hpp"
 #include "ast-nodes/exprs/TryCatch.hpp"
@@ -66,7 +69,10 @@ struct clef::astNode {
          Literal _literal;
          Expression _expression;
          Declaration _declaration;
-         Loop _loop;
+         ForLoop _forLoop;
+         ForeachLoop _foreachLoop;
+         WhileLoop _whileLoop;
+         DoWhileLoop _doWhileLoop;
          If _if;
          Switch _switch;
          Match _match;
@@ -89,7 +95,7 @@ struct clef::astNode {
       /*unsafe<UNINIT_MEM>*/ astNode(const NodeType type = NodeType::NONE):_nodeType{type} {}
       astNode(const astNode& other) { std::memcpy(this, &other, sizeof(self)); }
       astNode& operator=(const astNode& other) { new (this) astNode{other}; return self; }
-      #define _def_ctor(varName) astNode(decltype(varName)& node):varName{node},_nodeType{node.nodeType()} {}
+      #define _def_ctor(varName) astNode(decltype(varName)& node):varName{node},_nodeType{decltype(varName)::nodeType()} {}
       _def_ctor(_keyword)
       _def_ctor(_identifier)
       _def_ctor(_variable)
@@ -110,7 +116,10 @@ struct clef::astNode {
       _def_ctor(_literal)
       _def_ctor(_expression)
       _def_ctor(_declaration)
-      _def_ctor(_loop)
+      _def_ctor(_forLoop)
+      _def_ctor(_foreachLoop)
+      _def_ctor(_whileLoop)
+      _def_ctor(_doWhileLoop)
       _def_ctor(_if)
       _def_ctor(_switch)
       _def_ctor(_match)
@@ -160,7 +169,10 @@ struct clef::astNode {
       _def_cast_func(_literal)
       _def_cast_func(_expression)
       _def_cast_func(_declaration)
-      _def_cast_func(_loop)
+      _def_cast_func(_forLoop)
+      _def_cast_func(_foreachLoop)
+      _def_cast_func(_whileLoop)
+      _def_cast_func(_doWhileLoop)
       _def_cast_func(_if)
       _def_cast_func(_switch)
       _def_cast_func(_match)
