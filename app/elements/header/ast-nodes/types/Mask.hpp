@@ -10,19 +10,19 @@
 
 struct clef::Mask : public clef::Type {
    private:
-      Type* _baseType;
-      ParameterList* _enumerators;
+      index<Type> _baseType;
+      index<ParameterList> _enumerators;
    public:
       static constexpr NodeType nodeType() { return NodeType::MASK; }
 
       Mask():Type{},_baseType{},_enumerators{} {}
-      Mask(Type* name, Type* base = {}, ParameterList* enums = {}):Type{name?*name:Type{}},_baseType{base},_enumerators{enums} {}
+      Mask(Type& name, index<Type> base = {}, index<ParameterList> enums = {}):Type{name},_baseType{base},_enumerators{enums} {}
 
-      Type*& baseType() { return _baseType; }
-      const Type* baseType() const { return _baseType; }
+      index<Type>& baseType() { return _baseType; }
+      index<const Type> baseType() const { return _baseType; }
 
-      ParameterList*& enumerators() { return _enumerators; }
-      const ParameterList* enumerators() const { return _enumerators; }
+      index<ParameterList>& enumerators() { return _enumerators; }
+      index<const ParameterList> enumerators() const { return _enumerators; }
 };
 
 #endif //MASK_HPP

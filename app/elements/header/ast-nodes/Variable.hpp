@@ -7,18 +7,19 @@
 
 struct clef::Variable : public clef::Identifier {
    private:
-      Type* _type;
-      Expr* _val;
+      index<Type> _type;
+      index<Expr> _val;
    public:
       static constexpr NodeType nodeType() { return NodeType::VAR; }
 
-      Variable(Type* type = {}, Identifier* name = {}, Expr* val = {}):Identifier{name?*name:Identifier{}},_type{type},_val{val} {}
+      Variable(index<Type> type = {}, Identifier name = {}, index<Expr> val = {}):Identifier{name},_type{type},_val{val} {}
+      // Variable(Type* type = {}, Identifier* name = {}, Expr* val = {}):Identifier{name?*name:Identifier{}},_type{type},_val{val} {}
 
-      Type*& type() { return _type; }
-      const Type* type() const { return _type; }
+      index<Type>& type() { return _type; }
+      index<const Type> type() const { return _type; }
 
-      Expr*& val() { return _val; }
-      const Expr* val() const { return _val; }
+      index<Expr>& val() { return _val; }
+      index<const Expr> val() const { return _val; }
 };
 
 #endif //VARIABLE_HPP

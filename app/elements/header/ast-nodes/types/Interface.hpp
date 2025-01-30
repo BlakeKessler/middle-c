@@ -9,17 +9,17 @@
 
 struct clef::Interface : public clef::Type {
    private:
-      InterfaceSpec* _spec;
+      index<InterfaceSpec> _spec;
    public:
       static constexpr NodeType nodeType() { return NodeType::INTERFACE; }
 
       Interface():Type{},_spec{} {}
-      Interface(InterfaceSpec* spec):Type{},_spec{spec} {}
-      Interface(Type* name):Type{name?*name:Type{}},_spec{} {}
-      Interface(InterfaceSpec* spec, Type* name):Type{name?*name:Type{}},_spec{spec} {}
+      Interface(index<InterfaceSpec> spec):Type{},_spec{spec} {}
+      Interface(Type& name):Type{name},_spec{} {}
+      Interface(index<InterfaceSpec> spec, Type& name):Type{name},_spec{spec} {}
 
-      InterfaceSpec*& spec() { return _spec; }
-      const InterfaceSpec* spec() const { return _spec; }
+      index<InterfaceSpec>& spec() { return _spec; }
+      index<const InterfaceSpec> spec() const { return _spec; }
 };
 
 #endif //INTERFACE_HPP

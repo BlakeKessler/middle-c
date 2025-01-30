@@ -9,17 +9,17 @@
 
 struct clef::Struct : public clef::Type {
    private:
-      ObjTypeSpec* _spec;
+      index<ObjTypeSpec> _spec;
    public:
       static constexpr NodeType nodeType() { return NodeType::STRUCT; }
 
       Struct():Type{},_spec{} {}
-      Struct(ObjTypeSpec* spec):Type{},_spec{spec} {}
-      Struct(ObjTypeSpec* spec, Type* name):Type{name?*name:Type{}},_spec{spec} {}
-      Struct(Type* name):Type{name?*name:Type{}},_spec{} {}
+      Struct(index<ObjTypeSpec> spec):Type{},_spec{spec} {}
+      Struct(index<ObjTypeSpec> spec, Type& name):Type{name},_spec{spec} {}
+      Struct(Type& name):Type{name},_spec{} {}
 
-      ObjTypeSpec*& spec() { return _spec; }
-      const ObjTypeSpec* spec() const { return _spec; }
+      index<ObjTypeSpec>& spec() { return _spec; }
+      index<const ObjTypeSpec> spec() const { return _spec; }
 };
 
 #endif //STRUCT_HPP

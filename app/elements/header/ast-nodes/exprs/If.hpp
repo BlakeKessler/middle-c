@@ -12,16 +12,17 @@ struct clef::If : public clef::Statement {
       static constexpr NodeType nodeType() { return NodeType::IF; }
 
       If():Statement{} {}
-      // If(Expr* condition, Scope* procedure, If* elseStmt = {}):Statement{OpID::IF,condition,procedure,elseStmt} {}
-      If(Expr* condition, Scope* procedure, If* elseStmt = {}):
-         Statement{OpID::IF,NodeType::EXPR,NodeType::SCOPE,NodeType::IF,condition,procedure,elseStmt} {}
+      If(index<Expr> condition, index<Scope> procedure, index<If> elseStmt = {}):Statement{
+         OpID::IF,NodeType::EXPR,NodeType::SCOPE,NodeType::IF,
+         condition,procedure,elseStmt
+      } {}
 
-      Expr*& condition() { return (Expr*&)_lhs; }
-      const Expr* condition() const { return (Expr*)_lhs; }
-      Scope*& procedure() { return (Scope*&)_rhs;}
-      const Scope* procedure() const { return (Scope*)_rhs;}
-      If*& elseStmt() { return (If*&)_rhs;}
-      const If* elseStmt() const { return (If*)_rhs;}
+      index<Expr>& condition() { return reinterpret_cast<index<Expr>&>(_lhs); }
+      index<const Expr> condition() const { return _lhs; }
+      index<Scope>& procedure() { return reinterpret_cast<index<Scope>&>(_rhs);}
+      index<const Scope> procedure() const { return _rhs;}
+      index<If>& elseStmt() { return reinterpret_cast<index<If>&>(_extra);}
+      index<const If> elseStmt() const { return _extra;}
 };
 
 #endif //IF_HPP

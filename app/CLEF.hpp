@@ -79,10 +79,17 @@ namespace clef {
 template<typename T> struct clef::index {
    uint i;
 
-   index(const uint n):i{n} {}
+   index(const uint n = {}):i{n} {}
 
    operator uint&() { return i; }
    operator uint() const { return i; }
+
+   uint operator+() const { return i; }
+
+   operator index<const T>() const { return i; }
+
+   template<mcsl::is_t<T> child_t> operator index<child_t>() { return i; }
+   template<mcsl::is_t<T> child_t> operator index<const child_t>() const { return i; }
 };
 
 #endif //CLEF_HPP

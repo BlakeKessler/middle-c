@@ -12,12 +12,12 @@ struct clef::Match : public clef::Statement {
       static constexpr NodeType nodeType() { return NodeType::MATCH; }
 
       Match():Statement{} {}
-      Match(Expr* cond, MatchCases* cases):Statement{OpID::SWITCH,NodeType::EXPR,NodeType::MATCH_CASES,cond,cases} {}
+      Match(index<Expr> cond, index<MatchCases> cases):Statement{OpID::SWITCH,NodeType::EXPR,NodeType::MATCH_CASES,cond,cases} {}
 
-      Expr*& condition() { return (Expr*&)_lhs; }
-      const Expr* condition() const { return (Expr*)_lhs; }
-      MatchCases*& cases() { return (MatchCases*&)_rhs;}
-      const MatchCases* cases() const { return (MatchCases*)_rhs;}
+      index<Expr>& condition() { return reinterpret_cast<index<Expr>&>(_lhs); }
+      index<const Expr> condition() const { return _lhs; }
+      index<MatchCases>& cases() { return reinterpret_cast<index<MatchCases>&>(_rhs); }
+      index<const MatchCases> cases() const { return _rhs; }
 };
 
 #endif //MATCH_HPP

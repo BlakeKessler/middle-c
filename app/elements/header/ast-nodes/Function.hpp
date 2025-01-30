@@ -7,20 +7,20 @@
 
 struct clef::Function : public clef::Identifier {
    private:
-      FuncSig* _signature;
-      Scope* _procedure;
+      index<FuncSig> _signature;
+      index<Scope> _procedure;
    public:
       static constexpr NodeType nodeType() { return NodeType::FUNC; }
 
       Function():Identifier{},_signature{},_procedure{} {}
-      Function(FuncSig* sig, Scope* procedure = {}):Identifier{},_signature{sig},_procedure{procedure} {}
-      Function(FuncSig* sig, Identifier* name):Identifier{name?*name:Identifier{}},_signature{sig},_procedure{} {}
-      Function(FuncSig* sig, Scope* procedure, Identifier* name):Identifier{name?*name:Identifier{}},_signature{sig},_procedure{procedure} {}
+      Function(index<FuncSig> sig, index<Scope> procedure = {}):Identifier{},_signature{sig},_procedure{procedure} {}
+      Function(index<FuncSig> sig, Identifier name):Identifier{name},_signature{sig},_procedure{} {}
+      Function(index<FuncSig> sig, index<Scope> procedure, Identifier name):Identifier{name},_signature{sig},_procedure{procedure} {}
 
-      FuncSig*& signature() { return _signature; }
-      const FuncSig* signature() const { return _signature; }
-      Scope*& procedure() { return _procedure; }
-      const Scope* procedure() const { return _procedure; }
+      index<FuncSig>& signature() { return _signature; }
+      index<const FuncSig> signature() const { return _signature; }
+      index<Scope>& procedure() { return _procedure; }
+      index<const Scope> procedure() const { return _procedure; }
 };
 
 #endif //FUNCTION_HPP

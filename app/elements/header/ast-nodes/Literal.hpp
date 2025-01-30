@@ -20,7 +20,7 @@ struct clef::Literal {
          mcsl::raw_str_span _interpLit;
          mcsl::raw_str_span _formatLit;
          mcsl::raw_str_span _regexLit;
-         Type* _typeid;
+         index<Type> _typeid;
       };
       LitType _type;
    public:
@@ -38,7 +38,7 @@ struct clef::Literal {
             throwError(ErrCode::BAD_LITERAL, "attempt to construct string-like Literal node with non-string-like LitType");
          }
       }
-      Literal(Type* typeID):_typeid{typeID},_type{LitType::TYPEID} {}
+      Literal(index<Type> typeID):_typeid{typeID},_type{LitType::TYPEID} {}
 
       Literal(void* ptr):_ptrLit{ptr},_type{LitType::POINTER} {}
 
@@ -61,8 +61,8 @@ struct clef::Literal {
       operator const mcsl::raw_str_span&() const { if (_type == LitType::STRING) { return _strLit;    } else { throwCastErr(LitType::STRING); } }
       // operator mcsl::format() const { if (_type == LitType::FORMAT) { return _formatLit; } else { throwCastErr(LitType::FORMAT); } }
       // operator mcsl::regex()  const { if (_type == LitType::REGEX)  { return _regexLit;  } else { throwCastErr(LitType::REGEX);  } }
-      operator Type*() { if(_type == LitType::TYPEID) { return _typeid; } else { throwCastErr(LitType::TYPEID); }}
-      operator const Type*() const { if(_type == LitType::TYPEID) { return _typeid; } else { throwCastErr(LitType::TYPEID); }}
+      operator index<Type>() { if(_type == LitType::TYPEID) { return _typeid; } else { throwCastErr(LitType::TYPEID); }}
+      operator index<const Type>() const { if(_type == LitType::TYPEID) { return _typeid; } else { throwCastErr(LitType::TYPEID); }}
       operator void*() { if (_type == LitType::POINTER) { return _ptrLit; } else { throwCastErr(LitType::POINTER); }}
       operator const void*() const { if (_type == LitType::POINTER) { return _ptrLit; } else { throwCastErr(LitType::POINTER); }}
       #pragma endregion cast
@@ -80,7 +80,7 @@ struct clef::Literal {
             case LitType::INTERP_STR: return _interpLit == other._interpLit;
             case LitType::FORMAT    : return _formatLit == other._formatLit;
             case LitType::REGEX     : return  _regexLit == other._regexLit;
-            case LitType::TYPEID    : return    _typeid == other._typeid || *_typeid == *other._typeid;
+            case LitType::TYPEID    : return    _typeid == other._typeid;
          }
       }
 };

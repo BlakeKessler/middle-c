@@ -7,18 +7,18 @@
 
 struct clef::Union : public clef::Type {
    private:
-      ParameterList* _members;
+      index<ParameterList> _members;
    public:
       static constexpr NodeType nodeType() { return NodeType::UNION; }
 
       Union():Type{},_members{} {}
-      Union(ParameterList* members):Type{},_members{members} {}
-      Union(Type* name):Type{name?*name:Type{}},_members{} {}
-      Union(ParameterList* members, Type* name):Type{name?*name:Type{}},_members{members} {}
-      Union(Identifier* name, ParameterList* members = {}):Type{name?*(Type*)name:Type{}},_members{members} {}
+      Union(index<ParameterList> members):Type{},_members{members} {}
+      Union(Type& name):Type{name},_members{} {}
+      Union(index<ParameterList> members, Type& name):Type{name},_members{members} {}
+      // Union(Identifier name, index<ParameterList> members = {}):Type{name},_members{members} {}
 
-      ParameterList*& members() { return _members; }
-      const ParameterList* members() const { return _members; }
+      index<ParameterList>& members() { return _members; }
+      index<const ParameterList> members() const { return _members; }
 };
 
 #endif //UNION_HPP

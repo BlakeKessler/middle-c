@@ -9,17 +9,17 @@
 
 struct clef::Namespace : public clef::Type {
    private:
-      NamespaceSpec* _spec;
+      index<NamespaceSpec> _spec;
    public:
       static constexpr NodeType nodeType() { return NodeType::NAMESPACE; }
 
       Namespace():Type{},_spec{} {}
-      Namespace(NamespaceSpec* spec):Type{},_spec{spec} {}
-      Namespace(NamespaceSpec* spec, Type* name):Type{name?*name:Type{}},_spec{spec} {}
-      Namespace(Type* name):Type{name?*name:Type{}},_spec{} {}
+      Namespace(index<NamespaceSpec> spec):Type{},_spec{spec} {}
+      Namespace(index<NamespaceSpec> spec, Type& name):Type{name},_spec{spec} {}
+      Namespace(Type& name):Type{name},_spec{} {}
 
-      NamespaceSpec*& spec() { return _spec; }
-      const NamespaceSpec* spec() const { return _spec; }
+      index<NamespaceSpec>& spec() { return _spec; }
+      index<const NamespaceSpec> spec() const { return _spec; }
 
 };
 

@@ -209,7 +209,7 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma(astNode* initOperand) {
                goto PARSE_EXPR_CONTINUE;
             }
             else if (isValue(kw)) {
-               operandStack.push_back((astNode*)tree.getValueKeyword(kw));
+               operandStack.push_back(tree.getValueKeyword(kw));
                ++tokIt;
                goto PARSE_EXPR_CONTINUE;
             }
@@ -301,6 +301,12 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma(astNode* initOperand) {
 
    while (operatorStack.size()) { eval(); }
    if (operandStack.size() != 1) {
+      std::printf("%u excess operand(s)\n", operandStack.size() - 1);
+      for (uint i = 0; i < operandStack.size(); ++i) { //!NOTE: this is for debugging - don't forget to remove
+         operandStack[i]->print();
+         std::printf("\n");
+         std::fflush(stdout);
+      }
       logError(ErrCode::BAD_EXPR, "invalid expression");
    }
    return (Expr*)operandStack.back(); //!NOTE: WILL PROBABLY CAUSE ISSUES (not all AST nodes have the same memory layout as expressions)

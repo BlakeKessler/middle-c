@@ -80,9 +80,8 @@ clef::astNode* clef::SyntaxTree::getValueKeyword(const KeywordID keyword) {
 
 
 void clef::SyntaxTree::print() const {
-   std::printf("ROOT: index = %ld, addr = %p", _buf.begin() - _root, (void*)_root);
-   for (uint i = 0; i < _buf.size(); ++i) {
-      std::printf("\n\t");
+   for (uint i = 1; i < _buf.size(); ++i) {
+      std::printf("\n\t%u: ", i);
       _buf[i].print();
    }
    std::printf("\n");

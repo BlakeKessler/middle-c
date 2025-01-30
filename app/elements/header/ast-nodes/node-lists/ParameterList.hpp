@@ -8,11 +8,11 @@
 
 struct clef::ParameterList : public mcsl::contig_base<Variable*> {
    private:
-      mcsl::dyn_arr<Variable*>* _params;
+      mcsl::dyn_arr<index<Variable>>* _params;
    public:
       static constexpr NodeType nodeType() { return NodeType::PARAM_LIST; }
 
-      ParameterList(mcsl::dyn_arr<Variable*>& params):_params{&params} {}
+      ParameterList(mcsl::dyn_arr<index<Variable>>& params):_params{&params} {}
 
 
       #pragma region dyn_arr
@@ -31,7 +31,7 @@ struct clef::ParameterList : public mcsl::contig_base<Variable*> {
       bool resize(const uint newSize) { return _params->resize(newSize); }
       bool resize_exact(const uint newSize) { return _params->resize_exact(newSize); }
       auto* release() { return _params->release(); }
-      bool push_back(Variable* obj) { return _params->push_back(obj); }
+      bool push_back(index<Variable> obj) { return _params->push_back(obj); }
       auto pop_back() { return _params->pop_back(); }
       auto* emplace(const uint i, auto&&... args) { return _params->emplace(i, std::forward<decltype(args)>(args)...); }
       auto* emplace_back(auto&&... args) { return _params->emplace_back(std::forward<decltype(args)>(args)...); }

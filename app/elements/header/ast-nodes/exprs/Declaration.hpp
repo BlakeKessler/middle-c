@@ -12,14 +12,13 @@ struct clef::Declaration : public clef::Expression {
       static constexpr NodeType nodeType() { return NodeType::DECL; }
 
       Declaration():Expression{} {}
-      template<mcsl::is_t<Type> type_t, mcsl::is_t<Identifier> name_t>
-         Declaration(type_t* type, name_t* name):Expression{OpID::DECL,type,name} {}
+      Declaration(index<Type> type, index<Identifier> name):Expression{OpID::DECL,type,name} {}
 
 
-      Type*& type() { return (Type*&)_lhs; }
-      const Type* type() const { return (const Type*)_lhs; }
-      Identifier*& name() { return (Identifier*&)_rhs; }
-      const Identifier* name() const { return (const Identifier*)_rhs; }
+      index<Type>& type() { return reinterpret_cast<index<Type>&>(_lhs); }
+      index<const Type> type() const { return _lhs; }
+      index<Identifier>& name() { return reinterpret_cast<index<Identifier>&>(_rhs); }
+      index<const Identifier> name() const { return _rhs; }
 };
 
 #endif //DECL_HPP

@@ -12,12 +12,12 @@ struct clef::Switch : public clef::Statement {
       static constexpr NodeType nodeType() { return NodeType::SWITCH; }
 
       Switch():Statement{} {}
-      Switch(Expr* cond, SwitchCases* cases):Statement{OpID::SWITCH,NodeType::EXPR,NodeType::SWITCH_CASES,cond,cases} {}
+      Switch(index<Expr> cond, index<SwitchCases> cases):Statement{OpID::SWITCH,NodeType::EXPR,NodeType::SWITCH_CASES,cond,cases} {}
 
-      Expr*& condition() { return (Expr*&)_lhs; }
-      const Expr* condition() const { return (Expr*)_lhs; }
-      SwitchCases*& cases() { return (SwitchCases*&)_rhs;}
-      const SwitchCases* cases() const { return (SwitchCases*)_rhs;}
+      index<Expr>& condition() { return reinterpret_cast<index<Expr>&>(_lhs); }
+      index<const Expr> condition() const { return _lhs; }
+      index<SwitchCases>& cases() { return reinterpret_cast<index<SwitchCases>&>(_rhs);}
+      index<const SwitchCases> cases() const { return _rhs;}
 };
 
 #endif //SWITCH_HPP

@@ -12,15 +12,15 @@ struct clef::TryCatch : public clef::Statement {
    public:
       static constexpr NodeType nodeType() { return NodeType::TRY_CATCH; }
       TryCatch():Statement{} {}
-      TryCatch(Scope* procedure, Decl* err, Scope* errHandler):
+      TryCatch(index<Scope> procedure, index<Decl> err, index<Scope> errHandler):
          Statement{OpID::TRY_CATCH,NodeType::SCOPE,NodeType::DECL,NodeType::SCOPE,procedure,err,errHandler} {}
 
-      Scope*& procedure() { return (Scope*&)_lhs; }
-      Decl*& err() { return (Decl*&)_rhs; }
-      Scope*& errHandler() { return (Scope*&)_extra; }
-      const Scope* procedure() const { return (Scope*)_lhs; }
-      const Decl* err() const { return (Decl*)_rhs; }
-      const Scope* errHandler() const { return (Scope*)_extra; }
+      index<Scope>& procedure() { return reinterpret_cast<index<Scope>&>(_lhs); }
+      index<Decl>& err() { return reinterpret_cast<index<Decl>&>(_rhs); }
+      index<Scope>& errHandler() { return reinterpret_cast<index<Scope>&>(_extra); }
+      index<const Scope> procedure() const { return _lhs; }
+      index<const Decl> err() const { return _rhs; }
+      index<const Scope> errHandler() const { return _extra; }
 };
 
 #endif //TRY_CATCH_HPP

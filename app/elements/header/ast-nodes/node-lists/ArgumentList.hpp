@@ -8,11 +8,11 @@
 
 struct clef::ArgumentList : public mcsl::contig_base<Expr*> {
    private:
-      mcsl::dyn_arr<Expr*>* _exprs;
+      mcsl::dyn_arr<index<Expr>>* _exprs;
    public:
       static constexpr NodeType nodeType() { return NodeType::ARG_LIST; }
 
-      ArgumentList(mcsl::dyn_arr<Expr*>& exprs):_exprs{&exprs} {}
+      ArgumentList(mcsl::dyn_arr<index<Expr>>& exprs):_exprs{&exprs} {}
 
 
       #pragma region dyn_arr
@@ -31,7 +31,7 @@ struct clef::ArgumentList : public mcsl::contig_base<Expr*> {
       bool resize(const uint newSize) { return _exprs->resize(newSize); }
       bool resize_exact(const uint newSize) { return _exprs->resize_exact(newSize); }
       auto* release() { return _exprs->release(); }
-      bool push_back(Expr* obj) { return _exprs->push_back(obj); }
+      bool push_back(index<Expr> obj) { return _exprs->push_back(obj); }
       auto pop_back() { return _exprs->pop_back(); }
       auto* emplace(const uint i, auto&&... args) { return _exprs->emplace(i, std::forward<decltype(args)>(args)...); }
       auto* emplace_back(auto&&... args) { return _exprs->emplace_back(std::forward<decltype(args)>(args)...); }

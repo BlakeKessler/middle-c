@@ -13,7 +13,7 @@ struct clef::FundamentalType : public clef::Type {
 
       FundamentalType():Type{},_id{} {}
       FundamentalType(FundTypeID id):Type{},_id{id} {}
-      FundamentalType(FundTypeID id, Type* name):Type{name?*name:Type{}},_id{id} {}
+      FundamentalType(FundTypeID id, Type& name):Type{name},_id{id} {}
 
       FundTypeID& id() { return _id; }
       FundTypeID id() const { return _id; }

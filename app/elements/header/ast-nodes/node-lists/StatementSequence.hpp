@@ -8,11 +8,11 @@
 
 struct clef::StatementSequence : public mcsl::contig_base<Stmt*> {
    private:
-      mcsl::dyn_arr<Stmt*>* _stmts;
+      mcsl::dyn_arr<index<Stmt>>* _stmts;
    public:
       static constexpr NodeType nodeType() { return NodeType::STMT_SEQ; }
 
-      StatementSequence(mcsl::dyn_arr<Stmt*>& stmts):_stmts{&stmts} {}
+      StatementSequence(mcsl::dyn_arr<index<Stmt>>& stmts):_stmts{&stmts} {}
 
 
       #pragma region dyn_arr
@@ -31,7 +31,7 @@ struct clef::StatementSequence : public mcsl::contig_base<Stmt*> {
       bool resize(const uint newSize) { return _stmts->resize(newSize); }
       bool resize_exact(const uint newSize) { return _stmts->resize_exact(newSize); }
       auto* release() { return _stmts->release(); }
-      bool push_back(Stmt* obj) { return _stmts->push_back(obj); }
+      bool push_back(index<Stmt> obj) { return _stmts->push_back(obj); }
       auto pop_back() { return _stmts->pop_back(); }
       auto* emplace(const uint i, auto&&... args) { return _stmts->emplace(i, std::forward<decltype(args)>(args)...); }
       auto* emplace_back(auto&&... args) { return _stmts->emplace_back(std::forward<decltype(args)>(args)...); }
