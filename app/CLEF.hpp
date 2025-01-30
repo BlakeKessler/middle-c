@@ -62,6 +62,7 @@ namespace clef {
       struct ArgumentList; using ArgList = ArgumentList;
       struct ParameterList; using ParamList = ParameterList;
       template<typename T> concept astNode_t = requires { {T::nodeType()} -> mcsl::same_t<NodeType>; };
+      template<typename T> concept astNode_ptr_t = astNode_t<mcsl::remove_ptr<T>>;
       template<typename T> concept operand_t = mcsl::is_t<T, clef::Identifier> || mcsl::is_t<T,Expression>;
    class ObjTypeSpec;
    class InterfaceSpec;

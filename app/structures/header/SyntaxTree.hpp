@@ -46,8 +46,13 @@ class clef::SyntaxTree {
       ObjTypeSpec* operator+(index<ObjTypeSpec> i) { return _objSpecBuf + i; }
 
 
+      template<astNode_ptr_t T, typename... Argv_t> T make(NodeType baseType, Argv_t... argv) { astNode* tmp = _buf.emplace_back(mcsl::remove_ptr<T>{std::forward<Argv_t>(argv)...}); tmp->downCast(baseType); return tmp; }
+      template<astNode_ptr_t T, typename... Argv_t> T make(Argv_t... argv) { return _buf.emplace_back(mcsl::remove_ptr<T>{std::forward<Argv_t>(argv)...}); }
 
-      astNode* allocNode(const NodeType type) { return _buf.emplace_back(type); }
+      template<astNode_t T, typename... Argv_t> index<T> make(NodeType baseType, Argv_t... argv) { return make<T*>(baseType, std::forward<Argv_t>(argv)...) - _buf.begin(); }
+      template<astNode_t T, typename... Argv_t> index<T> make(Argv_t... argv) { return make<T*>(std::forward<Argv_t>(argv)...) - _buf.begin(); }
+
+      /*unsafe<UNIT_MEM>*/astNode* allocNode(const NodeType type) { return _buf.emplace_back(type); } //deprecated
       template<typename T> mcsl::dyn_arr<T>& allocBuf() { return _alloc.at(_alloc.alloc<T>()); }
       InterfaceSpec* allocInterfaceSpec() { return _ifaceSpecBuf.emplace_back(); }
       NamespaceSpec* allocNamespaceSpec() { return _nsSpecBuf.emplace_back(); }
