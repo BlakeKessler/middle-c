@@ -44,7 +44,10 @@ namespace clef {
       struct Literal;
       struct Expression; using Expr = Expression;
          struct Declaration; using Decl = Declaration;
-         struct Loop;
+         struct ForLoop;
+         struct ForeachLoop;
+         struct WhileLoop;
+         struct DoWhileLoop;
          struct If;
          struct Switch;
          struct Match;

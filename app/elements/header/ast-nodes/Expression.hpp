@@ -16,7 +16,10 @@ struct clef::Expression {
 
       friend struct Statement;
       friend struct Declaration;
-      friend struct Loop;
+      friend struct ForLoop;
+      friend struct ForeachLoop;
+      friend struct WhileLoop;
+      friend struct DoWhileLoop;
       friend struct If;
       friend struct Else;
       friend struct Switch;
