@@ -63,7 +63,7 @@
 }
 
 
-clef::Scope* clef::Parser::parseProcedure() {
+clef::index<clef::Scope> clef::Parser::parseProcedure() {
    Scope* scope = (Scope*)tree.allocNode(NodeType::SCOPE);
 
    while (tokIt < endtok) {
@@ -79,96 +79,100 @@ clef::Scope* clef::Parser::parseProcedure() {
 
 
 
-clef::Type* clef::Parser::parseTypename(Identifier* scopeName) {
-   Type* name = (Type*)parseIdentifier(scopeName);
-   ((astNode*)name)->upCast(NodeType::TYPE);
+clef::index<clef::Type> clef::Parser::parseTypename(Identifier* scopeName) {
+   index<Type> name = (index<Type>)parseIdentifier(scopeName);
+   tree[(index<astNode>)name].upCast(NodeType::TYPE);
    return name;
 }
 
-clef::Decl* clef::Parser::parseDecl(Type* type, Identifier* scopeName) {
-   Identifier* name = parseIdentifier(scopeName);
-   return new (tree.allocNode(NodeType::DECL)) Decl{type, name};
+clef::index<clef::Decl> clef::Parser::parseDecl(Type* type, Identifier* scopeName) {
+   index<Identifier> name = parseIdentifier(scopeName);
+   return tree.make<Decl>(type, name);
 }
-clef::Decl* clef::Parser::parseDecl(Identifier* scopeName) {
+clef::index<clef::Decl> clef::Parser::parseDecl(Identifier* scopeName) {
    if (tryConsumeKeyword(KeywordID::FUNC)) {
       Function* func = parseFuncDecl(scopeName);
       return new (tree.allocNode(NodeType::DECL)) Decl{func->signature(), func};
    }
 
-   Type* type = parseTypename(scopeName);
+   index<Type> type = parseTypename(scopeName);
 
-   Identifier* name = parseIdentifier(scopeName);
-   return new (tree.allocNode(NodeType::DECL)) Decl{type, name};
+   index<Identifier> name = parseIdentifier(scopeName);
+   return tree.make<Decl>(type, name);
 }
 
-clef::Function* clef::Parser::parseFuncDecl(Identifier* scopeName) {
-   Identifier* name = parseIdentifier(scopeName);
+clef::index<clef::Function> clef::Parser::parseFuncDecl(Identifier* scopeName) {
+   index<Identifier> name = parseIdentifier(scopeName);
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "function definition must include parameter list");
-   ParamList* params = parseParamList(BlockType::CALL);
+   index<ParamList> params = parseParamList(BlockType::CALL);
    consumeOperator(OpID::ARROW, "function definitions must provide a return type");
-   Type* returnType = parseTypename(scopeName);
+   index<Type> returnType = parseTypename(scopeName);
 
-   FuncSig* sig = new (tree.allocNode(NodeType::FUNC_SIG)) FuncSig{returnType, params};
-   return new (tree.allocNode(NodeType::FUNC)) Function{sig, nullptr, name};
+   index<FuncSig> sig = tree.make<FuncSig>(returnType, params);
+   return tree.make<Function>(sig, name);
 }
 
-clef::Variable* clef::Parser::parseVariable(Identifier* scopeName) {
+clef::index<clef::Variable> clef::Parser::parseVariable(Identifier* scopeName) {
    Decl* decl = parseDecl(scopeName);
    if (tryConsumeEOS()) { //forward declaration
       Variable* var = new (decl) Variable{decl->type(), decl->name()};
          ((astNode*)var)->anyCast(NodeType::VAR);
       return var;
    }
-   if (tryConsumeOperator(OpID::ASSIGN)) {
+   else if (tryConsumeOperator(OpID::ASSIGN)) {
       Variable* var = new (decl) Variable{decl->type(), decl->name(), parseExpr()};
          ((astNode*)var)->anyCast(NodeType::VAR);
       return var;
    }
-   if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN)) {
+   else if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN)) {
       ArgList* args = parseArgList(BlockType::INIT_LIST);
       Expr* invoke = new (tree.allocNode(NodeType::EXPR)) Expr{OpID::LIST_INVOKE, decl->type(), args};
       Variable* var = new (decl) Variable{decl->type(), decl->name(), invoke};
          ((astNode*)var)->anyCast(NodeType::VAR);
       return var;
    }
-   if (tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN)) {
+   else if (tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN)) {
       ArgList* args = parseArgList(BlockType::CALL);
       Expr* invoke = new (tree.allocNode(NodeType::EXPR)) Expr{OpID::CALL_INVOKE, decl->type(), args};
       Variable* var = new (decl) Variable{decl->type(), decl->name(), invoke};
          ((astNode*)var)->anyCast(NodeType::VAR);
       return var;
    }
-   logError(ErrCode::BAD_DECL, "bad variable definition");
+   else {
+      logError(ErrCode::BAD_DECL, "bad variable definition");
+   }
 }
 
-mcsl::pair<clef::Variable*,clef::Decl*> clef::Parser::parseVarDecl(Identifier* scopeName) {
+mcsl::pair<clef::index<clef::Variable>,clef::index<clef::Decl>> clef::Parser::parseVarDecl(Identifier* scopeName) {
    Decl* decl = parseDecl(scopeName);
    if (tryConsumeEOS()) {
       Variable* var = new (tree.allocNode(NodeType::VAR)) Variable{decl->type(), decl->name()};
       return {var,decl};
    }
-   if (tryConsumeOperator(OpID::ASSIGN)) {
+   else if (tryConsumeOperator(OpID::ASSIGN)) {
       Variable* var = new (tree.allocNode(NodeType::VAR)) Variable{decl->type(), decl->name(), parseExpr()};
       return {var,decl};
    }
-   if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN)) {
+   else if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN)) {
       ArgList* args = parseArgList(BlockType::INIT_LIST);
       Expr* invoke = new (tree.allocNode(NodeType::EXPR)) Expr{OpID::LIST_INVOKE, decl->type(), args};
       Variable* var = new (tree.allocNode(NodeType::VAR)) Variable{decl->type(), decl->name(), invoke};
       return {var,decl};
    }
-   if (tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN)) {
+   else if (tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN)) {
       ArgList* args = parseArgList(BlockType::CALL);
       Expr* invoke = new (tree.allocNode(NodeType::EXPR)) Expr{OpID::CALL_INVOKE, decl->type(), args};
       Variable* var = new (tree.allocNode(NodeType::VAR)) Variable{decl->type(), decl->name(), invoke};
       return {var,decl};
    }
-   logError(ErrCode::BAD_DECL, "bad variable definition");
+   else {
+      logError(ErrCode::BAD_DECL, "bad variable definition");
+   }
 }
 
 
 
-clef::ArgList* clef::Parser::parseArgList(const BlockType closer) {
+clef::index<clef::ArgList> clef::Parser::parseArgList(const BlockType closer) {
    ArgList* args = new (tree.allocNode(NodeType::ARG_LIST)) ArgList{tree.allocBuf<Expr*>()};
    if (tryConsumeBlockDelim(closer, BlockDelimRole::CLOSE)) {
       return args;
@@ -183,7 +187,7 @@ clef::ArgList* clef::Parser::parseArgList(const BlockType closer) {
    } while (true);
    return args;
 }
-clef::ParamList* clef::Parser::parseParamList(const BlockType closer) {
+clef::index<clef::ParamList> clef::Parser::parseParamList(const BlockType closer) {
    ParamList* args = new (tree.allocNode(NodeType::PARAM_LIST)) ParamList{tree.allocBuf<Variable*>()};
    if (tryConsumeBlockDelim(closer, BlockDelimRole::CLOSE)) {
       return args;
@@ -204,10 +208,10 @@ clef::ParamList* clef::Parser::parseParamList(const BlockType closer) {
 clef::TypeQualMask clef::Parser::parseQuals(const TypeQualMask illegalQuals) {
    logError(ErrCode::PARSER_NOT_IMPLEMENTED, "type qualifiers are not yet supported");
 }
-clef::Stmt* clef::Parser::parsePreprocStmt() {
+clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
    logError(ErrCode::PARSER_NOT_IMPLEMENTED, "preprocessor statements are not yet supported");
 }
-clef::Expr* clef::Parser::parseCast(KeywordID castID) {
+clef::index<clef::Expr> clef::Parser::parseCast(KeywordID castID) {
    logError(ErrCode::PARSER_NOT_IMPLEMENTED, "typecasting is not yet supported");
 }
 

@@ -21,6 +21,9 @@ class clef::Parser {
 
       ErrCode _errno;
 
+      //utils
+      template<typename T> T& operator*(index<T> i) { return tree + i; } //should be a dereferencing operator
+
       //helper functions
 
       /*inline*/ bool consumeKeyword(const KeywordID, const char* errStr);
@@ -34,53 +37,53 @@ class clef::Parser {
       /*inline*/ bool tryConsumeEOS();
 
       //parsing functions
-      Expr* parseExpr(astNode* initOperand = {});
-      Expr* parseExprNoPrimaryComma(astNode* initOperand = {}); //expression that cannot have the comma operator as its principal connective
-      Stmt* parseStmt();
-      Stmt* parsePreprocStmt();
-      Scope* parseProcedure();
-      ArgList* parseArgList(const BlockType closer);
-      ParamList* parseParamList(const BlockType closer);
+      index<Expr> parseExpr(astNode* initOperand = {});
+      index<Expr> parseExprNoPrimaryComma(astNode* initOperand = {}); //expression that cannot have the comma operator as its principal connective
+      index<Stmt> parseStmt();
+      index<Stmt> parsePreprocStmt();
+      index<Scope> parseProcedure();
+      index<ArgList> parseArgList(const BlockType closer);
+      index<ParamList> parseParamList(const BlockType closer);
 
-      Expr* parseCast(const KeywordID);
+      index<Expr> parseCast(const KeywordID);
 
       void skipBlockComment();
       void skipLineComment();
 
       TypeQualMask parseQuals(const TypeQualMask illegalQuals = {});
 
-      Identifier* tryParseIdentifier(Identifier* scopeName = {});
-      Identifier* parseIdentifier(Identifier* scopeName = {});
-      Decl* parseDecl(Type* type, Identifier* scopeName = {});
-      Decl* parseDecl(Identifier* scopeName = {});
-      Function* parseFuncDecl(Identifier* scopeName = {});
-      Stmt* parseForwardDecl(Identifier* scopeName = {});
-      Stmt* parseDeclStmt(Identifier* scopeName = {});
-      Type* parseTypename(Identifier* scopeName = {});
-      Variable* parseVariable(Identifier* scopeName = {});
+      index<Identifier> tryParseIdentifier(Identifier* scopeName = {});
+      index<Identifier> parseIdentifier(Identifier* scopeName = {});
+      index<Decl> parseDecl(Type* type, Identifier* scopeName = {});
+      index<Decl> parseDecl(Identifier* scopeName = {});
+      index<Function> parseFuncDecl(Identifier* scopeName = {});
+      index<Stmt> parseForwardDecl(Identifier* scopeName = {});
+      index<Stmt> parseDeclStmt(Identifier* scopeName = {});
+      index<Type> parseTypename(Identifier* scopeName = {});
+      index<Variable> parseVariable(Identifier* scopeName = {});
       mcsl::pair<Variable*,Decl*> parseVarDecl(Identifier* scopeName = {});
 
-      ForLoop* parseForLoop();
-      ForeachLoop* parseForeachLoop();
-      WhileLoop* parseWhileLoop();
-      DoWhileLoop* parseDoWhileLoop();
+      index<ForLoop> parseForLoop();
+      index<ForeachLoop> parseForeachLoop();
+      index<WhileLoop> parseWhileLoop();
+      index<DoWhileLoop> parseDoWhileLoop();
 
-      If* parseIf(); //parse if statement (including following else/else if blocks)
-      Switch* parseSwitch();
-      Match* parseMatch();
+      index<If> parseIf(); //parse if statement (including following else/else if blocks)
+      index<Switch> parseSwitch();
+      index<Match> parseMatch();
 
-      TryCatch* parseTryCatch();
+      index<TryCatch> parseTryCatch();
 
-      Function* parseFunction();
-      Asm* parseASM();
+      index<Function> parseFunction();
+      index<Asm> parseASM();
       
-      Class* parseClass();
-      Struct* parseStruct();
-      Interface* parseInterface();
-      Union* parseUnion();
-      Enum* parseEnum();
-      Mask* parseMask();
-      Namespace* parseNamespace();
+      index<Class> parseClass();
+      index<Struct> parseStruct();
+      index<Interface> parseInterface();
+      index<Union> parseUnion();
+      index<Enum> parseEnum();
+      index<Mask> parseMask();
+      index<Namespace> parseNamespace();
 
       //error logging
       void logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, auto&&... args);

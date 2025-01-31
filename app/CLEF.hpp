@@ -62,7 +62,7 @@ namespace clef {
       struct ArgumentList; using ArgList = ArgumentList;
       struct ParameterList; using ParamList = ParameterList;
       template<typename T> concept astNode_t = requires { {T::nodeType()} -> mcsl::same_t<NodeType>; };
-      template<typename T> concept astNode_ptr_t = astNode_t<mcsl::remove_ptr<T>>;
+      template<typename T> concept astNode_ptr_t = mcsl::ptr_t<T> && astNode_t<mcsl::remove_ptr<T>>;
       template<typename T> concept operand_t = mcsl::is_t<T, clef::Identifier> || mcsl::is_t<T,Expression>;
    class ObjTypeSpec;
    class InterfaceSpec;
@@ -92,8 +92,8 @@ template<typename T> struct clef::index {
 
    operator index<const T>() const { return i; }
 
-   template<mcsl::is_t<T> child_t> operator index<child_t>() { return i; }
-   template<mcsl::is_t<T> child_t> operator index<const child_t>() const { return i; }
+   template<typename parent_t> requires (mcsl::is_t<T, parent_t>) operator index<parent_t>() { return i; }
+   template<typename parent_t> requires (mcsl::is_t<T, parent_t>) operator index<const parent_t>() const { return i; }
 };
 
 #endif //CLEF_HPP

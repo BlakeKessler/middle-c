@@ -4,7 +4,7 @@
 #include "Parser.hpp"
 
 //!NOTE: clef::Parser::parseStruct temporarily relies on this function
-clef::Class* clef::Parser::parseClass() {
+clef::index<clef::Class> clef::Parser::parseClass() {
    Identifier* name = parseIdentifier();
    
    if (tryConsumeEOS()) { //forward declaration
@@ -51,13 +51,13 @@ clef::Class* clef::Parser::parseClass() {
 }
 
 //!NOTE: temporarily relies on clef::Parser::parseClass
-clef::Struct* clef::Parser::parseStruct() {
+clef::index<clef::Struct> clef::Parser::parseStruct() {
    Class* classptr = parseClass();
    ((astNode*)classptr)->anyCast(NodeType::STRUCT);
    return (Struct*)classptr;
 }
 
-clef::Interface* clef::Parser::parseInterface() {
+clef::index<clef::Interface> clef::Parser::parseInterface() {
    Identifier* name = parseIdentifier();
    
    if (tryConsumeEOS()) { //forward declaration
@@ -96,7 +96,7 @@ clef::Interface* clef::Parser::parseInterface() {
    return new (name) Interface{spec, (Type*)name};
 }
 
-clef::Union* clef::Parser::parseUnion() {
+clef::index<clef::Union> clef::Parser::parseUnion() {
    Identifier* name = tryParseIdentifier();
 
    if (tryConsumeEOS()) { //forward declaration
@@ -132,7 +132,7 @@ clef::Union* clef::Parser::parseUnion() {
 }
 
 //!NOTE: clef::Parser::parseMask relies on this function - be careful changing observable behavior
-clef::Enum* clef::Parser::parseEnum() {
+clef::index<clef::Enum> clef::Parser::parseEnum() {
    Identifier* name = tryParseIdentifier();
    Type* baseType;
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
@@ -173,13 +173,13 @@ clef::Enum* clef::Parser::parseEnum() {
 }
 
 //!NOTE: ASSUMES THAT THE SYNTAX AND MEMORY LAYOUT OF THE AST NODES FOR MASKS AND ENUMS ARE IDENTICAL
-clef::Mask* clef::Parser::parseMask() {
+clef::index<clef::Mask> clef::Parser::parseMask() {
    astNode* mask = (astNode*)parseEnum();
    mask->anyCast(NodeType::MASK);
    return (Mask*)mask;
 }
 
-clef::Namespace* clef::Parser::parseNamespace() {
+clef::index<clef::Namespace> clef::Parser::parseNamespace() {
    Identifier* name = parseIdentifier();
    
    if (tryConsumeEOS()) { //forward declaration

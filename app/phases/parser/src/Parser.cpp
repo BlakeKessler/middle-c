@@ -13,7 +13,7 @@ clef::SyntaxTree clef::Parser::parse(const SourceTokens& src) {
    return parser.tree;
 }
 
-clef::Stmt* clef::Parser::parseStmt() {
+clef::index<clef::Stmt> clef::Parser::parseStmt() {
 START_PARSE_STMT:
    switch (tokIt->type()) {
       case TokenType::NONE        : UNREACHABLE;
@@ -164,14 +164,14 @@ START_PARSE_STMT:
    UNREACHABLE;
 }
 
-clef::Expr* clef::Parser::parseExpr(astNode* initOperand) {
+clef::index<clef::Expr> clef::Parser::parseExpr(astNode* initOperand) {
    Expr* expr = parseExprNoPrimaryComma(initOperand);
    while (tryConsumeOperator(OpID::COMMA)) {
       expr = new (tree.allocNode(NodeType::EXPR)) Expr{OpID::COMMA, expr, parseExprNoPrimaryComma()};
    }
    return expr;
 }
-clef::Expr* clef::Parser::parseExprNoPrimaryComma(astNode* initOperand) {
+clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(astNode* initOperand) {
    mcsl::dyn_arr<OpData> operatorStack;
    mcsl::dyn_arr<astNode*> operandStack;
    bool prevTokIsOperand = false;
@@ -312,7 +312,7 @@ clef::Expr* clef::Parser::parseExprNoPrimaryComma(astNode* initOperand) {
    return (Expr*)operandStack.back(); //!NOTE: WILL PROBABLY CAUSE ISSUES (not all AST nodes have the same memory layout as expressions)
 }
 
-clef::Identifier* clef::Parser::tryParseIdentifier(Identifier* scopeName) {
+clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(Identifier* scopeName) {
    //handle keywords
    if (tokIt->type() == TokenType::KEYWORD) {
       Identifier* keyword = new (tree.allocNode(NodeType::KEYWORD)) Identifier{tokIt->keywordID()};
@@ -340,7 +340,7 @@ clef::Identifier* clef::Parser::tryParseIdentifier(Identifier* scopeName) {
    
    return name;
 }
-clef::Identifier* clef::Parser::parseIdentifier(Identifier* scopeName) {
+clef::index<clef::Identifier> clef::Parser::parseIdentifier(Identifier* scopeName) {
    Identifier* name = tryParseIdentifier(scopeName);
    if (!name) {
       logError(ErrCode::BAD_IDEN, "expected an identifier");
@@ -348,7 +348,7 @@ clef::Identifier* clef::Parser::parseIdentifier(Identifier* scopeName) {
    return name;
 }
 
-clef::If* clef::Parser::parseIf() {
+clef::index<clef::If> clef::Parser::parseIf() {
    //condition
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "IF statement without opening parens for condition");
    Expr* condition = parseExpr();
@@ -388,7 +388,7 @@ clef::If* clef::Parser::parseIf() {
    }
 }
 
-clef::Switch* clef::Parser::parseSwitch() {
+clef::index<clef::Switch> clef::Parser::parseSwitch() {
    //condition
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "SWITCH without opening parens for condition");
    Expr* condition = parseExpr();
@@ -427,7 +427,7 @@ clef::Switch* clef::Parser::parseSwitch() {
    return new (tree.allocNode(NodeType::SWITCH)) Switch{condition, cases};
 }
 
-clef::Match* clef::Parser::parseMatch() {
+clef::index<clef::Match> clef::Parser::parseMatch() {
    //condition
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "MATCH without opening parens for condition");
    Expr* condition = parseExpr();
@@ -459,7 +459,7 @@ clef::Match* clef::Parser::parseMatch() {
    return new (tree.allocNode(NodeType::MATCH)) Match{condition, cases};
 }
 
-clef::TryCatch* clef::Parser::parseTryCatch() {
+clef::index<clef::TryCatch> clef::Parser::parseTryCatch() {
    Scope* procedure = parseProcedure();
    consumeKeyword(KeywordID::CATCH, "TRY block without CATCH block");
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "CATCH block without opening parens");
@@ -469,7 +469,7 @@ clef::TryCatch* clef::Parser::parseTryCatch() {
    return new (tree.allocNode(NodeType::TRY_CATCH)) TryCatch{procedure, decl, handler};
 }
 
-clef::Function* clef::Parser::parseFunction() {
+clef::index<clef::Function> clef::Parser::parseFunction() {
    Identifier* name = tryParseIdentifier();
    
    //params
@@ -512,7 +512,7 @@ clef::Function* clef::Parser::parseFunction() {
    }
 }
 
-clef::Asm* clef::Parser::parseASM() {
+clef::index<clef::Asm> clef::Parser::parseASM() {
    logError(ErrCode::PARSER_NOT_IMPLEMENTED, "inline assembly is not yet supported");
 }
 #endif //PARSER_CPP
