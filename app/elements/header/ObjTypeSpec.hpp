@@ -8,36 +8,36 @@
 
 class clef::ObjTypeSpec {
    private:
-      mcsl::dyn_arr<Type*> _inheritedTypes; //includes implemented interfaces
+      mcsl::dyn_arr<index<Type>> _inheritedTypes; //includes implemented interfaces
 
-      mcsl::dyn_arr<Variable*> _staticVars;
-      mcsl::dyn_arr<Function*> _staticFuncs;
-      mcsl::dyn_arr<Type*> _memberTypes;
+      mcsl::dyn_arr<index<Variable>> _staticVars;
+      mcsl::dyn_arr<index<Function>> _staticFuncs;
+      mcsl::dyn_arr<index<Type>> _memberTypes;
 
-      mcsl::dyn_arr<Variable*> _members; //data members
-      mcsl::dyn_arr<Function*> _methods;
+      mcsl::dyn_arr<index<Variable>> _members; //data members
+      mcsl::dyn_arr<index<Function>> _methods;
 
-      mcsl::dyn_arr<Type*> _friendTypes;
+      mcsl::dyn_arr<index<Type>> _friendTypes;
 
    public:
       ObjTypeSpec():_inheritedTypes{},_staticVars{},_staticFuncs{},_memberTypes{},_members{},_methods{},_friendTypes{} {}
 
 
-      mcsl::dyn_arr<Type*>& inheritedTypes() { return _inheritedTypes; }
-      mcsl::dyn_arr<Variable*>& staticVars() { return _staticVars; }
-      mcsl::dyn_arr<Function*>& staticFuncs() { return _staticFuncs; }
-      mcsl::dyn_arr<Type*>& memberTypes() { return _memberTypes; }
-      mcsl::dyn_arr<Variable*>& members() { return _members; }
-      mcsl::dyn_arr<Function*>& methods() { return _methods; }
-      mcsl::dyn_arr<Type*>& friendTypes() { return _friendTypes; }
+      mcsl::dyn_arr<index<Type>>& inheritedTypes() { return _inheritedTypes; }
+      mcsl::dyn_arr<index<Variable>>& staticVars() { return _staticVars; }
+      mcsl::dyn_arr<index<Function>>& staticFuncs() { return _staticFuncs; }
+      mcsl::dyn_arr<index<Type>>& memberTypes() { return _memberTypes; }
+      mcsl::dyn_arr<index<Variable>>& members() { return _members; }
+      mcsl::dyn_arr<index<Function>>& methods() { return _methods; }
+      mcsl::dyn_arr<index<Type>>& friendTypes() { return _friendTypes; }
 
-      const mcsl::dyn_arr<Type*>& inheritedTypes() const { return _inheritedTypes; }
-      const mcsl::dyn_arr<Variable*>& staticVars() const { return _staticVars; }
-      const mcsl::dyn_arr<Function*>& staticFuncs() const { return _staticFuncs; }
-      const mcsl::dyn_arr<Type*>& memberTypes() const { return _memberTypes; }
-      const mcsl::dyn_arr<Variable*>& members() const { return _members; }
-      const mcsl::dyn_arr<Function*>& methods() const { return _methods; }
-      const mcsl::dyn_arr<Type*>& friendTypes() const { return _friendTypes; }
+      const mcsl::dyn_arr<index<Type>>& inheritedTypes() const { return _inheritedTypes; }
+      const mcsl::dyn_arr<index<Variable>>& staticVars() const { return _staticVars; }
+      const mcsl::dyn_arr<index<Function>>& staticFuncs() const { return _staticFuncs; }
+      const mcsl::dyn_arr<index<Type>>& memberTypes() const { return _memberTypes; }
+      const mcsl::dyn_arr<index<Variable>>& members() const { return _members; }
+      const mcsl::dyn_arr<index<Function>>& methods() const { return _methods; }
+      const mcsl::dyn_arr<index<Type>>& friendTypes() const { return _friendTypes; }
 };
 
 #endif //OBJ_SPEC_HPP

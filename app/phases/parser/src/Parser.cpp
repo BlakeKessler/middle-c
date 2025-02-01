@@ -25,7 +25,9 @@ START_PARSE_STMT:
             default: {
                debug_assert(isType(tokIt->keywordID()));
                auto [var, decl] = parseVarDecl();
-               return (Stmt*)decl;
+               tree.getNode(decl).anyCast(NodeType::STMT);
+               return (index<Stmt>)decl;
+               static_assert(mcsl::same_t<decltype(decl), index<Decl>>);
             } break;
             case KeywordID::NULLPTR : [[fallthrough]];
             case KeywordID::THIS    : [[fallthrough]];
@@ -34,19 +36,19 @@ START_PARSE_STMT:
             case KeywordID::FALSE   :
                goto STMT_STARTS_WITH_VALUE;
 
-            case KeywordID::ASM           : ++tokIt; return (Stmt*)parseASM(); break;
+            case KeywordID::ASM           : ++tokIt; return parseASM(); break;
             
-            case KeywordID::CLASS         : ++tokIt; return (Stmt*)(new (tree.allocNode(NodeType::STMT)) Decl{tree.getFundType(KeywordID::CLASS), parseClass()});
-            case KeywordID::STRUCT        : ++tokIt; return (Stmt*)(new (tree.allocNode(NodeType::STMT)) Decl{tree.getFundType(KeywordID::STRUCT), parseStruct()});
-            case KeywordID::INTERFACE     : ++tokIt; return (Stmt*)(new (tree.allocNode(NodeType::STMT)) Decl{tree.getFundType(KeywordID::INTERFACE), parseInterface()});
-            case KeywordID::UNION         : ++tokIt; return (Stmt*)(new (tree.allocNode(NodeType::STMT)) Decl{tree.getFundType(KeywordID::UNION), parseUnion()});
-            case KeywordID::ENUM          : ++tokIt; return (Stmt*)(new (tree.allocNode(NodeType::STMT)) Decl{tree.getFundType(KeywordID::ENUM), parseEnum()});
-            case KeywordID::MASK          : ++tokIt; return (Stmt*)(new (tree.allocNode(NodeType::STMT)) Decl{tree.getFundType(KeywordID::MASK), parseMask()});
-            case KeywordID::NAMESPACE     : ++tokIt; return (Stmt*)(new (tree.allocNode(NodeType::STMT)) Decl{tree.getFundType(KeywordID::NAMESPACE), parseNamespace()});
+            case KeywordID::CLASS         : ++tokIt; return tree.make<Stmt, Decl>(NodeType::STMT, tree.getFundType(KeywordID::CLASS), parseClass());
+            case KeywordID::STRUCT        : ++tokIt; return tree.make<Stmt, Decl>(NodeType::STMT, tree.getFundType(KeywordID::STRUCT), parseStruct());
+            case KeywordID::INTERFACE     : ++tokIt; return tree.make<Stmt, Decl>(NodeType::STMT, tree.getFundType(KeywordID::INTERFACE), parseInterface());
+            case KeywordID::UNION         : ++tokIt; return tree.make<Stmt, Decl>(NodeType::STMT, tree.getFundType(KeywordID::UNION), parseUnion());
+            case KeywordID::ENUM          : ++tokIt; return tree.make<Stmt, Decl>(NodeType::STMT, tree.getFundType(KeywordID::ENUM), parseEnum());
+            case KeywordID::MASK          : ++tokIt; return tree.make<Stmt, Decl>(NodeType::STMT, tree.getFundType(KeywordID::MASK), parseMask());
+            case KeywordID::NAMESPACE     : ++tokIt; return tree.make<Stmt, Decl>(NodeType::STMT, tree.getFundType(KeywordID::NAMESPACE), parseNamespace());
             case KeywordID::FUNC          : {
                ++tokIt;
-               Function* funcptr = parseFunction();
-               return (Stmt*)(new (tree.allocNode(NodeType::STMT)) Decl{funcptr->signature(), funcptr});
+               index<Function> funcptr = parseFunction();
+               return tree.make<Stmt, Decl>(tree[funcptr].signature(), funcptr);
             }
 
             
@@ -68,20 +70,20 @@ START_PARSE_STMT:
                ++tokIt;
                //goto case
                if (tryConsumeKeyword(KeywordID::CASE)) {
-                  Expr* caseExpr = parseExpr();
+                  index<Expr> caseExpr = parseExpr();
                   consumeEOS("bad GOTO CASE statement (missing EOS)");
-                  return new (tree.allocNode(NodeType::STMT)) Stmt{OpID::GOTO_CASE, caseExpr};
+                  return tree.make<Stmt>(OpID::GOTO_CASE, caseExpr);
                }
                //goto default
                if (tryConsumeKeyword(KeywordID::DEFAULT)) {
                   consumeEOS("bad GOTO DEFAULT statement (missing EOS)");
-                  return new (tree.allocNode(NodeType::STMT)) Stmt{OpID::GOTO_CASE};
+                  return tree.make<Stmt>(OpID::GOTO_CASE);
                }
                //goto
-               Identifier* label = parseIdentifier();
-               if (label->scopeName()) { logError(ErrCode::BAD_IDEN, "label may not be scoped"); }
+               index<Identifier> label = parseIdentifier();
+               if (tree[label].scopeName()) { logError(ErrCode::BAD_IDEN, "label may not be scoped"); }
                consumeEOS("bad GOTO statement (missing EOS)");
-               return new (tree.allocNode(NodeType::STMT)) Stmt{OpID::GOTO, label};
+               return tree.make<Stmt>(OpID::GOTO, label);
             }
 
             case KeywordID::TRY           : ++tokIt; return parseTryCatch(); break;
@@ -92,7 +94,7 @@ START_PARSE_STMT:
                const KeywordID kw = tokIt->keywordID();
                ++tokIt;
                consumeEOS("bad nullary keyword (BREAK or CONTINUE)");
-               return new (tree.allocNode(NodeType::STMT)) Stmt{kw};
+               return tree.make<Stmt>(kw);
             }
 
             case KeywordID::THROW         : [[fallthrough]];
@@ -102,17 +104,17 @@ START_PARSE_STMT:
             case KeywordID::RETURN        : {
                const KeywordID kw = tokIt->keywordID();
                ++tokIt;
-               Expr* expr = parseExpr();
+               index<Expr> expr = parseExpr();
                consumeEOS("bad unary keyword (THROW, ASSERT, STATIC_ASSERT, or RETURN)");
-               return new (tree.allocNode(NodeType::STMT)) Stmt{kw, expr};
+               return tree.make<Stmt>(kw, expr);
             }
 
             case KeywordID::USING         : {
                ++tokIt;
-               Identifier* alias = parseIdentifier();
+               index<Identifier> alias = parseIdentifier();
                consumeOperator(OpID::ASSIGN, "alias definitions must use the assignment operator (and cannot be forward-declared)");
-               Expr* valExpr = parseExpr();
-               return (Stmt*)(new (tree.allocNode(NodeType::STMT)) Stmt{KeywordID::USING, alias, valExpr});
+               index<Expr> valExpr = parseExpr();
+               return tree.make<Stmt>(KeywordID::USING, alias, valExpr);
             }
 
             UNREACHABLE;
@@ -122,10 +124,10 @@ START_PARSE_STMT:
             case KeywordID::DYN_CAST      : [[fallthrough]];
             case KeywordID::BIT_CAST      : [[fallthrough]];
             case KeywordID::CONST_CAST    : {
-               Expr* stmtContents = parseExpr();
+               index<Expr> stmtContents = parseExpr();
                consumeEOS("bad cast statement");
-               ((astNode*)stmtContents)->upCast(NodeType::STMT);
-               return (Stmt*)stmtContents;
+               tree.getNode(stmtContents).upCast(NodeType::STMT);
+               return (index<Stmt>)stmtContents;
             }
 
             case KeywordID::_NOT_A_KEYWORD: UNREACHABLE;
@@ -164,16 +166,16 @@ START_PARSE_STMT:
    UNREACHABLE;
 }
 
-clef::index<clef::Expr> clef::Parser::parseExpr(astNode* initOperand) {
-   Expr* expr = parseExprNoPrimaryComma(initOperand);
+clef::index<clef::Expr> clef::Parser::parseExpr(index<astNode> initOperand) {
+   index<Expr> expr = parseExprNoPrimaryComma(initOperand);
    while (tryConsumeOperator(OpID::COMMA)) {
-      expr = new (tree.allocNode(NodeType::EXPR)) Expr{OpID::COMMA, expr, parseExprNoPrimaryComma()};
+      expr = tree.make<Expr>(OpID::COMMA, expr, parseExprNoPrimaryComma());
    }
    return expr;
 }
-clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(astNode* initOperand) {
+clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> initOperand) {
    mcsl::dyn_arr<OpData> operatorStack;
-   mcsl::dyn_arr<astNode*> operandStack;
+   mcsl::dyn_arr<index<astNode>> operandStack;
    bool prevTokIsOperand = false;
 
    if (initOperand) {
@@ -183,14 +185,14 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(astNode* initOpera
    auto eval = [&]() { //evaluate the subexpression on the top of the stacks
       OpData op = operatorStack.pop_back();
       if (!operandStack.size()) { logError(ErrCode::BAD_EXPR, "bad expression (missing RHS on stack)"); }
-      astNode* rhs = operandStack.pop_back();
-      astNode* lhs;
+      index<astNode> rhs = operandStack.pop_back();
+      index<astNode> lhs;
       if (isBinary(op)) { //!NOTE: PRIORITIZES BINARY OVER POSTFIX-UNARY
          if (!operandStack.size()) { logError(ErrCode::BAD_EXPR, "bad expression (missing LHS on stack)"); }
          lhs = operandStack.pop_back();
-      } else { debug_assert(+(op & OpProps::POSTFIX)); lhs = nullptr; }
+      } else { debug_assert(+(op & OpProps::POSTFIX)); lhs = 0; }
 
-      operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::EXPR)) Expr{op.opID(), lhs, rhs}));
+      operandStack.push_back(+tree.make<Expr>(op.opID(), lhs, rhs));
    };
 
    while (tokIt < endtok) {
@@ -205,7 +207,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(astNode* initOpera
             const KeywordID kw = tokIt->keywordID();
             if (kw == KeywordID::FUNC) {
                ++tokIt;
-               operandStack.push_back((astNode*)parseFunction());
+               operandStack.push_back(+parseFunction());
                goto PARSE_EXPR_CONTINUE;
             }
             else if (isValue(kw)) {
@@ -215,18 +217,18 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(astNode* initOpera
             }
             else if (isCast(kw)) {
                ++tokIt;
-               operandStack.push_back((astNode*)parseCast(kw));
+               operandStack.push_back(+parseCast(kw));
                goto PARSE_EXPR_CONTINUE;
             }
             else if (isC_FunctionLike(kw)) {
                ++tokIt;
                consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "bad function-like keyword use");
-               ArgList* argList = parseArgList(BlockType::CALL);
-               operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::EXPR)) Expr{kw, argList}));
+               index<ArgList> argList = parseArgList(BlockType::CALL);
+               operandStack.push_back(+tree.make<Expr>(kw, argList));
                goto PARSE_EXPR_CONTINUE;
             }
             else if (isType(kw)) {
-               operandStack.push_back((astNode*)(tree.getFundType(kw)));
+               operandStack.push_back(+tree.getFundType(kw));
                ++tokIt;
                goto PARSE_EXPR_CONTINUE;
             }
@@ -234,20 +236,20 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(astNode* initOpera
             logError(ErrCode::BAD_KEYWORD, "bad keyword in expression");
          }
 
-         case TokenType::IDEN: operandStack.push_back((astNode*)parseIdentifier()); goto PARSE_EXPR_CONTINUE;
+         case TokenType::IDEN: operandStack.push_back(+parseIdentifier()); goto PARSE_EXPR_CONTINUE;
          case TokenType::INT_NUM:
-            operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::LITERAL)) Literal{tokIt++->intVal()}));
+            operandStack.push_back(+tree.make<Literal>(tokIt++->intVal()));
             goto PARSE_EXPR_CONTINUE;
          case TokenType::REAL_NUM:
-            operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::LITERAL)) Literal{tokIt++->realVal()}));
+            operandStack.push_back(+tree.make<Literal>(tokIt++->realVal()));
             goto PARSE_EXPR_CONTINUE;
          case TokenType::PTXT_SEG:
             switch (tokIt->ptxtType()) {
                case PtxtType::CHAR:
-                  operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::LITERAL)) Literal{tokIt++->charVal()}));
+                  operandStack.push_back(+tree.make<Literal>(tokIt++->charVal()));
                   goto PARSE_EXPR_CONTINUE;
                case PtxtType::UNPROCESSED_STR:
-                  operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::LITERAL)) Literal{tokIt++->unprocessedStrVal()}));
+                  operandStack.push_back(+tree.make<Literal>(tokIt++->unprocessedStrVal()));
                   goto PARSE_EXPR_CONTINUE;
 
                default: logError(ErrCode::PARSER_NOT_IMPLEMENTED, "cannot currently parse this plaintext segment type (%hhu)", +tokIt->ptxtType());
@@ -281,12 +283,12 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(astNode* initOpera
             ++tokIt;
             if (prevTokIsOperand) { //function call, initializer list, subscript, or specializer
                debug_assert(operandStack.size());
-               ArgList* args = parseArgList(blockType);
-               operandStack.push_back((astNode*)(new (tree.allocNode(NodeType::EXPR)) Expr{getInvoker(blockType),operandStack.pop_back(),(astNode*)args}));
+               index<ArgList> args = parseArgList(blockType);
+               operandStack.push_back(+tree.make<Expr>(getInvoker(blockType),operandStack.pop_back(),args));
             } else if (blockType == BlockType::INIT_LIST) { //tuple
-               operandStack.push_back((astNode*)(parseArgList(blockType)));
+               operandStack.push_back(+parseArgList(blockType));
             } else { //block subexpression
-               operandStack.push_back((astNode*)parseExpr());
+               operandStack.push_back(+parseExpr());
                consumeBlockDelim(blockType, BlockDelimRole::CLOSE, "bad block subexpression");
             }
             goto PARSE_EXPR_CONTINUE;
@@ -303,19 +305,19 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(astNode* initOpera
    if (operandStack.size() != 1) {
       std::printf("%u excess operand(s)\n", operandStack.size() - 1);
       for (uint i = 0; i < operandStack.size(); ++i) { //!NOTE: this is for debugging - don't forget to remove
-         operandStack[i]->print();
+         tree[operandStack[i]].print();
          std::printf("\n");
          std::fflush(stdout);
       }
       logError(ErrCode::BAD_EXPR, "invalid expression");
    }
-   return (Expr*)operandStack.back(); //!NOTE: WILL PROBABLY CAUSE ISSUES (not all AST nodes have the same memory layout as expressions)
+   return operandStack.back(); //!NOTE: WILL PROBABLY CAUSE ISSUES (not all AST nodes have the same memory layout as expressions)
 }
 
-clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(Identifier* scopeName) {
+clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(index<Identifier> scopeName) {
    //handle keywords
    if (tokIt->type() == TokenType::KEYWORD) {
-      Identifier* keyword = new (tree.allocNode(NodeType::KEYWORD)) Identifier{tokIt->keywordID()};
+      index<Identifier> keyword = tree.make<Identifier>(tokIt->keywordID());
       ++tokIt;
       if (tryConsumeOperator(OpID::SCOPE_RESOLUTION)) {
          logError(ErrCode::BAD_KEYWORD, "keywords may not name scopes");
@@ -324,12 +326,12 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(Identifier* scope
    }
 
    //handle other identifiers
-   if (tokIt->type() != TokenType::IDEN) { return nullptr; }
+   if (tokIt->type() != TokenType::IDEN) { return 0; }
 
-   Identifier* name = scopeName;
+   index<Identifier> name = scopeName;
 
    do {
-      name = new (tree.allocNode(NodeType::IDEN)) Identifier{tokIt->name(), name};
+      name = tree.make<Identifier>(tokIt->name(), name);
       
       ++tokIt;
       if (!tryConsumeOperator(OpID::SCOPE_RESOLUTION)) { break; }
@@ -340,8 +342,8 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(Identifier* scope
    
    return name;
 }
-clef::index<clef::Identifier> clef::Parser::parseIdentifier(Identifier* scopeName) {
-   Identifier* name = tryParseIdentifier(scopeName);
+clef::index<clef::Identifier> clef::Parser::parseIdentifier(index<Identifier> scopeName) {
+   index<Identifier> name = tryParseIdentifier(scopeName);
    if (!name) {
       logError(ErrCode::BAD_IDEN, "expected an identifier");
    }
@@ -351,16 +353,16 @@ clef::index<clef::Identifier> clef::Parser::parseIdentifier(Identifier* scopeNam
 clef::index<clef::If> clef::Parser::parseIf() {
    //condition
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "IF statement without opening parens for condition");
-   Expr* condition = parseExpr();
+   index<Expr> condition = parseExpr();
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "IF statement without closing parens for condition");
 
    //procedure
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad IF block");
-   Scope* proc = parseProcedure();
+   index<Scope> proc = parseProcedure();
 
    //EOS
    if (tryConsumeEOS()) {
-      return new (tree.allocNode(NodeType::IF)) If{condition, proc};
+      return tree.make<If>(condition, proc);
    }
 
    //ELSE
@@ -368,21 +370,21 @@ clef::index<clef::If> clef::Parser::parseIf() {
    switch (tokIt->type()) {
       case TokenType::OP: { //basic ELSE
          consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad ELSE block");
-         Scope* proc = parseProcedure();
+         index<Scope> elseProc = parseProcedure();
          //EOS
          consumeEOS("DO WHILE statement without EOS token");
 
          //return
-         If* elseStmt = new (tree.allocNode(NodeType::IF)) If{nullptr, proc, nullptr};
-         If* ifStmt = new (tree.allocNode(NodeType::IF)) If{condition, proc, elseStmt};
+         index<If> elseStmt = tree.make<If>(0, elseProc, 0);
+         index<If> ifStmt = tree.make<If>(condition, proc, elseStmt);
          return ifStmt;
       }
       default: { //ELSE IF
          consumeKeyword(KeywordID::IF, "bad ELSE IF block");
-         If* elifStmt = parseIf(); //will consume EOS
+         index<If> elifStmt = parseIf(); //will consume EOS
 
          //return
-         If* ifStmt = new (tree.allocNode(NodeType::IF)) If{condition, proc, elifStmt};
+         index<If> ifStmt = tree.make<If>(condition, proc, elifStmt);
          return ifStmt;
       }
    }
@@ -391,20 +393,20 @@ clef::index<clef::If> clef::Parser::parseIf() {
 clef::index<clef::Switch> clef::Parser::parseSwitch() {
    //condition
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "SWITCH without opening parens for condition");
-   Expr* condition = parseExpr();
+   index<Expr> condition = parseExpr();
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "SWITCH without closing parens for condition");
 
    //procedure
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad SWITCH block");
-   Scope* procedure = new (tree.allocNode(NodeType::SCOPE)) Scope{tree.allocBuf<Stmt*>()};
-   SwitchCases* cases = new (tree.allocNode(NodeType::SWITCH_CASES)) SwitchCases{tree.allocBuf<mcsl::pair<Expr*,Stmt*>>(), procedure};
+   index<Scope> procedure = tree.make<Scope>(tree.allocBuf<index<Stmt>>());
+   index<SwitchCases> cases = tree.make<SwitchCases>(tree.allocBuf<mcsl::pair<index<Expr>, index<Stmt>>>(), procedure);
 
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       if (tryConsumeKeyword(KeywordID::CASE)) { //CASE
-         Expr* caseExpr = parseExpr();
+         index<Expr> caseExpr = parseExpr();
          consumeOperator(OpID::LABEL_DELIM, "bad CASE in SWITCH statement");
          
-         Stmt* firstStmt = parseStmt();
+         index<Stmt> firstStmt = parseStmt();
          procedure->push_back(firstStmt);
          cases->push_back({caseExpr, firstStmt});
 
@@ -412,8 +414,8 @@ clef::index<clef::Switch> clef::Parser::parseSwitch() {
          consumeOperator(OpID::LABEL_DELIM, "bad DEFAULT in SWITCH statement");
          
          Stmt* firstStmt = parseStmt();
-         procedure->push_back(firstStmt);
-         cases->push_back({nullptr, firstStmt});
+         tree[procedure].push_back(firstStmt);
+         cases->push_back({0, firstStmt});
 
       } else { //standard statement
          procedure->push_back(parseStmt());
@@ -424,30 +426,30 @@ clef::index<clef::Switch> clef::Parser::parseSwitch() {
    consumeEOS("SWITCH statement without EOS");
 
    //return
-   return new (tree.allocNode(NodeType::SWITCH)) Switch{condition, cases};
+   return tree.make<Switch>(condition, cases);
 }
 
 clef::index<clef::Match> clef::Parser::parseMatch() {
    //condition
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "MATCH without opening parens for condition");
-   Expr* condition = parseExpr();
+   index<Expr> condition = parseExpr();
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "MATCH without closing parens for condition");
 
    //procedure
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad MATCH block");
-   MatchCases* cases = new (tree.allocNode(NodeType::SWITCH_CASES)) MatchCases{tree.allocBuf<mcsl::pair<Expr*,Scope*>>()};
+   index<MatchCases> cases = tree.make<MatchCases>(tree.allocBuf<mcsl::pair<index<Expr>, index<Scope>>>());
 
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
-      Expr* caseExpr;
+      index<Expr> caseExpr;
       if (tryConsumeKeyword(KeywordID::CASE)) { //CASE
          caseExpr = parseExpr();
       } else {
          consumeKeyword(KeywordID::DEFAULT, "bad MATCH block procedure");
-         caseExpr = nullptr;   
+         caseExpr = 0;   
       }
       consumeOperator(OpID::LABEL_DELIM, "bad CASE or DEFAULT in MATCH statement");
       consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad CASE or DEFAULT procedure in MATCH statement");
-      Scope* procedure = parseProcedure();
+      index<Scope> procedure = parseProcedure();
       
       cases->emplace_back(caseExpr, procedure);
    }
@@ -456,59 +458,61 @@ clef::index<clef::Match> clef::Parser::parseMatch() {
    consumeEOS("MATCH statement without EOS");
 
    //return
-   return new (tree.allocNode(NodeType::MATCH)) Match{condition, cases};
+   return tree.make<Match>(condition, cases);
 }
 
 clef::index<clef::TryCatch> clef::Parser::parseTryCatch() {
-   Scope* procedure = parseProcedure();
+   index<Scope> procedure = parseProcedure();
    consumeKeyword(KeywordID::CATCH, "TRY block without CATCH block");
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "CATCH block without opening parens");
-   Decl* decl = parseDecl();
+   index<Decl> decl = parseDecl();
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "CATCH block without closing parens");
-   Scope* handler = parseProcedure();
-   return new (tree.allocNode(NodeType::TRY_CATCH)) TryCatch{procedure, decl, handler};
+   index<Scope> handler = parseProcedure();
+   return tree.make<TryCatch>(procedure, decl, handler);
 }
 
 clef::index<clef::Function> clef::Parser::parseFunction() {
-   Identifier* name = tryParseIdentifier();
+   index<Identifier> name = tryParseIdentifier();
    
    //params
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FUNC without parameters");
-   ParamList* params = parseParamList(BlockType::CALL);
+   index<ParamList> params = parseParamList(BlockType::CALL);
    
 
    //return type
    consumeOperator(OpID::MEMBER_OF_POINTER_ACCESS, "FUNC without trailing return type");
    TypeQualMask returnTypeQuals = parseQuals();
-   Type* returnType = parseTypename();
+   index<Type> returnType = parseTypename();
 
    //make signature
-   FuncSig* sig = new (tree.allocNode(NodeType::FUNC_SIG)) FuncSig{returnType, params};
+   index<FuncSig> sig = tree.make<FuncSig>(returnType, params);
 
    if (tryConsumeEOS()) { //forward declaration
       if (name) {
-         Function* func = (Function*)name;
-         ((astNode*)func)->upCast(NodeType::FUNC);
-         return new (func) Function{sig, name};
+         Identifier* func = tree + name;
+         ((astNode*)fuc)->upCast(NodeType::FUNC);
+         new (func) Function{sig, tree[name]};
+         return (index<Function>)name;
       } else {
-         return new (tree.allocNode(NodeType::FUNC)) Function{sig};
+         return tree.make<Function>(sig);
       }
    }
 
    //definition
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad FUNC definition");
-   Scope* procedure = parseProcedure();
+   index<Scope> procedure = parseProcedure();
 
    //EOS
    consumeEOS("FUNC without EOS");
 
    //return
    if (name) {
-      Function* func = (Function*)name;
+      Identifier* func = tree + name;
       ((astNode*)func)->upCast(NodeType::FUNC);
-      return new (func) Function{sig, procedure, name};
+      new (func) Function{sig, procedure, tree[name]};
+      return (index<Function>)name;
    } else {
-      return new (tree.allocNode(NodeType::FUNC)) Function{sig, procedure};
+      return tree.make<Function>(sig, procedure);
    }
 }
 

@@ -79,17 +79,17 @@ clef::index<clef::Scope> clef::Parser::parseProcedure() {
 
 
 
-clef::index<clef::Type> clef::Parser::parseTypename(Identifier* scopeName) {
+clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName) {
    index<Type> name = (index<Type>)parseIdentifier(scopeName);
    tree[(index<astNode>)name].upCast(NodeType::TYPE);
    return name;
 }
 
-clef::index<clef::Decl> clef::Parser::parseDecl(Type* type, Identifier* scopeName) {
+clef::index<clef::Decl> clef::Parser::parseDecl(Type* type, index<Identifier> scopeName) {
    index<Identifier> name = parseIdentifier(scopeName);
    return tree.make<Decl>(type, name);
 }
-clef::index<clef::Decl> clef::Parser::parseDecl(Identifier* scopeName) {
+clef::index<clef::Decl> clef::Parser::parseDecl(index<Identifier> scopeName) {
    if (tryConsumeKeyword(KeywordID::FUNC)) {
       Function* func = parseFuncDecl(scopeName);
       return new (tree.allocNode(NodeType::DECL)) Decl{func->signature(), func};
@@ -101,7 +101,7 @@ clef::index<clef::Decl> clef::Parser::parseDecl(Identifier* scopeName) {
    return tree.make<Decl>(type, name);
 }
 
-clef::index<clef::Function> clef::Parser::parseFuncDecl(Identifier* scopeName) {
+clef::index<clef::Function> clef::Parser::parseFuncDecl(index<Identifier> scopeName) {
    index<Identifier> name = parseIdentifier(scopeName);
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "function definition must include parameter list");
    index<ParamList> params = parseParamList(BlockType::CALL);
@@ -112,7 +112,7 @@ clef::index<clef::Function> clef::Parser::parseFuncDecl(Identifier* scopeName) {
    return tree.make<Function>(sig, name);
 }
 
-clef::index<clef::Variable> clef::Parser::parseVariable(Identifier* scopeName) {
+clef::index<clef::Variable> clef::Parser::parseVariable(index<Identifier> scopeName) {
    Decl* decl = parseDecl(scopeName);
    if (tryConsumeEOS()) { //forward declaration
       Variable* var = new (decl) Variable{decl->type(), decl->name()};
@@ -143,7 +143,7 @@ clef::index<clef::Variable> clef::Parser::parseVariable(Identifier* scopeName) {
    }
 }
 
-mcsl::pair<clef::index<clef::Variable>,clef::index<clef::Decl>> clef::Parser::parseVarDecl(Identifier* scopeName) {
+mcsl::pair<clef::index<clef::Variable>,clef::index<clef::Decl>> clef::Parser::parseVarDecl(index<Identifier> scopeName) {
    Decl* decl = parseDecl(scopeName);
    if (tryConsumeEOS()) {
       Variable* var = new (tree.allocNode(NodeType::VAR)) Variable{decl->type(), decl->name()};

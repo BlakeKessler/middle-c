@@ -37,8 +37,8 @@ class clef::Parser {
       /*inline*/ bool tryConsumeEOS();
 
       //parsing functions
-      index<Expr> parseExpr(astNode* initOperand = {});
-      index<Expr> parseExprNoPrimaryComma(astNode* initOperand = {}); //expression that cannot have the comma operator as its principal connective
+      index<Expr> parseExpr(index<astNode> initOperand = 0);
+      index<Expr> parseExprNoPrimaryComma(index<astNode> initOperand = 0); //expression that cannot have the comma operator as its principal connective
       index<Stmt> parseStmt();
       index<Stmt> parsePreprocStmt();
       index<Scope> parseProcedure();
@@ -52,16 +52,16 @@ class clef::Parser {
 
       TypeQualMask parseQuals(const TypeQualMask illegalQuals = {});
 
-      index<Identifier> tryParseIdentifier(Identifier* scopeName = {});
-      index<Identifier> parseIdentifier(Identifier* scopeName = {});
-      index<Decl> parseDecl(Type* type, Identifier* scopeName = {});
-      index<Decl> parseDecl(Identifier* scopeName = {});
-      index<Function> parseFuncDecl(Identifier* scopeName = {});
-      index<Stmt> parseForwardDecl(Identifier* scopeName = {});
-      index<Stmt> parseDeclStmt(Identifier* scopeName = {});
-      index<Type> parseTypename(Identifier* scopeName = {});
-      index<Variable> parseVariable(Identifier* scopeName = {});
-      mcsl::pair<Variable*,Decl*> parseVarDecl(Identifier* scopeName = {});
+      index<Identifier> tryParseIdentifier(index<Identifier> scopeName = 0);
+      index<Identifier> parseIdentifier(index<Identifier> scopeName = 0);
+      index<Decl> parseDecl(index<Type> type, index<Identifier> scopeName = 0);
+      index<Decl> parseDecl(index<Identifier> scopeName = 0);
+      index<Function> parseFuncDecl(index<Identifier> scopeName = 0);
+      index<Stmt> parseForwardDecl(index<Identifier> scopeName = 0);
+      index<Stmt> parseDeclStmt(index<Identifier> scopeName = 0);
+      index<Type> parseTypename(index<Identifier> scopeName = 0);
+      index<Variable> parseVariable(index<Identifier> scopeName = 0);
+      mcsl::pair<index<Variable>,index<Decl>> parseVarDecl(index<Identifier> scopeName = 0);
 
       index<ForLoop> parseForLoop();
       index<ForeachLoop> parseForeachLoop();

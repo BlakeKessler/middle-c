@@ -8,19 +8,19 @@
 
 class clef::NamespaceSpec {
    private:
-      mcsl::dyn_arr<Variable*> _vars;
-      mcsl::dyn_arr<Function*> _funcs;
-      mcsl::dyn_arr<Type*> _types;
+      mcsl::dyn_arr<index<Variable>> _vars;
+      mcsl::dyn_arr<index<Function>> _funcs;
+      mcsl::dyn_arr<index<Type>> _types;
 
    public:
       NamespaceSpec():_vars{},_funcs{},_types{} {}
 
-      mcsl::dyn_arr<Variable*>& vars() {return _vars; }
-      mcsl::dyn_arr<Function*>& funcs() {return _funcs; }
-      mcsl::dyn_arr<Type*>& types() {return _types; }
-      const mcsl::dyn_arr<Variable*>& vars() const {return _vars; }
-      const mcsl::dyn_arr<Function*>& funcs() const {return _funcs; }
-      const mcsl::dyn_arr<Type*>& types() const {return _types; }
+      mcsl::dyn_arr<index<Variable>>& vars() {return _vars; }
+      mcsl::dyn_arr<index<Function>>& funcs() {return _funcs; }
+      mcsl::dyn_arr<index<Type>>& types() {return _types; }
+      const mcsl::dyn_arr<index<Variable>>& vars() const {return _vars; }
+      const mcsl::dyn_arr<index<Function>>& funcs() const {return _funcs; }
+      const mcsl::dyn_arr<index<Type>>& types() const {return _types; }
 };
 
 #endif //NAMESPACE_SPEC_HPP

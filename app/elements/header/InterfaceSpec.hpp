@@ -8,20 +8,20 @@
 
 class clef::InterfaceSpec {
    private:
-      mcsl::dyn_arr<Interface*> _inheritedInterfaces;
+      mcsl::dyn_arr<index<Interface>> _inheritedInterfaces;
 
-      mcsl::dyn_arr<Function*> _staticFuncs;
-      mcsl::dyn_arr<Function*> _methods;
+      mcsl::dyn_arr<index<Function>> _staticFuncs;
+      mcsl::dyn_arr<index<Function>> _methods;
    public:
       InterfaceSpec():_inheritedInterfaces{},_staticFuncs{},_methods{} {}
 
 
-      mcsl::dyn_arr<Interface*>& inheritedInterfaces() { return _inheritedInterfaces; }
-      mcsl::dyn_arr<Function*>& staticFuncs() { return _staticFuncs; }
-      mcsl::dyn_arr<Function*>& methods() { return _methods; }
-      const mcsl::dyn_arr<Interface*>& inheritedInterfaces() const { return _inheritedInterfaces; }
-      const mcsl::dyn_arr<Function*>& staticFuncs() const { return _staticFuncs; }
-      const mcsl::dyn_arr<Function*>& methods() const { return _methods; }
+      mcsl::dyn_arr<index<Interface>>& inheritedInterfaces() { return _inheritedInterfaces; }
+      mcsl::dyn_arr<index<Function>>& staticFuncs() { return _staticFuncs; }
+      mcsl::dyn_arr<index<Function>>& methods() { return _methods; }
+      const mcsl::dyn_arr<index<Interface>>& inheritedInterfaces() const { return _inheritedInterfaces; }
+      const mcsl::dyn_arr<index<Function>>& staticFuncs() const { return _staticFuncs; }
+      const mcsl::dyn_arr<index<Function>>& methods() const { return _methods; }
 };
 
 #endif //INTERFACE_SPEC_HPP
