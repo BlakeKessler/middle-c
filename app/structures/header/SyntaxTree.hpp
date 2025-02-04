@@ -28,6 +28,13 @@ class clef::SyntaxTree {
 
       index<FundType> getFundType(const KeywordID fundTypeKeyword);
       index<astNode> getValueKeyword(const KeywordID valueKeyword);
+      
+      index<Expr> makeExpr(const OpID, index<astNode>, index<astNode>);
+      template<astNode_t T> index<Expr> makeExpr(const OpID, index<T>, index<astNode>);
+      index<Expr> makeExpr(const OpID, index<astNode>);
+      template<astNode_t T> index<Expr> makeExpr(const OpID, index<T>);
+      template<astNode_t T> index<Expr> makeExpr(const OpID, index<astNode>, index<T>);
+      template<astNode_t T1, astNode_t T2> index<Expr> makeExpr(const OpID op, index<T1> lhs, index<T2> rhs) { return +make<Expr>(op, lhs, rhs); }
 
       void printf() const;
       void print() const;
@@ -51,14 +58,8 @@ class clef::SyntaxTree {
       ObjTypeSpec* operator+(index<ObjTypeSpec> i) { return _objSpecBuf + i; }
 
 
-      template<astNode_ptr_t T, astNode_ptr_t asT = T, typename... Argv_t> T make(Argv_t... argv) requires mcsl::valid_ctor<asT, Argv_t...> {
-         astNode* tmp = _buf.emplace_back(mcsl::remove_ptr<asT>{std::forward<Argv_t>(argv)...});
-         if constexpr (!mcsl::is_t<mcsl::remove_ptr<T>, mcsl::remove_ptr<asT>>) {
-            tmp->anyCast(mcsl::remove_ptr<T>::nodeType());
-         }
-         return (asT)tmp;
-      }
-      template<astNode_t T, astNode_t asT = T, typename... Argv_t> index<T> make(Argv_t... argv) requires mcsl::valid_ctor<T, Argv_t...> { return (index<T>)(make<asT>(std::forward<Argv_t>(argv)...) - _buf.begin()); }
+      template<astNode_ptr_t asT, astNode_ptr_t T = asT, typename... Argv_t> asT make(Argv_t... argv) requires mcsl::valid_ctor<mcsl::remove_ptr<T>, Argv_t...>;
+      template<astNode_t asT, astNode_t T = asT, typename... Argv_t> index<asT> make(Argv_t... argv) requires mcsl::valid_ctor<T, Argv_t...> { return (index<asT>)(make<T>(std::forward<Argv_t>(argv)...) - _buf.begin()); }
 
       /*unsafe<UNIT_MEM>*/astNode* allocNode(const NodeType type) { return _buf.emplace_back(type); } //deprecated
       template<typename T> mcsl::dyn_arr<T>& allocBuf() { return _alloc.at(_alloc.alloc<T>()); }
@@ -66,5 +67,17 @@ class clef::SyntaxTree {
       NamespaceSpec* allocNamespaceSpec() { return _nsSpecBuf.emplace_back(); }
       ObjTypeSpec* allocObjTypeSpec() { return _objSpecBuf.emplace_back(); }
 };
+
+#pragma region inlinesrc
+
+template<clef::astNode_ptr_t asT, clef::astNode_ptr_t T = asT, typename... Argv_t> asT clef::SyntaxTree::make(Argv_t... argv) requires mcsl::valid_ctor<mcsl::remove_ptr<T>, Argv_t...> {
+   astNode* tmp = _buf.emplace_back(mcsl::remove_ptr<T>{std::forward<Argv_t>(argv)...});
+   if constexpr (!mcsl::is_t<mcsl::remove_ptr<asT>, mcsl::remove_ptr<T>>) {
+      tmp->anyCast(mcsl::remove_ptr<asT>::nodeType());
+   }
+   return (asT)tmp;
+}
+
+#pragma endregion inlinesrc
 
 #endif //SYNTAX_TREE_HPP

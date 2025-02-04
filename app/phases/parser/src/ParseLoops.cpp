@@ -77,7 +77,7 @@ clef::index<clef::WhileLoop> clef::Parser::parseWhileLoop() {
    consumeEOS("WHILE statement without EOS token");
 
    //return
-   return tree.make<WhileLoop>(OpID::WHILE, condition, proc);
+   return tree.make<WhileLoop>(condition, proc);
 }
 
 clef::index<clef::DoWhileLoop> clef::Parser::parseDoWhileLoop() {
@@ -97,7 +97,7 @@ clef::index<clef::DoWhileLoop> clef::Parser::parseDoWhileLoop() {
    consumeEOS("DO WHILE statement without EOS token");
 
    //return
-   return tree.make<DoWhileLoop>(OpID::DO_WHILE, condition, proc);
+   return tree.make<DoWhileLoop>(condition, proc);
 }
 
 #endif //PARSE_LOOPS

@@ -109,12 +109,12 @@ clef::index<clef::Function> clef::Parser::parseFuncDecl(index<Identifier> scopeN
    index<Type> returnType = parseTypename(scopeName);
 
    index<FuncSig> sig = tree.make<FuncSig>(returnType, params);
-   return tree.make<Function>(sig, name);
+   return tree.make<Function>(sig, tree[name]);
 }
 
 clef::index<clef::Variable> clef::Parser::parseVariable(index<Identifier> scopeName) {
    index<Decl> decl = parseDecl(scopeName);
-   index<Variable> var = tree.make<Variable>(tree[decl].type(), tree[decl].name()); //!NOTE: make and use a `remake` function?
+   index<Variable> var = tree.make<Variable>(tree[decl].type(), tree[tree[decl].name()]); //!NOTE: make and use a `remake` function?
    if (tryConsumeEOS()) { //forward declaration
       return var;
    }
@@ -141,7 +141,7 @@ clef::index<clef::Variable> clef::Parser::parseVariable(index<Identifier> scopeN
 
 mcsl::pair<clef::index<clef::Variable>,clef::index<clef::Decl>> clef::Parser::parseVarDecl(index<Identifier> scopeName) {
    index<Decl> decl = parseDecl(scopeName);
-   index<Variable> var = tree.make<Variable>(tree[decl].type(), tree[decl].name()); //NOTE: make and use a `remake` function?
+   index<Variable> var = tree.make<Variable>(tree[decl].type(), tree[tree[decl].name()]); //NOTE: make and use a `remake` function?
    if (tryConsumeEOS()) {
       return {var,decl};
    }

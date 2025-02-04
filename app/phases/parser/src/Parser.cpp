@@ -38,13 +38,13 @@ START_PARSE_STMT:
 
             case KeywordID::ASM           : ++tokIt; return parseASM(); break;
             
-            case KeywordID::CLASS         : ++tokIt; return tree.make<Stmt, Decl>(KeywordID::CLASS, parseClass());
-            case KeywordID::STRUCT        : ++tokIt; return tree.make<Stmt, Decl>(KeywordID::STRUCT, parseStruct());
-            case KeywordID::INTERFACE     : ++tokIt; return tree.make<Stmt, Decl>(KeywordID::INTERFACE, parseInterface());
-            case KeywordID::UNION         : ++tokIt; return tree.make<Stmt, Decl>(KeywordID::UNION, parseUnion());
-            case KeywordID::ENUM          : ++tokIt; return tree.make<Stmt, Decl>(KeywordID::ENUM, parseEnum());
-            case KeywordID::MASK          : ++tokIt; return tree.make<Stmt, Decl>(KeywordID::MASK, parseMask());
-            case KeywordID::NAMESPACE     : ++tokIt; return tree.make<Stmt, Decl>(KeywordID::NAMESPACE, parseNamespace());
+            case KeywordID::CLASS         : ++tokIt; return tree.make<Stmt, Decl>(tree.getFundType(KeywordID::CLASS), parseClass());
+            case KeywordID::STRUCT        : ++tokIt; return tree.make<Stmt, Decl>(tree.getFundType(KeywordID::STRUCT), parseStruct());
+            case KeywordID::INTERFACE     : ++tokIt; return tree.make<Stmt, Decl>(tree.getFundType(KeywordID::INTERFACE), parseInterface());
+            case KeywordID::UNION         : ++tokIt; return tree.make<Stmt, Decl>(tree.getFundType(KeywordID::UNION), parseUnion());
+            case KeywordID::ENUM          : ++tokIt; return tree.make<Stmt, Decl>(tree.getFundType(KeywordID::ENUM), parseEnum());
+            case KeywordID::MASK          : ++tokIt; return tree.make<Stmt, Decl>(tree.getFundType(KeywordID::MASK), parseMask());
+            case KeywordID::NAMESPACE     : ++tokIt; return tree.make<Stmt, Decl>(tree.getFundType(KeywordID::NAMESPACE), parseNamespace());
             case KeywordID::FUNC          : {
                ++tokIt;
                index<Function> funcptr = parseFunction();
@@ -190,9 +190,11 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
       if (isBinary(op)) { //!NOTE: PRIORITIZES BINARY OVER POSTFIX-UNARY
          if (!operandStack.size()) { logError(ErrCode::BAD_EXPR, "bad expression (missing LHS on stack)"); }
          lhs = operandStack.pop_back();
-      } else { debug_assert(+(op & OpProps::POSTFIX)); lhs = 0; }
-
-      operandStack.push_back(+tree.make<Expr>(op.opID(), lhs, rhs));
+         operandStack.push_back(+tree.makeExpr(op.opID(), lhs, rhs));
+      } else {
+         debug_assert(+(op & OpProps::POSTFIX));
+         operandStack.push_back(+tree.makeExpr(op.opID(), rhs));
+      }
    };
 
    while (tokIt < endtok) {
@@ -284,7 +286,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             if (prevTokIsOperand) { //function call, initializer list, subscript, or specializer
                debug_assert(operandStack.size());
                index<ArgList> args = parseArgList(blockType);
-               operandStack.push_back(+tree.make<Expr>(getInvoker(blockType),operandStack.pop_back(),args));
+               operandStack.push_back(+tree.makeExpr(getInvoker(blockType),operandStack.pop_back(),args));
             } else if (blockType == BlockType::INIT_LIST) { //tuple
                operandStack.push_back(+parseArgList(blockType));
             } else { //block subexpression
