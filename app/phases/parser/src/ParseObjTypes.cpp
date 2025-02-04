@@ -13,7 +13,7 @@ clef::index<clef::Class> clef::Parser::parseClass() {
    }
 
    //inheritance (including implemented interfaces)
-   ObjTypeSpec* spec = new (tree.allocObjTypeSpec()) ObjTypeSpec{};
+   ObjTypeSpec* spec = tree.allocObjTypeSpec();
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
       do {
          Type* parentType = parseTypename();
@@ -66,7 +66,7 @@ clef::index<clef::Interface> clef::Parser::parseInterface() {
    }
    
    //inheritance
-   InterfaceSpec* spec = new (tree.allocInterfaceSpec()) InterfaceSpec{};
+   InterfaceSpec* spec = tree.allocInterfaceSpec();
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
       do {
          Interface* parentType = (Interface*)parseIdentifier();
@@ -188,7 +188,7 @@ clef::index<clef::Namespace> clef::Parser::parseNamespace() {
    }
 
    //definition
-   NamespaceSpec* spec = new (tree.allocNamespaceSpec()) NamespaceSpec{};
+   NamespaceSpec* spec = tree.allocNamespaceSpec();
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad CLASS definition");
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       if (tokIt->type() == TokenType::KEYWORD) {

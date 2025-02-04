@@ -36,6 +36,8 @@ class clef::Parser {
       /*inline*/ bool tryConsumeBlockDelim(const BlockType, const BlockDelimRole);
       /*inline*/ bool tryConsumeEOS();
 
+      index<Expr> toExpr(index<astNode>);
+
       //parsing functions
       index<Expr> parseExpr(index<astNode> initOperand = 0);
       index<Expr> parseExprNoPrimaryComma(index<astNode> initOperand = 0); //expression that cannot have the comma operator as its principal connective

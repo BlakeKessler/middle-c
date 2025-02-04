@@ -133,16 +133,16 @@ START_PARSE_STMT:
             case KeywordID::_NOT_A_KEYWORD: UNREACHABLE;
          }
       case TokenType::IDEN        : {
-         astNode* tmp = (astNode*)parseIdentifier();
+         index<astNode> tmp = (index<astNode>)parseIdentifier();
          if (tokIt->type() == TokenType::IDEN) {
-            tmp->upCast(NodeType::TYPE);
-            Decl* decl = parseDecl((Type*)tmp);
-            tmp = (astNode*)decl;
+            tree[tmp].upCast(NodeType::TYPE);
+            index<Decl> decl = parseDecl((index<Type>)tmp);
+            tmp = (index<astNode>)decl;
          }
-         Expr* stmtContents = parseExpr(tmp);
+         index<Expr> stmtContents = parseExpr(tmp);
          consumeEOS("invalid statement");
-         ((astNode*)stmtContents)->upCast(NodeType::STMT);
-         return (Stmt*)stmtContents;
+         tree[(index<astNode>)stmtContents].upCast(NodeType::STMT);
+         return (index<Stmt>)stmtContents;
       }
       
       case TokenType::INT_NUM     : [[fallthrough]];
@@ -150,15 +150,15 @@ START_PARSE_STMT:
       case TokenType::OP          : [[fallthrough]];
       case TokenType::BLOCK_DELIM : [[fallthrough]];
       case TokenType::PTXT_SEG    : STMT_STARTS_WITH_VALUE: {
-         Expr* stmtContents = parseExpr();
+         index<Expr> stmtContents = parseExpr();
          consumeEOS("statement must end with EOS token");
-         ((astNode*)stmtContents)->upCast(NodeType::STMT);
-         return (Stmt*)stmtContents;
+         tree[(index<astNode>)stmtContents].upCast(NodeType::STMT);
+         return (index<Stmt>)stmtContents;
       }
 
       case TokenType::PREPROC_INIT: ++tokIt; return parsePreprocStmt();
       case TokenType::PREPROC_EOS : ++tokIt; goto START_PARSE_STMT;
-      case TokenType::EOS         : ++tokIt; return new (tree.allocNode(NodeType::STMT)) Stmt{};
+      case TokenType::EOS         : ++tokIt; return tree.make<Stmt>();
       case TokenType::ESC         : ++tokIt += 2; goto START_PARSE_STMT;
 
       default: UNREACHABLE;
@@ -311,7 +311,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
       }
       logError(ErrCode::BAD_EXPR, "invalid expression");
    }
-   return operandStack.back(); //!NOTE: WILL PROBABLY CAUSE ISSUES (not all AST nodes have the same memory layout as expressions)
+   return toExpr(operandStack[0]); //!NOTE: WILL PROBABLY CAUSE ISSUES (not all AST nodes have the same memory layout as expressions)
 }
 
 clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(index<Identifier> scopeName) {
@@ -407,18 +407,18 @@ clef::index<clef::Switch> clef::Parser::parseSwitch() {
          consumeOperator(OpID::LABEL_DELIM, "bad CASE in SWITCH statement");
          
          index<Stmt> firstStmt = parseStmt();
-         procedure->push_back(firstStmt);
-         cases->push_back({caseExpr, firstStmt});
+         tree[procedure].push_back(firstStmt);
+         tree[cases].push_back({caseExpr, firstStmt});
 
       } else if (tryConsumeKeyword(KeywordID::DEFAULT)) { //DEFAULT
          consumeOperator(OpID::LABEL_DELIM, "bad DEFAULT in SWITCH statement");
          
-         Stmt* firstStmt = parseStmt();
+         index<Stmt> firstStmt = parseStmt();
          tree[procedure].push_back(firstStmt);
-         cases->push_back({0, firstStmt});
+         tree[cases].push_back({0, firstStmt});
 
       } else { //standard statement
-         procedure->push_back(parseStmt());
+         tree[procedure].push_back(parseStmt());
       }
    }
 
@@ -451,7 +451,7 @@ clef::index<clef::Match> clef::Parser::parseMatch() {
       consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad CASE or DEFAULT procedure in MATCH statement");
       index<Scope> procedure = parseProcedure();
       
-      cases->emplace_back(caseExpr, procedure);
+      tree[cases].emplace_back(caseExpr, procedure);
    }
 
    //EOS
@@ -490,7 +490,7 @@ clef::index<clef::Function> clef::Parser::parseFunction() {
    if (tryConsumeEOS()) { //forward declaration
       if (name) {
          Identifier* func = tree + name;
-         ((astNode*)fuc)->upCast(NodeType::FUNC);
+         ((astNode*)func)->upCast(NodeType::FUNC); //!NOTE: make and use `remake` function
          new (func) Function{sig, tree[name]};
          return (index<Function>)name;
       } else {

@@ -114,7 +114,7 @@ clef::index<clef::Function> clef::Parser::parseFuncDecl(index<Identifier> scopeN
 
 clef::index<clef::Variable> clef::Parser::parseVariable(index<Identifier> scopeName) {
    index<Decl> decl = parseDecl(scopeName);
-   index<Variable> var = tree.make<Variable>(tree[decl].type(), tree[decl].name()); //NOTE: make and use a `remake` function?
+   index<Variable> var = tree.make<Variable>(tree[decl].type(), tree[decl].name()); //!NOTE: make and use a `remake` function?
    if (tryConsumeEOS()) { //forward declaration
       return var;
    }
