@@ -6,7 +6,7 @@
 
 #include "dyn_arr.hpp"
 
-struct clef::ParameterList : public mcsl::contig_base<Variable*> {
+struct clef::ParameterList : public mcsl::contig_base<index<Variable>> {
    private:
       mcsl::dyn_arr<index<Variable>>* _params;
    public:
@@ -33,8 +33,8 @@ struct clef::ParameterList : public mcsl::contig_base<Variable*> {
       auto* release() { return _params->release(); }
       bool push_back(index<Variable> obj) { return _params->push_back(obj); }
       auto pop_back() { return _params->pop_back(); }
-      auto* emplace(const uint i, auto&&... args) { return _params->emplace(i, std::forward<decltype(args)>(args)...); }
-      auto* emplace_back(auto&&... args) { return _params->emplace_back(std::forward<decltype(args)>(args)...); }
+      auto* emplace(const uint i, auto&&... args) requires mcsl::valid_ctor<Variable, decltype(args)...> { return _params->emplace(i, std::forward<decltype(args)>(args)...); }
+      auto* emplace_back(auto&&... args) requires mcsl::valid_ctor<Variable, decltype(args)...> { return _params->emplace_back(std::forward<decltype(args)>(args)...); }
       #pragma endregion dyn_arr
 };
 

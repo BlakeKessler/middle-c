@@ -38,13 +38,13 @@ START_PARSE_STMT:
 
             case KeywordID::ASM           : ++tokIt; return parseASM(); break;
             
-            case KeywordID::CLASS         : ++tokIt; return tree.make<Stmt, Decl>(NodeType::STMT, tree.getFundType(KeywordID::CLASS), parseClass());
-            case KeywordID::STRUCT        : ++tokIt; return tree.make<Stmt, Decl>(NodeType::STMT, tree.getFundType(KeywordID::STRUCT), parseStruct());
-            case KeywordID::INTERFACE     : ++tokIt; return tree.make<Stmt, Decl>(NodeType::STMT, tree.getFundType(KeywordID::INTERFACE), parseInterface());
-            case KeywordID::UNION         : ++tokIt; return tree.make<Stmt, Decl>(NodeType::STMT, tree.getFundType(KeywordID::UNION), parseUnion());
-            case KeywordID::ENUM          : ++tokIt; return tree.make<Stmt, Decl>(NodeType::STMT, tree.getFundType(KeywordID::ENUM), parseEnum());
-            case KeywordID::MASK          : ++tokIt; return tree.make<Stmt, Decl>(NodeType::STMT, tree.getFundType(KeywordID::MASK), parseMask());
-            case KeywordID::NAMESPACE     : ++tokIt; return tree.make<Stmt, Decl>(NodeType::STMT, tree.getFundType(KeywordID::NAMESPACE), parseNamespace());
+            case KeywordID::CLASS         : ++tokIt; return tree.make<Stmt, Decl>(KeywordID::CLASS, parseClass());
+            case KeywordID::STRUCT        : ++tokIt; return tree.make<Stmt, Decl>(KeywordID::STRUCT, parseStruct());
+            case KeywordID::INTERFACE     : ++tokIt; return tree.make<Stmt, Decl>(KeywordID::INTERFACE, parseInterface());
+            case KeywordID::UNION         : ++tokIt; return tree.make<Stmt, Decl>(KeywordID::UNION, parseUnion());
+            case KeywordID::ENUM          : ++tokIt; return tree.make<Stmt, Decl>(KeywordID::ENUM, parseEnum());
+            case KeywordID::MASK          : ++tokIt; return tree.make<Stmt, Decl>(KeywordID::MASK, parseMask());
+            case KeywordID::NAMESPACE     : ++tokIt; return tree.make<Stmt, Decl>(KeywordID::NAMESPACE, parseNamespace());
             case KeywordID::FUNC          : {
                ++tokIt;
                index<Function> funcptr = parseFunction();
@@ -311,7 +311,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
       }
       logError(ErrCode::BAD_EXPR, "invalid expression");
    }
-   return toExpr(operandStack[0]); //!NOTE: WILL PROBABLY CAUSE ISSUES (not all AST nodes have the same memory layout as expressions)
+   return toExpr(operandStack[0]);
 }
 
 clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(index<Identifier> scopeName) {

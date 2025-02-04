@@ -6,7 +6,7 @@
 
 #include "dyn_arr.hpp"
 
-struct clef::ArgumentList : public mcsl::contig_base<Expr*> {
+struct clef::ArgumentList : public mcsl::contig_base<index<Expr>> {
    private:
       mcsl::dyn_arr<index<Expr>>* _exprs;
    public:
@@ -33,8 +33,8 @@ struct clef::ArgumentList : public mcsl::contig_base<Expr*> {
       auto* release() { return _exprs->release(); }
       bool push_back(index<Expr> obj) { return _exprs->push_back(obj); }
       auto pop_back() { return _exprs->pop_back(); }
-      auto* emplace(const uint i, auto&&... args) { return _exprs->emplace(i, std::forward<decltype(args)>(args)...); }
-      auto* emplace_back(auto&&... args) { return _exprs->emplace_back(std::forward<decltype(args)>(args)...); }
+      auto* emplace(const uint i, auto&&... args) requires mcsl::valid_ctor<Expr, decltype(args)...> { return _exprs->emplace(i, std::forward<decltype(args)>(args)...); }
+      auto* emplace_back(auto&&... args) requires mcsl::valid_ctor<Expr, decltype(args)...> { return _exprs->emplace_back(std::forward<decltype(args)>(args)...); }
       #pragma endregion dyn_arr
 };
 

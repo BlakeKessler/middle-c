@@ -7,7 +7,7 @@
 #include "dyn_arr.hpp"
 #include "pair.hpp"
 
-struct clef::SwitchCases : public mcsl::contig_base<mcsl::pair<Expr*,Stmt*>> {
+struct clef::SwitchCases : public mcsl::contig_base<mcsl::pair<index<Expr>, index<Stmt>>> {
    private:
       index<Scope> _proc;
       mcsl::dyn_arr<mcsl::pair<index<Expr>,index<Stmt>>>* _cases; //case expression, statement to jump to
@@ -41,8 +41,8 @@ struct clef::SwitchCases : public mcsl::contig_base<mcsl::pair<Expr*,Stmt*>> {
       bool push_back(mcsl::pair<index<Expr>,index<Stmt>>&& obj) { return _cases->push_back(std::forward<decltype(obj)>(obj)); }
       bool push_back(const mcsl::pair<index<Expr>,index<Stmt>>& obj) { return _cases->push_back(obj); }
       auto pop_back() { return _cases->pop_back(); }
-      auto* emplace(const uint i, auto&&... args) { return _cases->emplace(i, std::forward<decltype(args)>(args)...); }
-      auto* emplace_back(auto&&... args) { return _cases->emplace_back(std::forward<decltype(args)>(args)...); }
+      auto* emplace(const uint i, auto&&... args) requires mcsl::valid_ctor<mcsl::pair<index<Expr>, index<Stmt>>, decltype(args)...> { return _cases->emplace(i, std::forward<decltype(args)>(args)...); }
+      auto* emplace_back(auto&&... args) requires mcsl::valid_ctor<mcsl::pair<index<Expr>, index<Stmt>>, decltype(args)...> { return _cases->emplace_back(std::forward<decltype(args)>(args)...); }
       #pragma endregion dyn_arr
 };
 

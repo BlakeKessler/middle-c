@@ -6,7 +6,7 @@
 
 #include "dyn_arr.hpp"
 
-struct clef::StatementSequence : public mcsl::contig_base<Stmt*> {
+struct clef::StatementSequence : public mcsl::contig_base<index<Stmt>> {
    private:
       mcsl::dyn_arr<index<Stmt>>* _stmts;
    public:
@@ -33,8 +33,8 @@ struct clef::StatementSequence : public mcsl::contig_base<Stmt*> {
       auto* release() { return _stmts->release(); }
       bool push_back(index<Stmt> obj) { return _stmts->push_back(obj); }
       auto pop_back() { return _stmts->pop_back(); }
-      auto* emplace(const uint i, auto&&... args) { return _stmts->emplace(i, std::forward<decltype(args)>(args)...); }
-      auto* emplace_back(auto&&... args) { return _stmts->emplace_back(std::forward<decltype(args)>(args)...); }
+      auto* emplace(const uint i, auto&&... args) requires mcsl::valid_ctor<Stmt, decltype(args)...> { return _stmts->emplace(i, std::forward<decltype(args)>(args)...); }
+      auto* emplace_back(auto&&... args) requires mcsl::valid_ctor<Stmt, decltype(args)...> { return _stmts->emplace_back(std::forward<decltype(args)>(args)...); }
       #pragma endregion dyn_arr
 };
 

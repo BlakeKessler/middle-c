@@ -7,7 +7,7 @@
 #include "dyn_arr.hpp"
 #include "pair.hpp"
 
-struct clef::MatchCases : public mcsl::contig_base<mcsl::pair<Expr*,Scope*>> {
+struct clef::MatchCases : public mcsl::contig_base<mcsl::pair<index<Expr>, index<Scope>>> {
    private:
       mcsl::dyn_arr<mcsl::pair<index<Expr>,index<Scope>>>* _cases; //case expression, scope to jump to
    public:
@@ -35,8 +35,8 @@ struct clef::MatchCases : public mcsl::contig_base<mcsl::pair<Expr*,Scope*>> {
       bool push_back(mcsl::pair<index<Expr>,index<Scope>>&& obj) { return _cases->push_back(std::forward<decltype(obj)>(obj)); }
       bool push_back(const mcsl::pair<index<Expr>,index<Scope>>& obj) { return _cases->push_back(obj); }
       auto pop_back() { return _cases->pop_back(); }
-      auto* emplace(const uint i, auto&&... args) { return _cases->emplace(i, std::forward<decltype(args)>(args)...); }
-      auto* emplace_back(auto&&... args) { return _cases->emplace_back(std::forward<decltype(args)>(args)...); }
+      auto* emplace(const uint i, auto&&... args) requires mcsl::valid_ctor<mcsl::pair<index<Expr>, index<Scope>>, decltype(args)...> { return _cases->emplace(i, std::forward<decltype(args)>(args)...); }
+      auto* emplace_back(auto&&... args) requires mcsl::valid_ctor<mcsl::pair<index<Expr>, index<Scope>>, decltype(args)...> { return _cases->emplace_back(std::forward<decltype(args)>(args)...); }
       #pragma endregion dyn_arr
 };
 

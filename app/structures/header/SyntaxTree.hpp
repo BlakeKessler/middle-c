@@ -51,14 +51,14 @@ class clef::SyntaxTree {
       ObjTypeSpec* operator+(index<ObjTypeSpec> i) { return _objSpecBuf + i; }
 
 
-      template<astNode_ptr_t T, astNode_ptr_t asT = T, typename... Argv_t> T make(Argv_t... argv) {
+      template<astNode_ptr_t T, astNode_ptr_t asT = T, typename... Argv_t> T make(Argv_t... argv) requires mcsl::valid_ctor<asT, Argv_t...> {
          astNode* tmp = _buf.emplace_back(mcsl::remove_ptr<asT>{std::forward<Argv_t>(argv)...});
          if constexpr (!mcsl::is_t<mcsl::remove_ptr<T>, mcsl::remove_ptr<asT>>) {
             tmp->anyCast(mcsl::remove_ptr<T>::nodeType());
          }
          return (asT)tmp;
       }
-      template<astNode_t T, astNode_t asT = T, typename... Argv_t> index<T> make(Argv_t... argv) { return (index<T>)(make<asT>(std::forward<Argv_t>(argv)...) - _buf.begin()); }
+      template<astNode_t T, astNode_t asT = T, typename... Argv_t> index<T> make(Argv_t... argv) requires mcsl::valid_ctor<T, Argv_t...> { return (index<T>)(make<asT>(std::forward<Argv_t>(argv)...) - _buf.begin()); }
 
       /*unsafe<UNIT_MEM>*/astNode* allocNode(const NodeType type) { return _buf.emplace_back(type); } //deprecated
       template<typename T> mcsl::dyn_arr<T>& allocBuf() { return _alloc.at(_alloc.alloc<T>()); }
