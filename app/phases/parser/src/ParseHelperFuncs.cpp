@@ -64,13 +64,13 @@
 
 
 clef::index<clef::Scope> clef::Parser::parseProcedure() {
-   Scope* scope = (Scope*)tree.allocNode(NodeType::SCOPE);
+   index<Scope> scope = tree.make<Scope>(tree.allocBuf<index<Stmt>>());
 
    while (tokIt < endtok) {
       if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
          return scope;
       }
-      scope->push_back(parseStmt());
+      tree[scope].push_back(parseStmt());
    }
 
    //reached end of source without finding closing token
@@ -85,14 +85,14 @@ clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName)
    return name;
 }
 
-clef::index<clef::Decl> clef::Parser::parseDecl(Type* type, index<Identifier> scopeName) {
+clef::index<clef::Decl> clef::Parser::parseDecl(index<Type> type, index<Identifier> scopeName) {
    index<Identifier> name = parseIdentifier(scopeName);
    return tree.make<Decl>(type, name);
 }
 clef::index<clef::Decl> clef::Parser::parseDecl(index<Identifier> scopeName) {
    if (tryConsumeKeyword(KeywordID::FUNC)) {
-      Function* func = parseFuncDecl(scopeName);
-      return new (tree.allocNode(NodeType::DECL)) Decl{func->signature(), func};
+      index<Function> func = parseFuncDecl(scopeName);
+      return tree.make<Decl>(tree[func].signature(), func);
    }
 
    index<Type> type = parseTypename(scopeName);
@@ -113,29 +113,25 @@ clef::index<clef::Function> clef::Parser::parseFuncDecl(index<Identifier> scopeN
 }
 
 clef::index<clef::Variable> clef::Parser::parseVariable(index<Identifier> scopeName) {
-   Decl* decl = parseDecl(scopeName);
+   index<Decl> decl = parseDecl(scopeName);
+   index<Variable> var = tree.make<Variable>(tree[decl].type(), tree[decl].name()); //NOTE: make and use a `remake` function?
    if (tryConsumeEOS()) { //forward declaration
-      Variable* var = new (decl) Variable{decl->type(), decl->name()};
-         ((astNode*)var)->anyCast(NodeType::VAR);
       return var;
    }
    else if (tryConsumeOperator(OpID::ASSIGN)) {
-      Variable* var = new (decl) Variable{decl->type(), decl->name(), parseExpr()};
-         ((astNode*)var)->anyCast(NodeType::VAR);
+      tree[var].val() = parseExpr();
       return var;
    }
    else if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN)) {
-      ArgList* args = parseArgList(BlockType::INIT_LIST);
-      Expr* invoke = new (tree.allocNode(NodeType::EXPR)) Expr{OpID::LIST_INVOKE, decl->type(), args};
-      Variable* var = new (decl) Variable{decl->type(), decl->name(), invoke};
-         ((astNode*)var)->anyCast(NodeType::VAR);
+      index<ArgList> args = parseArgList(BlockType::INIT_LIST);
+      index<Expr> invoke = tree.make<Expr>(OpID::LIST_INVOKE, tree[decl].type(), args);
+      tree[var].val() = invoke;
       return var;
    }
    else if (tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN)) {
-      ArgList* args = parseArgList(BlockType::CALL);
-      Expr* invoke = new (tree.allocNode(NodeType::EXPR)) Expr{OpID::CALL_INVOKE, decl->type(), args};
-      Variable* var = new (decl) Variable{decl->type(), decl->name(), invoke};
-         ((astNode*)var)->anyCast(NodeType::VAR);
+      index<ArgList> args = parseArgList(BlockType::CALL);
+      index<Expr> invoke = tree.make<Expr>(OpID::CALL_INVOKE, tree[decl].type(), args);
+      tree[var].val() = invoke;
       return var;
    }
    else {
@@ -144,25 +140,25 @@ clef::index<clef::Variable> clef::Parser::parseVariable(index<Identifier> scopeN
 }
 
 mcsl::pair<clef::index<clef::Variable>,clef::index<clef::Decl>> clef::Parser::parseVarDecl(index<Identifier> scopeName) {
-   Decl* decl = parseDecl(scopeName);
+   index<Decl> decl = parseDecl(scopeName);
+   index<Variable> var = tree.make<Variable>(tree[decl].type(), tree[decl].name()); //NOTE: make and use a `remake` function?
    if (tryConsumeEOS()) {
-      Variable* var = new (tree.allocNode(NodeType::VAR)) Variable{decl->type(), decl->name()};
       return {var,decl};
    }
    else if (tryConsumeOperator(OpID::ASSIGN)) {
-      Variable* var = new (tree.allocNode(NodeType::VAR)) Variable{decl->type(), decl->name(), parseExpr()};
+      tree[var].val() = parseExpr();
       return {var,decl};
    }
    else if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN)) {
-      ArgList* args = parseArgList(BlockType::INIT_LIST);
-      Expr* invoke = new (tree.allocNode(NodeType::EXPR)) Expr{OpID::LIST_INVOKE, decl->type(), args};
-      Variable* var = new (tree.allocNode(NodeType::VAR)) Variable{decl->type(), decl->name(), invoke};
+      index<ArgList> args = parseArgList(BlockType::INIT_LIST);
+      index<Expr> invoke = tree.make<Expr>(OpID::LIST_INVOKE, tree[decl].type(), args);
+      tree[var].val() = invoke;
       return {var,decl};
    }
    else if (tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN)) {
-      ArgList* args = parseArgList(BlockType::CALL);
-      Expr* invoke = new (tree.allocNode(NodeType::EXPR)) Expr{OpID::CALL_INVOKE, decl->type(), args};
-      Variable* var = new (tree.allocNode(NodeType::VAR)) Variable{decl->type(), decl->name(), invoke};
+      index<ArgList> args = parseArgList(BlockType::CALL);
+      index<Expr> invoke = tree.make<Expr>(OpID::CALL_INVOKE, tree[decl].type(), args);
+      tree[var].val() = invoke;
       return {var,decl};
    }
    else {
@@ -173,12 +169,12 @@ mcsl::pair<clef::index<clef::Variable>,clef::index<clef::Decl>> clef::Parser::pa
 
 
 clef::index<clef::ArgList> clef::Parser::parseArgList(const BlockType closer) {
-   ArgList* args = new (tree.allocNode(NodeType::ARG_LIST)) ArgList{tree.allocBuf<Expr*>()};
+   index<ArgList> args = tree.make<ArgList>(tree.allocBuf<index<Expr>>());
    if (tryConsumeBlockDelim(closer, BlockDelimRole::CLOSE)) {
       return args;
    }
    do {
-      args->push_back(parseExpr());
+      tree[args].push_back(parseExpr());
       if (tryConsumeOperator(OpID::COMMA)) {
          continue;
       }
@@ -188,12 +184,12 @@ clef::index<clef::ArgList> clef::Parser::parseArgList(const BlockType closer) {
    return args;
 }
 clef::index<clef::ParamList> clef::Parser::parseParamList(const BlockType closer) {
-   ParamList* args = new (tree.allocNode(NodeType::PARAM_LIST)) ParamList{tree.allocBuf<Variable*>()};
+   index<ParamList> args = tree.make<ParamList>(tree.allocBuf<index<Variable>>());
    if (tryConsumeBlockDelim(closer, BlockDelimRole::CLOSE)) {
       return args;
    }
    do {
-      args->push_back(parseVariable());
+      tree[args].push_back(parseVariable());
       if (tryConsumeOperator(OpID::COMMA)) {
          continue;
       }
