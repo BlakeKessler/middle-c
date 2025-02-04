@@ -61,7 +61,6 @@ class clef::SyntaxTree {
       template<astNode_ptr_t asT, astNode_ptr_t T = asT, typename... Argv_t> asT make(Argv_t... argv) requires mcsl::valid_ctor<mcsl::remove_ptr<T>, Argv_t...>;
       template<astNode_t asT, astNode_t T = asT, typename... Argv_t> index<asT> make(Argv_t... argv) requires mcsl::valid_ctor<T, Argv_t...> { return (index<asT>)(make<T>(std::forward<Argv_t>(argv)...) - _buf.begin()); }
 
-      /*unsafe<UNIT_MEM>*/astNode* allocNode(const NodeType type) { return _buf.emplace_back(type); } //deprecated
       template<typename T> mcsl::dyn_arr<T>& allocBuf() { return _alloc.at(_alloc.alloc<T>()); }
       InterfaceSpec* allocInterfaceSpec() { return _ifaceSpecBuf.emplace_back(); }
       NamespaceSpec* allocNamespaceSpec() { return _nsSpecBuf.emplace_back(); }

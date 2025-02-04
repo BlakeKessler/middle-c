@@ -109,7 +109,7 @@ clef::index<clef::Union> clef::Parser::parseUnion() {
 
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad UNION definition");
 
-   ParameterList* members = new (tree.allocNode(NodeType::PARAM_LIST)) ParameterList{tree.allocBuf<Variable*>()};
+   index<ParameterList> members = tree.make<ParameterList>(tree.allocBuf<index<Variable>>());
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       //parse member
       Type* memberType = parseTypename();
@@ -148,7 +148,7 @@ clef::index<clef::Enum> clef::Parser::parseEnum() {
    }
 
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad ENUM definition");
-   ParamList* enumerators = new (tree.allocNode(NodeType::PARAM_LIST)) ParamList{tree.allocBuf<Variable*>()};
+   index<ParamList> enumerators = tree.make<ParamList>(tree.allocBuf<index<Variable>>());
    if (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       do {
          Identifier* enumerator = parseIdentifier();

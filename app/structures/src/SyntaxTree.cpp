@@ -7,7 +7,7 @@
 
 #define ID(fund) id = fund; break
 //!NOTE: currently uses LP64 data model no matter what
-clef::FundType* clef::SyntaxTree::getFundType(const KeywordID keyword) {
+clef::index<clef::FundType> clef::SyntaxTree::getFundType(const KeywordID keyword) {
    using enum FundTypeID;
    FundTypeID id;
    switch (keyword) {
@@ -62,17 +62,17 @@ clef::FundType* clef::SyntaxTree::getFundType(const KeywordID keyword) {
 
       default: UNREACHABLE;
    }
-   return new (allocNode(NodeType::FUND_TYPE)) FundType{id};
+   return make<FundType>(id);
 }
 #undef ID
 
-clef::astNode* clef::SyntaxTree::getValueKeyword(const KeywordID keyword) {
+clef::index<clef::astNode> clef::SyntaxTree::getValueKeyword(const KeywordID keyword) {
    switch (keyword) {
-      case KeywordID::THIS    : return (astNode*)(new (allocNode(NodeType::IDEN)) Identifier{KeywordID::THIS});
-      case KeywordID::SELF    : return (astNode*)(new (allocNode(NodeType::IDEN)) Identifier{KeywordID::SELF});
-      case KeywordID::TRUE    : return (astNode*)(new (allocNode(NodeType::LITERAL)) Literal{true});
-      case KeywordID::FALSE   : return (astNode*)(new (allocNode(NodeType::LITERAL)) Literal{false});
-      case KeywordID::NULLPTR : return (astNode*)(new (allocNode(NodeType::LITERAL)) Literal{(void*)nullptr});
+      case KeywordID::THIS    : return +make<Identifier>(KeywordID::THIS);
+      case KeywordID::SELF    : return +make<Identifier>(KeywordID::SELF);
+      case KeywordID::TRUE    : return +make<Literal>(true);
+      case KeywordID::FALSE   : return +make<Literal>(false);
+      case KeywordID::NULLPTR : return +make<Literal>((void*)nullptr);
 
       default: UNREACHABLE;
    }
