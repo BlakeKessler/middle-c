@@ -25,7 +25,9 @@ struct clef::Expression {
       friend struct Switch;
       friend struct Match;
       friend struct TryCatch;
-      // friend struct Asm;
+      friend struct Asm;
+
+      friend class SyntaxTree;
 
       Expression(OpID op, NodeType lhsType, NodeType rhsType, NodeType extraType, uint lhs, uint rhs, uint extra):_op{op},_lhsType{lhsType},_rhsType{rhsType},_extraType{extraType},_lhs{lhs},_rhs{rhs},_extra{extra} {}
       Expression(OpID op, NodeType lhsType, NodeType rhsType, uint lhs, uint rhs):Expression{op, lhsType, rhsType, NodeType::NONE, lhs, rhs, {}} {}
@@ -40,6 +42,7 @@ struct clef::Expression {
 
       template<operand_t lhs_t, operand_t rhs_t> Expression(OpID binaryOp, index<lhs_t> lhs, index<rhs_t> rhs):Expression{binaryOp, lhs_t::nodeType(), rhs_t::nodeType(), lhs, rhs} {}
       template<operand_t lhs_t>Expression(OpID unaryOp, index<lhs_t> lhs):Expression{unaryOp, lhs_t::nodeType(), lhs} {}
+      Expression(OpID unaryOp, NodeType t, index<astNode> lhs):Expression{unaryOp, t, +lhs} {}
       Expression(OpID nullaryOp):Expression{nullaryOp, NodeType::NONE, {}} {}
 
       Expression(OpID op, index<Type> type, index<ArgList> ctorArgs);
@@ -56,12 +59,12 @@ struct clef::Expression {
       NodeType rhsType() const { return _rhsType; }
       NodeType extraType() const { return _extraType; }
 
-      uint lhs() { return _lhs; }
-      const uint lhs() const { return _lhs; }
-      uint rhs() { return _rhs; }
-      const uint rhs() const { return _rhs; }
-      uint extra() { return _extra; }
-      const uint extra() const { return _extra; }
+      index<void> lhs() { return _lhs; }
+      index<const void> lhs() const { return _lhs; }
+      index<void> rhs() { return _rhs; }
+      index<const void> rhs() const { return _rhs; }
+      index<void> extra() { return _extra; }
+      index<const void> extra() const { return _extra; }
 
       void setLHS(uint lhs, NodeType t) { _lhs = lhs; _lhsType = t; }
       void setRHS(uint rhs, NodeType t) { _rhs = rhs; _rhsType = t; }

@@ -66,7 +66,6 @@ namespace clef {
             GENERIC,
       SCOPE,
       LITERAL,
-      OPERATOR,
       EXPR,
          STMT,
             DECL,

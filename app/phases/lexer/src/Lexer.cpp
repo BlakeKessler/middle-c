@@ -416,6 +416,7 @@ bool clef::Lexer::lexExpr(char*& curr, char* const end, mcsl::dyn_arr<Token>& to
       //process token
       switch (*curr) {
          //!NUMBERS
+         #pragma region nums
          case '0':
             isReal = false;
             //check for radix specifier
@@ -487,6 +488,7 @@ PUSH_NUM_TOK:
             }
             // ++curr;
             break;
+         #pragma endregion nums
 
 
          //IDENTIFIERS
@@ -504,6 +506,7 @@ PUSH_NUM_TOK:
          } break;
 
 
+         #pragma region misc
          //EOS
          case EOS:
             toks.emplace_back(TokenType::EOS);
@@ -533,6 +536,8 @@ PUSH_NUM_TOK:
          case  ' ': case '\t': case '\v': case '\f': case '\r':
             ++curr;
             break;
+         
+         #pragma endregion misc
          
          //OPERATORS
          case '!': case '$': case '%': case '&': case '+': case ',': case '-': case '.': case '=': case '?': case '@': case '^': case '|': case '~': case '(': case ')': case '[': case ']': case '{': case '}': case '*': case '/': case '<': case '>': case ':': {
@@ -616,6 +621,7 @@ PUSH_NUM_TOK:
             throwError(ErrCode::LEXER_UNSPEC, "invalid character (%hhu)", *curr);
       }
    }
+   return true;
 }
 
 #endif //LEXER_CPP

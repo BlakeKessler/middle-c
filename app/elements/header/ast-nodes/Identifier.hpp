@@ -15,10 +15,10 @@ struct clef::Identifier {
    public:
       static constexpr NodeType nodeType() { return NodeType::IDEN; }
 
-      Identifier(const mcsl::raw_str_span name = {}, index<Identifier> scopeName = {}):_scopeName{scopeName},_name_buf{name.begin()},_name_size{name.size()},_keywordID{KeywordID::_NOT_A_KEYWORD} {}
-      Identifier(const KeywordID id):_scopeName{},_name_buf{},_name_size{},_keywordID{id} {}
+      Identifier(const mcsl::raw_str_span name = {}, index<Identifier> scopeName = {}):_name_buf{name.begin()},_name_size{name.size()},_scopeName{scopeName},_keywordID{KeywordID::_NOT_A_KEYWORD} {}
+      Identifier(const KeywordID id):_name_buf{},_name_size{},_scopeName{},_keywordID{id} {}
 
-      Identifier(const Identifier& other):_scopeName{other._scopeName},_name_buf{other._name_buf},_name_size{other._name_size},_keywordID{other._keywordID} {}
+      Identifier(const Identifier& other):_name_buf{other._name_buf},_name_size{other._name_size},_scopeName{other._scopeName},_keywordID{other._keywordID} {}
       Identifier& operator=(const Identifier& other) { new (this) Identifier{other}; return self; }
 
       index<Identifier>& scopeName() { return _scopeName; }

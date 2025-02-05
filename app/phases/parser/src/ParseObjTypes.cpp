@@ -32,13 +32,13 @@ clef::index<clef::Class> clef::Parser::parseClass() {
             case KeywordID::ENUM     : ++tokIt; tree[spec].memberTypes().push_back(parseEnum()); break;
             case KeywordID::MASK     : ++tokIt; tree[spec].memberTypes().push_back(parseMask()); break;
             case KeywordID::NAMESPACE: ++tokIt; tree[spec].memberTypes().push_back(parseNamespace()); break;
-            case KeywordID::FUNC     : ++tokIt; tree[spec].methods().push_back(parseFunction()); break; //!NOTE: does not account for static functions
+            case KeywordID::FUNC     : ++tokIt; tree[spec].methods().push_back(parseFunction()); break; //!TODO: does not account for static functions
             default: goto MEMB_VAR_DECL;
          }
          continue;
       }
       MEMB_VAR_DECL:
-      tree[spec].members().push_back(parseVariable()); //!NOTE: does not yet account for static functions
+      tree[spec].members().push_back(parseVariable()); //!TODO: does not yet account for static functions
    }
 
    //EOS

@@ -38,48 +38,52 @@ void clef::astNode::anyCast(NodeType newType) {
 
 
 //sizeof node from node type
+#define typecase(type) case type::nodeType(): return sizeof(type)
 uint clef::nodeSizeof(NodeType t) {
    switch (t) {
       case NodeType::NONE: return 0;
       case NodeType::ERROR: return 0;
-      case NodeType::OPERATOR: UNREACHABLE;
 
-      case Keyword::nodeType(): return sizeof(Keyword);
-      case Identifier::nodeType(): return sizeof(Identifier);
-      case Variable::nodeType(): return sizeof(Variable);
-      case Function::nodeType(): return sizeof(Function);
-      case Type::nodeType(): return sizeof(Type);
-      case VariadicParameter::nodeType(): return sizeof(VariadicParameter);
-      case FundamentalType::nodeType(): return sizeof(FundamentalType);
-      case FunctionSignature::nodeType(): return sizeof(FunctionSignature);
-      case Enum::nodeType(): return sizeof(Enum);
-      case Mask::nodeType(): return sizeof(Mask);
-      case Union::nodeType(): return sizeof(Union);
-      case Namespace::nodeType(): return sizeof(Namespace);
-      case Interface::nodeType(): return sizeof(Interface);
-      case Struct::nodeType(): return sizeof(Struct);
-      case Class::nodeType(): return sizeof(Class);
-      case GenericType::nodeType(): return sizeof(GenericType);
-      case Scope::nodeType(): return sizeof(Scope);
-      case Literal::nodeType(): return sizeof(Literal);
-      case Expression::nodeType(): return sizeof(Expression);
-      case Declaration::nodeType(): return sizeof(Declaration);
-      case Loop::nodeType(): return sizeof(Loop);
-      case If::nodeType(): return sizeof(If);
-      case Switch::nodeType(): return sizeof(Switch);
-      case Match::nodeType(): return sizeof(Match);
-      case TryCatch::nodeType(): return sizeof(TryCatch);
-      case Asm::nodeType(): return sizeof(Asm);
-      case ForLoopParams::nodeType(): return sizeof(ForLoopParams);
-      case ForeachLoopParams::nodeType(): return sizeof(ForeachLoopParams);
-      case SwitchCases::nodeType(): return sizeof(SwitchCases);
-      case MatchCases::nodeType(): return sizeof(MatchCases);
-      case Statement::nodeType(): return sizeof(Statement);
-      case StatementSequence::nodeType(): return sizeof(StatementSequence);
-      case ArgumentList::nodeType(): return sizeof(ArgumentList);
-      case ParameterList::nodeType(): return sizeof(ParameterList);
+      typecase(Keyword);
+      typecase(Identifier);
+      typecase(Variable);
+      typecase(Function);
+      typecase(Type);
+      typecase(VariadicParameter);
+      typecase(FundamentalType);
+      typecase(FunctionSignature);
+      typecase(Enum);
+      typecase(Mask);
+      typecase(Union);
+      typecase(Namespace);
+      typecase(Interface);
+      typecase(Struct);
+      typecase(Class);
+      typecase(GenericType);
+      typecase(Scope);
+      typecase(Literal);
+      typecase(Expression);
+      typecase(Declaration);
+      typecase(ForLoop);
+      typecase(ForeachLoop);
+      typecase(WhileLoop);
+      typecase(DoWhileLoop);
+      typecase(If);
+      typecase(Switch);
+      typecase(Match);
+      typecase(TryCatch);
+      typecase(Asm);
+      typecase(ForLoopParams);
+      typecase(ForeachLoopParams);
+      typecase(SwitchCases);
+      typecase(MatchCases);
+      typecase(Statement);
+      typecase(StatementSequence);
+      typecase(ArgumentList);
+      typecase(ParameterList);
    }
 }
+#undef typecase
 
 //unformatted print
 void clef::astNode::print() const {

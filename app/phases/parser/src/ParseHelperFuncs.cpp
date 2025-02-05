@@ -211,4 +211,57 @@ clef::index<clef::Expr> clef::Parser::parseCast(KeywordID castID) {
    logError(ErrCode::PARSER_NOT_IMPLEMENTED, "typecasting is not yet supported");
 }
 
+
+
+clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
+   astNode& node = tree[index];
+   switch (node.nodeType()) {
+      case Keyword::nodeType():
+      case Identifier::nodeType():
+      case Variable::nodeType():
+      case Function::nodeType():
+      case Type::nodeType():
+      case VariadicParameter::nodeType():
+      case FundamentalType::nodeType():
+      case FunctionSignature::nodeType():
+      case Enum::nodeType():
+      case Mask::nodeType():
+      case Union::nodeType():
+      case Namespace::nodeType():
+      case Interface::nodeType():
+      case Struct::nodeType():
+      case Class::nodeType():
+      case GenericType::nodeType():
+      case Literal::nodeType():
+         return tree.makeExpr(OpID::NULL, index);
+
+      case Expression::nodeType():
+      case Declaration::nodeType():
+      case Statement::nodeType():
+      case ForLoop::nodeType():
+      case ForeachLoop::nodeType():
+      case WhileLoop::nodeType():
+      case DoWhileLoop::nodeType():
+      case If::nodeType():
+      case Switch::nodeType():
+      case Match::nodeType():
+      case TryCatch::nodeType():
+      case Asm::nodeType():
+         return +index;
+
+
+      case Scope::nodeType():
+      case ForLoopParams::nodeType():
+      case ForeachLoopParams::nodeType():
+      case SwitchCases::nodeType():
+      case MatchCases::nodeType():
+      case StatementSequence::nodeType():
+      case ArgumentList::nodeType():
+      case ParameterList::nodeType():
+      case NodeType::NONE:
+      case NodeType::ERROR:
+         UNREACHABLE;
+   }
+}
+
 #endif //PARSER_HELPERS_CPP

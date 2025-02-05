@@ -286,7 +286,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             if (prevTokIsOperand) { //function call, initializer list, subscript, or specializer
                debug_assert(operandStack.size());
                index<ArgList> args = parseArgList(blockType);
-               operandStack.push_back(+tree.makeExpr(getInvoker(blockType),operandStack.pop_back(),args));
+               operandStack.push_back(+tree.makeExpr(getInvoker(blockType),operandStack.pop_back(),(index<astNode>)args));
             } else if (blockType == BlockType::INIT_LIST) { //tuple
                operandStack.push_back(+parseArgList(blockType));
             } else { //block subexpression
