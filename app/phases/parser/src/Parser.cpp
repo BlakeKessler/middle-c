@@ -491,10 +491,7 @@ clef::index<clef::Function> clef::Parser::parseFunction() {
 
    if (tryConsumeEOS()) { //forward declaration
       if (name) {
-         Identifier* func = tree + name;
-         ((astNode*)func)->upCast(NodeType::FUNC); //!NOTE: make and use `remake` function
-         new (func) Function{sig, tree[name]};
-         return (index<Function>)name;
+         return tree.remake<Function>(name, sig, tree[name]);
       } else {
          return tree.make<Function>(sig);
       }
@@ -509,10 +506,7 @@ clef::index<clef::Function> clef::Parser::parseFunction() {
 
    //return
    if (name) {
-      Identifier* func = tree + name;
-      ((astNode*)func)->upCast(NodeType::FUNC);
-      new (func) Function{sig, procedure, tree[name]};
-      return (index<Function>)name;
+      return tree.remake<Function>(name, sig, procedure, tree[name]);
    } else {
       return tree.make<Function>(sig, procedure);
    }

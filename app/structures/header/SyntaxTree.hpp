@@ -61,10 +61,15 @@ class clef::SyntaxTree {
       template<astNode_ptr_t asT, astNode_ptr_t T = asT, typename... Argv_t> asT make(Argv_t... argv) requires mcsl::valid_ctor<mcsl::remove_ptr<T>, Argv_t...>;
       template<astNode_t asT, astNode_t T = asT, typename... Argv_t> index<asT> make(Argv_t... argv) requires mcsl::valid_ctor<T, Argv_t...> { return (index<asT>)(make<T>(std::forward<Argv_t>(argv)...) - _buf.begin()); }
 
+      template<astNode_ptr_t newT, astNode_ptr_t oldT, typename... Argv_t> newT remake(index<oldT> i, Argv_t... argv) requires mcsl::is_t<mcsl::remove_ptr<newT>, mcsl::remove_ptr<oldT>> && mcsl::valid_ctor<mcsl::remove_ptr<newT>, Argv_t...>;
+      template<astNode_t newT, astNode_t oldT, typename... Argv_t> index<newT> remake(index<oldT> i, Argv_t... argv) requires mcsl::is_t<newT, oldT> && mcsl::valid_ctor<newT, Argv_t...> { return (index<asT>)(remake<T>(i, std::forward<Argv_t>(argv)...) - _buf.begin()); }
+
+
+
       template<typename T> mcsl::dyn_arr<T>& allocBuf() { return _alloc.at(_alloc.alloc<T>()); }
-      InterfaceSpec* allocInterfaceSpec() { return _ifaceSpecBuf.emplace_back(); }
-      NamespaceSpec* allocNamespaceSpec() { return _nsSpecBuf.emplace_back(); }
-      ObjTypeSpec* allocObjTypeSpec() { return _objSpecBuf.emplace_back(); }
+      index<InterfaceSpec> allocInterfaceSpec() { return _ifaceSpecBuf.emplace_back() - _ifaceSpecBuf.begin(); }
+      index<NamespaceSpec> allocNamespaceSpec() { return _nsSpecBuf.emplace_back() - _nsSpecBuf.begin(); }
+      index<ObjTypeSpec> allocObjTypeSpec() { return _objSpecBuf.emplace_back() - _objSpecBuf.begin(); }
 };
 
 #pragma region inlinesrc
@@ -75,6 +80,15 @@ template<clef::astNode_ptr_t asT, clef::astNode_ptr_t T = asT, typename... Argv_
       tmp->anyCast(mcsl::remove_ptr<asT>::nodeType());
    }
    return (asT)tmp;
+}
+
+template<clef::astNode_ptr_t newT, clef::astNode_ptr_t oldT, typename... Argv_t> newT clef::SyntaxTree::remake(index<oldT> i, Argv_t... argv) requires mcsl::is_t<mcsl::remove_ptr<newT>, mcsl::remove_ptr<oldT>> && mcsl::valid_ctor<mcsl::remove_ptr<newT>, Argv_t...> {
+   debug_assert(i);
+   astNode* tmp = _buf.emplace(i, mcsl::remove_ptr<newT>{std::forward<Argv_t>(argv)...});
+   if constexpr (!mcsl::same_t<mcsl::remove_ptr<oldT>, mcsl::remove_ptr<newT>>) {
+      tmp->anyCast(mcsl::remove_ptr<newT>::nodeType());
+   }
+   return (newT)tmp;
 }
 
 #pragma endregion inlinesrc
