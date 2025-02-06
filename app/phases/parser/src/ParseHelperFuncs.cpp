@@ -216,7 +216,6 @@ clef::index<clef::Expr> clef::Parser::parseCast(KeywordID castID) {
 clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
    astNode& node = tree[index];
    switch (node.nodeType()) {
-      case Keyword::nodeType():
       case Identifier::nodeType():
       case Variable::nodeType():
       case Function::nodeType():

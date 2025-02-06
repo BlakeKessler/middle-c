@@ -377,7 +377,7 @@ clef::index<clef::If> clef::Parser::parseIf() {
          consumeEOS("DO WHILE statement without EOS token");
 
          //return
-         index<If> elseStmt = tree.make<If>(0, elseProc, 0);
+         index<If> elseStmt = tree.make<If>((index<Expr>)0, elseProc, (index<If>)0);
          index<If> ifStmt = tree.make<If>(condition, proc, elseStmt);
          return ifStmt;
       }

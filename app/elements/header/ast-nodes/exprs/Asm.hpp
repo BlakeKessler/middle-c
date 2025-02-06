@@ -18,6 +18,8 @@ struct clef::Asm : public clef::Statement {
          //inout vars
       //clobbers
       //labels
+
+      void printf() const;
 };
 
 #endif //ASM_HPP

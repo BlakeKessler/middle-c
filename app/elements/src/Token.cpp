@@ -2,8 +2,9 @@
 #define TOKEN_CPP
 
 #include "Token.hpp"
-#include "unreachable.hpp"
+#include "pretty-print.hpp"
 
+#include "unreachable.hpp"
 #include <cstdio>
 #ifdef MCSL
    #undef NULL
@@ -18,7 +19,7 @@ void clef::Token::printf() const {
          std::printf("\033[35mIDENTIFIER:\033[39m %.*s", _name.size(), _name.begin());
          break;
       case TokenType::KEYWORD:
-         std::printf("\033[35mKEYWORD:\033[39m %hhu", +_keyword);
+         std::printf("\033[35mKEYWORD:\033[39m %s", toString(_keyword));
          break;
       case TokenType::INT_NUM:
          std::printf("\033[35mINTEGER:\033[39m %lu", _intVal);
@@ -27,7 +28,7 @@ void clef::Token::printf() const {
          std::printf("\033[35mREAL NUMBER:\033[39m %lf", _realVal);
          break;
       case TokenType::OP:
-         std::printf("\033[35mOPERATOR:\033[39m %hhu %hhu", +_op.opID(), +_op.props());
+         std::printf("\033[35mOPERATOR:\033[39;1m \033[34m%s\033[39;22m \033[3m[%s]\033[23m", toString(_op.opID()), toString(_op.props()));
          break;
       case TokenType::PREPROC_INIT:
          std::printf("\033[35mINVOKE PREPROCESSOR\033[39m");
@@ -42,16 +43,16 @@ void clef::Token::printf() const {
          std::printf("\033[35mESCAPE CHARACTER\033[39m");
          break;
       case TokenType::BLOCK_DELIM:
-         std::printf("\033[35mBLOCK DELIMITER:\033[39m %hhu %huu", +_blockDelim.first, +_blockDelim.second);
+         std::printf("\033[35mBLOCK DELIMITER:\033[39m %s \033[3m[%s]\033[23m", toString(_blockDelim.first), toString(_blockDelim.second));
          break;
       case TokenType::PTXT_SEG:
-         std::printf("\033[35mPLAINTEXT SEGMENT (%hhu):\033[39m ", +_ptxtType);
+         std::printf("\033[35mPLAINTEXT SEGMENT (\033[3m%s\033[23m):\033[39m ", toString(_ptxtType));
          switch (_ptxtType) {
             case PtxtType::CHAR           : std::printf("%c", _charVal); break;
             case PtxtType::STR            : std::printf("%.*s", _strVal.size(), _strVal.begin()); break;
             case PtxtType::UNPROCESSED_STR: std::printf("%.*s", _strVal.size(), _strVal.begin()); break;
 
-            default: throwError(ErrCode::LEXER_NOT_IMPLEMENTED, "\033[35munimplemented plaintext segment type used (%hhu)\033[39m", +_ptxtType);
+            default: throwError(ErrCode::LEXER_NOT_IMPLEMENTED, "\033[35munimplemented plaintext segment type used (%s)\033[39m", toString(_ptxtType));
          }
          break;
       

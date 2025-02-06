@@ -21,6 +21,7 @@ struct clef::Namespace : public clef::Type {
       index<NamespaceSpec>& spec() { return _spec; }
       index<const NamespaceSpec> spec() const { return _spec; }
 
+      void printf() const;
 };
 
 #endif //NAMESPACE_HPP

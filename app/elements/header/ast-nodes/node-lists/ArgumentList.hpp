@@ -36,6 +36,8 @@ struct clef::ArgumentList : public mcsl::contig_base<index<Expr>> {
       auto* emplace(const uint i, auto&&... args) requires mcsl::valid_ctor<Expr, decltype(args)...> { return _exprs->emplace(i, std::forward<decltype(args)>(args)...); }
       auto* emplace_back(auto&&... args) requires mcsl::valid_ctor<Expr, decltype(args)...> { return _exprs->emplace_back(std::forward<decltype(args)>(args)...); }
       #pragma endregion dyn_arr
+
+      void printf() const;
 };
 
 #endif //ARG_LIST_HPP

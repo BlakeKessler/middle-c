@@ -23,6 +23,8 @@ struct clef::Mask : public clef::Type {
 
       index<ParameterList>& enumerators() { return _enumerators; }
       index<const ParameterList> enumerators() const { return _enumerators; }
+
+      void printf() const;
 };
 
 #endif //MASK_HPP

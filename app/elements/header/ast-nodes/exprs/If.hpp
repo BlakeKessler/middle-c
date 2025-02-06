@@ -23,6 +23,8 @@ struct clef::If : public clef::Statement {
       index<const Scope> procedure() const { return _rhs;}
       index<If>& elseStmt() { return reinterpret_cast<index<If>&>(_extra);}
       index<const If> elseStmt() const { return _extra;}
+
+      void printf() const;
 };
 
 #endif //IF_HPP

@@ -20,6 +20,8 @@ struct clef::Variable : public clef::Identifier {
 
       index<Expr>& val() { return _val; }
       index<const Expr> val() const { return _val; }
+
+      void printf() const;
 };
 
 #endif //VARIABLE_HPP

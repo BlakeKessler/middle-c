@@ -11,7 +11,6 @@
 #include "ast-nodes/Type.hpp"
 #include "ast-nodes/ForLoopParams.hpp"
 #include "ast-nodes/ForeachLoopParams.hpp"
-#include "ast-nodes/Keyword.hpp"
 #include "ast-nodes/Identifier.hpp"
 #include "ast-nodes/Statement.hpp"
 #include "ast-nodes/Variable.hpp"
@@ -49,7 +48,6 @@
 struct clef::astNode {
    private:
       union {
-         Keyword _keyword;
          Identifier _identifier;
          Variable _variable;
          Function _function;
@@ -96,7 +94,6 @@ struct clef::astNode {
       astNode(const astNode& other) { std::memcpy(this, &other, sizeof(self)); }
       astNode& operator=(const astNode& other) { new (this) astNode{other}; return self; }
       #define _def_ctor(varName) astNode(decltype(varName)& node):varName{node},_nodeType{decltype(varName)::nodeType()} {}
-      _def_ctor(_keyword)
       _def_ctor(_identifier)
       _def_ctor(_variable)
       _def_ctor(_function)
@@ -124,7 +121,7 @@ struct clef::astNode {
       _def_ctor(_switch)
       _def_ctor(_match)
       _def_ctor(_tryCatch)
-      // _def_ctor(_asm)
+      _def_ctor(_asm)
       _def_ctor(_forLoopParams)
       _def_ctor(_foreachLoopParams)
       _def_ctor(_switchCases)

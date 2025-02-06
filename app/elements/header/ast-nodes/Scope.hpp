@@ -16,6 +16,8 @@ struct clef::Scope : public clef::StatementSequence {
       using StatementSequence::StatementSequence;
       // Scope():StatementSequence{} {}
       // Scope(StatementSequence& stmts):StatementSequence{stmts} {}
+
+      void printf() const;
 };
 
 #endif //SCOPE_HPP

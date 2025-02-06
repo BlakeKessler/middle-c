@@ -24,7 +24,6 @@ namespace clef {
    //atomic compilation elements
    struct Token;
    struct astNode;
-      struct Keyword;
       struct Identifier;
          struct Variable;
          struct Function;

@@ -5,9 +5,9 @@
 // #include "CLEF.hpp"
 #include "CLEF_DEFINES.hpp"
 #include <utility>
-#include <bit>
+// #include <bit>
 
-#include <assert.hpp>
+#include "assert.hpp"
 
 namespace clef {
    //!enum of CLEF error codes
@@ -44,11 +44,10 @@ namespace clef {
    constexpr auto      operator+(const ErrCode t) noexcept { return std::to_underlying(t); }
    
    //!enum of AST node type codes
-   enum class [[clang::flag_enum]] NodeType : uint8 {
+   enum class NodeType : uint8 {
       ERROR = 0xFF,  //CLEF INTERNAL ERROR
       NONE = 0x00,   //to-be determined
 
-      KEYWORD,
       IDEN,
          VAR,
          FUNC,
@@ -793,7 +792,6 @@ namespace clef {
       SINT128,
       SINT256,
 
-      FLOAT,
       FLOAT16,
       FLOAT32,
       FLOAT64,

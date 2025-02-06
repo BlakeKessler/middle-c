@@ -36,6 +36,8 @@ struct clef::StatementSequence : public mcsl::contig_base<index<Stmt>> {
       auto* emplace(const uint i, auto&&... args) requires mcsl::valid_ctor<Stmt, decltype(args)...> { return _stmts->emplace(i, std::forward<decltype(args)>(args)...); }
       auto* emplace_back(auto&&... args) requires mcsl::valid_ctor<Stmt, decltype(args)...> { return _stmts->emplace_back(std::forward<decltype(args)>(args)...); }
       #pragma endregion dyn_arr
+
+      void printf() const;
 };
 
 #endif //STMT_SEQ_HPP

@@ -50,7 +50,7 @@ struct clef::Expression {
       Expression(KeywordID oplikeKeyword):Expression{toOpID(oplikeKeyword)} {}
       template<operand_t lhs_t>Expression(KeywordID oplikeKeyword, index<lhs_t> operand):Expression{toOpID(oplikeKeyword), operand} {}
       template<operand_t lhs_t, operand_t rhs_t>Expression(KeywordID oplikeKeyword, index<lhs_t> lhs, index<rhs_t> rhs):Expression{toOpID(oplikeKeyword), lhs, rhs} {}
-      Expression(KeywordID funclikeKeyword, index<ArgList> args):Expression{toOpID(funclikeKeyword), NodeType::ARG_LIST, args} {}
+      Expression(KeywordID funclikeKeyword, index<ArgList> args):Expression{toOpID(funclikeKeyword), NodeType::ARG_LIST, +args} {}
 
       Literal* value() const; //evaluate expression
       
@@ -73,6 +73,8 @@ struct clef::Expression {
       template<astNode_t T> void setLHS(index<T> lhs) { setLHS(lhs, T::nodeType()); }
       template<astNode_t T> void setRHS(index<T> rhs) { setRHS(rhs, T::nodeType()); }
       template<astNode_t T> void setExtra(index<T> extra) { setExtra(extra, T::nodeType()); }
+
+      void printf() const;
 };
 
 #endif //EXPR_HPP

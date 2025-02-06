@@ -12,6 +12,8 @@ struct clef::Type : public clef::Identifier {
       static constexpr NodeType nodeType() { return NodeType::TYPE; }
 
       using Identifier::Identifier;
+
+      void printf() const;
 };
 
 #endif //TYPE_HPP

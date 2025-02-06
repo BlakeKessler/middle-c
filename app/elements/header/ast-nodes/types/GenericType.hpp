@@ -12,6 +12,8 @@ struct clef::GenericType : public clef::Type {
       static constexpr NodeType nodeType() { return NodeType::GENERIC; }
 
       using Type::Type;
+
+      void printf() const;
 };
 
 #endif //GENERIC_TYPE_HPP

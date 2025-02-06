@@ -20,6 +20,8 @@ struct clef::Struct : public clef::Type {
 
       index<ObjTypeSpec>& spec() { return _spec; }
       index<const ObjTypeSpec> spec() const { return _spec; }
+
+      void printf() const;
 };
 
 #endif //STRUCT_HPP

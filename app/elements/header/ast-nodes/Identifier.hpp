@@ -30,6 +30,8 @@ struct clef::Identifier {
       inline bool sameScope(const Identifier& other) const { return _scopeName == other._scopeName; }
       inline bool sameName(const Identifier& other) const { return name() == other.name(); }
       bool operator==(const Identifier& other) const;
+
+      void printf() const;
 };
 
 #endif //IDENTIFIER_HPP

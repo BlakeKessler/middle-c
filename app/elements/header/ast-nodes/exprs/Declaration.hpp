@@ -4,6 +4,7 @@
 
 #include "CLEF.hpp"
 #include "ast-nodes/Expression.hpp"
+#include "ast-nodes/Type.hpp"
 
 struct clef::Declaration : public clef::Expression {
    private:
@@ -19,6 +20,8 @@ struct clef::Declaration : public clef::Expression {
       index<const Type> type() const { return _lhs; }
       index<Identifier>& name() { return reinterpret_cast<index<Identifier>&>(_rhs); }
       index<const Identifier> name() const { return _rhs; }
+
+      void printf() const;
 };
 
 #endif //DECL_HPP

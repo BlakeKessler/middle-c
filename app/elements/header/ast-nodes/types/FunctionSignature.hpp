@@ -19,6 +19,8 @@ struct clef::FunctionSignature : public clef::Type {
       index<const Type> returnType() const { return _returnType; }
       index<ParamList>& params() { return _paramTypes; }
       index<const ParamList> params() const { return _paramTypes; }
+
+      void printf() const;
 };
 
 #endif //FUNC_SIG_HPP

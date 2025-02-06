@@ -11,6 +11,8 @@ struct clef::VariadicParameter : public clef::Type {
    public:
       static constexpr NodeType nodeType() { return NodeType::VAR_PARAM; }
       using Type::Type;
+
+      void printf() const;
 };
 
 #endif //VAR_PARAM_HPP

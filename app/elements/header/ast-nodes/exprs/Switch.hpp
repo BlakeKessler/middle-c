@@ -18,6 +18,8 @@ struct clef::Switch : public clef::Statement {
       index<const Expr> condition() const { return _lhs; }
       index<SwitchCases>& cases() { return reinterpret_cast<index<SwitchCases>&>(_rhs);}
       index<const SwitchCases> cases() const { return _rhs;}
+
+      void printf() const;
 };
 
 #endif //SWITCH_HPP

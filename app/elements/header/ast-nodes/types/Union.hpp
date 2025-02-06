@@ -19,6 +19,8 @@ struct clef::Union : public clef::Type {
 
       index<ParameterList>& members() { return _members; }
       index<const ParameterList> members() const { return _members; }
+
+      void printf() const;
 };
 
 #endif //UNION_HPP

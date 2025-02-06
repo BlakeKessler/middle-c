@@ -50,6 +50,8 @@ struct clef::Literal {
       }
       #pragma endregion constructors
 
+      LitType type() const { return _type; }
+
       [[noreturn]] void throwCastErr(LitType target) const { throwError(ErrCode::BAD_LIT_CAST, "%hhu to %hhu", +_type, +target); }
 
       #pragma region cast
@@ -83,6 +85,8 @@ struct clef::Literal {
             case LitType::TYPEID    : return    _typeid == other._typeid;
          }
       }
+
+      void printf() const;
 };
 
 #endif //LITERAL_HPP

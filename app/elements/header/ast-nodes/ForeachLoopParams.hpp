@@ -19,6 +19,8 @@ struct clef::ForeachLoopParams {
 
       index<const Decl> decl() const { return _decl; }
       index<const Expr> target() const { return _target; }
+
+      void printf() const;
 };
 
 #endif //FOREACH_LOOP_PARAMS_HPP

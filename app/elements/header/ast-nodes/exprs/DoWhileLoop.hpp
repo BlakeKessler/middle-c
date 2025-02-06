@@ -18,6 +18,8 @@ struct clef::DoWhileLoop : public clef::Statement {
       index<const Expr> condition() const { return _lhs; }
       index<Scope>& procedure() { return reinterpret_cast<index<Scope>&>(_rhs); }
       index<const Scope> procedure() const { return _rhs; }
+
+      void printf() const;
 };
 
 #endif //DO_WHILE_HPP

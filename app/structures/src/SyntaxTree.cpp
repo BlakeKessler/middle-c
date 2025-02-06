@@ -81,7 +81,6 @@ clef::index<clef::astNode> clef::SyntaxTree::getValueKeyword(const KeywordID key
 clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode> index) {
    astNode& node = self[index];
    switch (node.nodeType()) {
-      case Keyword::nodeType():
       case Identifier::nodeType():
       case Variable::nodeType():
       case Function::nodeType():
@@ -131,98 +130,6 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
 
 clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode> lhsI, index<astNode> rhsI) {
    return make<Expr>(op, self[lhsI].nodeType(), self[rhsI].nodeType(), lhsI, rhsI);
-   // auto& lhs = self[lhsI];
-   // auto& rhs = self[rhsI];
-   // switch (lhs.nodeType()) {
-   //    case Keyword::nodeType():
-   //    case Identifier::nodeType():
-   //    case Variable::nodeType():
-   //    case Function::nodeType():
-   //    case Type::nodeType():
-   //    case VariadicParameter::nodeType():
-   //    case FundamentalType::nodeType():
-   //    case FunctionSignature::nodeType():
-   //    case Enum::nodeType():
-   //    case Mask::nodeType():
-   //    case Union::nodeType():
-   //    case Namespace::nodeType():
-   //    case Interface::nodeType():
-   //    case Struct::nodeType():
-   //    case Class::nodeType():
-   //    case GenericType::nodeType():
-   //    case Literal::nodeType():
-
-   //    case Expression::nodeType():
-   //    case Declaration::nodeType():
-   //    case Statement::nodeType():
-   //    case ForLoop::nodeType():
-   //    case ForeachLoop::nodeType():
-   //    case WhileLoop::nodeType():
-   //    case DoWhileLoop::nodeType():
-   //    case If::nodeType():
-   //    case Switch::nodeType():
-   //    case Match::nodeType():
-   //    case TryCatch::nodeType():
-   //    case Asm::nodeType():
-
-   //       switch (rhs.nodeType()) {
-   //          case Keyword::nodeType():
-   //          case Identifier::nodeType():
-   //          case Variable::nodeType():
-   //          case Function::nodeType():
-   //          case Type::nodeType():
-   //          case VariadicParameter::nodeType():
-   //          case FundamentalType::nodeType():
-   //          case FunctionSignature::nodeType():
-   //          case Enum::nodeType():
-   //          case Mask::nodeType():
-   //          case Union::nodeType():
-   //          case Namespace::nodeType():
-   //          case Interface::nodeType():
-   //          case Struct::nodeType():
-   //          case Class::nodeType():
-   //          case GenericType::nodeType():
-   //          case Literal::nodeType():
-
-   //          case Expression::nodeType():
-   //          case Declaration::nodeType():
-   //          case Statement::nodeType():
-   //          case ForLoop::nodeType():
-   //          case ForeachLoop::nodeType():
-   //          case WhileLoop::nodeType():
-   //          case DoWhileLoop::nodeType():
-   //          case If::nodeType():
-   //          case Switch::nodeType():
-   //          case Match::nodeType():
-   //          case TryCatch::nodeType():
-   //          case Asm::nodeType():
-   //          case NodeType::NONE:
-   //          case NodeType::ERROR:
-   //             return make<Expr>(op, lhs.nodeType(), lhs.nodeType(), +lhsI, +rhsI);
-
-   //          case Scope::nodeType():
-   //          case ForLoopParams::nodeType():
-   //          case ForeachLoopParams::nodeType():
-   //          case SwitchCases::nodeType():
-   //          case MatchCases::nodeType():
-   //          case StatementSequence::nodeType():
-   //          case ArgumentList::nodeType():
-   //          case ParameterList::nodeType():
-   //             UNREACHABLE;
-   //       }
-
-   //    case Scope::nodeType():
-   //    case ForLoopParams::nodeType():
-   //    case ForeachLoopParams::nodeType():
-   //    case SwitchCases::nodeType():
-   //    case MatchCases::nodeType():
-   //    case StatementSequence::nodeType():
-   //    case ArgumentList::nodeType():
-   //    case ParameterList::nodeType():
-   //    case NodeType::NONE:
-   //    case NodeType::ERROR:
-   //       UNREACHABLE;
-   // }
 }
 
 
@@ -233,7 +140,6 @@ void clef::SyntaxTree::print() const {
    }
    std::printf("\n");
 }
-
 void clef::SyntaxTree::printf() const {
    std::printf("HEY YOU! PROGRAMMING THIS! MAKE THIS ACTUALLY FORMATTED!\n");
    print();

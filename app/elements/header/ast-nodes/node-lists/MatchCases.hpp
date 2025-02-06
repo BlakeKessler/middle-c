@@ -38,6 +38,8 @@ struct clef::MatchCases : public mcsl::contig_base<mcsl::pair<index<Expr>, index
       auto* emplace(const uint i, auto&&... args) requires mcsl::valid_ctor<mcsl::pair<index<Expr>, index<Scope>>, decltype(args)...> { return _cases->emplace(i, std::forward<decltype(args)>(args)...); }
       auto* emplace_back(auto&&... args) requires mcsl::valid_ctor<mcsl::pair<index<Expr>, index<Scope>>, decltype(args)...> { return _cases->emplace_back(std::forward<decltype(args)>(args)...); }
       #pragma endregion dyn_arr
+
+      void printf() const;
 };
 
 #endif //MATCH_CASES_HPP

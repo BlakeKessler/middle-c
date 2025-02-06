@@ -17,6 +17,8 @@ struct clef::FundamentalType : public clef::Type {
 
       FundTypeID& id() { return _id; }
       FundTypeID id() const { return _id; }
+
+      void printf() const;
 };
 
 #endif //FUND_TYPE_HPP
