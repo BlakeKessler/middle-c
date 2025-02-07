@@ -20,9 +20,12 @@ namespace clef {
 
 //!CLEF formatted error thrower
 [[noreturn, gnu::format(printf,2,3)]] void clef::throwError(const clef::ErrCode code, const char* formatStr, auto&&... args) {
+   std::printf("\n");
+   std::fflush(stdout);
    std::fprintf(stderr, "\033[31;1;4mCLEF ERROR:\033[0m %s", ERR_MSG_ARR[+code]);
    std::fprintf(stderr, formatStr, args...);
    std::fprintf(stderr, "\n");
+   std::fflush(stderr);
    #ifdef NDEBUG
       std::exit(EXIT_FAILURE);
    #else
@@ -31,9 +34,12 @@ namespace clef {
 }
 //!CLEF formatted error thrower with line num
 [[noreturn, gnu::format(printf,3,4)]] void clef::throwError(const clef::ErrCode code, const uint lineNum, const char* formatStr, auto&&... args) {
+   std::printf("\n");
+   std::fflush(stdout);
    std::fprintf(stderr, "\033[31;1;4mCLEF ERROR:\033[0m %s", ERR_MSG_ARR[+code]);
    std::fprintf(stderr, formatStr, args...);
    std::fprintf(stderr, " \033[35m(line %u)\033[0m\n", lineNum);
+   std::fflush(stderr);
    #ifdef NDEBUG
       std::exit(EXIT_FAILURE);
    #else

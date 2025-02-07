@@ -113,8 +113,7 @@ clef::index<clef::Function> clef::Parser::parseFuncDecl(index<Identifier> scopeN
 }
 
 clef::index<clef::Variable> clef::Parser::parseVariable(index<Identifier> scopeName) {
-   index<Decl> decl = parseDecl(scopeName);
-   index<Variable> var = tree.remake<Variable>(tree[decl].name(), tree[decl].type(), tree[tree[decl].name()]);
+   auto [var, decl] = parseVarDecl(scopeName);
    if (tryConsumeEOS()) { //forward declaration
       return var;
    }
@@ -142,28 +141,7 @@ clef::index<clef::Variable> clef::Parser::parseVariable(index<Identifier> scopeN
 mcsl::pair<clef::index<clef::Variable>,clef::index<clef::Decl>> clef::Parser::parseVarDecl(index<Identifier> scopeName) {
    index<Decl> decl = parseDecl(scopeName);
    index<Variable> var = tree.remake<Variable>(tree[decl].name(), tree[decl].type(), tree[tree[decl].name()]);
-   if (tryConsumeEOS()) {
-      return {var,decl};
-   }
-   else if (tryConsumeOperator(OpID::ASSIGN)) {
-      tree[var].val() = parseExpr();
-      return {var,decl};
-   }
-   else if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN)) {
-      index<ArgList> args = parseArgList(BlockType::INIT_LIST);
-      index<Expr> invoke = tree.make<Expr>(OpID::LIST_INVOKE, tree[decl].type(), args);
-      tree[var].val() = invoke;
-      return {var,decl};
-   }
-   else if (tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN)) {
-      index<ArgList> args = parseArgList(BlockType::CALL);
-      index<Expr> invoke = tree.make<Expr>(OpID::CALL_INVOKE, tree[decl].type(), args);
-      tree[var].val() = invoke;
-      return {var,decl};
-   }
-   else {
-      logError(ErrCode::BAD_DECL, "bad variable definition");
-   }
+   return {var,decl};
 }
 
 
@@ -189,7 +167,7 @@ clef::index<clef::ParamList> clef::Parser::parseParamList(const BlockType closer
       return args;
    }
    do {
-      tree[args].push_back(parseVariable());
+      tree[args].push_back(parseVarDecl().first);
       if (tryConsumeOperator(OpID::COMMA)) {
          continue;
       }

@@ -13,7 +13,6 @@ struct clef::Variable : public clef::Identifier {
       static constexpr NodeType nodeType() { return NodeType::VAR; }
 
       Variable(index<Type> type = {}, Identifier name = {}, index<Expr> val = {}):Identifier{name},_type{type},_val{val} {}
-      // Variable(Type* type = {}, Identifier* name = {}, Expr* val = {}):Identifier{name?*name:Identifier{}},_type{type},_val{val} {}
 
       index<Type>& type() { return _type; }
       index<const Type> type() const { return _type; }

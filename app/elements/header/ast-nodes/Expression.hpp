@@ -52,7 +52,7 @@ struct clef::Expression {
       template<operand_t lhs_t, operand_t rhs_t>Expression(KeywordID oplikeKeyword, index<lhs_t> lhs, index<rhs_t> rhs):Expression{toOpID(oplikeKeyword), lhs, rhs} {}
       Expression(KeywordID funclikeKeyword, index<ArgList> args):Expression{toOpID(funclikeKeyword), NodeType::ARG_LIST, +args} {}
 
-      Literal* value() const; //evaluate expression
+      index<Literal> value() const; //evaluate expression
       
       OpID opID() const { return _op; }
       NodeType lhsType() const { return _lhsType; }

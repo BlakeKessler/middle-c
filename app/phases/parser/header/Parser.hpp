@@ -107,6 +107,7 @@ class clef::Parser {
 #pragma GCC diagnostic ignored "-Wformat-security"
 void clef::Parser::logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, auto&&... args) {
    _errno = code;
+   tokIt->printf();
    clef::throwError(code, formatStr, std::forward<decltype(args)>(args)...);
 }
 #pragma GCC diagnostic pop

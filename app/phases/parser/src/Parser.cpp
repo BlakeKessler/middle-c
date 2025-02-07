@@ -307,7 +307,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
    if (operandStack.size() != 1) {
       std::printf("%u excess operand(s)\n", operandStack.size() - 1);
       for (uint i = 0; i < operandStack.size(); ++i) { //!NOTE: this is for debugging - don't forget to remove
-         tree[operandStack[i]].print();
+         tree[operandStack[i]].printf();
          std::printf("\n");
          std::fflush(stdout);
       }
