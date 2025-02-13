@@ -5,8 +5,8 @@
 
 #include "dyn_arr.hpp"
 
-clef::SyntaxTree clef::Parser::parse(const SourceTokens& src) {
-   Parser parser{src};
+clef::SyntaxTree clef::Parser::parse(const SourceTokens& src, SyntaxTree& tree) {
+   Parser parser{src, tree};
    while (parser.tokIt < parser.endtok) {
       parser.parseStmt();
    }
@@ -91,10 +91,9 @@ START_PARSE_STMT:
 
             case KeywordID::BREAK         : [[fallthrough]];
             case KeywordID::CONTINUE      : {
-               const KeywordID kw = tokIt->keywordID();
                ++tokIt;
                consumeEOS("bad nullary keyword (BREAK or CONTINUE)");
-               return tree.make<Stmt>(kw);
+               return tree.make<Stmt>(KeywordID::CONTINUE);
             }
 
             case KeywordID::THROW         : [[fallthrough]];
@@ -102,11 +101,10 @@ START_PARSE_STMT:
             case KeywordID::DEBUG_ASSERT  : [[fallthrough]];
             case KeywordID::STATIC_ASSERT : [[fallthrough]];
             case KeywordID::RETURN        : {
-               const KeywordID kw = tokIt->keywordID();
                ++tokIt;
                index<Expr> expr = parseExpr();
                consumeEOS("bad unary keyword (THROW, ASSERT, STATIC_ASSERT, or RETURN)");
-               return tree.make<Stmt>(kw, expr);
+               return tree.make<Stmt>(KeywordID::RETURN, expr);
             }
 
             case KeywordID::USING         : {

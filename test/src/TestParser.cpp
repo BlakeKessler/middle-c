@@ -27,7 +27,8 @@ int main(const int argc, char** argv) {
    std::printf("\n%s",BIG_HEADER);
 
    //abstract syntax tree
-   clef::SyntaxTree tree = clef::Parser::parse(tokens);
+   clef::SyntaxTree tree{};
+   clef::Parser::parse(tokens, tree);
    std::printf("\033[1mAbstract Syntax Tree:\033[22m\n%s", SMALL_HEADER);
    tree.printf();
    std::printf("\n%s\n", BIG_HEADER);

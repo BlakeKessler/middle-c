@@ -14,7 +14,7 @@
 class clef::Parser {
    private:
       //data members
-      SyntaxTree tree;
+      SyntaxTree& tree;
       const SourceTokens& src;
       const Token* tokIt;
       const Token* endtok;
@@ -91,14 +91,14 @@ class clef::Parser {
       void logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, auto&&... args);
       
       //constructors
-      Parser(const SourceTokens& s):tree{},src{s},tokIt{s.begin()},endtok{s.end()},_errno{} {}
+      Parser(const SourceTokens& s, SyntaxTree& t):tree{t},src{s},tokIt{s.begin()},endtok{s.end()},_errno{} {}
       
       static constexpr const mcsl::raw_str _nameof = "Parser";
    public:
       static constexpr const auto& nameof() { return _nameof; }
 
       //parse tokenized source code
-      static SyntaxTree parse(const SourceTokens& src);
+      static SyntaxTree parse(const SourceTokens& src, SyntaxTree& tree);
 };
 
 

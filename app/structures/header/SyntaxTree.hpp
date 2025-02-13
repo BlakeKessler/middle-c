@@ -21,7 +21,18 @@ class clef::SyntaxTree {
    public:
       SyntaxTree():_buf{},_ifaceSpecBuf{},_nsSpecBuf{},_objSpecBuf{},_alloc{} { _buf.emplace_back(NodeType::ERROR); }
       SyntaxTree(const SyntaxTree& other):_buf{other._buf},_ifaceSpecBuf{other._ifaceSpecBuf},_nsSpecBuf{},_objSpecBuf{},_alloc{other._alloc} {}
-      SyntaxTree(SyntaxTree&& other);
+      SyntaxTree(SyntaxTree&& other):
+         _buf{std::move(other._buf)},
+         _ifaceSpecBuf{std::move(other._ifaceSpecBuf)},
+         _nsSpecBuf{std::move(other._nsSpecBuf)},
+         _objSpecBuf{std::move(other._objSpecBuf)},
+         _alloc{std::move(other._alloc)} {
+            if (this != &other) {
+               other.release();
+            }
+      }
+      
+      inline void release();
 
       index<FundType> getFundType(const KeywordID fundTypeKeyword);
       index<astNode> getValueKeyword(const KeywordID valueKeyword);
@@ -65,6 +76,14 @@ class clef::SyntaxTree {
 };
 
 #pragma region inlinesrc
+
+inline void clef::SyntaxTree::release() {
+   _buf.release();
+   _ifaceSpecBuf.release();
+   _nsSpecBuf.release();
+   _objSpecBuf.release();
+   _alloc.release();
+}
 
 template<clef::astNode_ptr_t asT, clef::astNode_ptr_t T = asT, typename... Argv_t> asT clef::SyntaxTree::make(Argv_t... argv) requires mcsl::valid_ctor<mcsl::remove_ptr<T>, Argv_t...> {
    astNode* tmp = _buf.emplace_back(std::move(mcsl::remove_ptr<T>{std::forward<Argv_t>(argv)...}));

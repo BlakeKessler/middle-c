@@ -18,12 +18,13 @@ class clef::allocator {
       static allocator* active;
       
       allocator():_bufBuf{} {}
-      allocator(allocator&& other):_bufBuf{std::move(other._bufBuf)} { other._bufBuf.release(); }
+      allocator(allocator&& other):_bufBuf{std::move(other._bufBuf)} { if (this != &other) { other._bufBuf.release(); } }
       inline allocator(const allocator& other);
 
       inline allocator& merge(allocator&& other);
 
       inline void free() { _bufBuf.free(); }
+      inline void release() { _bufBuf.release(); }
 
       template<typename T> mcsl::dyn_arr<T>& at(const index<T>);
 
