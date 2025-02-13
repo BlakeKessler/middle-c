@@ -12,7 +12,7 @@ struct clef::StatementSequence : public mcsl::contig_base<index<Stmt>> {
    public:
       static constexpr NodeType nodeType() { return NodeType::STMT_SEQ; }
 
-      StatementSequence(mcsl::dyn_arr<index<Stmt>>& stmts):_stmts{&stmts} {}
+      StatementSequence(mcsl::dyn_arr<index<Stmt>>* stmts):_stmts{stmts} {}
 
 
       #pragma region dyn_arr

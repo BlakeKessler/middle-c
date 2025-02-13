@@ -19,8 +19,8 @@ class clef::SyntaxTree {
 
       allocator _alloc;
    public:
-      SyntaxTree():/*_names{},*/_buf{astNode{NodeType::ERROR}/*makes null indexes act like null pointers*/},_alloc{} {}
-      SyntaxTree(const SyntaxTree& other):/*_names{other._names},*/_buf{other._buf},_ifaceSpecBuf{other._ifaceSpecBuf},_alloc{other._alloc} {}
+      SyntaxTree():_buf{},_ifaceSpecBuf{},_nsSpecBuf{},_objSpecBuf{},_alloc{} { _buf.emplace_back(NodeType::ERROR); }
+      SyntaxTree(const SyntaxTree& other):_buf{other._buf},_ifaceSpecBuf{other._ifaceSpecBuf},_nsSpecBuf{},_objSpecBuf{},_alloc{other._alloc} {}
       SyntaxTree(SyntaxTree&& other);
 
       index<FundType> getFundType(const KeywordID fundTypeKeyword);
@@ -49,10 +49,10 @@ class clef::SyntaxTree {
 
 
       template<astNode_ptr_t asT, astNode_ptr_t T, typename... Argv_t> asT make(Argv_t... argv) requires mcsl::valid_ctor<mcsl::remove_ptr<T>, Argv_t...>;
-      template<astNode_t asT, astNode_t T = asT, typename... Argv_t> index<asT> make(Argv_t... argv) requires mcsl::valid_ctor<T, Argv_t...> { return (index<asT>)((astNode*)(make<asT*,T*>(argv...)) - _buf.begin()); }
+      template<astNode_t asT, astNode_t T = asT, typename... Argv_t> index<asT> make(Argv_t... argv) requires mcsl::valid_ctor<T, Argv_t...> { index<asT> index = _buf.size(); make<asT*,T*>(std::forward<Argv_t>(argv)...); return index; }
 
       template<astNode_ptr_t newT, astNode_t oldT, typename... Argv_t> newT remake(index<oldT> i, Argv_t... argv) requires mcsl::is_t<mcsl::remove_ptr<newT>, mcsl::remove_ptr<oldT>> && mcsl::valid_ctor<mcsl::remove_ptr<newT>, Argv_t...>;
-      template<astNode_t newT, astNode_t oldT, typename... Argv_t> index<newT> remake(index<oldT> i, Argv_t... argv) requires mcsl::is_t<newT, oldT> && mcsl::valid_ctor<newT, Argv_t...> { return (index<newT>)((astNode*)remake<newT*>(i, std::forward<Argv_t>(argv)...) - _buf.begin()); }
+      template<astNode_t newT, astNode_t oldT, typename... Argv_t> index<newT> remake(index<oldT> i, Argv_t... argv) requires mcsl::is_t<newT, oldT> && mcsl::valid_ctor<newT, Argv_t...> { remake<newT*>(i, std::forward<Argv_t>(argv)...); return +i; }
       
       index<Expr> makeExpr(const OpID, index<astNode>);
       index<Expr> makeExpr(const OpID, index<astNode>, index<astNode>);
@@ -67,7 +67,7 @@ class clef::SyntaxTree {
 #pragma region inlinesrc
 
 template<clef::astNode_ptr_t asT, clef::astNode_ptr_t T = asT, typename... Argv_t> asT clef::SyntaxTree::make(Argv_t... argv) requires mcsl::valid_ctor<mcsl::remove_ptr<T>, Argv_t...> {
-   astNode* tmp = _buf.emplace_back(mcsl::remove_ptr<T>{argv...});
+   astNode* tmp = _buf.emplace_back(std::move(mcsl::remove_ptr<T>{std::forward<Argv_t>(argv)...}));
    if constexpr (!mcsl::is_t<mcsl::remove_ptr<asT>, mcsl::remove_ptr<T>>) {
       tmp->anyCast(mcsl::remove_ptr<asT>::nodeType());
    }
@@ -75,8 +75,8 @@ template<clef::astNode_ptr_t asT, clef::astNode_ptr_t T = asT, typename... Argv_
 }
 
 template<clef::astNode_ptr_t newT, clef::astNode_t oldT, typename... Argv_t> newT clef::SyntaxTree::remake(index<oldT> i, Argv_t... argv) requires mcsl::is_t<mcsl::remove_ptr<newT>, mcsl::remove_ptr<oldT>> && mcsl::valid_ctor<mcsl::remove_ptr<newT>, Argv_t...> {
-   debug_assert(i);
-   astNode* tmp = _buf.emplace(i, mcsl::remove_ptr<newT>{argv...});
+   safe_mode_assert(i);
+   astNode* tmp = _buf.emplace(i, std::move(mcsl::remove_ptr<newT>{std::forward<Argv_t>(argv)...}));
    if constexpr (!mcsl::same_t<mcsl::remove_ptr<oldT>, mcsl::remove_ptr<newT>>) {
       tmp->anyCast(mcsl::remove_ptr<newT>::nodeType());
    }

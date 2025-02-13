@@ -108,6 +108,7 @@ class clef::Parser {
 void clef::Parser::logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, auto&&... args) {
    _errno = code;
    tokIt->printf();
+   tree.printf();
    clef::throwError(code, formatStr, std::forward<decltype(args)>(args)...);
 }
 #pragma GCC diagnostic pop

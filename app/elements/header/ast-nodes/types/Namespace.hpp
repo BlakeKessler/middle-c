@@ -15,8 +15,8 @@ struct clef::Namespace : public clef::Type {
 
       Namespace():Type{},_spec{} {}
       Namespace(index<NamespaceSpec> spec):Type{},_spec{spec} {}
-      Namespace(index<NamespaceSpec> spec, Type& name):Type{name},_spec{spec} {}
-      Namespace(Type& name):Type{name},_spec{} {}
+      Namespace(index<NamespaceSpec> spec, const Type& name):Type{name},_spec{spec} {}
+      Namespace(const Type& name):Type{name},_spec{} {}
 
       index<NamespaceSpec>& spec() { return _spec; }
       index<const NamespaceSpec> spec() const { return _spec; }

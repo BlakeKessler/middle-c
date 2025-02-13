@@ -400,8 +400,8 @@ clef::index<clef::Switch> clef::Parser::parseSwitch() {
 
    //procedure
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad SWITCH block");
-   index<Scope> procedure = tree.make<Scope>(tree.allocBuf<index<Stmt>>());
-   index<SwitchCases> cases = tree.make<SwitchCases>(tree.allocBuf<mcsl::pair<index<Expr>, index<Stmt>>>(), procedure);
+   index<Scope> procedure = tree.make<Scope>(&tree.allocBuf<index<Stmt>>());
+   index<SwitchCases> cases = tree.make<SwitchCases>(&tree.allocBuf<mcsl::pair<index<Expr>, index<Stmt>>>(), procedure);
 
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       if (tryConsumeKeyword(KeywordID::CASE)) { //CASE
@@ -420,7 +420,8 @@ clef::index<clef::Switch> clef::Parser::parseSwitch() {
          tree[cases].push_back({0, firstStmt});
 
       } else { //standard statement
-         tree[procedure].push_back(parseStmt());
+         index<Stmt> tmp = parseStmt();
+         tree[procedure].push_back(tmp);
       }
    }
 
@@ -439,7 +440,7 @@ clef::index<clef::Match> clef::Parser::parseMatch() {
 
    //procedure
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad MATCH block");
-   index<MatchCases> cases = tree.make<MatchCases>(tree.allocBuf<mcsl::pair<index<Expr>, index<Scope>>>());
+   index<MatchCases> cases = tree.make<MatchCases>(&tree.allocBuf<mcsl::pair<index<Expr>, index<Scope>>>());
 
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       index<Expr> caseExpr;
@@ -483,7 +484,7 @@ clef::index<clef::Function> clef::Parser::parseFunction() {
 
    //return type
    consumeOperator(OpID::MEMBER_OF_POINTER_ACCESS, "FUNC without trailing return type");
-   TypeQualMask returnTypeQuals = parseQuals();
+   // TypeQualMask returnTypeQuals = parseQuals();
    index<Type> returnType = parseTypename();
 
    //make signature

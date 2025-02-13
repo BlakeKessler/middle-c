@@ -64,19 +64,19 @@
 
 
 clef::index<clef::Scope> clef::Parser::parseProcedure() {
-   index<Scope> scope = tree.make<Scope>(tree.allocBuf<index<Stmt>>());
+   index<Scope> scope = tree.make<Scope>(&tree.allocBuf<index<Stmt>>());
 
    while (tokIt < endtok) {
       if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
          return scope;
       }
-      tree[scope].push_back(parseStmt());
+      index<Stmt> tmp = parseStmt();
+      tree[scope].push_back(tmp);
    }
 
    //reached end of source without finding closing token
    logError(ErrCode::UNCLOSED_BLOCK, "unclosed procedure block");
 }
-
 
 
 clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName) {
@@ -118,7 +118,8 @@ clef::index<clef::Variable> clef::Parser::parseVariable(index<Identifier> scopeN
       return var;
    }
    else if (tryConsumeOperator(OpID::ASSIGN)) {
-      tree[var].val() = parseExpr();
+      auto tmp = parseExpr();
+      tree[var].val() = tmp;
       return var;
    }
    else if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN)) {
@@ -147,12 +148,13 @@ mcsl::pair<clef::index<clef::Variable>,clef::index<clef::Decl>> clef::Parser::pa
 
 
 clef::index<clef::ArgList> clef::Parser::parseArgList(const BlockType closer) {
-   index<ArgList> args = tree.make<ArgList>(tree.allocBuf<index<Expr>>());
+   index<ArgList> args = tree.make<ArgList>(&tree.allocBuf<index<Expr>>());
    if (tryConsumeBlockDelim(closer, BlockDelimRole::CLOSE)) {
       return args;
    }
    do {
-      tree[args].push_back(parseExpr());
+      auto tmp = parseExpr();
+      tree[args].push_back(tmp);
       if (tryConsumeOperator(OpID::COMMA)) {
          continue;
       }
@@ -162,7 +164,7 @@ clef::index<clef::ArgList> clef::Parser::parseArgList(const BlockType closer) {
    return args;
 }
 clef::index<clef::ParamList> clef::Parser::parseParamList(const BlockType closer) {
-   index<ParamList> args = tree.make<ParamList>(tree.allocBuf<index<Variable>>());
+   index<ParamList> args = tree.make<ParamList>(&tree.allocBuf<index<Variable>>());
    if (tryConsumeBlockDelim(closer, BlockDelimRole::CLOSE)) {
       return args;
    }

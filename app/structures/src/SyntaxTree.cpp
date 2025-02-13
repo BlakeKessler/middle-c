@@ -141,8 +141,11 @@ void clef::SyntaxTree::print() const {
    std::printf("\n");
 }
 void clef::SyntaxTree::printf() const {
-   std::printf("HEY YOU! PROGRAMMING THIS! MAKE THIS ACTUALLY FORMATTED!\n");
-   print();
+   for (uint i = 1; i < _buf.size(); ++i) {
+      std::printf("\n\t%u: ", i);
+      _buf[i].printf();
+   }
+   std::printf("\n");
 }
 
 #endif //SYNTAX_TREE_CPP

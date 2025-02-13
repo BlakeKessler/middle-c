@@ -25,7 +25,7 @@ template<typename T> mcsl::dyn_arr<T>& clef::allocator::at(const index<T> i) {
 
 template<typename T> clef::index<T> clef::allocator::alloc() {
    index<T> i = _bufBuf.size();
-   _bufBuf.push_back(mcsl::dyn_arr<ubyte>{});
+   _bufBuf.emplace_back();
    return i;
 }
 

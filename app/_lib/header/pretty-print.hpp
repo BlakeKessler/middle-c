@@ -60,7 +60,7 @@ constexpr const char* clef::toString(const NodeType type) {
       CASE(MATCH, "MATCH");
       CASE(ASM, "ASM");
       CASE(TRY_CATCH, "TRY_CATCH");
-      CASE(FOR_LOOP_PARAMS, "FOR_LOOP_PARAMS");
+      CASE(FOR_LOOP_PARAMS_, "FOR_LOOP_PARAMS");
       CASE(FOREACH_LOOP_PARAMS, "FOREACH_LOOP_PARAMS");
       CASE(SWITCH_CASES, "SWITCH_CASES");
       CASE(MATCH_CASES, "MATCH_CASES");
@@ -68,6 +68,7 @@ constexpr const char* clef::toString(const NodeType type) {
       CASE(ARG_LIST, "ARGUMENT_LIST");
       CASE(PARAM_LIST, "PARAMETER_LIST");
    }
+   UNREACHABLE;
 }
 
 constexpr const char* clef::toString(const TokenType type) {
@@ -90,6 +91,7 @@ constexpr const char* clef::toString(const TokenType type) {
 
       case __OPLIKE: UNREACHABLE;
    }
+   UNREACHABLE;
 }
 
 constexpr const char* clef::toString(const OpID op) {
@@ -229,6 +231,7 @@ constexpr const char* clef::toString(const OpID op) {
 
       CASE(DECL, "DECLARATION");
    }
+   UNREACHABLE;
 }
 
 #pragma region oppropcase
@@ -267,6 +270,7 @@ constexpr const char* clef::toString(const OpProps props) {
 
       default: UNREACHABLE;
    }
+   UNREACHABLE;
 }
 #pragma GCC diagnostic pop
 #undef OP_PROP_CASE
@@ -411,6 +415,7 @@ constexpr const char* clef::toString(const KeywordID kw) {
 
       default: UNREACHABLE;
    }
+   UNREACHABLE;
 }
 
 constexpr const char* clef::toString(const BlockType type) {
@@ -432,6 +437,7 @@ constexpr const char* clef::toString(const BlockType type) {
       CASE(COMMENT_BLOCK, "BLOCK_COMMENT");
       CASE(COMMENT_LINE, "LINE_COMMENT");
    }
+   UNREACHABLE;
 }
 
 constexpr const char* clef::toString(const BlockDelimRole role) {
@@ -442,6 +448,7 @@ constexpr const char* clef::toString(const BlockDelimRole role) {
       CASE(CLOSE, "CLOSE");
       CASE(BOTH, "BOTH");
    }
+   UNREACHABLE;
 }
 
 constexpr const char* clef::toString(const PtxtType type) {
@@ -469,6 +476,7 @@ constexpr const char* clef::toString(const PtxtType type) {
 
       case __STR_TYPE: UNREACHABLE;
    }
+   UNREACHABLE;
 }
 
 constexpr const char* clef::toString(const LitType type) {
@@ -490,6 +498,7 @@ constexpr const char* clef::toString(const LitType type) {
 
       CASE(TYPEID, "TYPEID");
    }
+   UNREACHABLE;
 }
 
 constexpr const char* clef::toString(const FundTypeID type) {
@@ -528,6 +537,7 @@ constexpr const char* clef::toString(const FundTypeID type) {
       CASE(FLOAT128, "FLOAT128");
       CASE(FLOAT256, "FLOAT256");
    }
+   UNREACHABLE;
 }
 
 #undef CASE

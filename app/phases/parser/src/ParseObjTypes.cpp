@@ -25,20 +25,21 @@ clef::index<clef::Class> clef::Parser::parseClass() {
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       if (tokIt->type() == TokenType::KEYWORD) {
          switch (tokIt->keywordID()) {
-            case KeywordID::CLASS    : ++tokIt; tree[spec].memberTypes().push_back(parseClass()); break;
-            case KeywordID::STRUCT   : ++tokIt; tree[spec].memberTypes().push_back(parseStruct()); break;
-            case KeywordID::INTERFACE: ++tokIt; tree[spec].memberTypes().push_back(parseInterface()); break;
-            case KeywordID::UNION    : ++tokIt; tree[spec].memberTypes().push_back(parseUnion()); break;
-            case KeywordID::ENUM     : ++tokIt; tree[spec].memberTypes().push_back(parseEnum()); break;
-            case KeywordID::MASK     : ++tokIt; tree[spec].memberTypes().push_back(parseMask()); break;
-            case KeywordID::NAMESPACE: ++tokIt; tree[spec].memberTypes().push_back(parseNamespace()); break;
-            case KeywordID::FUNC     : ++tokIt; tree[spec].methods().push_back(parseFunction()); break; //!TODO: does not account for static functions
+            case KeywordID::CLASS    : ++tokIt; {auto tmp = parseClass(); tree[spec].memberTypes().push_back(tmp);} break;
+            case KeywordID::STRUCT   : ++tokIt; {auto tmp = parseStruct(); tree[spec].memberTypes().push_back(tmp);} break;
+            case KeywordID::INTERFACE: ++tokIt; {auto tmp = parseInterface(); tree[spec].memberTypes().push_back(tmp);} break;
+            case KeywordID::UNION    : ++tokIt; {auto tmp = parseUnion(); tree[spec].memberTypes().push_back(tmp);} break;
+            case KeywordID::ENUM     : ++tokIt; {auto tmp = parseEnum(); tree[spec].memberTypes().push_back(tmp);} break;
+            case KeywordID::MASK     : ++tokIt; {auto tmp = parseMask(); tree[spec].memberTypes().push_back(tmp);} break;
+            case KeywordID::NAMESPACE: ++tokIt; {auto tmp = parseNamespace(); tree[spec].memberTypes().push_back(tmp);} break;
+            case KeywordID::FUNC     : ++tokIt; {auto tmp = parseFunction(); tree[spec].methods().push_back(tmp);} break; //!TODO: does not account for static functions
             default: goto MEMB_VAR_DECL;
          }
          continue;
       }
       MEMB_VAR_DECL:
-      tree[spec].members().push_back(parseVariable()); //!TODO: does not yet account for static functions
+      auto tmp = parseVariable();
+      tree[spec].members().push_back(tmp); //!TODO: does not yet account for static functions
    }
 
    //EOS
@@ -75,14 +76,14 @@ clef::index<clef::Interface> clef::Parser::parseInterface() {
    //definition
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad INTERFACE definition");
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
-      TypeQualMask quals = parseQuals();
+      // TypeQualMask quals = parseQuals();
       consumeKeyword(KeywordID::FUNC, "INTERFACE can only contain functions");
       index<Function> func = parseFunction();
-      if (+(quals & TypeQualMask::STATIC)) {
-         tree[spec].staticFuncs().push_back(func);
-      } else {
+      // if (+(quals & TypeQualMask::STATIC)) {
+      //    tree[spec].staticFuncs().push_back(func);
+      // } else {
          tree[spec].methods().push_back(func);
-      }
+      // }
    }
 
    //EOS
@@ -104,7 +105,7 @@ clef::index<clef::Union> clef::Parser::parseUnion() {
 
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad UNION definition");
 
-   index<ParameterList> members = tree.make<ParameterList>(tree.allocBuf<index<Variable>>());
+   index<ParameterList> members = tree.make<ParameterList>(&tree.allocBuf<index<Variable>>());
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       //parse member
       index<Type> memberType = parseTypename();
@@ -135,11 +136,11 @@ clef::index<clef::Enum> clef::Parser::parseEnum() {
       if (!name) {
          logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous ENUM");
       }
-      return tree.remake<Enum>(name, tree[(index<Type>)name], baseType, tree.make<ParamList>(tree.allocBuf<index<Variable>>()));
+      return tree.remake<Enum>(name, tree[(index<Type>)name], baseType, tree.make<ParamList>(&tree.allocBuf<index<Variable>>()));
    }
 
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad ENUM definition");
-   index<ParamList> enumerators = tree.make<ParamList>(tree.allocBuf<index<Variable>>());
+   index<ParamList> enumerators = tree.make<ParamList>(&tree.allocBuf<index<Variable>>());
    if (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       do {
          index<Identifier> enumerator = parseIdentifier();
@@ -181,20 +182,21 @@ clef::index<clef::Namespace> clef::Parser::parseNamespace() {
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       if (tokIt->type() == TokenType::KEYWORD) {
          switch (tokIt->keywordID()) {
-            case KeywordID::CLASS    : ++tokIt; tree[spec].types().push_back(parseClass()); break;
-            case KeywordID::STRUCT   : ++tokIt; tree[spec].types().push_back(parseStruct()); break;
-            case KeywordID::INTERFACE: ++tokIt; tree[spec].types().push_back(parseInterface()); break;
-            case KeywordID::UNION    : ++tokIt; tree[spec].types().push_back(parseUnion()); break;
-            case KeywordID::ENUM     : ++tokIt; tree[spec].types().push_back(parseEnum()); break;
-            case KeywordID::MASK     : ++tokIt; tree[spec].types().push_back(parseMask()); break;
-            case KeywordID::NAMESPACE: ++tokIt; tree[spec].types().push_back(parseNamespace()); break;
-            case KeywordID::FUNC     : ++tokIt; tree[spec].funcs().push_back(parseFunction()); break; //!NOTE: does not account for static functions
+            case KeywordID::CLASS    : ++tokIt; {auto tmp = parseClass(); tree[spec].types().push_back(tmp);} break;
+            case KeywordID::STRUCT   : ++tokIt; {auto tmp = parseStruct(); tree[spec].types().push_back(tmp);} break;
+            case KeywordID::INTERFACE: ++tokIt; {auto tmp = parseInterface(); tree[spec].types().push_back(tmp);} break;
+            case KeywordID::UNION    : ++tokIt; {auto tmp = parseUnion(); tree[spec].types().push_back(tmp);} break;
+            case KeywordID::ENUM     : ++tokIt; {auto tmp = parseEnum(); tree[spec].types().push_back(tmp);} break;
+            case KeywordID::MASK     : ++tokIt; {auto tmp = parseMask(); tree[spec].types().push_back(tmp);} break;
+            case KeywordID::NAMESPACE: ++tokIt; {auto tmp = parseNamespace(); tree[spec].types().push_back(tmp);} break;
+            case KeywordID::FUNC     : ++tokIt; {auto tmp = parseFunction(); tree[spec].funcs().push_back(tmp);} break; //!NOTE: does not account for static functions
             default: goto MEMB_VAR_DECL;
          }
          continue;
       }
       MEMB_VAR_DECL:
-      tree[spec].vars().push_back(parseVariable()); //!NOTE: does not yet account for static variables
+      auto tmp = parseVariable();
+      tree[spec].vars().push_back(tmp); //!NOTE: does not yet account for static variables
    }
 
    //EOS

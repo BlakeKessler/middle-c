@@ -12,7 +12,7 @@ struct clef::ForLoop : public clef::Statement {
       static constexpr NodeType nodeType() { return NodeType::FOR_LOOP; }
 
       ForLoop():Statement{} {}
-      ForLoop(index<ForLoopParams> params, index<Scope> procedure):Statement{OpID::FOR,NodeType::FOR_LOOP_PARAMS,NodeType::SCOPE,params,procedure} {}
+      ForLoop(index<ForLoopParams> params, index<Scope> procedure):Statement{OpID::FOR,NodeType::FOR_LOOP_PARAMS_,NodeType::SCOPE,params,procedure} {}
 
       index<ForLoopParams>& params() { return reinterpret_cast<index<ForLoopParams>&>(_lhs); }
       index<const ForLoopParams> params() const { return _lhs; }

@@ -12,7 +12,7 @@ struct clef::ArgumentList : public mcsl::contig_base<index<Expr>> {
    public:
       static constexpr NodeType nodeType() { return NodeType::ARG_LIST; }
 
-      ArgumentList(mcsl::dyn_arr<index<Expr>>& exprs):_exprs{&exprs} {}
+      ArgumentList(mcsl::dyn_arr<index<Expr>>* exprs):_exprs{exprs} {}
 
 
       #pragma region dyn_arr

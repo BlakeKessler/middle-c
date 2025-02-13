@@ -4,6 +4,7 @@
 
 #include "CLEF.hpp"
 
+#include "arr_list.hpp"
 #include "dyn_arr.hpp"
 
 //!allocates and manages dynamic memory blocks
@@ -12,7 +13,7 @@
 //  should probably also make that only active in debug mode for efficiency
 class clef::allocator {
    private:
-      mcsl::dyn_arr<mcsl::dyn_arr<ubyte>> _bufBuf;
+      mcsl::arr_list<mcsl::dyn_arr<ubyte>> _bufBuf;
    public:
       static allocator* active;
       

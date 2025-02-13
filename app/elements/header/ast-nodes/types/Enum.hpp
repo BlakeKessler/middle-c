@@ -16,7 +16,7 @@ struct clef::Enum : public clef::Type {
       static constexpr NodeType nodeType() { return NodeType::ENUM; }
 
       Enum():Type{},_baseType{},_enumerators{} {}
-      Enum(Type& name, index<Type> base = {}, index<ParameterList> enums = {}):Type{name},_baseType{base},_enumerators{enums} {}
+      Enum(const Type& name, index<Type> base = {}, index<ParameterList> enums = {}):Type{name},_baseType{base},_enumerators{enums} {}
 
       index<Type>& baseType() { return _baseType; }
       index<const Type> baseType() const { return _baseType; }

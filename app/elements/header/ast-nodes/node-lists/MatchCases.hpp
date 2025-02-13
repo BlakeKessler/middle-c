@@ -13,7 +13,7 @@ struct clef::MatchCases : public mcsl::contig_base<mcsl::pair<index<Expr>, index
    public:
       static constexpr NodeType nodeType() { return NodeType::MATCH_CASES; }
 
-      MatchCases(mcsl::dyn_arr<mcsl::pair<index<Expr>,index<Scope>>>& cases):_cases{&cases} {}
+      MatchCases(mcsl::dyn_arr<mcsl::pair<index<Expr>,index<Scope>>>* cases):_cases{cases} {}
 
 
       #pragma region dyn_arr

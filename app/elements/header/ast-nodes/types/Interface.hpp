@@ -15,8 +15,8 @@ struct clef::Interface : public clef::Type {
 
       Interface():Type{},_spec{} {}
       Interface(index<InterfaceSpec> spec):Type{},_spec{spec} {}
-      Interface(Type& name):Type{name},_spec{} {}
-      Interface(index<InterfaceSpec> spec, Type& name):Type{name},_spec{spec} {}
+      Interface(const Type& name):Type{name},_spec{} {}
+      Interface(index<InterfaceSpec> spec, const Type& name):Type{name},_spec{spec} {}
 
       index<InterfaceSpec>& spec() { return _spec; }
       index<const InterfaceSpec> spec() const { return _spec; }

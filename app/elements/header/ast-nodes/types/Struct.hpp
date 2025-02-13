@@ -15,8 +15,8 @@ struct clef::Struct : public clef::Type {
 
       Struct():Type{},_spec{} {}
       Struct(index<ObjTypeSpec> spec):Type{},_spec{spec} {}
-      Struct(index<ObjTypeSpec> spec, Type& name):Type{name},_spec{spec} {}
-      Struct(Type& name):Type{name},_spec{} {}
+      Struct(index<ObjTypeSpec> spec, const Type& name):Type{name},_spec{spec} {}
+      Struct(const Type& name):Type{name},_spec{} {}
 
       index<ObjTypeSpec>& spec() { return _spec; }
       index<const ObjTypeSpec> spec() const { return _spec; }

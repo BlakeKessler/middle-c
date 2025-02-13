@@ -14,7 +14,7 @@ struct clef::SwitchCases : public mcsl::contig_base<mcsl::pair<index<Expr>, inde
    public:
       static constexpr NodeType nodeType() { return NodeType::SWITCH_CASES; }
 
-      SwitchCases(mcsl::dyn_arr<mcsl::pair<index<Expr>,index<Stmt>>>& cases, index<Scope> procedure = {}):_proc{procedure},_cases{&cases} {}
+      SwitchCases(mcsl::dyn_arr<mcsl::pair<index<Expr>,index<Stmt>>>* cases, index<Scope> procedure = {}):_proc{procedure},_cases{cases} {}
 
       index<Scope>& procedure() { return _proc; }
       auto*& cases() { return _cases; }

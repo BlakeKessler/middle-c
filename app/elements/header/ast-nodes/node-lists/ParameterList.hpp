@@ -12,7 +12,7 @@ struct clef::ParameterList : public mcsl::contig_base<index<Variable>> {
    public:
       static constexpr NodeType nodeType() { return NodeType::PARAM_LIST; }
 
-      ParameterList(mcsl::dyn_arr<index<Variable>>& params):_params{&params} {}
+      ParameterList(mcsl::dyn_arr<index<Variable>>* params):_params{params} {}
 
 
       #pragma region dyn_arr

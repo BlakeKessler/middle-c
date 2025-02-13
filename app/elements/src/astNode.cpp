@@ -2,6 +2,7 @@
 #define AST_NODE_CPP
 
 #include "astNode.hpp"
+#include "pretty-print.hpp"
 
 #include <cstdio>
 #include <cstring>
@@ -12,7 +13,7 @@ void clef::astNode::downCast(NodeType newType) {
    if (canDownCastTo(_nodeType, newType)) {
       _nodeType = newType;
    } else {
-      throwError(ErrCode::BAD_NODE_CAST, "attempt to downcast from %hhu to %hhu", +_nodeType, +newType);
+      throwError(ErrCode::BAD_NODE_CAST, "attempt to downcast from %s to %s", toString(_nodeType), toString(newType));
    }
 }
 //base to derived
@@ -20,7 +21,7 @@ void clef::astNode::upCast(NodeType newType) {
    if (canDownCastTo(newType, _nodeType)) {
       _nodeType = newType;
    } else {
-      throwError(ErrCode::BAD_NODE_CAST, "attempt to upcast from %hhu to %hhu", +_nodeType, +newType);
+      throwError(ErrCode::BAD_NODE_CAST, "attempt to upcast from %s to %s", toString(_nodeType), toString(newType));
    }
 }
 //derived to base or base to derived
@@ -28,7 +29,7 @@ void clef::astNode::verticalCast(NodeType newType) {
    if (canDownCastTo(_nodeType, newType) || canDownCastTo(newType, _nodeType)) {
       _nodeType = newType;
    } else {
-      throwError(ErrCode::BAD_NODE_CAST, "attempt to vertical cast from %hhu to %hhu", +_nodeType, +newType);
+      throwError(ErrCode::BAD_NODE_CAST, "attempt to vertical cast from %s to %s", toString(_nodeType), toString(newType));
    }
 }
 //cast without type checking
@@ -137,8 +138,8 @@ void clef::astNode::printf() const {
       CASE(_argumentList);
       CASE(_parameterList);
 
-      case NodeType::NONE: std::printf("NULL NODE");
-      case NodeType::ERROR: std::printf("ERORR NODE");
+      case NodeType::NONE: std::printf("NULL NODE"); break;
+      case NodeType::ERROR: std::printf("ERORR NODE"); break;
    }
 }
 #undef CASE
