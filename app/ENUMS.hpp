@@ -322,50 +322,36 @@ namespace clef {
    enum class [[clang::flag_enum]] OpProps : uint8 {
       NULL = 0,
 
-      CAN_BE_POSTFIX = 8_m,
-      CAN_BE_PREFIX  = 7_m,
-      CAN_BE_BINARY  = 6_m,
-      IS_LEFT_ASSOC  = 5_m, //only applies for use as binary operators
+      TYPE_MOD       = 1_m,
+      OPEN_DELIM     = 2_m,
+      CLOSE_DELIM    = 3_m,
 
-      __PRECEDENCE_BITS = 4_m | 3_m | 2_m | 1_m,
+      CAN_BE_POSTFIX = 4_m,
+      CAN_BE_PREFIX  = 5_m,
+      CAN_BE_BINARY  = 6_m,
+      
+      IS_LEFT_ASSOC  = 7_m, //only applies for use as binary operators
 
       POSTFIX = CAN_BE_POSTFIX,
       PREFIX = CAN_BE_PREFIX,
       INFIX_LEFT = CAN_BE_BINARY | IS_LEFT_ASSOC,
       INFIX_RIGHT = CAN_BE_BINARY,
 
-      OPEN_DELIM = PREFIX,
-      CLOSE_DELIM = POSTFIX,
       DELIM = OPEN_DELIM | CLOSE_DELIM,
-
-      TYPE_MOD = POSTFIX,
    };
    constexpr auto    operator+(const OpProps t) noexcept { return std::to_underlying(t); }
    constexpr OpProps operator~(const OpProps lhs) noexcept { return (OpProps)(~+lhs); }
    constexpr OpProps operator&(const OpProps lhs, const OpProps rhs) noexcept { return (OpProps)((+lhs) & (+rhs)); }
    constexpr OpProps operator^(const OpProps lhs, const OpProps rhs) noexcept { return (OpProps)((+lhs) ^ (+rhs)); }
    constexpr OpProps operator|(const OpProps lhs, const OpProps rhs) noexcept { return (OpProps)((+lhs) | (+rhs)); }
-   constexpr uint8 precedence(const OpProps x) { return +(x & OpProps::__PRECEDENCE_BITS); }
    constexpr bool isBinary(const OpProps x) { return +(x & OpProps::CAN_BE_BINARY); }
-   constexpr OpProps makeOpProps(const bool canBePostfix, const bool canBePrefix, const bool canBeBinary, const bool isLeftAssocWhenBinary, const uint8 precedence) {
-      assert(precedence <= +OpProps::__PRECEDENCE_BITS, "precedence value overflows into property flag bits"); //maybe make debug_assert
+   constexpr OpProps makeOpProps(const bool canBePostfix, const bool canBePrefix, const bool canBeBinary, const bool canBeTypeMod, const bool isLeftAssocWhenBinary) {
       OpProps post = canBePostfix ? OpProps::CAN_BE_POSTFIX : OpProps::NULL;
       OpProps pre  = canBePrefix  ? OpProps::CAN_BE_PREFIX  : OpProps::NULL;
       OpProps bin  = canBeBinary  ? OpProps::CAN_BE_BINARY  : OpProps::NULL;
+      OpProps mod  = canBeTypeMod ? OpProps::TYPE_MOD       : OpProps::NULL;
       OpProps left = (isLeftAssocWhenBinary && canBeBinary) ? OpProps::IS_LEFT_ASSOC : OpProps::NULL;
-      return post | pre | bin | left | (OpProps)precedence;
-   }
-   constexpr OpProps makeOpProps(const uint8 flags, const uint8 precedence) {
-      assert(flags      <= +OpProps::__PRECEDENCE_BITS, "property flag bits underflow into precedence bits"); //maybe make debug_assert
-      assert(precedence <= +OpProps::__PRECEDENCE_BITS, "precedence value overflows into property flag bits"); //maybe make debug_assert
-
-      return (OpProps)((flags << 4) | precedence);
-   }
-   constexpr OpProps makeOpProps(const OpProps flags, const uint8 precedence) {
-      assert(+flags     >  +OpProps::__PRECEDENCE_BITS, "property flag bits underflow into precedence bits"); //maybe make debug_assert
-      assert(precedence <= +OpProps::__PRECEDENCE_BITS, "precedence value overflows into property flag bits"); //maybe make debug_assert
-
-      return (OpProps)(+flags | precedence);
+      return post | pre | bin | mod | left;
    }
    #pragma endregion ops
    #pragma region keyword

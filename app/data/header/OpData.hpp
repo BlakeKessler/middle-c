@@ -14,18 +14,19 @@ struct alignas(8) clef::OpData {
       mcsl::raw_buf_str<MAX_OP_LEN, ubyte> _opStr;
       OpID _id;
       OpProps _props;
+      ubyte _prec;
       TokenType _tokType;
       
    public:
-      constexpr OpData():_opStr{},_id{},_props{},_tokType{} {}
-      template<mcsl::str_t str_t> constexpr OpData(const str_t& str, const OpID id, const OpProps props, const TokenType tokType)
-         :_opStr{str},_id{id},_props{props},_tokType{tokType} {}
-      constexpr OpData(const char str[MAX_OP_LEN + 1], const OpID id, const OpProps props, const TokenType tokType)
-         :_opStr{str},_id{id},_props{props},_tokType{tokType} {}
+      constexpr OpData():_opStr{},_id{},_props{},_prec{},_tokType{} {}
+      template<mcsl::str_t str_t> constexpr OpData(const str_t& str, const OpID id, const OpProps props, const ubyte prec, const TokenType tokType)
+         :_opStr{str},_id{id},_props{props},_prec{prec},_tokType{tokType} {}
+      constexpr OpData(const char str[MAX_OP_LEN + 1], const OpID id, const OpProps props, const ubyte prec, const TokenType tokType)
+         :_opStr{str},_id{id},_props{props},_prec{prec},_tokType{tokType} {}
 
       constexpr ubyte size() const { return _opStr.size(); }
       constexpr OpID opID() const { return _id; }
-      constexpr ubyte precedence() const { return +(OpProps::__PRECEDENCE_BITS & _props); }
+      constexpr ubyte precedence() const { return _prec; }
       constexpr OpProps props() const { return _props; }
       constexpr TokenType tokType() const { return _tokType; }
       constexpr auto toString() const { return _opStr; }
