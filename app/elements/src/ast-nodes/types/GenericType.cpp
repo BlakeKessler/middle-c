@@ -3,8 +3,6 @@
 
 #include "ast-nodes/types/GenericType.hpp"
 
-#include <cstdio>
-
 void clef::GenericType::printf() const {
    __printf("generic type");
 }

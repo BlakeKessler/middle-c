@@ -3,8 +3,6 @@
 
 #include "ast-nodes/types/VariadicParameter.hpp"
 
-#include <cstdio>
-
 void clef::VariadicParam::printf() const {
    __printf("variadic parameter");
 }

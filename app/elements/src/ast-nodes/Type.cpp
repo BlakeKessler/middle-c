@@ -3,8 +3,6 @@
 
 #include "ast-nodes/Type.hpp"
 
-#include <cstdio>
-
 void clef::Type::printf() const {
    __printf("type");
 }
