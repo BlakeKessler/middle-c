@@ -6,7 +6,7 @@
 #include <cstdio>
 
 void clef::Type::printf() const {
-   std::printf("type: \033[4m%.*s\033[24m (scope: id=%u)", name().size(), name().begin(), +scopeName());
+   __printf("type");
 }
 
 #endif //TYPE_CPP

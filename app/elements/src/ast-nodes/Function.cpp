@@ -6,7 +6,8 @@
 #include <cstdio>
 
 void clef::Function::printf() const {
-   std::printf("function: \033[4m%.*s\033[24m (scope: id=%u) - (signature id=%u) {procedure id=%u}", name().size(), name().begin(), +scopeName(), +signature(), +procedure());
+   __printf("function");
+   std::printf(" - (signature id=%u) {procedure id=%u}", +signature(), +procedure());
 }
 
 #endif //FUNC_CPP

@@ -6,7 +6,8 @@
 #include <cstdio>
 
 void clef::Variable::printf() const {
-   std::printf("variable: \033[4m%.*s\033[24m (scope: id=%u): (type id=%u) = (value id=%u)", name().size(), name().begin(), +scopeName(), +type(), +val());
+   __printf("variable");
+   std::printf(": (type id=%u) = (value id=%u)", +type(), +val());
 }
 
 #endif //VAR_CPP

@@ -6,7 +6,8 @@
 #include <cstdio>
 
 void clef::Struct::printf() const {
-   std::printf("struct: \033[4m%.*s\033[24m (scope: id=%u) {spec: id=%u}", name().size(), name().begin(), +scopeName(), +spec());
+   __printf("struct");
+   std::printf(" {spec: id=%u}", +spec());
 }
 
 #endif //STRUCT_CPP

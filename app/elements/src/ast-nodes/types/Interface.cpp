@@ -6,7 +6,8 @@
 #include <cstdio>
 
 void clef::Interface::printf() const {
-   std::printf("interface: \033[4m%.*s\033[24m (scope: id=%u) {spec: id=%u}", name().size(), name().begin(), +scopeName(), +spec());
+   __printf("interface");
+   std::printf(" {spec: id=%u}", +spec());
 }
 
 #endif //INTERFACE_CPP

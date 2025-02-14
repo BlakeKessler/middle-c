@@ -12,6 +12,11 @@ struct clef::Identifier {
       const uint _name_size;
       index<Identifier> _scopeName;
       const KeywordID _keywordID;
+
+   protected:
+      void __printName() const;
+      void __printf(const char* nodetype) const;
+
    public:
       static constexpr NodeType nodeType() { return NodeType::IDEN; }
 

@@ -6,7 +6,8 @@
 #include <cstdio>
 
 void clef::Mask::printf() const {
-   std::printf("mask: \033[4m%.*s\033[24m (scope: id=%u) : (base: id=%u) {members: id=%u}", name().size(), name().begin(), +scopeName(), +baseType(), +enumerators());
+   __printf("mask");
+   std::printf(" : (base: id=%u) {members: id=%u}", +baseType(), +enumerators());
 }
 
 #endif //MASK_CPP

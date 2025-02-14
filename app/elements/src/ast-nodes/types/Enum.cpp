@@ -6,7 +6,8 @@
 #include <cstdio>
 
 void clef::Enum::printf() const {
-   std::printf("enum: \033[4m%.*s\033[24m (scope: id=%u) : (base: id=%u) {members: id=%u}", name().size(), name().begin(), +scopeName(), +baseType(), +enumerators());
+   __printf("enum");
+   std::printf(" : (base: id=%u) {members: id=%u}", +baseType(), +enumerators());
 }
 
 #endif //ENUM_CPP

@@ -6,7 +6,8 @@
 #include <cstdio>
 
 void clef::Class::printf() const {
-   std::printf("class: \033[4m%.*s\033[24m (scope: id=%u) {spec: id=%u}", name().size(), name().begin(), +scopeName(), +spec());
+   __printf("class");
+   std::printf(" {spec: id=%u}", +spec());
 }
 
 #endif //CLASS_CPP

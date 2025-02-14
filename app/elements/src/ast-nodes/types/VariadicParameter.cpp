@@ -6,7 +6,7 @@
 #include <cstdio>
 
 void clef::VariadicParam::printf() const {
-   std::printf("variadic parameter: \033[4m%.*s\033[24m (scope: id=%u)", name().size(), name().begin(), +scopeName());
+   __printf("variadic parameter");
 }
 
 #endif //VAR_PARAM_CPP

@@ -6,7 +6,8 @@
 #include <cstdio>
 
 void clef::Union::printf() const {
-   std::printf("union: \033[4m%.*s\033[24m (scope: id=%u) {memebers: id=%u}", name().size(), name().begin(), +scopeName(), +members());
+   __printf("union");
+   std::printf(" {memebers: id=%u}", +scopeName(), +members());
 }
 
 #endif //UNION_CPP
