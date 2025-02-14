@@ -8,7 +8,7 @@
 #include "dyn_arr.hpp"
 
 //!allocates and manages dynamic memory blocks
-//!NOTE: relies on all mcsl::dyn_arr<T> having identical memory layouts
+//!HACK: relies on all mcsl::dyn_arr<T> having identical memory layouts
 //!NOTE: would probably be a good idea to find a way to make this runtime-type-safe (std::type_info* would probably help)
 //  should probably also make that only active in debug mode for efficiency
 class clef::allocator {
@@ -19,7 +19,7 @@ class clef::allocator {
       
       allocator():_bufBuf{} {}
       allocator(allocator&& other):_bufBuf{std::move(other._bufBuf)} { if (this != &other) { other._bufBuf.release(); } }
-      inline allocator(const allocator& other);
+      // inline allocator(const allocator& other);
 
       inline allocator& merge(allocator&& other);
 

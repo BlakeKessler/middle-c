@@ -98,7 +98,7 @@ class clef::Parser {
       static constexpr const auto& nameof() { return _nameof; }
 
       //parse tokenized source code
-      static SyntaxTree parse(const SourceTokens& src, SyntaxTree& tree);
+      static void parse(const SourceTokens& src, SyntaxTree& tree);
 };
 
 

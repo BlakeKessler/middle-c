@@ -28,8 +28,8 @@ struct clef::ArgumentList : public mcsl::contig_base<index<Expr>> {
       const auto* const* ptr_to_buf() const { return _exprs->ptr_to_buf(); }
 
 
-      bool resize(const uint newSize) { return _exprs->resize(newSize); }
-      bool resize_exact(const uint newSize) { return _exprs->resize_exact(newSize); }
+      bool reserve(const uint newSize) { return _exprs->reserve(newSize); }
+      bool reserve_exact(const uint newSize) { return _exprs->reserve_exact(newSize); }
       auto* release() { return _exprs->release(); }
       bool push_back(index<Expr> obj) { return _exprs->push_back(obj); }
       auto pop_back() { return _exprs->pop_back(); }

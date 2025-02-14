@@ -28,8 +28,8 @@ struct clef::ParameterList : public mcsl::contig_base<index<Variable>> {
       const auto* const* ptr_to_buf() const { return _params->ptr_to_buf(); }
 
 
-      bool resize(const uint newSize) { return _params->resize(newSize); }
-      bool resize_exact(const uint newSize) { return _params->resize_exact(newSize); }
+      bool reserve(const uint newSize) { return _params->reserve(newSize); }
+      bool reserve_exact(const uint newSize) { return _params->reserve_exact(newSize); }
       auto* release() { return _params->release(); }
       bool push_back(index<Variable> obj) { return _params->push_back(obj); }
       auto pop_back() { return _params->pop_back(); }

@@ -17,7 +17,7 @@ clef::Expression::Expression(OpID op, index<Type> type, index<ArgList> ctorArgs)
 }
 
 void clef::Expression::printf() const {
-   std::printf("expression: %s(", toString(opID()));
+   std::printf("expression: op=%s(", toString(opID()));
    if (+lhsType()) {
       std::printf("lhs: %s{id=%u}", toString(lhsType()), +lhs());
 

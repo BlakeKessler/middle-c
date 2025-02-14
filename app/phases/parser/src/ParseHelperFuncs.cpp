@@ -82,6 +82,7 @@ clef::index<clef::Scope> clef::Parser::parseProcedure() {
 clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName) {
    index<astNode> name = +parseIdentifier(scopeName);
    tree[name].upCast(NodeType::TYPE);
+   //!TODO: type modifier operators (pointer, reference)
    return +name;
 }
 
@@ -169,7 +170,8 @@ clef::index<clef::ParamList> clef::Parser::parseParamList(const BlockType closer
       return args;
    }
    do {
-      tree[args].push_back(parseVarDecl().first);
+      index<Variable> tmp = parseVarDecl().first;
+      tree[args].push_back(tmp);
       if (tryConsumeOperator(OpID::COMMA)) {
          continue;
       }

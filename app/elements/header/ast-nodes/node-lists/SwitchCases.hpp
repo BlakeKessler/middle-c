@@ -35,8 +35,8 @@ struct clef::SwitchCases : public mcsl::contig_base<mcsl::pair<index<Expr>, inde
       const auto* const* ptr_to_buf() const { return _cases->ptr_to_buf(); }
 
 
-      bool resize(const uint newSize) { return _cases->resize(newSize); }
-      bool resize_exact(const uint newSize) { return _cases->resize_exact(newSize); }
+      bool reserve(const uint newSize) { return _cases->reserve(newSize); }
+      bool reserve_exact(const uint newSize) { return _cases->reserve_exact(newSize); }
       auto* release() { return _cases->release(); }
       bool push_back(mcsl::pair<index<Expr>,index<Stmt>>&& obj) { return _cases->push_back(std::forward<decltype(obj)>(obj)); }
       bool push_back(const mcsl::pair<index<Expr>,index<Stmt>>& obj) { return _cases->push_back(obj); }

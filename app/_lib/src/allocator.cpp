@@ -3,13 +3,13 @@
 
 #include "allocator.hpp"
 
-inline clef::allocator::allocator(const allocator& other):
-   _bufBuf{other._bufBuf.size()} {
-      //deep copy
-      for (uint i = 0; i < _bufBuf.size(); ++i) {
-         _bufBuf[i] = other._bufBuf[i];
-      }
-}
+// inline clef::allocator::allocator(const allocator& other):
+//    _bufBuf{other._bufBuf.size()} {
+//       //deep copy
+//       for (uint i = 0; i < _bufBuf.size(); ++i) {
+//          _bufBuf[i] = other._bufBuf[i];
+//       }
+// }
 
 inline clef::allocator& clef::allocator::merge(allocator&& other) {
    for (uint i = 0; i < other._bufBuf.size(); ++i) {

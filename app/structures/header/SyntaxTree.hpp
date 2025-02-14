@@ -20,7 +20,7 @@ class clef::SyntaxTree {
       allocator _alloc;
    public:
       SyntaxTree():_buf{},_ifaceSpecBuf{},_nsSpecBuf{},_objSpecBuf{},_alloc{} { _buf.emplace_back(NodeType::ERROR); }
-      SyntaxTree(const SyntaxTree& other):_buf{other._buf},_ifaceSpecBuf{other._ifaceSpecBuf},_nsSpecBuf{},_objSpecBuf{},_alloc{other._alloc} {}
+      // SyntaxTree(const SyntaxTree& other):_buf{other._buf},_ifaceSpecBuf{other._ifaceSpecBuf},_nsSpecBuf{},_objSpecBuf{},_alloc{other._alloc} {}
       SyntaxTree(SyntaxTree&& other):
          _buf{std::move(other._buf)},
          _ifaceSpecBuf{std::move(other._ifaceSpecBuf)},
@@ -33,6 +33,8 @@ class clef::SyntaxTree {
       }
       
       inline void release();
+
+      inline void reserve(const uint nodeCount) { _buf.reserve(nodeCount); }
 
       index<FundType> getFundType(const KeywordID fundTypeKeyword);
       index<astNode> getValueKeyword(const KeywordID valueKeyword);

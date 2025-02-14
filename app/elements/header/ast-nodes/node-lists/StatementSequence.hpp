@@ -28,8 +28,8 @@ struct clef::StatementSequence : public mcsl::contig_base<index<Stmt>> {
       const auto* const* ptr_to_buf() const { return _stmts->ptr_to_buf(); }
 
 
-      bool resize(const uint newSize) { return _stmts->resize(newSize); }
-      bool resize_exact(const uint newSize) { return _stmts->resize_exact(newSize); }
+      bool reserve(const uint newSize) { return _stmts->reserve(newSize); }
+      bool reserve_exact(const uint newSize) { return _stmts->reserve_exact(newSize); }
       auto* release() { return _stmts->release(); }
       bool push_back(index<Stmt> obj) { return _stmts->push_back(obj); }
       auto pop_back() { return _stmts->pop_back(); }
