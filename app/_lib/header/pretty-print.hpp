@@ -234,47 +234,22 @@ constexpr const char* clef::toString(const OpID op) {
    UNREACHABLE;
 }
 
-#pragma region oppropcase
-#define __OP_PROP_CASE(enumerator, name, prec) CASE(enumerator | (OpProps)(0x##prec), name "(precedence=" #prec ")") 
-#define OP_PROP_CASE(enumerator, name) \
-__OP_PROP_CASE(enumerator, name, 0);\
-__OP_PROP_CASE(enumerator, name, 1);\
-__OP_PROP_CASE(enumerator, name, 2);\
-__OP_PROP_CASE(enumerator, name, 3);\
-__OP_PROP_CASE(enumerator, name, 4);\
-__OP_PROP_CASE(enumerator, name, 5);\
-__OP_PROP_CASE(enumerator, name, 6);\
-__OP_PROP_CASE(enumerator, name, 7);\
-__OP_PROP_CASE(enumerator, name, 8);\
-__OP_PROP_CASE(enumerator, name, 9);\
-__OP_PROP_CASE(enumerator, name, A);\
-__OP_PROP_CASE(enumerator, name, B);\
-__OP_PROP_CASE(enumerator, name, C);\
-__OP_PROP_CASE(enumerator, name, D);\
-__OP_PROP_CASE(enumerator, name, E);\
-__OP_PROP_CASE(enumerator, name, F)
-#pragma endregion oppropcase
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wswitch"
 constexpr const char* clef::toString(const OpProps props) {
    using enum OpProps;
    switch (props) {
       CASE(NULL, "null");
 
-      OP_PROP_CASE(POSTFIX, "POSTFIX");
-      OP_PROP_CASE(PREFIX, "PREFIX");
-      OP_PROP_CASE(INFIX_LEFT, "INFIX_LEFT");
-      OP_PROP_CASE(INFIX_RIGHT, "INFIX_RIGHT");
+      CASE(POSTFIX, "POSTFIX");
+      CASE(PREFIX, "PREFIX");
+      CASE(INFIX_LEFT, "INFIX_LEFT");
+      CASE(INFIX_RIGHT, "INFIX_RIGHT");
 
-      OP_PROP_CASE(DELIM, "DELIMITER");
+      CASE(DELIM, "DELIMITER");
 
       default: UNREACHABLE;
    }
    UNREACHABLE;
 }
-#pragma GCC diagnostic pop
-#undef OP_PROP_CASE
-#undef __OP_PROP_CASE
 
 constexpr const char* clef::toString(const KeywordID kw) {
    using enum KeywordID;

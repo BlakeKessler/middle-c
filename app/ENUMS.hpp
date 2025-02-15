@@ -345,13 +345,15 @@ namespace clef {
    constexpr OpProps operator^(const OpProps lhs, const OpProps rhs) noexcept { return (OpProps)((+lhs) ^ (+rhs)); }
    constexpr OpProps operator|(const OpProps lhs, const OpProps rhs) noexcept { return (OpProps)((+lhs) | (+rhs)); }
    constexpr bool isBinary(const OpProps x) { return +(x & OpProps::CAN_BE_BINARY); }
-   constexpr OpProps makeOpProps(const bool canBePostfix, const bool canBePrefix, const bool canBeBinary, const bool canBeTypeMod, const bool isLeftAssocWhenBinary) {
-      OpProps post = canBePostfix ? OpProps::CAN_BE_POSTFIX : OpProps::NULL;
-      OpProps pre  = canBePrefix  ? OpProps::CAN_BE_PREFIX  : OpProps::NULL;
-      OpProps bin  = canBeBinary  ? OpProps::CAN_BE_BINARY  : OpProps::NULL;
-      OpProps mod  = canBeTypeMod ? OpProps::TYPE_MOD       : OpProps::NULL;
-      OpProps left = (isLeftAssocWhenBinary && canBeBinary) ? OpProps::IS_LEFT_ASSOC : OpProps::NULL;
-      return post | pre | bin | mod | left;
+   constexpr OpProps makeOpProps(const bool canBePostfix, const bool canBePrefix, const bool canBeBinary, const bool canBeTypeMod, const bool canBeOpen, const bool canBeClose, const bool isLeftAssoc) {
+      OpProps post  = canBePostfix ? OpProps::CAN_BE_POSTFIX : OpProps::NULL;
+      OpProps pre   = canBePrefix  ? OpProps::CAN_BE_PREFIX  : OpProps::NULL;
+      OpProps bin   = canBeBinary  ? OpProps::CAN_BE_BINARY  : OpProps::NULL;
+      OpProps mod   = canBeTypeMod ? OpProps::TYPE_MOD       : OpProps::NULL;
+      OpProps open  = canBeOpen    ? OpProps::OPEN_DELIM     : OpProps::NULL;
+      OpProps close = canBeClose   ? OpProps::CLOSE_DELIM    : OpProps::NULL;
+      OpProps left  = (isLeftAssoc && canBeBinary) ? OpProps::IS_LEFT_ASSOC : OpProps::NULL;
+      return post | pre | bin | mod | open | close | left;
    }
    #pragma endregion ops
    #pragma region keyword

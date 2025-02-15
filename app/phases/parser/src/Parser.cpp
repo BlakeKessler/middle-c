@@ -270,7 +270,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             }
             if (prevTokIsOperand) { //binary or postfix unary
                OpData op = tokIt->op();
-               while (operatorStack.size() && precedence(operatorStack.back()) >= precedence(op)) { //!NOTE: UNFINISHED (does not consider associativity yet)
+               while (operatorStack.size() && operatorStack.back().precedence() >= op.precedence()) { //!NOTE: UNFINISHED (does not consider associativity yet)
                   eval();
                }
                op.removeProps(OpProps::PREFIX);

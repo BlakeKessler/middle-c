@@ -36,10 +36,11 @@ struct alignas(8) clef::OpData {
             return false;
          }
          _props = _props | other.props();
+         _prec = _prec ? _prec : other._prec;
          return true;
       }
       constexpr OpProps removeProps(const OpProps props) {
-         _props = _props & (~props | OpProps::__PRECEDENCE_BITS);
+         _props = _props & ~props;
          return _props;
       }
 
