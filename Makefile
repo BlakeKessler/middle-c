@@ -1,7 +1,7 @@
 #directories and files
 MODULES := mcsl app
 
-ALL_CODE_DIRS := $(foreach dir, $(MODULES),${shell find $(dir) -type d -print})
+ALL_CODE_DIRS := $(foreach dir, $(MODULES),${shell find -L $(dir) -type d -print})
 ALL_SRC_FILES := $(foreach dir, $(ALL_CODE_DIRS), $(wildcard $(dir)/*.cpp))
 ALL_HEADER_FILES := $(foreach dir, $(ALL_CODE_DIRS), $(wildcard $(dir)/*.hpp))
 
@@ -18,12 +18,16 @@ FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=
 # COMPILER := g++ -std=c++23
 # FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -Wno-trigraphs -Wno-attributes -Wno-parentheses -Wno-class-memaccess
 
-LINKER_FLAGS := -lbacktrace
+# LINKER_FLAGS := -lbacktrace
 
 #compile commands
 COMPILE := $(COMPILER) $(FLAGS) $(addprefix -I, $(MODULES) $(filter %/header, $(ALL_CODE_DIRS)))
 
 
+#clean
+.PHONY: clean
+clean:
+	rm -rf _build
 #set up directory structure
 .PHONY: setup
 setup:
@@ -66,14 +70,8 @@ objects: $(ALL_OBJ_FILES)
 #compile unit test files
 .PHONY: Lexer
 Lexer: makefiles _build/test/src/TestLexer.mk test/src/TestLexer.cpp | $(ALL_OBJ_FILES)
-	$(COMPILE) test/src/TestLexer.cpp $(shell find _build | grep "\.o") -o _build/out/$@.out $(LINKER_FLAGS)
+	$(COMPILE) test/src/TestLexer.cpp $(shell find _build | grep "\.o") -o _build/out/$@.out
 .PHONY: Parser
 Parser: makefiles _build/test/src/TestParser.mk test/src/TestParser.cpp | $(ALL_OBJ_FILES)
-	$(COMPILE) test/src/TestParser.cpp $(shell find _build | grep "\.o") -o _build/out/$@.out $(LINKER_FLAGS)
+	$(COMPILE) test/src/TestParser.cpp $(shell find _build | grep "\.o") -o _build/out/$@.out
 #	$(COMPILE) test/src/TestParser.cpp $(ALL_SRC_FILES:%.cpp=_build/%.o) -o _build/out/$@.out
-
-
-#clean
-.PHONY: clean
-clean:
-	rm -rf _build
