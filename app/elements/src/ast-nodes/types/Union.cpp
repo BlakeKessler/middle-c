@@ -7,7 +7,7 @@
 
 void clef::Union::printf() const {
    __printf("union");
-   std::printf(" {memebers: id=%u}", +scopeName(), +members());
+   std::printf(" {memebers: id=%u}", +members());
 }
 
 #endif //UNION_CPP
