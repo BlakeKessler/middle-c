@@ -4,20 +4,16 @@
 #include "Parser.hpp"
 #include "Lexer.hpp"
 #include "dyn_arr.hpp"
-// #include "backtrace.hpp"
 #include <cstdio>
 
 #define BIG_HEADER "\033[;1m=======================\n\033[0m"
 #define SMALL_HEADER "\033[;1m-----------------------\n\033[0m"
-
 
 int main(const int argc, char** argv) {
    if (argc < 2) {
       std::printf("No file path provided. Exiting.\n");
       return EXIT_FAILURE;
    }
-
-   // mcsl::backtrace::init(argv[0]);
 
    //read and tokenize file
    std::printf("%s", BIG_HEADER);

@@ -27,7 +27,7 @@ requires ( sizeof...(Argv_t) == _size )
 
       while (++it < bufEnd) { //!NOTE: TEST THIS
          if (it->opID() == back->opID()) {
-            assert(it->combineWith(*back), "invalid operator combination (conflicting strings or precedences)");
+            assert(back->combineWith(*it), "invalid operator combination (conflicting strings or precedences)");
          } else {
             *++back = *it;
          }
@@ -70,107 +70,108 @@ template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef:
 
 [[gnu::const]] constexpr auto clef::GetAllOplikesData() {
    using enum clef::OpProps;
+   using Op = OpID;
+   using Prop = OpProps;
+   using Type = TokenType;
+   using _ = OpData;
    ubyte prec = 16;
    return OpDecoder{
-      OpData("#",     OpID::PREPROCESSOR, PREFIX, 0, TokenType::PREPROC_INIT),
-      OpData("::",    OpID::SCOPE_RESOLUTION, INFIX_LEFT, 0, TokenType::OP),  //scope resolution
-      OpData("\\",    OpID::ESCAPE, PREFIX, 0, TokenType::ESC),      //escape character
-      OpData(";",     OpID::EOS, PREFIX, 0, TokenType::EOS),      //end of statement
-      OpData("//",    OpID::LINE_CMNT, PREFIX, 0, TokenType::BLOCK_DELIM),      //line comment
-      OpData("/*",    OpID::BLOCK_CMNT_OPEN, OPEN_DELIM, 0, TokenType::BLOCK_DELIM), //block comment
-      OpData("*/",    OpID::BLOCK_CMNT_CLOSE, CLOSE_DELIM, 0, TokenType::BLOCK_DELIM), //block comment
-      OpData("\'",    OpID::CHAR, DELIM, 0, TokenType::BLOCK_DELIM), //char
-      OpData("\"",    OpID::STRING, DELIM, 0, TokenType::BLOCK_DELIM), //string
-      OpData("`",     OpID::STRING, DELIM, 0, TokenType::BLOCK_DELIM), //interpolated string
+      _("#",   Op::PREPROCESSOR,      Prop::PREFIX,      0,      Type::PREPROC_INIT), //preprocessor
+      _("::",  Op::SCOPE_RESOLUTION,  Prop::INFIX_LEFT,  0,      Type::OP          ), //scope resolution
+      _("\\",  Op::ESCAPE,            Prop::PREFIX,      0,      Type::ESC         ), //escape character
+      _(";",   Op::EOS,               Prop::PREFIX,      0,      Type::EOS         ), //end of statement
+      _("//",  Op::LINE_CMNT,         Prop::PREFIX,      0,      Type::BLOCK_DELIM ), //line comment
+      _("/*",  Op::BLOCK_CMNT_OPEN,   Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //block comment
+      _("*/",  Op::BLOCK_CMNT_CLOSE,  Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //block comment
+      _("\'",  Op::CHAR,              Prop::DELIM,       0,      Type::BLOCK_DELIM ), //char
+      _("\"",  Op::STRING,            Prop::DELIM,       0,      Type::BLOCK_DELIM ), //string
+      _("`",   Op::INTERP_STRING,     Prop::DELIM,       0,      Type::BLOCK_DELIM ), //interpolated string
 
 
-      OpData("(",     OpID::CALL_OPEN, OPEN_DELIM, 0, TokenType::BLOCK_DELIM), //function calls/functional casts
-      OpData(")",     OpID::CALL_CLOSE, CLOSE_DELIM, 0, TokenType::BLOCK_DELIM), //function calls/functional casts
-      OpData("[",     OpID::SUBSCRIPT_OPEN, OPEN_DELIM, 0, TokenType::BLOCK_DELIM), //subscript
-      OpData("]",     OpID::SUBSCRIPT_CLOSE, CLOSE_DELIM, 0, TokenType::BLOCK_DELIM), //subscript
-      OpData("{",     OpID::LIST_OPEN, OPEN_DELIM, 0, TokenType::BLOCK_DELIM), //scope/functional casts
-      OpData("}",     OpID::LIST_CLOSE, CLOSE_DELIM, 0, TokenType::BLOCK_DELIM), //scope/functional casts
-      OpData("<:",    OpID::SPECIALIZER_OPEN, OPEN_DELIM, 0, TokenType::BLOCK_DELIM), //specifier
-      OpData(":>",    OpID::SPECIALIZER_CLOSE, CLOSE_DELIM, 0, TokenType::BLOCK_DELIM), //specifier
+      _("(",   Op::CALL_OPEN,         Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //function calls/functional casts
+      _(")",   Op::CALL_CLOSE,        Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //function calls/functional casts
+      _("[",   Op::SUBSCRIPT_OPEN,    Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //subscript
+      _("]",   Op::SUBSCRIPT_CLOSE,   Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //subscript
+      _("{",   Op::LIST_OPEN,         Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //scope/functional casts
+      _("}",   Op::LIST_CLOSE,        Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //scope/functional casts
+      _("<:",  Op::SPECIALIZER_OPEN,  Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //specifier
+      _(":>",  Op::SPECIALIZER_CLOSE, Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //specifier
 
 
 
 
 
-      OpData("++",    OpID::INC, PREFIX, 0, TokenType::OP),            //pre-increment
-      OpData("--",    OpID::DEC, PREFIX, 0, TokenType::OP),            //pre-decrement
-      OpData(".",     OpID::MEMBER_ACCESS, INFIX_LEFT, 0, TokenType::OP),        //element access
-      OpData("->",    OpID::MEMBER_OF_POINTER_ACCESS, INFIX_LEFT, 0, TokenType::OP),        //element access
-      OpData("..",    OpID::RANGE, INFIX_LEFT, 0, TokenType::OP),        //range
-      OpData("...",   OpID::SPREAD, INFIX_LEFT, 0, TokenType::OP),        //array spread
+      _("++",  Op::INC,               Prop::PREFIX,      0,      Type::OP          ), //pre-increment
+      _("--",  Op::DEC,               Prop::PREFIX,      0,      Type::OP          ), //pre-decrement
+      _(".",   Op::MEMBER_ACCESS,     Prop::INFIX_LEFT,  0,      Type::OP          ), //element access
+      _("->",  Op::PTR_MEMBER_ACCESS, Prop::INFIX_LEFT,  0,      Type::OP          ), //element access
+      _("..",  Op::RANGE,             Prop::INFIX_LEFT,  0,      Type::OP          ), //range
+      _("...", Op::SPREAD,            Prop::INFIX_LEFT,  0,      Type::OP          ), //array spread
 
-      OpData("++",    OpID::INC, POSTFIX, 0, TokenType::OP),           //post-increment
-      OpData("--",    OpID::DEC, POSTFIX, prec, TokenType::OP),           //post-decrement
-      OpData("+",     OpID::UNARY_PLUS, POSTFIX, 0, TokenType::OP),           //unary plus
-      OpData("-",     OpID::UNARY_MINUS, POSTFIX, 0, TokenType::OP),           //integer negation
-      OpData("!",     OpID::LOGICAL_NOT, POSTFIX, 0, TokenType::OP),           //logical negation
-      OpData("~",     OpID::BIT_NOT, POSTFIX, 0, TokenType::OP),           //bitwise negation
-      OpData("&",     OpID::ADDRESS_OF, PREFIX, 0, TokenType::OP), //reference/address of
-      OpData("*",     OpID::DEREF, PREFIX, 0, TokenType::OP), //raw pointer/dereference
-      OpData("&",     OpID::REFERENCE, TYPE_MOD, 0, TokenType::OP), //reference/address of
-      OpData("*",     OpID::RAW_PTR, TYPE_MOD, 0, TokenType::OP), //raw pointer/dereference
-      OpData("@",     OpID::UNIQUE_PTR, TYPE_MOD, 0, TokenType::OP),          //unique pointer
-      OpData("$",     OpID::SHARED_PTR, TYPE_MOD, 0, TokenType::OP),          //shared pointer
-      OpData("`",     OpID::WEAK_PTR, TYPE_MOD, 0, TokenType::OP),          //weak pointer
-      OpData("%",     OpID::ITERATOR, TYPE_MOD, 0, TokenType::OP),          //iterator
-      
-      OpData(".*",    OpID::POINTER_TO_MEMBER, INFIX_LEFT, --prec, TokenType::OP),        //pointer to member
-      OpData("->*",   OpID::POINTER_TO_MEMBER_OF_POINTER, INFIX_LEFT, prec, TokenType::OP),        //pointer to member
+      _("++",  Op::INC,               Prop::POSTFIX,     0,      Type::OP          ), //post-increment
+      _("--",  Op::DEC,               Prop::POSTFIX,     0,      Type::OP          ), //post-decrement
+      _("+",   Op::UNARY_PLUS,        Prop::PREFIX,      0,      Type::OP          ), //unary plus
+      _("-",   Op::UNARY_MINUS,       Prop::PREFIX,      0,      Type::OP          ), //integer negation
+      _("!",   Op::LOGICAL_NOT,       Prop::POSTFIX,     0,      Type::OP          ), //logical negation
+      _("~",   Op::BIT_NOT,           Prop::POSTFIX,     0,      Type::OP          ), //bitwise negation
+      _("&",   Op::ADDRESS_OF,        Prop::PREFIX,      0,      Type::OP          ), //reference/address of
+      _("*",   Op::DEREF,             Prop::PREFIX,      0,      Type::OP          ), //raw pointer/dereference
+      _("&",   Op::REFERENCE,         Prop::TYPE_MOD,    0,      Type::OP          ), //reference/address of
+      _("*",   Op::RAW_PTR,           Prop::TYPE_MOD,    0,      Type::OP          ), //raw pointer/dereference
+      _("@",   Op::UNIQUE_PTR,        Prop::TYPE_MOD,    0,      Type::OP          ), //unique pointer
+      _("$",   Op::SHARED_PTR,        Prop::TYPE_MOD,    0,      Type::OP          ), //shared pointer
+      _("`",   Op::WEAK_PTR,          Prop::TYPE_MOD,    0,      Type::OP          ), //weak pointer
+      _("%",   Op::ITERATOR,          Prop::TYPE_MOD,    0,      Type::OP          ), //iterator
 
-      OpData("^^",    OpID::EXP, INFIX_LEFT, --prec, TokenType::OP),        //exponentiation
+      _(".*",  Op::METHOD_PTR,        Prop::INFIX_LEFT,  --prec, Type::OP          ), //pointer to member
+      _("->*", Op::ARROW_METHOD_PTR,  Prop::INFIX_LEFT,    prec, Type::OP          ), //pointer to member
 
-      OpData("*",     OpID::MUL, INFIX_LEFT, --prec, TokenType::OP),        //multiplication
-      OpData("/",     OpID::DIV, INFIX_LEFT, prec, TokenType::OP),        //division
-      OpData("%",     OpID::MOD, INFIX_LEFT, prec, TokenType::OP),        //modulo
+      _("^^",  Op::EXP,               Prop::INFIX_LEFT,  --prec, Type::OP          ), //exponentiation
 
-      OpData("+",     OpID::ADD, INFIX_LEFT, --prec, TokenType::OP),        //addition
-      OpData("-",     OpID::SUB, INFIX_LEFT, prec, TokenType::OP),        //subtraction
+      _("*",   Op::MUL,               Prop::INFIX_LEFT,  --prec, Type::OP          ), //multiplication
+      _("/",   Op::DIV,               Prop::INFIX_LEFT,    prec, Type::OP          ), //division
+      _("%",   Op::MOD,               Prop::INFIX_LEFT,    prec, Type::OP          ), //modulo
 
-      OpData("<<",    OpID::SHIFT_LEFT, INFIX_LEFT, --prec, TokenType::OP),        //left bit-shift
-      OpData(">>",    OpID::SHIFT_RIGHT, INFIX_LEFT, prec, TokenType::OP),        //right bit-shift
+      _("+",   Op::ADD,               Prop::INFIX_LEFT,  --prec, Type::OP          ), //addition
+      _("-",   Op::SUB,               Prop::INFIX_LEFT,    prec, Type::OP          ), //subtraction
 
-      OpData("<=>",   OpID::THREE_WAY_COMP, INFIX_LEFT, --prec, TokenType::OP),        //three-way comparison
+      _("<<",  Op::SHIFT_LEFT,        Prop::INFIX_LEFT,  --prec, Type::OP          ), //left bit-shift
+      _(">>",  Op::SHIFT_RIGHT,       Prop::INFIX_LEFT,    prec, Type::OP          ), //right bit-shift
 
-      OpData("<",     OpID::LESSER, INFIX_LEFT, --prec, TokenType::OP),        //less than
-      OpData(">",     OpID::GREATER, INFIX_LEFT, prec, TokenType::OP),        //greater than
-      OpData("<=",    OpID::LESSER_OR_EQ, INFIX_LEFT, prec, TokenType::OP),        //less than or equal to
-      OpData(">=",    OpID::GREATER_OR_EQ, INFIX_LEFT, prec, TokenType::OP),        //greather than or equal to
+      _("<=>", Op::THREE_WAY_COMP,    Prop::INFIX_LEFT,  --prec, Type::OP          ), //three-way comparison
 
-      OpData("==",    OpID::IS_EQUAL, INFIX_LEFT, --prec, TokenType::OP),        //equality
-      OpData("!=",    OpID::IS_UNEQUAL, INFIX_LEFT, prec, TokenType::OP),        //inequality
-      // OpData("===",   OpID::SQUAM, INFIX_LEFT, prec, TokenType::OP),        //strict equality
-      // OpData("!==",   OpID::SQUAM, INFIX_LEFT, prec, TokenType::OP),        //strict inequality
+      _("<",   Op::LESSER,            Prop::INFIX_LEFT,  --prec, Type::OP          ), //less than
+      _(">",   Op::GREATER,           Prop::INFIX_LEFT,    prec, Type::OP          ), //greater than
+      _("<=",  Op::LESSER_OR_EQ,      Prop::INFIX_LEFT,    prec, Type::OP          ), //less than or equal to
+      _(">=",  Op::GREATER_OR_EQ,     Prop::INFIX_LEFT,    prec, Type::OP          ), //greather than or equal to
 
-      OpData("&",     OpID::BIT_AND, INFIX_LEFT, --prec, TokenType::OP),        //bitwise AND
-      OpData("^",     OpID::BIT_XOR, INFIX_LEFT, --prec, TokenType::OP),        //bitwise XOR
-      OpData("|",     OpID::BIT_OR, INFIX_LEFT, --prec, TokenType::OP),        //bitwise OR
-      OpData("&&",    OpID::LOGICAL_AND, INFIX_LEFT, --prec, TokenType::OP),        //logical AND
-      OpData("||",    OpID::LOGICAL_OR, INFIX_LEFT, --prec, TokenType::OP),        //logical OR
+      _("==",  Op::IS_EQUAL,          Prop::INFIX_LEFT,  --prec, Type::OP          ), //equality
+      _("!=",  Op::IS_UNEQUAL,        Prop::INFIX_LEFT,    prec, Type::OP          ), //inequality
 
-      OpData("??",    OpID::COALESCE, INFIX_RIGHT, --prec, TokenType::OP),       //null coalescing
-      OpData("?",     OpID::INLINE_IF, INFIX_RIGHT, prec, TokenType::OP),       //inline if
-      OpData(":",     OpID::INLINE_ELSE, INFIX_RIGHT, prec, TokenType::OP),       //inline else
-      OpData("=",     OpID::ASSIGN, INFIX_RIGHT, prec, TokenType::OP),       //direct assignment
-      // OpData(":=",    OpID::CONST_ASSIGN, INFIX_RIGHT, prec, TokenType::OP),       //const assignment
-      OpData("+=",    OpID::ADD_ASSIGN, INFIX_RIGHT, prec, TokenType::OP),       //compound assignment (add)
-      OpData("-=",    OpID::SUB_ASSIGN, INFIX_RIGHT, prec, TokenType::OP),       //compound assignment (sub)
-      OpData("*=",    OpID::MUL_ASSIGN, INFIX_RIGHT, prec, TokenType::OP),       //compound assignment (mul)
-      OpData("/=",    OpID::DIV_ASSIGN, INFIX_RIGHT, prec, TokenType::OP),       //compound assignment (div)
-      OpData("%=",    OpID::MOD_ASSIGN, INFIX_RIGHT, prec, TokenType::OP),       //compound assignment (mod)
-      OpData("^^=",   OpID::EXP_ASSIGN, INFIX_RIGHT, prec, TokenType::OP),       //compound assignment (exp)
-      OpData("<<=",   OpID::SHL_ASSIGN, INFIX_RIGHT, prec, TokenType::OP),       //compound assignment (shl)
-      OpData(">>=",   OpID::SHR_ASSIGN, INFIX_RIGHT, prec, TokenType::OP),       //compound assignment (shr)
-      OpData("&=",    OpID::AND_ASSIGN, INFIX_RIGHT, prec, TokenType::OP),       //compound assignment (AND)
-      OpData("^=",    OpID::XOR_ASSIGN, INFIX_RIGHT, prec, TokenType::OP),       //compound assignment (XOR)
-      OpData("|=",    OpID::OR_ASSIGN, INFIX_RIGHT, prec, TokenType::OP),       //compound assignment (OR)
-      OpData("??=",   OpID::COALESCE_ASSIGN, INFIX_RIGHT, prec, TokenType::OP),       //compound assignment (null coalescing)
+      _("&",   Op::BIT_AND,           Prop::INFIX_LEFT,  --prec, Type::OP          ), //bitwise AND
+      _("^",   Op::BIT_XOR,           Prop::INFIX_LEFT,  --prec, Type::OP          ), //bitwise XOR
+      _("|",   Op::BIT_OR,            Prop::INFIX_LEFT,  --prec, Type::OP          ), //bitwise OR
+      _("&&",  Op::LOGICAL_AND,       Prop::INFIX_LEFT,  --prec, Type::OP          ), //logical AND
+      _("||",  Op::LOGICAL_OR,        Prop::INFIX_LEFT,  --prec, Type::OP          ), //logical OR
 
-      OpData(",",     OpID::COMMA, INFIX_LEFT, --prec, TokenType::OP)         //comma
+      _("??",  Op::COALESCE,          Prop::INFIX_RIGHT, --prec, Type::OP          ), //null coalescing
+      _("?",   Op::INLINE_IF,         Prop::INFIX_RIGHT,   prec, Type::OP          ), //inline if
+      _(":",   Op::INLINE_ELSE,       Prop::INFIX_RIGHT,   prec, Type::OP          ), //inline else
+      _("=",   Op::ASSIGN,            Prop::INFIX_RIGHT,   prec, Type::OP          ), //direct assignment
+      _("+=",  Op::ADD_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (add)
+      _("-=",  Op::SUB_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (sub)
+      _("*=",  Op::MUL_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (mul)
+      _("/=",  Op::DIV_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (div)
+      _("%=",  Op::MOD_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (mod)
+      _("^^=", Op::EXP_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (exp)
+      _("<<=", Op::SHL_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (shl)
+      _(">>=", Op::SHR_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (shr)
+      _("&=",  Op::AND_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (AND)
+      _("^=",  Op::XOR_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (XOR)
+      _("|=",  Op::OR_ASSIGN,         Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (OR)
+      _("??=", Op::COALESCE_ASSIGN,   Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (null coalescing)
+
+      _(",",   Op::COMMA,             Prop::INFIX_LEFT,  --prec, Type::OP          )  //comma
    };
 }
 

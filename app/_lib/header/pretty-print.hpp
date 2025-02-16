@@ -102,8 +102,9 @@ constexpr const char* clef::toString(const OpID op) {
       CASE(ESCAPE, "\\");
       CASE(EOS, ";");
 
-      CASE(STRING, "\"");
       CASE(CHAR, "\'");
+      CASE(STRING, "\"");
+      CASE(INTERP_STRING, "`");
 
       CASE(LINE_CMNT, "//");
       CASE(BLOCK_CMNT, "/**/");
@@ -137,9 +138,9 @@ constexpr const char* clef::toString(const OpID op) {
       CASE(DEC, "--");
 
       CASE(MEMBER_ACCESS, ".");
-      CASE(MEMBER_OF_POINTER_ACCESS, "->");
-      CASE(POINTER_TO_MEMBER, ".*");
-      CASE(POINTER_TO_MEMBER_OF_POINTER, "->*");
+      CASE(PTR_MEMBER_ACCESS, "->");
+      CASE(METHOD_PTR, ".*");
+      CASE(ARROW_METHOD_PTR, "->*");
 
       CASE(RANGE, "..");
       CASE(SPREAD, "...");
@@ -241,10 +242,21 @@ constexpr const char* clef::toString(const OpProps props) {
 
       CASE(POSTFIX, "POSTFIX");
       CASE(PREFIX, "PREFIX");
+      CASE(POSTFIX | PREFIX, "UNARY");
       CASE(INFIX_LEFT, "INFIX_LEFT");
       CASE(INFIX_RIGHT, "INFIX_RIGHT");
+      CASE(PREFIX | INFIX_LEFT, "PREFIX or INFIX_LEFT");
+      CASE(PREFIX | INFIX_RIGHT, "PREFIX or INFIX_RIGHT");
 
       CASE(DELIM, "DELIMITER");
+      CASE(OPEN_DELIM, "OPENING DELIMITER");
+      CASE(CLOSE_DELIM, "CLOSING DELIMITER");
+
+      CASE(TYPE_MOD, "TYPE MODIFIER");
+      CASE(TYPE_MOD | INFIX_LEFT, "TYPE MODIFIER or INFIX_LEFT");
+      CASE(TYPE_MOD | INFIX_RIGHT, "TYPE MODIFIER or INFIX_RIGHT");
+      CASE(TYPE_MOD | PREFIX | INFIX_LEFT, "TYPE MODIFIER or PREFIX or INFIX_LEFT");
+      CASE(TYPE_MOD | PREFIX | INFIX_RIGHT, "TYPE MODIFIER or PREFIX or INFIX_RIGHT");
 
       default: UNREACHABLE;
    }

@@ -146,6 +146,7 @@ namespace clef {
 
       STRING,
       CHAR,
+      INTERP_STRING,
 
       LINE_CMNT,
       BLOCK_CMNT,
@@ -179,9 +180,9 @@ namespace clef {
       DEC, //decrement
 
       MEMBER_ACCESS, // .
-      MEMBER_OF_POINTER_ACCESS, // ->
-      POINTER_TO_MEMBER, // .*
-      POINTER_TO_MEMBER_OF_POINTER, // ->*
+      PTR_MEMBER_ACCESS, // ->
+      METHOD_PTR, // .*
+      ARROW_METHOD_PTR, // ->*
 
       RANGE,
       SPREAD,
@@ -286,7 +287,7 @@ namespace clef {
       RAW_PTR = MUL,
       DEREF = RAW_PTR,
       VARIADIC_PARAM = SPREAD,
-      ARROW = MEMBER_OF_POINTER_ACCESS,
+      ARROW = PTR_MEMBER_ACCESS,
       UNARY_PLUS = ADD,
       UNARY_MINUS = SUB,
       RADIX_POINT = MEMBER_ACCESS,

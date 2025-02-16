@@ -82,7 +82,10 @@ clef::index<clef::Scope> clef::Parser::parseProcedure() {
 clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName) {
    index<astNode> name = +parseIdentifier(scopeName);
    tree[name].upCast(NodeType::TYPE);
-   //!TODO: type modifier operators (pointer, reference)
+   while (tokIt->type() == TokenType::OP && +(tokIt->op().props() & OpProps::TYPE_MOD)) {
+      //!TODO: actually do something with the type modifiers
+      ++tokIt;
+   }
    return +name;
 }
 

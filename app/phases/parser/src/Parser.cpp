@@ -491,7 +491,7 @@ clef::index<clef::Function> clef::Parser::parseFunction() {
    
 
    //return type
-   consumeOperator(OpID::MEMBER_OF_POINTER_ACCESS, "FUNC without trailing return type");
+   consumeOperator(OpID::PTR_MEMBER_ACCESS, "FUNC without trailing return type");
    // TypeQualMask returnTypeQuals = parseQuals();
    index<Type> returnType = parseTypename();
 
