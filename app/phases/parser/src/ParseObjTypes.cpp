@@ -4,6 +4,7 @@
 #include "Parser.hpp"
 
 //!HACK: clef::Parser::parseStruct temporarily relies on this function
+//!TODO: `let` syntax
 clef::index<clef::Class> clef::Parser::parseClass() {
    index<Identifier> name = parseIdentifier();
    
@@ -23,23 +24,21 @@ clef::index<clef::Class> clef::Parser::parseClass() {
    //definition
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad CLASS definition");
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
-      if (tokIt->type() == TokenType::KEYWORD) {
-         switch (tokIt->keywordID()) {
-            case KeywordID::CLASS    : ++tokIt; {auto tmp = parseClass(); tree[spec].memberTypes().push_back(tmp);} break;
-            case KeywordID::STRUCT   : ++tokIt; {auto tmp = parseStruct(); tree[spec].memberTypes().push_back(tmp);} break;
-            case KeywordID::INTERFACE: ++tokIt; {auto tmp = parseInterface(); tree[spec].memberTypes().push_back(tmp);} break;
-            case KeywordID::UNION    : ++tokIt; {auto tmp = parseUnion(); tree[spec].memberTypes().push_back(tmp);} break;
-            case KeywordID::ENUM     : ++tokIt; {auto tmp = parseEnum(); tree[spec].memberTypes().push_back(tmp);} break;
-            case KeywordID::MASK     : ++tokIt; {auto tmp = parseMask(); tree[spec].memberTypes().push_back(tmp);} break;
-            case KeywordID::NAMESPACE: ++tokIt; {auto tmp = parseNamespace(); tree[spec].memberTypes().push_back(tmp);} break;
-            case KeywordID::FUNC     : ++tokIt; {auto tmp = parseFunction(); tree[spec].methods().push_back(tmp);} break; //!TODO: does not account for static functions
-            default: goto MEMB_VAR_DECL;
-         }
-         continue;
+      if (tokIt->type() != TokenType::KEYWORD) {
+         logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
       }
-      MEMB_VAR_DECL:
-      auto tmp = parseVariable();
-      tree[spec].members().push_back(tmp); //!TODO: does not yet account for static functions
+      switch (tokIt->keywordID()) {
+         case KeywordID::CLASS    : ++tokIt; {auto tmp = parseClass(); tree[spec].memberTypes().push_back(tmp);} break;
+         case KeywordID::STRUCT   : ++tokIt; {auto tmp = parseStruct(); tree[spec].memberTypes().push_back(tmp);} break;
+         case KeywordID::INTERFACE: ++tokIt; {auto tmp = parseInterface(); tree[spec].memberTypes().push_back(tmp);} break;
+         case KeywordID::UNION    : ++tokIt; {auto tmp = parseUnion(); tree[spec].memberTypes().push_back(tmp);} break;
+         case KeywordID::ENUM     : ++tokIt; {auto tmp = parseEnum(); tree[spec].memberTypes().push_back(tmp);} break;
+         case KeywordID::MASK     : ++tokIt; {auto tmp = parseMask(); tree[spec].memberTypes().push_back(tmp);} break;
+         case KeywordID::NAMESPACE: ++tokIt; {auto tmp = parseNamespace(); tree[spec].memberTypes().push_back(tmp);} break;
+         case KeywordID::FUNC     : ++tokIt; {auto tmp = parseFunction(); tree[spec].methods().push_back(tmp);} break; //!TODO: does not account for static functions
+         case KeywordID::LET      : ++tokIt; {auto tmp = parseLetStmt().second; tree[spec].members().push_back(tmp); } //!TODO: does not account for static members
+         default: logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
+      }
    }
 
    //EOS
@@ -169,6 +168,7 @@ clef::index<clef::Mask> clef::Parser::parseMask() {
    return +mask;
 }
 
+//!TODO: `let` syntax
 clef::index<clef::Namespace> clef::Parser::parseNamespace() {
    index<Identifier> name = parseIdentifier();
    
@@ -180,23 +180,21 @@ clef::index<clef::Namespace> clef::Parser::parseNamespace() {
    index<NamespaceSpec> spec = tree.allocNamespaceSpec();
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad CLASS definition");
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
-      if (tokIt->type() == TokenType::KEYWORD) {
-         switch (tokIt->keywordID()) {
-            case KeywordID::CLASS    : ++tokIt; {auto tmp = parseClass(); tree[spec].types().push_back(tmp);} break;
-            case KeywordID::STRUCT   : ++tokIt; {auto tmp = parseStruct(); tree[spec].types().push_back(tmp);} break;
-            case KeywordID::INTERFACE: ++tokIt; {auto tmp = parseInterface(); tree[spec].types().push_back(tmp);} break;
-            case KeywordID::UNION    : ++tokIt; {auto tmp = parseUnion(); tree[spec].types().push_back(tmp);} break;
-            case KeywordID::ENUM     : ++tokIt; {auto tmp = parseEnum(); tree[spec].types().push_back(tmp);} break;
-            case KeywordID::MASK     : ++tokIt; {auto tmp = parseMask(); tree[spec].types().push_back(tmp);} break;
-            case KeywordID::NAMESPACE: ++tokIt; {auto tmp = parseNamespace(); tree[spec].types().push_back(tmp);} break;
-            case KeywordID::FUNC     : ++tokIt; {auto tmp = parseFunction(); tree[spec].funcs().push_back(tmp);} break; //!NOTE: does not account for static functions
-            default: goto MEMB_VAR_DECL;
-         }
-         continue;
+      if (tokIt->type() != TokenType::KEYWORD) {
+         logError(ErrCode::BAD_STMT, "invalid statement in NAMESPACE definition");
       }
-      MEMB_VAR_DECL:
-      auto tmp = parseVariable();
-      tree[spec].vars().push_back(tmp); //!NOTE: does not yet account for static variables
+      switch (tokIt->keywordID()) {
+         case KeywordID::CLASS    : ++tokIt; {auto tmp = parseClass(); tree[spec].types().push_back(tmp);} break;
+         case KeywordID::STRUCT   : ++tokIt; {auto tmp = parseStruct(); tree[spec].types().push_back(tmp);} break;
+         case KeywordID::INTERFACE: ++tokIt; {auto tmp = parseInterface(); tree[spec].types().push_back(tmp);} break;
+         case KeywordID::UNION    : ++tokIt; {auto tmp = parseUnion(); tree[spec].types().push_back(tmp);} break;
+         case KeywordID::ENUM     : ++tokIt; {auto tmp = parseEnum(); tree[spec].types().push_back(tmp);} break;
+         case KeywordID::MASK     : ++tokIt; {auto tmp = parseMask(); tree[spec].types().push_back(tmp);} break;
+         case KeywordID::NAMESPACE: ++tokIt; {auto tmp = parseNamespace(); tree[spec].types().push_back(tmp);} break;
+         case KeywordID::FUNC     : ++tokIt; {auto tmp = parseFunction(); tree[spec].funcs().push_back(tmp);} break; //!NOTE: does not account for static functions
+         case KeywordID::LET      : ++tokIt; {auto tmp = parseLetStmt().second; tree[spec].vars().push_back(tmp); }
+         default: logError(ErrCode::BAD_STMT, "invalid statement in NAMESPACE definition");
+      }
    }
 
    //EOS

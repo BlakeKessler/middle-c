@@ -284,7 +284,7 @@ constexpr const char* clef::toString(const KeywordID kw) {
       CASE(USHORT, "USHORT");
       CASE(UINT, "UINT");
       CASE(ULONG, "ULONG");
-      CASE(UPTR, "UPTR");
+      CASE(UINT_PTR, "UINT_PTR");
       CASE(UWORD, "UWORD");
 
       CASE(SIGN_T, "SIGN_T");
@@ -292,7 +292,7 @@ constexpr const char* clef::toString(const KeywordID kw) {
       CASE(SSHORT, "SSHORT");
       CASE(SINT, "SINT");
       CASE(SLONG, "SLONG");
-      CASE(SPTR, "SPTR");
+      CASE(SINT_PTR, "SINT_PTR");
       CASE(SWORD, "SWORD");
 
 
@@ -336,7 +336,8 @@ constexpr const char* clef::toString(const KeywordID kw) {
       CASE(CONST, "CONST");
       CASE(CONSTEXPR, "CONSTEXPR");
       CASE(IMMEDIATE, "IMMEDIATE");
-      CASE(READONLY, "READONLY");
+      CASE(VIEW, "VIEW");
+      CASE(NON_OWNING, "NON_OWNING");
       CASE(MUTABLE, "MUTABLE");
       CASE(VOLATILE, "VOLATILE");
       CASE(ATOMIC, "ATOMIC");
@@ -349,10 +350,7 @@ constexpr const char* clef::toString(const KeywordID kw) {
       CASE(CONST_CAST, "CONST_CAST");
 
       CASE(TYPEOF, "TYPEOF");
-      CASE(TYPEID, "TYPEID");
-      CASE(TYPENAME, "TYPENAME");
       CASE(SIZEOF, "SIZEOF");
-      CASE(ARRLEN, "ARRLEN");
       CASE(ALIGNAS, "ALIGNAS");
       CASE(ALIGNOF, "ALIGNOF");
 
@@ -380,27 +378,22 @@ constexpr const char* clef::toString(const KeywordID kw) {
       CASE(THIS, "THIS");
       CASE(SELF, "SELF");
 
-      CASE(NEW, "NEW");
-      CASE(DELETE, "DELETE");
-
       CASE(ASSERT, "ASSERT");
       CASE(STATIC_ASSERT, "STATIC_ASSERT");
       CASE(DEBUG_ASSERT, "DEBUG_ASSERT");
+      CASE(SAFE_MODE_ASSERT, "SAFE_MODE_ASSERT");
 
       CASE(TRUE, "TRUE");
       CASE(FALSE, "FALSE");
 
-      CASE(NULLPTR, "NULLPTR");
+      CASE(NULLPTR, "NULL");
 
       CASE(RETURN, "RETURN");
 
-      CASE(USING, "USING");
+      CASE(LET, "LET");
+      CASE(ALIAS, "ALIAS");
 
       CASE(ASM, "ASM");
-
-      CASE(TEMPLATE, "TEMPLATE");
-
-      default: UNREACHABLE;
    }
    UNREACHABLE;
 }

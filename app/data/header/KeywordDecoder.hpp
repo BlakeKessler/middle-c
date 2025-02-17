@@ -10,7 +10,7 @@
 
 //code adapted from gperf
 
-
+//!TODO: update (and maybe use [frozen](https://github.com/serge-sans-paille/frozen))
 class clef::KeywordDecoder {
    private:
       static constexpr ubyte TOTAL_KEYWORDS  = 96;
@@ -138,7 +138,7 @@ class clef::KeywordDecoder {
       {"this", THIS},
       {"const_cast", CONST_CAST},
       {},
-      {"using", USING},
+      {"using", ALIAS},
       {},
       {"namespace", NAMESPACE},
       {},
@@ -154,12 +154,12 @@ class clef::KeywordDecoder {
       {"sword", SWORD},
       {}, {},
       {"bit_cast", BIT_CAST},
-      {"uptr", UPTR},
+      {"uptr", UINT_PTR},
       {},
       {"char16", CHAR_UTF_16},
       {"float32", FLOAT_32},
       {"asm", ASM},
-      {"sptr", SPTR},
+      {"sptr", SINT_PTR},
       {},
       {"uint32", UINT_32},
       {},

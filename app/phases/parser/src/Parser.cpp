@@ -22,13 +22,15 @@ START_PARSE_STMT:
          switch (tokIt->keywordID()) {
             case KeywordID::VOID    : [[fallthrough]];
             case KeywordID::AUTO    : [[fallthrough]];
-            default: {
+            default:
                debug_assert(isType(tokIt->keywordID()));
-               auto [var, decl] = parseVarDecl();
-               tree.getNode(decl).anyCast(NodeType::STMT);
-               return (index<Stmt>)decl;
-               static_assert(mcsl::same_t<decltype(decl), index<Decl>>);
+               logError(ErrCode::BAD_KEYWORD, "floating typename (declarations must use the `let` keyword)");
+               break;
+            case KeywordID::LET     : {
+               ++tokIt;
+               return parseLetStmt().first;
             } break;
+
             case KeywordID::NULLPTR : [[fallthrough]];
             case KeywordID::THIS    : [[fallthrough]];
             case KeywordID::SELF    : [[fallthrough]];
@@ -107,12 +109,12 @@ START_PARSE_STMT:
                return tree.make<Stmt>(KeywordID::RETURN, expr);
             }
 
-            case KeywordID::USING         : {
+            case KeywordID::ALIAS         : {
                ++tokIt;
                index<Identifier> alias = parseIdentifier();
                consumeOperator(OpID::ASSIGN, "alias definitions must use the assignment operator (and cannot be forward-declared)");
                index<Expr> valExpr = parseExpr();
-               return tree.make<Stmt>(KeywordID::USING, alias, valExpr);
+               return tree.make<Stmt>(KeywordID::ALIAS, alias, valExpr);
             }
 
             UNREACHABLE;
@@ -131,13 +133,7 @@ START_PARSE_STMT:
             case KeywordID::_NOT_A_KEYWORD: UNREACHABLE;
          }
       case TokenType::IDEN        : {
-         index<astNode> tmp = (index<astNode>)parseIdentifier();
-         if (tokIt->type() == TokenType::IDEN) {
-            tree[tmp].upCast(NodeType::TYPE);
-            index<Decl> decl = parseDecl((index<Type>)tmp);
-            tmp = (index<astNode>)decl;
-         }
-         index<Expr> stmtContents = parseExpr(tmp);
+         index<Expr> stmtContents = parseExpr();
          consumeEOS("invalid statement");
          tree[(index<astNode>)stmtContents].upCast(NodeType::STMT);
          return (index<Stmt>)stmtContents;
@@ -231,6 +227,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
                goto PARSE_EXPR_CONTINUE;
             }
             else if (isType(kw)) {
+               //!TODO: change for `let` syntax
                operandStack.push_back(+tree.getFundType(kw));
                ++tokIt;
                prevTokIsOperand = true;
@@ -476,10 +473,10 @@ clef::index<clef::TryCatch> clef::Parser::parseTryCatch() {
    index<Scope> procedure = parseProcedure();
    consumeKeyword(KeywordID::CATCH, "TRY block without CATCH block");
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "CATCH block without opening parens");
-   index<Decl> decl = parseDecl();
+   index<Variable> err = parseParam();
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "CATCH block without closing parens");
    index<Scope> handler = parseProcedure();
-   return tree.make<TryCatch>(procedure, decl, handler);
+   return tree.make<TryCatch>(procedure, err, handler);
 }
 
 clef::index<clef::Function> clef::Parser::parseFunction() {
@@ -491,7 +488,7 @@ clef::index<clef::Function> clef::Parser::parseFunction() {
    
 
    //return type
-   consumeOperator(OpID::PTR_MEMBER_ACCESS, "FUNC without trailing return type");
+   consumeOperator(OpID::ARROW, "FUNC without trailing return type");
    // TypeQualMask returnTypeQuals = parseQuals();
    index<Type> returnType = parseTypename();
 

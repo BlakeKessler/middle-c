@@ -26,7 +26,7 @@ clef::index<clef::FundType> clef::SyntaxTree::getFundType(const KeywordID keywor
       case KeywordID::USHORT     : ID(UINT16);
       case KeywordID::UINT       : ID(UINT32);
       case KeywordID::ULONG      : ID(UINT64);
-      case KeywordID::UPTR       : ID(UINT64);
+      case KeywordID::UINT_PTR       : ID(UINT64);
       case KeywordID::UWORD      : ID(UINT64);
 
       case KeywordID::SIGN_T     : ID(SIGN_T);
@@ -34,7 +34,7 @@ clef::index<clef::FundType> clef::SyntaxTree::getFundType(const KeywordID keywor
       case KeywordID::SSHORT     : ID(SINT16);
       case KeywordID::SINT       : ID(SINT32);
       case KeywordID::SLONG      : ID(SINT64);
-      case KeywordID::SPTR       : ID(SINT64);
+      case KeywordID::SINT_PTR       : ID(SINT64);
       case KeywordID::SWORD      : ID(SINT64);
 
 

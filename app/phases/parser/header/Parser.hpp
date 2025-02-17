@@ -56,14 +56,10 @@ class clef::Parser {
 
       index<Identifier> tryParseIdentifier(index<Identifier> scopeName = 0);
       index<Identifier> parseIdentifier(index<Identifier> scopeName = 0);
-      index<Decl> parseDecl(index<Type> type, index<Identifier> scopeName = 0);
-      index<Decl> parseDecl(index<Identifier> scopeName = 0);
-      index<Function> parseFuncDecl(index<Identifier> scopeName = 0);
-      index<Stmt> parseForwardDecl(index<Identifier> scopeName = 0);
-      index<Stmt> parseDeclStmt(index<Identifier> scopeName = 0);
       index<Type> parseTypename(index<Identifier> scopeName = 0);
-      index<Variable> parseVariable(index<Identifier> scopeName = 0);
-      mcsl::pair<index<Variable>,index<Decl>> parseVarDecl(index<Identifier> scopeName = 0);
+      mcsl::pair<index<Stmt>,index<Variable>> parseLetStmt(index<Identifier> scopeName = 0);
+      index<Variable> parseParam(index<Identifier> scopeName = 0);
+      index<Variable> parseDefaultableParam(index<Identifier> scopeName = 0);
 
       index<ForLoop> parseForLoop();
       index<ForeachLoop> parseForeachLoop();

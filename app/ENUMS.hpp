@@ -359,114 +359,128 @@ namespace clef {
    #pragma endregion ops
    #pragma region keyword
    enum class KeywordID : uint8 {
-      __TYPE         = 8_m,
-         __NUMERIC      = 7_m, __NUMERIC_TYPE = __TYPE | __NUMERIC,
-            __FIXED_WIDTH  = 6_m,
-            __FLOATING     = 5_m,
-            __SIGNED       = 4_m,
-         __TEXT         = 4_m,
-      __TYPE_ADJACENT = 7_m,
-         __OBJECT_TYPE  = 6_m,
-         __QUALIFIER    = 5_m,
-         __CAST         = 4_m,
-      __CONTROL_FLOW = 6_m,
-      ___LAST_SPEC = __CONTROL_FLOW,
-
-      _8_BITS        = 1,
-
-
       _NOT_A_KEYWORD = 0,
 
 
-      VOID           = __TYPE + 1,
+      VOID,
       AUTO,
 
 
-      CHAR           = __TYPE | __TEXT,
-      CHAR_UTF_8     = __TYPE | __TEXT | __FIXED_WIDTH | _8_BITS,
+      CHAR,
+      CHAR_UTF_8,
       CHAR_UTF_16,
       CHAR_UTF_32,
       
 
-      BOOL           = __TYPE | __NUMERIC,
+      BOOL,
       UBYTE,
       USHORT,
       UINT,
       ULONG,
-      UPTR,
+      UINT_PTR,
       UWORD,
 
-      SIGN_T         = __TYPE | __NUMERIC | __SIGNED,
-      SBYTE,
-      SSHORT,
-      SINT,
-      SLONG,
-      SPTR,
-      SWORD,
-
-
-      UINT_8         = __TYPE | __NUMERIC | __FIXED_WIDTH | _8_BITS,
+      UINT_8,
       UINT_16,
       UINT_32,
       UINT_64,
       UINT_128,
       UINT_256,
 
-      SINT_8         = UINT_8 | __SIGNED,
+
+      SIGN_T,
+      SBYTE,
+      SSHORT,
+      SINT,
+      SLONG,
+      SINT_PTR,
+      SWORD,
+
+      SINT_8,
       SINT_16,
       SINT_32,
       SINT_64,
       SINT_128,
       SINT_256,
 
-      FLOAT             = SINT | __FLOATING,
+      FLOAT,
 
-      FLOAT_16          = SINT_16 | __FLOATING,
+      FLOAT_16,
       FLOAT_32,
       FLOAT_64,
       FLOAT_128,
       FLOAT_256,
 
 
+      __SIGN_TYPE_OFFSET = SBYTE - UBYTE,
+
+      __FIRST_TEXT_TYPE = CHAR,
+      __LAST_TEXT_TYPE = CHAR_UTF_32,
+      __FIRST_INT_TYPE = BOOL,
+      __LAST_INT_TYPE = SINT_256,
+      __FIRST_UINT_TYPE = BOOL,
+      __LAST_UINT_TYPE = UINT_256,
+      __FIRST_SINT_TYPE = SIGN_T,
+      __LAST_SINT_TYPE = SINT_256,
+      __FIRST_FLOAT_TYPE = FLOAT,
+      __LAST_FLOAT_TYPE = FLOAT_256,
+      __FIRST_NUM_TYPE = __FIRST_INT_TYPE,
+      __LAST_NUM_TYPE = __LAST_FLOAT_TYPE,
+      __FIRST_TYPE = VOID,
+      __LAST_TYPE = FLOAT_256,
 
 
 
 
 
-      CLASS             = __TYPE_ADJACENT | __OBJECT_TYPE + 1,
+
+
+      CLASS,
       STRUCT,
       INTERFACE,
       UNION,
       ENUM,
+      ENUM_UNION,
       MASK,
       NAMESPACE,
       FUNC,
 
-      CONST             = __TYPE_ADJACENT | __QUALIFIER + 1,
+      __FIRST_OBJ_TYPE = CLASS,
+      __LAST_OBJ_TYPE = FUNC,
+
+      CONST,
       CONSTEXPR,
       IMMEDIATE,
-      READONLY,
+      VIEW,
+      NON_OWNING,
       MUTABLE,
       VOLATILE,
       ATOMIC,
       EXPLICIT,
 
-      CAST              = __TYPE_ADJACENT | __CAST + 1,
+      __FIRST_TYPE_QUAL = CONST,
+      __LAST_TYPE_QUAL = EXPLICIT,
+
+      CAST,
       UP_CAST,
       DYN_CAST,
       BIT_CAST,
       CONST_CAST,
 
-      TYPEOF            = __TYPE_ADJACENT + 1,
-      TYPEID,
-      TYPENAME,
+      __FIRST_CAST = CAST,
+      __LAST_CAST = CONST_CAST,
+
+      TYPEOF,
       SIZEOF,
-      ARRLEN,
       ALIGNAS,
       ALIGNOF,
+
+      __FIRST_TYPE_ASSESSMENT = TYPEOF,
+      __LAST_TYPE_ASSESSMENT = ALIGNOF,
       
 
-      GOTO              = __CONTROL_FLOW + 1,
+      GOTO,
+      RETURN,
       IF,
       ELSE,
       FOR,
@@ -483,78 +497,71 @@ namespace clef {
       CATCH,
       THROW,
 
+      __FIRST_CONTROL_FLOW = GOTO,
+      __LAST_CONTROL_FLOW = THROW,
 
 
 
-      THIS = 1,
+
+      THIS,
       SELF,
-
-      NEW,
-      DELETE,
-
-      ASSERT,
-      STATIC_ASSERT,
-      DEBUG_ASSERT,
 
       TRUE,
       FALSE,
 
       NULLPTR,
 
-      RETURN,
+      __FIRST_VALUE = THIS,
+      __LAST_VALUE = NULLPTR,
 
-      USING,
+      ASSERT,
+      STATIC_ASSERT,
+      DEBUG_ASSERT,
+      SAFE_MODE_ASSERT,
+
+      __FIRST_ASSERT = ASSERT,
+      __LAST_ASSERT = SAFE_MODE_ASSERT,
+
+      LET,
+      ALIAS,
 
       ASM,
 
-      TEMPLATE,
+      __FIRST_UNSPEC = LET,
+      __LAST_UNSPEC = ASM,
    };
    constexpr auto operator+(const KeywordID t) noexcept { return std::to_underlying(t); }
-   constexpr bool isType(const KeywordID id) noexcept { return +id & +KeywordID::__NUMERIC; }
-      constexpr bool isNumeric(const KeywordID id) noexcept { return +id & +KeywordID::__NUMERIC_TYPE; }
-         constexpr bool isFloatingPoint(const KeywordID id) noexcept { return +id & (+KeywordID::__NUMERIC_TYPE | +KeywordID::__FLOATING); }
-         constexpr bool isInteger(const KeywordID id) noexcept { return ~(+id & +KeywordID::__NUMERIC_TYPE) & +KeywordID::__FLOATING; }
-            constexpr bool isSint(const KeywordID id) noexcept { return ~(+id & (+KeywordID::__NUMERIC_TYPE | +KeywordID::__SIGNED)) & +KeywordID::__FLOATING; }
-            constexpr bool isUint(const KeywordID id) noexcept { return ~(+id & +KeywordID::__NUMERIC_TYPE) & (+KeywordID::__FLOATING | +KeywordID::__SIGNED); }
-      constexpr bool isText(const KeywordID id) noexcept { return ~(+id & (+KeywordID::__TYPE | +KeywordID::__TEXT)) & (+KeywordID::__NUMERIC); }
-         constexpr bool isASCII(const KeywordID id) noexcept { return ~(+id & (+KeywordID::__TYPE | +KeywordID::__TEXT)) & (+KeywordID::__NUMERIC | +KeywordID::__FIXED_WIDTH); }
-         constexpr bool isUnicode(const KeywordID id) noexcept { return ~(+id & (+KeywordID::__TYPE | +KeywordID::__TEXT | +KeywordID::__FIXED_WIDTH)) & +KeywordID::__NUMERIC; }
-   constexpr bool isTypeAdjacent(const KeywordID id) noexcept { return ~(+id & +KeywordID::__TYPE_ADJACENT) & +KeywordID::__TYPE; }
-      constexpr bool isObjectType(const KeywordID id) noexcept { return ~(+id & (+KeywordID::__TYPE_ADJACENT | +KeywordID::__OBJECT_TYPE)) & +KeywordID::__TYPE; }
-      constexpr bool isQualifier(const KeywordID id) noexcept { return ~(+id & (+KeywordID::__TYPE_ADJACENT | +KeywordID::__QUALIFIER)) & (+KeywordID::__TYPE | +KeywordID::__OBJECT_TYPE); }
-      constexpr bool isCast(const KeywordID id) noexcept { return ~(+id & (+KeywordID::__TYPE_ADJACENT | +KeywordID::__CAST)) & (+KeywordID::__TYPE | +KeywordID::__OBJECT_TYPE | +KeywordID::__QUALIFIER); }
-   constexpr bool isControlFlow(const KeywordID id) noexcept { return ~(+id & +KeywordID::__CONTROL_FLOW) & +KeywordID::__NUMERIC_TYPE; }
-   constexpr bool isUnspec(const KeywordID id) noexcept { return +id < +KeywordID::___LAST_SPEC; }
-   
-   constexpr bool isValue(const KeywordID id) noexcept {
-      using enum KeywordID;
-      switch (id) {
-         case THIS:
-         case SELF:
-         case TRUE:
-         case FALSE:
-         case NULLPTR:
-            return true;
-         
-         default:
-            return false;
-      }
-   }
+   #define __BETWEEN(name) (id >= KeywordID::__FIRST_##name && id <= KeywordID::__LAST_##name)
+   constexpr bool isType(const KeywordID id) noexcept { return __BETWEEN(TYPE); }
+      constexpr bool isNumeric(const KeywordID id) noexcept { return __BETWEEN(NUM_TYPE); }
+         constexpr bool isFloatingPoint(const KeywordID id) noexcept { return __BETWEEN(FLOAT_TYPE); }
+         constexpr bool isInteger(const KeywordID id) noexcept { return __BETWEEN(INT_TYPE); }
+            constexpr bool isSint(const KeywordID id) noexcept { return __BETWEEN(SINT_TYPE); }
+            constexpr bool isUint(const KeywordID id) noexcept { return __BETWEEN(UINT_TYPE); }
+      constexpr bool isText(const KeywordID id) noexcept { return __BETWEEN(TEXT_TYPE); }
+         constexpr bool isASCII(const KeywordID id) noexcept { return id == KeywordID::CHAR; }
+         constexpr bool isUnicode(const KeywordID id) noexcept { return !isASCII(id) && isText(id); }
+   constexpr bool isObjectType(const KeywordID id) noexcept { return __BETWEEN(OBJ_TYPE); }
+   constexpr bool isQualifier(const KeywordID id) noexcept { return __BETWEEN(TYPE_QUAL); }
+   constexpr bool isCast(const KeywordID id) noexcept { return __BETWEEN(CAST); }
+   constexpr bool isControlFlow(const KeywordID id) noexcept { return __BETWEEN(CONTROL_FLOW); }
+   constexpr bool isUnspec(const KeywordID id) noexcept { return __BETWEEN(UNSPEC); }
+   constexpr bool isValue(const KeywordID id) noexcept { return __BETWEEN(VALUE); }
+   #undef __BETWEEN
+
    constexpr bool isC_FunctionLike(const KeywordID id) noexcept {//no specializer parameters
       using enum KeywordID;
       switch (id) {
          case ASSERT:
          case DEBUG_ASSERT:
          case STATIC_ASSERT:
+         case SAFE_MODE_ASSERT:
          
          case RETURN:
          case THROW:
          
          case TYPEOF:
-         case TYPEID:
-         case TYPENAME:
          case SIZEOF:
-         case ARRLEN:
          case ALIGNAS:
          case ALIGNOF:
             return true;
@@ -574,7 +581,7 @@ namespace clef {
          case KeywordID::STATIC_ASSERT : return OpID::STATIC_ASSERT;
          case KeywordID::RETURN        : return OpID::RETURN;
 
-         case KeywordID::USING         : return OpID::ALIAS;
+         case KeywordID::ALIAS         : return OpID::ALIAS;
 
          default: UNREACHABLE;
       }

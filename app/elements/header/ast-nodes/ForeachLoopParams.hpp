@@ -6,18 +6,18 @@
 
 struct clef::ForeachLoopParams {
    private:
-      index<Decl> _decl;
+      index<Variable> _it;
       index<Expr> _target;
    public:
       static constexpr NodeType nodeType() { return NodeType::FOREACH_LOOP_PARAMS; }
 
-      ForeachLoopParams():_decl{},_target{} {}
-      ForeachLoopParams(index<Decl> decl, index<Expr> target):_decl{decl},_target{target} {}
+      ForeachLoopParams():_it{},_target{} {}
+      ForeachLoopParams(index<Variable> iterator, index<Expr> target):_it{iterator},_target{target} {}
 
-      index<Decl>& decl() { return _decl; }
+      index<Variable>& iterator() { return _it; }
       index<Expr>& target() { return _target; }
 
-      index<const Decl> decl() const { return _decl; }
+      index<const Variable> iterator() const { return _it; }
       index<const Expr> target() const { return _target; }
 
       void printf() const;

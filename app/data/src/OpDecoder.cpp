@@ -69,7 +69,6 @@ template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef:
 }
 
 [[gnu::const]] constexpr auto clef::GetAllOplikesData() {
-   using enum clef::OpProps;
    using Op = OpID;
    using Prop = OpProps;
    using Type = TokenType;

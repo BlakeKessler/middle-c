@@ -6,7 +6,7 @@
 #include <cstdio>
 
 void clef::ForeachLoopParams::printf() const {
-   std::printf("FOREACH_PARAMS (id=%u : id=%u)", +decl(), +target());
+   std::printf("FOREACH_PARAMS (id=%u : id=%u)", +iterator(), +target());
 }
 
 #endif //FOREACH_LOOP_PARAMS_CPP
