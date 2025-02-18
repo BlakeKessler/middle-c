@@ -329,6 +329,7 @@ constexpr const char* clef::toString(const KeywordID kw) {
       CASE(INTERFACE, "INTERFACE");
       CASE(UNION, "UNION");
       CASE(ENUM, "ENUM");
+      CASE(ENUM_UNION, "ENUM_UNION");
       CASE(MASK, "MASK");
       CASE(NAMESPACE, "NAMESPACE");
       CASE(FUNC, "FUNC");
