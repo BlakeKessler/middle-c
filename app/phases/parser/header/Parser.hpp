@@ -80,6 +80,7 @@ class clef::Parser {
       index<Interface> parseInterface();
       index<Union> parseUnion();
       index<Enum> parseEnum();
+      index<EnumUnion> parseEnumUnion();
       index<Mask> parseMask();
       index<Namespace> parseNamespace();
 

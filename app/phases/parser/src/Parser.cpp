@@ -257,6 +257,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
                   goto PARSE_EXPR_CONTINUE;
 
                default: logError(ErrCode::PARSER_NOT_IMPLEMENTED, "cannot currently parse this plaintext segment type (%hhu)", +tokIt->ptxtType());
+               //!TODO: support other types of plaintext literal
             }
             UNREACHABLE;
 
@@ -518,6 +519,7 @@ clef::index<clef::Function> clef::Parser::parseFunction() {
    }
 }
 
+//!TODO: implement parseASM
 clef::index<clef::Asm> clef::Parser::parseASM() {
    logError(ErrCode::PARSER_NOT_IMPLEMENTED, "inline assembly is not yet supported");
 }

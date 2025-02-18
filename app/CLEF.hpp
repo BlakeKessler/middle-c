@@ -34,6 +34,7 @@ namespace clef {
             struct Enum;
             struct Mask;
             struct Union;
+            struct EnumUnion; //!TODO: implement enumunions
             struct Namespace;
             struct Interface;
             struct Struct;

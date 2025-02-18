@@ -168,7 +168,11 @@ clef::index<clef::Mask> clef::Parser::parseMask() {
    return +mask;
 }
 
-//!TODO: `let` syntax
+//!TODO: implement enumunions
+clef::index<clef::EnumUnion> clef::Parser::parseEnumUnion() {
+   logError(ErrCode::PARSER_NOT_IMPLEMENTED, "enumunions are not yet supported");
+}
+
 clef::index<clef::Namespace> clef::Parser::parseNamespace() {
    index<Identifier> name = parseIdentifier();
    

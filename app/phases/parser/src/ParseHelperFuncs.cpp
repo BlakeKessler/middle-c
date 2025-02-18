@@ -182,13 +182,15 @@ clef::index<clef::ParamList> clef::Parser::parseParamList(const BlockType closer
 }
 
 
-
+//!TODO: implement parseQuals
 clef::TypeQualMask clef::Parser::parseQuals(const TypeQualMask illegalQuals) {
    logError(ErrCode::PARSER_NOT_IMPLEMENTED, "type qualifiers are not yet supported");
 }
+//!TODO: implement parsePreprocStmt
 clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
    logError(ErrCode::PARSER_NOT_IMPLEMENTED, "preprocessor statements are not yet supported");
 }
+//!TODO: implement parseCast
 clef::index<clef::Expr> clef::Parser::parseCast(KeywordID castID) {
    logError(ErrCode::PARSER_NOT_IMPLEMENTED, "typecasting is not yet supported");
 }
