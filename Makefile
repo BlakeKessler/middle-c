@@ -1,5 +1,5 @@
 #directories and files
-MODULES := mcsl app
+MODULES := mcsl app frozen
 
 ALL_CODE_DIRS := $(foreach dir, $(MODULES),${shell find -L $(dir) -type d -print})
 ALL_SRC_FILES := $(foreach dir, $(ALL_CODE_DIRS), $(wildcard $(dir)/*.cpp))
