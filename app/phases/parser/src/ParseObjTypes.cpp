@@ -4,7 +4,6 @@
 #include "Parser.hpp"
 
 //!HACK: clef::Parser::parseStruct temporarily relies on this function
-//!TODO: `let` syntax
 clef::index<clef::Class> clef::Parser::parseClass() {
    index<Identifier> name = parseIdentifier();
    
@@ -36,7 +35,7 @@ clef::index<clef::Class> clef::Parser::parseClass() {
          case KeywordID::MASK     : ++tokIt; {auto tmp = parseMask(); tree[spec].memberTypes().push_back(tmp);} break;
          case KeywordID::NAMESPACE: ++tokIt; {auto tmp = parseNamespace(); tree[spec].memberTypes().push_back(tmp);} break;
          case KeywordID::FUNC     : ++tokIt; {auto tmp = parseFunction(); tree[spec].methods().push_back(tmp);} break; //!TODO: does not account for static functions
-         case KeywordID::LET      : ++tokIt; {auto tmp = parseLetStmt().second; tree[spec].members().push_back(tmp); } //!TODO: does not account for static members
+         case KeywordID::LET      : ++tokIt; {auto tmp = parseLetStmt().second; tree[spec].members().push_back(tmp); } break; //!TODO: does not account for static members
          default: logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
       }
    }
@@ -196,7 +195,7 @@ clef::index<clef::Namespace> clef::Parser::parseNamespace() {
          case KeywordID::MASK     : ++tokIt; {auto tmp = parseMask(); tree[spec].types().push_back(tmp);} break;
          case KeywordID::NAMESPACE: ++tokIt; {auto tmp = parseNamespace(); tree[spec].types().push_back(tmp);} break;
          case KeywordID::FUNC     : ++tokIt; {auto tmp = parseFunction(); tree[spec].funcs().push_back(tmp);} break; //!NOTE: does not account for static functions
-         case KeywordID::LET      : ++tokIt; {auto tmp = parseLetStmt().second; tree[spec].vars().push_back(tmp); }
+         case KeywordID::LET      : ++tokIt; {auto tmp = parseLetStmt().second; tree[spec].vars().push_back(tmp); } break;
          default: logError(ErrCode::BAD_STMT, "invalid statement in NAMESPACE definition");
       }
    }
