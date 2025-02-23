@@ -81,6 +81,7 @@ uint clef::nodeSizeof(NodeType t) {
       typecase(StatementSequence);
       typecase(ArgumentList);
       typecase(ParameterList);
+      typecase(SpecializerList);
    }
 }
 #undef typecase
@@ -137,6 +138,7 @@ void clef::astNode::printf() const {
       CASE(_statementSequence);
       CASE(_argumentList);
       CASE(_parameterList);
+      CASE(_specializerList);
 
       case NodeType::NONE: std::printf("NULL NODE"); break;
       case NodeType::ERROR: std::printf("ERORR NODE"); break;

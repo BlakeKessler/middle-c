@@ -67,6 +67,7 @@ constexpr const char* clef::toString(const NodeType type) {
       CASE(STMT_SEQ, "STATEMENT_SEQUENCE");
       CASE(ARG_LIST, "ARGUMENT_LIST");
       CASE(PARAM_LIST, "PARAMETER_LIST");
+      CASE(SPEC_LIST, "SPECIALIZER_LIST");
    }
    UNREACHABLE;
 }

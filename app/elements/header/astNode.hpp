@@ -27,6 +27,7 @@
 #include "ast-nodes/node-lists/ArgumentList.hpp"
 #include "ast-nodes/node-lists/MatchCases.hpp"
 #include "ast-nodes/node-lists/ParameterList.hpp"
+#include "ast-nodes/node-lists/SpecializerList.hpp"
 #include "ast-nodes/node-lists/StatementSequence.hpp"
 #include "ast-nodes/node-lists/SwitchCases.hpp"
 #include "ast-nodes/types/Class.hpp"
@@ -84,6 +85,7 @@ struct clef::astNode {
          StatementSequence _statementSequence;
          ArgumentList _argumentList;
          ParameterList _parameterList;
+         SpecializerList _specializerList;
       };
       NodeType _nodeType;
 
@@ -134,6 +136,7 @@ struct clef::astNode {
       _def_ctor(_statementSequence)
       _def_ctor(_argumentList)
       _def_ctor(_parameterList)
+      _def_ctor(_specializerList)
       #undef _def_ctor
       #pragma endregion constructors
 
@@ -187,6 +190,7 @@ struct clef::astNode {
       _def_cast_func(_statementSequence)
       _def_cast_func(_argumentList)
       _def_cast_func(_parameterList)
+      _def_cast_func(_specializerList)
 
       #undef _def_cast_func
       #pragma endregion cast

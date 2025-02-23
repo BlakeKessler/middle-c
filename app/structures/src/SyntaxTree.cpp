@@ -122,6 +122,7 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
       case StatementSequence::nodeType():
       case ArgumentList::nodeType():
       case ParameterList::nodeType():
+      case SpecializerList::nodeType():
       case NodeType::NONE:
       case NodeType::ERROR:
          UNREACHABLE;

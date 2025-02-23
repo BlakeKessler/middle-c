@@ -93,6 +93,7 @@ namespace clef {
       STMT_SEQ,
       ARG_LIST,
       PARAM_LIST,
+      SPEC_LIST,
    };
    constexpr auto operator+(const NodeType t) noexcept { return std::to_underlying(t); }
    constexpr bool canDownCastTo(const NodeType from, const NodeType to) {
