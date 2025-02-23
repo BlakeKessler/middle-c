@@ -24,15 +24,16 @@ bool testNum(slong num) {
    return true;
 }
 bool testNum(double num) {
-   double parsedNum = mcsl::str_to_real(buf, std::sprintf(buf, "%lf", num));
+   double parsedNum = mcsl::str_to_real(buf, std::sprintf(buf, "%le", num));
    num = std::atof(buf);
-   if (num != parsedNum) {
-      std::printf("\t%24la != %-24la (%s)\n", num, parsedNum, std::format("{:064b}", std::bit_cast<ulong>(num) ^ std::bit_cast<ulong>(parsedNum)).data());
-      return false;
+   const ulong bitdif = std::bit_cast<ulong>(num) ^ std::bit_cast<ulong>(parsedNum);
+   if (num == parsedNum) {
+      std::printf("\t%24le == %-24le\n", num, parsedNum);
+      return true;
    } else {
-      std::printf("\t%24la == %-24la\n", num, parsedNum);
+      std::printf("\t%24le != %-24le (%s)\n", num, parsedNum, std::format("{:064b}", bitdif).data());
+      return false;
    }
-   return true;
 }
 
 
@@ -77,7 +78,7 @@ int main() {
    uint failures = 0;
    failures += testType<ulong>(0x10, 1);
    failures += testType<slong>(0x10, 1);
-   failures += testType<double>(0x10, 1);
+   failures += testType<double>(0x100, 1);
 
    std::cout << "total failures: ";
    if (failures) {
