@@ -39,7 +39,7 @@ clef::SourceTokens clef::Lexer::LexSource(Source&& src) {
             switch (*curr) {
                default:
                   radix = 10;
-                  if (!mcsl::is_digit(*curr, radix)) { goto PUSH_NUM_TOK; }
+                  --curr;
                   goto PROCESS_NUM;
 
                case 'b': case 'B': radix = 2;  break;
@@ -77,9 +77,10 @@ PROCESS_NUM:
 
             }
             //radix separator
-            if (*curr == RADIX_SEPARATOR) {
+            if (curr + 2 < end && curr[0] == '~' && curr[1] == '^') {
                isReal = true;
-               if (++curr >= end) { throwError(ErrCode::BAD_LITERAL, "radix separator must be followed by digits"); }
+               curr += 2;
+               if (curr >= end) { throwError(ErrCode::BAD_LITERAL, "radix separator must be followed by digits"); }
                //skip sign if present
                if (*curr == '-' || *curr == '+') { if (++curr >= end) { throwError(ErrCode::BAD_LITERAL, "radix separator must be followed by digits"); }}
                //check first digit
@@ -442,7 +443,7 @@ bool clef::Lexer::lexExpr(char*& curr, char* const end, mcsl::dyn_arr<Token>& to
             //setup
             radix = 10;
             isReal = false;
-PROCESS_NUM:
+            PROCESS_NUM:
             //integer part
             do {
                if (++curr >= end) { goto PUSH_NUM_TOK; }
@@ -462,9 +463,10 @@ PROCESS_NUM:
 
             }
             //radix separator
-            if (*curr == RADIX_SEPARATOR) {
+            if (curr + 2 < end && curr[0] == '~' && curr[1] == '^') {
                isReal = true;
-               if (++curr >= end) { throwError(ErrCode::BAD_LITERAL, "radix separator must be followed by digits"); }
+               curr += 2;
+               if (curr >= end) { throwError(ErrCode::BAD_LITERAL, "radix separator must be followed by digits"); }
                //skip sign if present
                if (*curr == '-' || *curr == '+') { if (++curr >= end) { throwError(ErrCode::BAD_LITERAL, "radix separator must be followed by digits"); }}
                //check first digit
