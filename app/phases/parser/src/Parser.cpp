@@ -322,7 +322,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
    return toExpr(operandStack[0]);
 }
 
-clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(index<Identifier> scopeName) {
+template<bool isDecl> clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(index<Identifier> scopeName) {
    //handle keywords
    if (tokIt->type() == TokenType::KEYWORD) {
       index<Identifier> keyword = tree.make<Identifier>(tokIt->keywordID());
@@ -343,7 +343,7 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(index<Identifier>
       ++tokIt;
 
       if (tryConsumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::OPEN)) {
-         index<SpecList> specializer = parseSpecList(BlockType::SPECIALIZER);
+         index<SpecList> specializer = parseSpecList<isDecl>(BlockType::SPECIALIZER);
          tree[name].specializer() = specializer;
       }
 
@@ -355,13 +355,17 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(index<Identifier>
    
    return name;
 }
-clef::index<clef::Identifier> clef::Parser::parseIdentifier(index<Identifier> scopeName) {
-   index<Identifier> name = tryParseIdentifier(scopeName);
+template<bool isDecl> clef::index<clef::Identifier> clef::Parser::parseIdentifier(index<Identifier> scopeName) {
+   index<Identifier> name = tryParseIdentifier<isDecl>(scopeName);
    if (!name) {
       logError(ErrCode::BAD_IDEN, "expected an identifier");
    }
    return name;
 }
+template clef::index<clef::Identifier> clef::Parser::parseIdentifier<true>(index<Identifier>);
+template clef::index<clef::Identifier> clef::Parser::parseIdentifier<false>(index<Identifier>);
+template clef::index<clef::Identifier> clef::Parser::tryParseIdentifier<true>(index<Identifier>);
+template clef::index<clef::Identifier> clef::Parser::tryParseIdentifier<false>(index<Identifier>);
 
 clef::index<clef::If> clef::Parser::parseIf() {
    //condition
@@ -486,7 +490,7 @@ clef::index<clef::TryCatch> clef::Parser::parseTryCatch() {
 }
 
 clef::index<clef::Function> clef::Parser::parseFunction() {
-   index<Identifier> name = tryParseIdentifier();
+   index<Identifier> name = tryParseIdentifier<true>();
    
    //params
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FUNC without parameters");

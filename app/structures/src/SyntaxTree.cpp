@@ -26,7 +26,7 @@ clef::index<clef::FundType> clef::SyntaxTree::getFundType(const KeywordID keywor
       case KeywordID::USHORT     : ID(UINT16);
       case KeywordID::UINT       : ID(UINT32);
       case KeywordID::ULONG      : ID(UINT64);
-      case KeywordID::UINT_PTR       : ID(UINT64);
+      case KeywordID::UINT_PTR   : ID(UINT64);
       case KeywordID::UWORD      : ID(UINT64);
 
       case KeywordID::SIGN_T     : ID(SIGN_T);
@@ -34,7 +34,7 @@ clef::index<clef::FundType> clef::SyntaxTree::getFundType(const KeywordID keywor
       case KeywordID::SSHORT     : ID(SINT16);
       case KeywordID::SINT       : ID(SINT32);
       case KeywordID::SLONG      : ID(SINT64);
-      case KeywordID::SINT_PTR       : ID(SINT64);
+      case KeywordID::SINT_PTR   : ID(SINT64);
       case KeywordID::SWORD      : ID(SINT64);
 
 
@@ -59,6 +59,15 @@ clef::index<clef::FundType> clef::SyntaxTree::getFundType(const KeywordID keywor
       case KeywordID::FLOAT_64   : ID(FLOAT64);
       case KeywordID::FLOAT_128  : ID(FLOAT128);
       case KeywordID::FLOAT_256  : ID(FLOAT256);
+
+
+      case KeywordID::ENUM       : ID(ENUM);
+      case KeywordID::MASK       : ID(MASK);
+      case KeywordID::UNION      : ID(UNION);
+      case KeywordID::NAMESPACE  : ID(NAMESPACE);
+      case KeywordID::INTERFACE  : ID(INTERFACE);
+      case KeywordID::STRUCT     : ID(STRUCT);
+      case KeywordID::CLASS      : ID(CLASS);
 
       default: UNREACHABLE;
    }

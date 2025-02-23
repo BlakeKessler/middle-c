@@ -59,8 +59,8 @@ class clef::Parser {
 
       TypeQualMask parseQuals(const TypeQualMask illegalQuals = {});
 
-      index<Identifier> tryParseIdentifier(index<Identifier> scopeName = 0);
-      index<Identifier> parseIdentifier(index<Identifier> scopeName = 0);
+      template<bool isDecl = false> index<Identifier> tryParseIdentifier(index<Identifier> scopeName = 0);
+      template<bool isDecl = false> index<Identifier> parseIdentifier(index<Identifier> scopeName = 0);
       index<Type> parseTypename(index<Identifier> scopeName = 0);
       mcsl::pair<index<Stmt>,index<Variable>> parseLetStmt(index<Identifier> scopeName = 0);
       index<Variable> parseParam(index<Identifier> scopeName = 0);

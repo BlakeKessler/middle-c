@@ -5,7 +5,7 @@
 
 //!HACK: clef::Parser::parseStruct temporarily relies on this function
 clef::index<clef::Class> clef::Parser::parseClass() {
-   index<Identifier> name = parseIdentifier();
+   index<Identifier> name = parseIdentifier<true>();
    
    if (tryConsumeEOS()) { //forward declaration
       return tree.remake<Class>(name, tree.allocObjTypeSpec(), tree[(index<Type>)name]);
@@ -55,7 +55,7 @@ clef::index<clef::Struct> clef::Parser::parseStruct() {
 }
 
 clef::index<clef::Interface> clef::Parser::parseInterface() {
-   index<Identifier> name = parseIdentifier();
+   index<Identifier> name = parseIdentifier<true>();
    
    if (tryConsumeEOS()) { //forward declaration
       return tree.remake<Interface>(name, tree[(index<Type>)name]);
@@ -92,7 +92,7 @@ clef::index<clef::Interface> clef::Parser::parseInterface() {
 }
 
 clef::index<clef::Union> clef::Parser::parseUnion() {
-   index<Identifier> name = tryParseIdentifier();
+   index<Identifier> name = tryParseIdentifier<true>();
 
    if (tryConsumeEOS()) { //forward declaration
       if (!name) {
@@ -105,6 +105,7 @@ clef::index<clef::Union> clef::Parser::parseUnion() {
 
    index<ParameterList> members = tree.make<ParameterList>(&tree.allocBuf<index<Variable>>());
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
+      //!TODO: maybe use parseLetStmt?
       //parse member
       index<Type> memberType = parseTypename();
       index<Identifier> memberName = parseIdentifier();
@@ -124,7 +125,7 @@ clef::index<clef::Union> clef::Parser::parseUnion() {
 
 //!HACK: clef::Parser::parseMask relies on this function - be careful changing observable behavior
 clef::index<clef::Enum> clef::Parser::parseEnum() {
-   index<Identifier> name = tryParseIdentifier();
+   index<Identifier> name = tryParseIdentifier<true>();
    index<Type> baseType;
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
       baseType = parseTypename();
@@ -173,7 +174,7 @@ clef::index<clef::EnumUnion> clef::Parser::parseEnumUnion() {
 }
 
 clef::index<clef::Namespace> clef::Parser::parseNamespace() {
-   index<Identifier> name = parseIdentifier();
+   index<Identifier> name = parseIdentifier<true>();
    
    if (tryConsumeEOS()) { //forward declaration
       return tree.remake<Namespace>(name, tree[(index<Type>)name]);

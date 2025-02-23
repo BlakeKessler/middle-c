@@ -189,6 +189,8 @@ template<bool isDecl> clef::index<clef::SpecList> clef::Parser::parseSpecList(co
       return tree.remake<SpecList>(args, tree[args]);
    }
 }
+template clef::index<clef::SpecList> clef::Parser::parseSpecList<true>(const BlockType closer);
+template clef::index<clef::SpecList> clef::Parser::parseSpecList<false>(const BlockType closer);
 
 
 //!TODO: implement parseQuals

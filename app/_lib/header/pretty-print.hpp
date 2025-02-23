@@ -518,6 +518,15 @@ constexpr const char* clef::toString(const FundTypeID type) {
       CASE(FLOAT64, "FLOAT64");
       CASE(FLOAT128, "FLOAT128");
       CASE(FLOAT256, "FLOAT256");
+      
+
+      CASE(ENUM, "ENUM");
+      CASE(MASK, "MASK");
+      CASE(UNION, "UNION");
+      CASE(NAMESPACE, "NAMESPACE");
+      CASE(INTERFACE, "INTERFACE");
+      CASE(STRUCT, "STRUCT");
+      CASE(CLASS, "CLASS");
    }
    UNREACHABLE;
 }

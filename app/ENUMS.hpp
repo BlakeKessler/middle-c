@@ -803,6 +803,15 @@ namespace clef {
       FLOAT64,
       FLOAT128,
       FLOAT256,
+
+
+      ENUM,
+      MASK,
+      UNION,
+      NAMESPACE,
+      INTERFACE,
+      STRUCT,
+      CLASS,
    };
 }
 
