@@ -180,6 +180,15 @@ clef::index<clef::ParamList> clef::Parser::parseParamList(const BlockType closer
    } while (true);
    return args;
 }
+template<bool isDecl> clef::index<clef::SpecList> clef::Parser::parseSpecList(const BlockType closer) {
+   if constexpr (isDecl) {
+      index<ParamList> params = parseParamList(closer);
+      return tree.remake<SpecList>(params, tree[params]);
+   } else {
+      index<ArgList> args = parseArgList(closer);
+      return tree.remake<SpecList>(args, tree[args]);
+   }
+}
 
 
 //!TODO: implement parseQuals
@@ -192,7 +201,15 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
 }
 //!TODO: implement parseCast
 clef::index<clef::Expr> clef::Parser::parseCast(KeywordID castID) {
-   logError(ErrCode::PARSER_NOT_IMPLEMENTED, "typecasting is not yet supported");
+   debug_assert(isCast(castID));
+   consumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::OPEN, "must specify type of cast");
+   index<SpecList> typeptr = parseSpecList(BlockType::SPECIALIZER);
+   index<Identifier> castptr = tree.make<Identifier>(castID, typeptr);
+   //!TODO: validate cast specializer
+   consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "typecasting uses function call syntax");
+   index<Expr> contents = parseExpr();
+   consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "typecasting uses function call syntax");
+   return tree.makeExpr(OpID::CALL_INVOKE, +castptr, +contents);
 }
 
 
@@ -241,6 +258,7 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
       case StatementSequence::nodeType():
       case ArgumentList::nodeType():
       case ParameterList::nodeType():
+      case SpecializerList::nodeType():
       case NodeType::NONE:
       case NodeType::ERROR:
          UNREACHABLE;

@@ -124,7 +124,7 @@ START_PARSE_STMT:
             case KeywordID::DYN_CAST      : [[fallthrough]];
             case KeywordID::BIT_CAST      : [[fallthrough]];
             case KeywordID::CONST_CAST    : {
-               index<Expr> stmtContents = parseExpr();
+               index<Expr> stmtContents = parseCast(tokIt++->keywordID());
                consumeEOS("bad cast statement");
                tree.getNode(stmtContents).upCast(NodeType::STMT);
                return (index<Stmt>)stmtContents;
@@ -340,11 +340,16 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(index<Identifier>
 
    do {
       name = tree.make<Identifier>(tokIt->name(), name);
-      
       ++tokIt;
+
+      if (tryConsumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::OPEN)) {
+         index<SpecList> specializer = parseSpecList(BlockType::SPECIALIZER);
+         tree[name].specializer() = specializer;
+      }
+
       if (!tryConsumeOperator(OpID::SCOPE_RESOLUTION)) { break; }
 
-      if   (tokIt->type() == TokenType::KEYWORD) { logError(ErrCode::BAD_IDEN, "keywords may not name or be members of scopes"); }
+      if (tokIt->type() == TokenType::KEYWORD) { logError(ErrCode::BAD_IDEN, "keywords may not name or be members of scopes"); }
       else if (tokIt->type() != TokenType::IDEN) { logError(ErrCode::BAD_IDEN, "only identifiers may name or be members of scopes (%hhu)", +tokIt->type()); }
    } while (true);
    

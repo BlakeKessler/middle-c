@@ -46,6 +46,11 @@ class clef::Parser {
       index<Scope> parseProcedure();
       index<ArgList> parseArgList(const BlockType closer);
       index<ParamList> parseParamList(const BlockType closer);
+      template<bool isDecl = false> index<SpecList> parseSpecList(const BlockType closer);
+      index<SpecList> parseSpecList(const BlockType closer, bool isDecl) {
+         if (isDecl) { return parseSpecList<true>(closer); }
+         else { return parseSpecList<false>(closer); }
+      }
 
       index<Expr> parseCast(const KeywordID);
 
@@ -99,7 +104,7 @@ class clef::Parser {
 };
 
 
-#pragma region src
+#pragma region inlinesrc
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-security"
 void clef::Parser::logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, auto&&... args) {
@@ -109,6 +114,6 @@ void clef::Parser::logError [[noreturn]] (const clef::ErrCode code, const char* 
    clef::throwError(code, formatStr, std::forward<decltype(args)>(args)...);
 }
 #pragma GCC diagnostic pop
-#pragma endregion src
+#pragma endregion inlinesrc
 
 #endif //PARSER_HPP

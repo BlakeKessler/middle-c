@@ -11,6 +11,7 @@ struct clef::Identifier {
       const char* _name_buf;
       const uint _name_size;
       index<Identifier> _scopeName;
+      index<SpecList> _specializer;
       const KeywordID _keywordID;
 
    protected:
@@ -20,12 +21,14 @@ struct clef::Identifier {
    public:
       static constexpr NodeType nodeType() { return NodeType::IDEN; }
 
-      Identifier(const mcsl::raw_str_span name = {}, index<Identifier> scopeName = {}):_name_buf{name.begin()},_name_size{name.size()},_scopeName{scopeName},_keywordID{KeywordID::_NOT_A_KEYWORD} {}
-      Identifier(const KeywordID id):_name_buf{},_name_size{},_scopeName{},_keywordID{id} {}
+      Identifier(const mcsl::raw_str_span name = {}, index<Identifier> scopeName = {}, index<SpecList> specializer = {}):_name_buf{name.begin()},_name_size{name.size()},_scopeName{scopeName},_specializer{specializer},_keywordID{KeywordID::_NOT_A_KEYWORD} {}
+      Identifier(const KeywordID id, index<SpecList> specializer = {}):_name_buf{},_name_size{},_scopeName{},_specializer{specializer},_keywordID{id} {}
 
-      Identifier(const Identifier& other):_name_buf{other._name_buf},_name_size{other._name_size},_scopeName{other._scopeName},_keywordID{other._keywordID} {}
+      Identifier(const Identifier& other):_name_buf{other._name_buf},_name_size{other._name_size},_scopeName{other._scopeName},_specializer{other._specializer},_keywordID{other._keywordID} {}
       Identifier& operator=(const Identifier& other) { new (this) Identifier{other}; return self; }
 
+      index<SpecList>& specializer() { return _specializer; }
+      index<const SpecList> specializer() const { return _specializer; }
       index<Identifier>& scopeName() { return _scopeName; }
       index<const Identifier> scopeName() const { return _scopeName; }
 
