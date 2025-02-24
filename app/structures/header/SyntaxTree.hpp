@@ -18,8 +18,20 @@ class clef::SyntaxTree {
       mcsl::dyn_arr<ObjTypeSpec> _objSpecBuf;
 
       allocator _alloc;
+
+      void __indent(uint indents) const;
+      void __printf(index<const astNode>, const uint indents) const;
+      template<astNode_t T> void __printf(index<const T>, const uint indents) const;
+      void __printf(index<const InterfaceSpec>, const uint indents) const;
+      void __printf(index<const NamespaceSpec>, const uint indents) const;
+      void __printf(index<const ObjTypeSpec>, const uint indents) const;
    public:
-      SyntaxTree():_buf{},_ifaceSpecBuf{},_nsSpecBuf{},_objSpecBuf{},_alloc{} { _buf.emplace_back(NodeType::ERROR); }
+      SyntaxTree():_buf{},_ifaceSpecBuf{},_nsSpecBuf{},_objSpecBuf{},_alloc{} {
+         _buf.emplace_back(NodeType::ERROR);
+         _ifaceSpecBuf.emplace_back();
+         _nsSpecBuf.emplace_back();
+         _objSpecBuf.emplace_back();
+      }
       // SyntaxTree(const SyntaxTree& other):_buf{other._buf},_ifaceSpecBuf{other._ifaceSpecBuf},_nsSpecBuf{},_objSpecBuf{},_alloc{other._alloc} {}
       SyntaxTree(SyntaxTree&& other):
          _buf{std::move(other._buf)},
@@ -45,17 +57,17 @@ class clef::SyntaxTree {
       astNode& getNode(const uint i) { safe_mode_assert(i); return _buf[i]; }
       const astNode& getNode(const uint i) const { safe_mode_assert(i); return _buf[i]; }
 
-      template<typename T> const T& operator[](index<const T> i) { safe_mode_assert(i); return *(self + i); }
+      template<typename T> const T& operator[](index<const T> i) const { safe_mode_assert(i); return *(self + i); }
       template<typename T> T& operator[](index<T> i) { safe_mode_assert(i); return *(self + i); }
 
-      template<astNode_t T> const T* operator+(index<const T> i) { return (const T*)(_buf + i); }
+      template<astNode_t T> const T* operator+(index<const T> i) const { return (const T*)(_buf + i); }
       template<astNode_t T> T* operator+(index<T> i) { return (T*)(_buf + i); }
-      const astNode* operator+(index<const astNode> i) { return _buf + i; }
+      const astNode* operator+(index<const astNode> i) const { return _buf + i; }
       astNode* operator+(index<astNode> i) { return _buf + i; }
 
-      const InterfaceSpec* operator+(index<const InterfaceSpec> i) { return _ifaceSpecBuf + i; }
-      const NamespaceSpec* operator+(index<const NamespaceSpec> i) { return _nsSpecBuf + i; }
-      const ObjTypeSpec* operator+(index<const ObjTypeSpec> i) { return _objSpecBuf + i; }
+      const InterfaceSpec* operator+(index<const InterfaceSpec> i) const { return _ifaceSpecBuf + i; }
+      const NamespaceSpec* operator+(index<const NamespaceSpec> i) const { return _nsSpecBuf + i; }
+      const ObjTypeSpec* operator+(index<const ObjTypeSpec> i) const { return _objSpecBuf + i; }
       InterfaceSpec* operator+(index<InterfaceSpec> i) { return _ifaceSpecBuf + i; }
       NamespaceSpec* operator+(index<NamespaceSpec> i) { return _nsSpecBuf + i; }
       ObjTypeSpec* operator+(index<ObjTypeSpec> i) { return _objSpecBuf + i; }

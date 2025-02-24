@@ -181,6 +181,7 @@ clef::index<clef::ParamList> clef::Parser::parseParamList(const BlockType closer
    return args;
 }
 template<bool isDecl> clef::index<clef::SpecList> clef::Parser::parseSpecList(const BlockType closer) {
+   //!TODO: use GenericType?
    if constexpr (isDecl) {
       index<ParamList> params = parseParamList(closer);
       return tree.remake<SpecList>(params, tree[params]);
