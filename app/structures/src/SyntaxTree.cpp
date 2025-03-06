@@ -161,52 +161,7 @@ void clef::SyntaxTree::__indent(uint indents) const {
       std::printf("   ");
    }
 }
-#define typecase(T) case T::nodeType(): __printf<T>(+i, indents); break
-void clef::SyntaxTree::__printf(index<const astNode> i, uint indents) const {
-   switch (self[i].nodeType()) {
-      case NodeType::NONE: break;
-      case NodeType::ERROR: throwError(ErrCode::UNSPEC, "\n\033[31mERROR NODE: %u\033[39m\n", +i); break;
 
-      typecase(Identifier);
-      typecase(Variable);
-      typecase(Function);
-      typecase(Type);
-      typecase(VariadicParameter);
-      typecase(FundamentalType);
-      typecase(FunctionSignature);
-      typecase(Enum);
-      typecase(Mask);
-      typecase(Union);
-      typecase(Namespace);
-      typecase(Interface);
-      typecase(Struct);
-      typecase(Class);
-      typecase(GenericType);
-      typecase(Scope);
-      typecase(Literal);
-      typecase(Expression);
-      typecase(Declaration);
-      typecase(ForLoop);
-      typecase(ForeachLoop);
-      typecase(WhileLoop);
-      typecase(DoWhileLoop);
-      typecase(If);
-      typecase(Switch);
-      typecase(Match);
-      typecase(TryCatch);
-      typecase(Asm);
-      typecase(ForLoopParams);
-      typecase(ForeachLoopParams);
-      typecase(SwitchCases);
-      typecase(MatchCases);
-      typecase(Statement);
-      typecase(StatementSequence);
-      typecase(ArgumentList);
-      typecase(ParameterList);
-      typecase(SpecializerList);
-   }
-}
-#undef typecase
 template<> void clef::SyntaxTree::__printf<clef::Identifier>(index<const Identifier> i, const uint indents) const {
    const Identifier& node = self[i];
    if (node.scopeName()) { //parent scope
@@ -226,6 +181,13 @@ template<> void clef::SyntaxTree::__printf<clef::Identifier>(index<const Identif
       __printf<SpecializerList>(node.specializer(), 0);
    }
 }
+template<> void clef::SyntaxTree::__printf<clef::Type>(index<const Type> i, const uint indents) const {
+   __printf<Identifier>(i, indents);
+}
+template<> void clef::SyntaxTree::__printf<clef::Expr>(index<const Expr> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
 template<> void clef::SyntaxTree::__printf<clef::Variable>(index<const Variable> i, const uint indents) const {
    const Variable& node = self[i];
    __printf<Type>(node.type(), indents);
@@ -234,16 +196,6 @@ template<> void clef::SyntaxTree::__printf<clef::Variable>(index<const Variable>
       std::printf(" = ");
       __printf<Expr>(node.val(), 0);
    }
-}
-template<> void clef::SyntaxTree::__printf<clef::Function>(index<const Function> i, const uint indents) const {
-   const Function& node = self[i];
-   __printf<Identifier>(i, indents);
-   __printf<FuncSig>(node.signature(), 0);
-   std::printf(" ");
-   __printf<Scope>(node.procedure(), indents);
-}
-template<> void clef::SyntaxTree::__printf<clef::Type>(index<const Type> i, const uint indents) const {
-   __printf<Identifier>(i, indents);
 }
 template<> void clef::SyntaxTree::__printf<clef::VariadicParam>(index<const VariadicParam> i, const uint indents) const {
    __printf<Type>(i, indents);
@@ -258,6 +210,16 @@ template<> void clef::SyntaxTree::__printf<clef::FunctionSignature>(index<const 
    __printf<ParamList>(node.params(), indents);
    std::printf(" -> ");
    __printf<Type>(node.returnType(), 0);
+}
+template<> void clef::SyntaxTree::__printf<clef::Scope>(index<const Scope> i, const uint indents) const {
+   __printf<StmtSeq>(i, indents);
+}
+template<> void clef::SyntaxTree::__printf<clef::Function>(index<const Function> i, const uint indents) const {
+   const Function& node = self[i];
+   __printf<Identifier>(i, indents);
+   __printf<FuncSig>(node.signature(), 0);
+   std::printf(" ");
+   __printf<Scope>(node.procedure(), indents);
 }
 template<> void clef::SyntaxTree::__printf<clef::Enum>(index<const Enum> i, const uint indents) const {
    const Enum& node = self[i];
@@ -349,9 +311,6 @@ template<> void clef::SyntaxTree::__printf<clef::Class>(index<const Class> i, co
 template<> void clef::SyntaxTree::__printf<clef::GenericType>(index<const GenericType> i, const uint indents) const {
    __printf<Type>(i, indents);
 }
-template<> void clef::SyntaxTree::__printf<clef::Scope>(index<const Scope> i, const uint indents) const {
-   __printf<StmtSeq>(i, indents);
-}
 template<> void clef::SyntaxTree::__printf<clef::Literal>(index<const Literal> i, const uint indents) const {
    const Literal& node = self[i];
    switch (node.type()) {
@@ -372,13 +331,56 @@ template<> void clef::SyntaxTree::__printf<clef::Literal>(index<const Literal> i
       case LitType::TYPEID: __printf<Type>((index<const Type>)node, indents); break;
    }
 }
-template<> void clef::SyntaxTree::__printf<clef::Expr>(index<const Expr> i, const uint indents) const {
-   UNREACHABLE;
-   //!TODO: implement
-}
 template<> void clef::SyntaxTree::__printf<clef::Decl>(index<const Decl> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
+
+#define typecase(T) case T::nodeType(): __printf<T>(+i, indents); break
+void clef::SyntaxTree::__printf(index<const astNode> i, uint indents) const {
+   switch (self[i].nodeType()) {
+      case NodeType::NONE: break;
+      case NodeType::ERROR: throwError(ErrCode::UNSPEC, "\n\033[31mERROR NODE: %u\033[39m\n", +i); break;
+
+      typecase(Identifier);
+      typecase(Variable);
+      typecase(Function);
+      typecase(Type);
+      typecase(VariadicParameter);
+      typecase(FundamentalType);
+      typecase(FunctionSignature);
+      typecase(Enum);
+      typecase(Mask);
+      typecase(Union);
+      typecase(Namespace);
+      typecase(Interface);
+      typecase(Struct);
+      typecase(Class);
+      typecase(GenericType);
+      typecase(Scope);
+      typecase(Literal);
+      typecase(Expression);
+      typecase(Declaration);
+      typecase(ForLoop);
+      typecase(ForeachLoop);
+      typecase(WhileLoop);
+      typecase(DoWhileLoop);
+      typecase(If);
+      typecase(Switch);
+      typecase(Match);
+      typecase(TryCatch);
+      typecase(Asm);
+      typecase(ForLoopParams);
+      typecase(ForeachLoopParams);
+      typecase(SwitchCases);
+      typecase(MatchCases);
+      typecase(Statement);
+      typecase(StatementSequence);
+      typecase(ArgumentList);
+      typecase(ParameterList);
+      typecase(SpecializerList);
+   }
+}
+#undef typecase
 
 #endif //SYNTAX_TREE_CPP
