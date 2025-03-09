@@ -336,6 +336,19 @@ template<> void clef::SyntaxTree::__printf<clef::Decl>(index<const Decl> i, cons
    //!TODO: implement
 }
 
+void clef::SyntaxTree::__printf(index<const InterfaceSpec> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+void clef::SyntaxTree::__printf(index<const NamespaceSpec> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+void clef::SyntaxTree::__printf(index<const ObjTypeSpec> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+
 #define typecase(T) case T::nodeType(): __printf<T>(+i, indents); break
 void clef::SyntaxTree::__printf(index<const astNode> i, uint indents) const {
    switch (self[i].nodeType()) {

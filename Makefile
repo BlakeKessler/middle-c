@@ -13,7 +13,7 @@ ALL_OBJ_FILES := $(ALL_SRC_FILES:%.cpp=_build/%.o)
 
 #compiler
 COMPILER := clang++ -std=c++23
-FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name -Wno-gcc-compat -Wno-trigraphs
+FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name -Wno-gcc-compat -Wno-trigraphs -Wno-pessimizing-move
 # FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name -Wno-gcc-compat -Wno-trigraphs -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
 # COMPILER := g++ -std=c++23
 # FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -Wno-trigraphs -Wno-attributes -Wno-parentheses -Wno-class-memaccess
@@ -37,10 +37,6 @@ setup:
 #generate prereq makefiles
 $(ALL_AUTO_MAKEFILES): _build/%.mk : %.cpp
 	(($(COMPILE) -MM $^) | (sed -E 's/([^ ]*)\.o([^u])?/_build\/\1.o _build\/\1.mk\2/') > $@) && echo $@
-#	($(COMPILE) -MM $^) | (sed -E 's/([^ ]*)\.o([^u])?/_build\/\1.mk\2/') | (sed -E 's/([^ ]*.hpp)/_build\/\1.pch/g') > $@
-
-# $(ALL_HEADER_FILES:%.hpp=_build/%.mk): _build/%.mk : %.hpp
-# 	($(COMPILE) -MM $^) | (sed -E 's/([^ ]*)\.o([^u])?/_build\/\1.mk\2/') | (sed -E 's/([^ ]*.hpp)/_build\/\1.pch/g') > $@
 
 #include prereq makefiles
 -include $(ALL_AUTO_MAKEFILES)
@@ -78,3 +74,6 @@ Parser: makefiles _build/test/src/TestParser.mk test/src/TestParser.cpp | $(ALL_
 .PHONY: StrToNum
 StrToNum: makefiles _build/test/src/TestStrToNum.mk test/src/TestStrToNum.cpp | $(ALL_OBJ_FILES)
 	$(COMPILE) test/src/TestStrToNum.cpp $(shell find _build | grep "\.o$$") -o _build/out/$@.out
+.PHONY: Printf
+Printf: makefiles _build/test/src/TestPrintf.mk test/src/TestPrintf.cpp | $(ALL_OBJ_FILES)
+	$(COMPILE) test/src/TestPrintf.cpp $(shell find _build | grep "\.o$$") -o _build/out/$@.out
