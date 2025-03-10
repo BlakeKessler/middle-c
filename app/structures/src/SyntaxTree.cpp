@@ -162,6 +162,19 @@ void clef::SyntaxTree::__indent(uint indents) const {
    }
 }
 
+template<> void clef::SyntaxTree::__printf<clef::ArgList>(index<const ArgList> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::ParamList>(index<const ParamList> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::SpecList>(index<const SpecList> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+
 template<> void clef::SyntaxTree::__printf<clef::Identifier>(index<const Identifier> i, const uint indents) const {
    const Identifier& node = self[i];
    if (node.scopeName()) { //parent scope
@@ -185,6 +198,14 @@ template<> void clef::SyntaxTree::__printf<clef::Type>(index<const Type> i, cons
    __printf<Identifier>(i, indents);
 }
 template<> void clef::SyntaxTree::__printf<clef::Expr>(index<const Expr> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::Stmt>(index<const Stmt> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::StmtSeq>(index<const StmtSeq> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
@@ -332,6 +353,62 @@ template<> void clef::SyntaxTree::__printf<clef::Literal>(index<const Literal> i
    }
 }
 template<> void clef::SyntaxTree::__printf<clef::Decl>(index<const Decl> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+
+
+template<> void clef::SyntaxTree::__printf<clef::SwitchCases>(index<const SwitchCases> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::MatchCases>(index<const MatchCases> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::Switch>(index<const Switch> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::Match>(index<const Match> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::TryCatch>(index<const TryCatch> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+
+template<> void clef::SyntaxTree::__printf<clef::ForLoopParams>(index<const ForLoopParams> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::ForeachLoopParams>(index<const ForeachLoopParams> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::ForLoop>(index<const ForLoop> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::ForeachLoop>(index<const ForeachLoop> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::WhileLoop>(index<const WhileLoop> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::DoWhileLoop>(index<const DoWhileLoop> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+
+template<> void clef::SyntaxTree::__printf<clef::If>(index<const If> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::Asm>(index<const Asm> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
