@@ -383,7 +383,7 @@ constexpr const char* clef::toString(const KeywordID kw) {
       CASE(ASSERT, "ASSERT");
       CASE(STATIC_ASSERT, "STATIC_ASSERT");
       CASE(DEBUG_ASSERT, "DEBUG_ASSERT");
-      CASE(SAFE_MODE_ASSERT, "SAFE_MODE_ASSERT");
+      CASE(ASSUME, "ASSUME");
 
       CASE(TRUE, "TRUE");
       CASE(FALSE, "FALSE");

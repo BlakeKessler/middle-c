@@ -54,11 +54,11 @@ class clef::SyntaxTree {
       void printf() const;
       void print() const;
 
-      astNode& getNode(const uint i) { safe_mode_assert(i); return _buf[i]; }
-      const astNode& getNode(const uint i) const { safe_mode_assert(i); return _buf[i]; }
+      astNode& getNode(const uint i) { assume(i); return _buf[i]; }
+      const astNode& getNode(const uint i) const { assume(i); return _buf[i]; }
 
-      template<typename T> const T& operator[](index<const T> i) const { safe_mode_assert(i); return *(self + i); }
-      template<typename T> T& operator[](index<T> i) { safe_mode_assert(i); return *(self + i); }
+      template<typename T> const T& operator[](index<const T> i) const { assume(i); return *(self + i); }
+      template<typename T> T& operator[](index<T> i) { assume(i); return *(self + i); }
 
       template<astNode_t T> const T* operator+(index<const T> i) const { return (const T*)(_buf + i); }
       template<astNode_t T> T* operator+(index<T> i) { return (T*)(_buf + i); }
@@ -108,7 +108,7 @@ template<clef::astNode_ptr_t asT, clef::astNode_ptr_t T = asT, typename... Argv_
 }
 
 template<clef::astNode_ptr_t newT, clef::astNode_t oldT, typename... Argv_t> newT clef::SyntaxTree::remake(index<oldT> i, Argv_t... argv) requires (mcsl::is_t<mcsl::remove_ptr<newT>, mcsl::remove_ptr<oldT>> || mcsl::valid_ctor<mcsl::remove_ptr<newT>,mcsl::remove_ptr<oldT>>) && mcsl::valid_ctor<mcsl::remove_ptr<newT>, Argv_t...> {
-   safe_mode_assert(i);
+   assume(i);
    astNode* tmp = _buf.emplace(i, std::move(mcsl::remove_ptr<newT>{std::forward<Argv_t>(argv)...}));
    if constexpr (!mcsl::same_t<mcsl::remove_ptr<oldT>, mcsl::remove_ptr<newT>>) {
       tmp->anyCast(mcsl::remove_ptr<newT>::nodeType());

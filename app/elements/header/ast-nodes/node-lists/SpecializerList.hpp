@@ -22,11 +22,11 @@ struct clef::SpecializerList {
 
       bool isDecl() const { return _isDecl; }
 
-      operator ParamList() { safe_mode_assert(_isDecl); return _declSpecList; }
-      operator const ParamList() const { safe_mode_assert(_isDecl); return _declSpecList; }
+      operator ParamList() { assume(_isDecl); return _declSpecList; }
+      operator const ParamList() const { assume(_isDecl); return _declSpecList; }
       
-      operator ArgList() { safe_mode_assert(!_isDecl); return _baseSpecList; }
-      operator const ArgList() const { safe_mode_assert(!_isDecl); return _baseSpecList; }
+      operator ArgList() { assume(!_isDecl); return _baseSpecList; }
+      operator const ArgList() const { assume(!_isDecl); return _baseSpecList; }
 
       void printf() const {
          if (_isDecl) {

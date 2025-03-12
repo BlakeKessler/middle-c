@@ -102,7 +102,7 @@ class clef::KeywordDecoder {
          {"assert", KeywordID::ASSERT},
          {"static_assert", KeywordID::STATIC_ASSERT},
          {"debug_assert", KeywordID::DEBUG_ASSERT},
-         {"safe_mode_assert", KeywordID::SAFE_MODE_ASSERT},
+         {"assume", KeywordID::ASSUME},
          {"let", KeywordID::LET},
          {"using", KeywordID::ALIAS},
          {"asm", KeywordID::ASM}

@@ -518,10 +518,10 @@ namespace clef {
       ASSERT,
       STATIC_ASSERT,
       DEBUG_ASSERT,
-      SAFE_MODE_ASSERT,
+      ASSUME,
 
       __FIRST_ASSERT = ASSERT,
-      __LAST_ASSERT = SAFE_MODE_ASSERT,
+      __LAST_ASSERT = ASSUME,
 
       LET,
       ALIAS,
@@ -556,7 +556,7 @@ namespace clef {
          case ASSERT:
          case DEBUG_ASSERT:
          case STATIC_ASSERT:
-         case SAFE_MODE_ASSERT:
+         case ASSUME:
          
          case RETURN:
          case THROW:
