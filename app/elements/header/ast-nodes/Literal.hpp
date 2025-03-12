@@ -14,7 +14,7 @@ struct clef::Literal {
          void* _ptrLit;
          ulong _uintLit;
          slong _sintLit;
-         double _floatLit;
+         flong _floatLit;
          char _charLit;
          mcsl::raw_str_span _strLit;
          mcsl::raw_str_span _interpLit;
@@ -57,7 +57,7 @@ struct clef::Literal {
       #pragma region cast
       operator ulong()        const { if (_type == LitType::UINT)   { return _uintLit;   } else { throwCastErr(LitType::UINT);   } }
       operator slong()        const { if (_type == LitType::SINT)   { return _sintLit;   } else { throwCastErr(LitType::SINT);   } }
-      operator double()       const { if (_type == LitType::FLOAT)  { return _floatLit;  } else { throwCastErr(LitType::FLOAT);  } }
+      operator flong()       const { if (_type == LitType::FLOAT)  { return _floatLit;  } else { throwCastErr(LitType::FLOAT);  } }
       operator char()         const { if (_type == LitType::CHAR)   { return _charLit;   } else { throwCastErr(LitType::CHAR);   } }
       operator mcsl::raw_str_span&()      { if (_type == LitType::STRING) { return _strLit;    } else { throwCastErr(LitType::STRING); } }
       operator const mcsl::raw_str_span&() const { if (_type == LitType::STRING) { return _strLit;    } else { throwCastErr(LitType::STRING); } }

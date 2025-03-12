@@ -340,7 +340,7 @@ template<> void clef::SyntaxTree::__printf<clef::Literal>(index<const Literal> i
 
       case LitType::UINT: std::printf("%lu", (ulong)node); break;
       case LitType::SINT: std::printf("%ld", (slong)node); break;
-      case LitType::FLOAT: std::printf("%lf", (double)node); break;
+      case LitType::FLOAT: std::printf("%lf", (flong)node); break;
 
       case LitType::CHAR: std::printf("'%c'", (char)node); break;
       case LitType::STRING: std::printf("\"%.*s\"", ((const mcsl::raw_str_span)node).size(), ((const mcsl::raw_str_span)node).begin()); break;

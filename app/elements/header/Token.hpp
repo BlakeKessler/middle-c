@@ -14,7 +14,7 @@ struct clef::Token {
       union {
          const mcsl::raw_str_span _name; //identifier
          ulong _intVal;
-         double _realVal;
+         flong _realVal;
          const mcsl::raw_str_span _strVal;
          char _charVal;
       };
@@ -35,7 +35,7 @@ struct clef::Token {
       Token(const mcsl::raw_str_span name):_name{name},_type{TokenType::IDEN} {}
       Token(const KeywordID id):_keyword{id},_type{+id ? TokenType::KEYWORD : TokenType::IDEN} {}
       Token(const ulong val):_intVal{val},_type{TokenType::INT_NUM} {}
-      Token(const double val):_realVal{val},_type{TokenType::REAL_NUM} {}
+      Token(const flong val):_realVal{val},_type{TokenType::REAL_NUM} {}
       Token(const OpData op):_op{op},_type{TokenType::OP} {}
       Token(const BlockType type, const BlockDelimRole role):_blockDelim{mcsl::pair{type,role}},_type{TokenType::BLOCK_DELIM} {}
       Token(const mcsl::raw_str_span val, const PtxtType type):_strVal{val},_ptxtType{type},_type{TokenType::PTXT_SEG} {}
@@ -48,7 +48,7 @@ struct clef::Token {
       
       const mcsl::raw_str_span& name() const { debug_assert(_type == TokenType::IDEN); return _name; }
       ulong intVal() const { debug_assert(_type == TokenType::INT_NUM); return _intVal; }
-      double realVal() const { debug_assert(_type == TokenType::REAL_NUM); return _realVal; }
+      flong realVal() const { debug_assert(_type == TokenType::REAL_NUM); return _realVal; }
       const mcsl::raw_str_span& strVal() const { debug_assert(_type == TokenType::PTXT_SEG && _ptxtType == PtxtType::STR); return _strVal; }
       const mcsl::raw_str_span& unprocessedStrVal() const { debug_assert(_type == TokenType::PTXT_SEG && _ptxtType == PtxtType::UNPROCESSED_STR); return _strVal; }
       char charVal() const { debug_assert(_type == TokenType::PTXT_SEG && _ptxtType == PtxtType::CHAR); return _charVal; }
