@@ -3,7 +3,7 @@
 
 #include "CLEF.hpp"
 
-#include "raw_str_span.hpp"
+#include "str_slice.hpp"
 #include "raw_buf_str.hpp"
 
 #include "frozen/string.h"
@@ -110,7 +110,7 @@ class clef::KeywordDecoder {
 
       static constexpr frozen::unordered_map _map = frozen::make_unordered_map(_mapBuf);
    public:
-      static constexpr KeywordID keywordID(const mcsl::raw_str_span& str) {
+      static constexpr KeywordID keywordID(const mcsl::str_slice& str) {
          const auto tmp = _map.find(frozen::string{str.begin(), str.size()});
          if (tmp == _map.end()) {
             return {};

@@ -4,7 +4,7 @@
 
 #include "CLEF.hpp"
 
-#include "raw_str_span.hpp"
+#include "str_slice.hpp"
 
 struct clef::Identifier {
    private:
@@ -21,7 +21,7 @@ struct clef::Identifier {
    public:
       static constexpr NodeType nodeType() { return NodeType::IDEN; }
 
-      Identifier(const mcsl::raw_str_span name = {}, index<Identifier> scopeName = {}, index<SpecList> specializer = {}):_name_buf{name.begin()},_name_size{name.size()},_scopeName{scopeName},_specializer{specializer},_keywordID{KeywordID::_NOT_A_KEYWORD} {}
+      Identifier(const mcsl::str_slice name = {}, index<Identifier> scopeName = {}, index<SpecList> specializer = {}):_name_buf{name.begin()},_name_size{name.size()},_scopeName{scopeName},_specializer{specializer},_keywordID{KeywordID::_NOT_A_KEYWORD} {}
       Identifier(const KeywordID id, index<SpecList> specializer = {}):_name_buf{},_name_size{},_scopeName{},_specializer{specializer},_keywordID{id} {}
 
       Identifier(const Identifier& other):_name_buf{other._name_buf},_name_size{other._name_size},_scopeName{other._scopeName},_specializer{other._specializer},_keywordID{other._keywordID} {}
@@ -32,7 +32,7 @@ struct clef::Identifier {
       index<Identifier>& scopeName() { return _scopeName; }
       index<const Identifier> scopeName() const { return _scopeName; }
 
-      const mcsl::raw_str_span name() const { return {const_cast<char*>(_name_buf), _name_size}; } //unqualified name
+      const mcsl::str_slice name() const { return {const_cast<char*>(_name_buf), _name_size}; } //unqualified name
       KeywordID keywordID() const { return _keywordID; }
 
       inline bool sameScope(const Identifier& other) const { return _scopeName == other._scopeName; }

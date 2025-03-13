@@ -6,16 +6,16 @@
 #include "TokenData.hpp"
 #include "OpData.hpp"
 
-#include "raw_str_span.hpp"
+#include "str_slice.hpp"
 #include "pair.hpp"
 
 struct clef::Token {
    private:
       union {
-         const mcsl::raw_str_span _name; //identifier
+         const mcsl::str_slice _name; //identifier
          ulong _intVal;
          flong _realVal;
-         const mcsl::raw_str_span _strVal;
+         const mcsl::str_slice _strVal;
          char _charVal;
       };
       union {
@@ -32,13 +32,13 @@ struct clef::Token {
 
       //constructors
       Token():_type{TokenType::NONE} {}
-      Token(const mcsl::raw_str_span name):_name{name},_type{TokenType::IDEN} {}
+      Token(const mcsl::str_slice name):_name{name},_type{TokenType::IDEN} {}
       Token(const KeywordID id):_keyword{id},_type{+id ? TokenType::KEYWORD : TokenType::IDEN} {}
       Token(const ulong val):_intVal{val},_type{TokenType::INT_NUM} {}
       Token(const flong val):_realVal{val},_type{TokenType::REAL_NUM} {}
       Token(const OpData op):_op{op},_type{TokenType::OP} {}
       Token(const BlockType type, const BlockDelimRole role):_blockDelim{mcsl::pair{type,role}},_type{TokenType::BLOCK_DELIM} {}
-      Token(const mcsl::raw_str_span val, const PtxtType type):_strVal{val},_ptxtType{type},_type{TokenType::PTXT_SEG} {}
+      Token(const mcsl::str_slice val, const PtxtType type):_strVal{val},_ptxtType{type},_type{TokenType::PTXT_SEG} {}
       Token(const char c):_charVal{c},_ptxtType{PtxtType::CHAR},_type{TokenType::PTXT_SEG} {}
       Token(const TokenType type):_type{type} { debug_assert(_type == TokenType::PREPROC_INIT || _type == TokenType::PREPROC_EOS || _type == TokenType::EOS || _type == TokenType::ESC); } //intended for PREPROC_INIT, PREPROC_EOS, EOS, ESC only
 
@@ -46,11 +46,11 @@ struct clef::Token {
       //getters
       TokenType type() const { return _type; }
       
-      const mcsl::raw_str_span& name() const { debug_assert(_type == TokenType::IDEN); return _name; }
+      const mcsl::str_slice& name() const { debug_assert(_type == TokenType::IDEN); return _name; }
       ulong intVal() const { debug_assert(_type == TokenType::INT_NUM); return _intVal; }
       flong realVal() const { debug_assert(_type == TokenType::REAL_NUM); return _realVal; }
-      const mcsl::raw_str_span& strVal() const { debug_assert(_type == TokenType::PTXT_SEG && _ptxtType == PtxtType::STR); return _strVal; }
-      const mcsl::raw_str_span& unprocessedStrVal() const { debug_assert(_type == TokenType::PTXT_SEG && _ptxtType == PtxtType::UNPROCESSED_STR); return _strVal; }
+      const mcsl::str_slice& strVal() const { debug_assert(_type == TokenType::PTXT_SEG && _ptxtType == PtxtType::STR); return _strVal; }
+      const mcsl::str_slice& unprocessedStrVal() const { debug_assert(_type == TokenType::PTXT_SEG && _ptxtType == PtxtType::UNPROCESSED_STR); return _strVal; }
       char charVal() const { debug_assert(_type == TokenType::PTXT_SEG && _ptxtType == PtxtType::CHAR); return _charVal; }
 
       KeywordID keywordID() const { debug_assert(_type == TokenType::KEYWORD); return _keyword; }

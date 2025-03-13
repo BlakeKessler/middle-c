@@ -111,7 +111,7 @@ PUSH_NUM_TOK:
          case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'x': case 'O': case 'g': case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'y': case 'z':
          case '_': {
             while (++curr < end && (mcsl::is_digit(*curr, 36) || *curr == '_')) {}
-            mcsl::raw_str_span name{tokBegin,curr};
+            mcsl::str_slice name{tokBegin,curr};
             KeywordID id = decodeKeyword(name);
             if (+id) {
                toks.emplace_back(id);
@@ -153,7 +153,7 @@ PUSH_NUM_TOK:
          
          //OPERATORS
          case '!': case '$': case '%': case '&': case '+': case ',': case '-': case '.': case '=': case '?': case '@': case '^': case '|': case '~': case '(': case ')': case '[': case ']': case '{': case '}': case '*': case '/': case '<': case '>': case ':': {
-            OpData op = OPERATORS[mcsl::raw_str_span{curr, end}];
+            OpData op = OPERATORS[mcsl::str_slice{curr, end}];
             debug_assert(op);
             curr += op.size();
             switch (op.tokType()) {
@@ -193,7 +193,7 @@ PUSH_NUM_TOK:
                      case OpID::BLOCK_CMNT_OPEN: 
                         do {
                            if (curr >= end) { throwError(ErrCode::BAD_CMNT, "unclosed block comment"); }
-                           OpData tmp = OPERATORS[mcsl::raw_str_span{curr,end}];
+                           OpData tmp = OPERATORS[mcsl::str_slice{curr,end}];
                            if (tmp == OpID::BLOCK_CMNT_CLOSE) { curr += tmp.size(); break; }
                            ++curr;
                         } while (true);
@@ -370,7 +370,7 @@ bool clef::Lexer::lexStr(char*& curr, char* const end, char* const tokBegin, mcs
       throwError(ErrCode::BAD_LITERAL, "unclosed string literal");
    }
    ++curr;
-   toks.emplace_back(mcsl::raw_str_span{tokBegin+1,curr-1}, PtxtType::UNPROCESSED_STR);
+   toks.emplace_back(mcsl::str_slice{tokBegin+1,curr-1}, PtxtType::UNPROCESSED_STR);
    return true;
 }
 bool clef::Lexer::lexInterpStr(char*& curr, char* const end, char* const tokBegin, mcsl::dyn_arr<Token>& toks) {
@@ -383,7 +383,7 @@ bool clef::Lexer::lexInterpStr(char*& curr, char* const end, char* const tokBegi
       ++curr;
       if (curr < end) {
          if (*curr == PLACEHOLDER_OPEN) {
-            debug_assert((OPERATORS[mcsl::raw_str_span{const_cast<char*>(&PLACEHOLDER_INIT), 1}] == OpID::LIST_OPEN));
+            debug_assert((OPERATORS[mcsl::str_slice::make((&PLACEHOLDER_INIT), 1)] == OpID::LIST_OPEN));
             while (++curr < end && *curr != PLACEHOLDER_CLOSE) {
                lexExpr(curr, end, toks);
             }
@@ -398,7 +398,7 @@ bool clef::Lexer::lexInterpStr(char*& curr, char* const end, char* const tokBegi
       throwError(ErrCode::BAD_LITERAL, "unclosed interpolated string literal");
    }
    ++curr;
-   toks.emplace_back(mcsl::raw_str_span{tokBegin+1,curr-1}, PtxtType::UNPROCESSED_STR);
+   toks.emplace_back(mcsl::str_slice{tokBegin+1,curr-1}, PtxtType::UNPROCESSED_STR);
    return true;
 }
 
@@ -498,7 +498,7 @@ PUSH_NUM_TOK:
          case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'x': case 'O': case 'g': case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'y': case 'z':
          case '_': {
             while (++curr < end && (mcsl::is_digit(*curr, 36) || *curr == '_')) {}
-            mcsl::raw_str_span name{tokBegin,curr};
+            mcsl::str_slice name{tokBegin,curr};
             KeywordID id = decodeKeyword(name);
             if (+id) {
                toks.emplace_back(id);
@@ -543,7 +543,7 @@ PUSH_NUM_TOK:
          
          //OPERATORS
          case '!': case '$': case '%': case '&': case '+': case ',': case '-': case '.': case '=': case '?': case '@': case '^': case '|': case '~': case '(': case ')': case '[': case ']': case '{': case '}': case '*': case '/': case '<': case '>': case ':': {
-            OpData op = OPERATORS[mcsl::raw_str_span{curr, end}];
+            OpData op = OPERATORS[mcsl::str_slice{curr, end}];
             debug_assert(op);
             curr += op.size();
             switch (op.tokType()) {
@@ -578,7 +578,7 @@ PUSH_NUM_TOK:
                      case OpID::BLOCK_CMNT_OPEN: 
                         do {
                            if (curr >= end) { throwError(ErrCode::BAD_CMNT, "unclosed block comment"); }
-                           OpData tmp = OPERATORS[mcsl::raw_str_span{curr,end}];
+                           OpData tmp = OPERATORS[mcsl::str_slice{curr,end}];
                            if (tmp == OpID::BLOCK_CMNT_CLOSE) { curr += tmp.size(); break; }
                            ++curr;
                         } while (true);

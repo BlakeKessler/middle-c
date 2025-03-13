@@ -5,7 +5,7 @@
 #include "CLEF.hpp"
 #include "ast-nodes/Type.hpp"
 
-#include "raw_str_span.hpp"
+#include "str_slice.hpp"
 // #include "string.hpp"
 
 struct clef::Literal {
@@ -16,10 +16,10 @@ struct clef::Literal {
          slong _sintLit;
          flong _floatLit;
          char _charLit;
-         mcsl::raw_str_span _strLit;
-         mcsl::raw_str_span _interpLit;
-         mcsl::raw_str_span _formatLit;
-         mcsl::raw_str_span _regexLit;
+         mcsl::str_slice _strLit;
+         mcsl::str_slice _interpLit;
+         mcsl::str_slice _formatLit;
+         mcsl::str_slice _regexLit;
          index<Type> _typeid;
       };
       LitType _type;
@@ -31,8 +31,8 @@ struct clef::Literal {
       template<mcsl::uint_t  uint_t > Literal(const  uint_t i):_uintLit{i}, _type{LitType::UINT}  {}
       template<mcsl::sint_t  sint_t > Literal(const  sint_t i):_sintLit{i}, _type{LitType::SINT}  {}
       template<mcsl::float_t float_t> Literal(const float_t i):_floatLit{i},_type{LitType::FLOAT} {}
-      Literal(mcsl::raw_str_span str):_strLit{str},_type{LitType::STRING} {}
-      Literal(mcsl::raw_str_span str, const LitType type):_strLit{str},_type{type} {
+      Literal(mcsl::str_slice str):_strLit{str},_type{LitType::STRING} {}
+      Literal(mcsl::str_slice str, const LitType type):_strLit{str},_type{type} {
          //check type
          if (_type != LitType::STRING && _type != LitType::INTERP_STR && _type != LitType::FORMAT && _type != LitType::REGEX) {
             throwError(ErrCode::BAD_LITERAL, "attempt to construct string-like Literal node with non-string-like LitType");
@@ -59,8 +59,8 @@ struct clef::Literal {
       operator slong()        const { if (_type == LitType::SINT)   { return _sintLit;   } else { throwCastErr(LitType::SINT);   } }
       operator flong()       const { if (_type == LitType::FLOAT)  { return _floatLit;  } else { throwCastErr(LitType::FLOAT);  } }
       operator char()         const { if (_type == LitType::CHAR)   { return _charLit;   } else { throwCastErr(LitType::CHAR);   } }
-      operator mcsl::raw_str_span&()      { if (_type == LitType::STRING) { return _strLit;    } else { throwCastErr(LitType::STRING); } }
-      operator const mcsl::raw_str_span&() const { if (_type == LitType::STRING) { return _strLit;    } else { throwCastErr(LitType::STRING); } }
+      operator mcsl::str_slice&()      { if (_type == LitType::STRING) { return _strLit;    } else { throwCastErr(LitType::STRING); } }
+      operator const mcsl::str_slice&() const { if (_type == LitType::STRING) { return _strLit;    } else { throwCastErr(LitType::STRING); } }
       // operator mcsl::format() const { if (_type == LitType::FORMAT) { return _formatLit; } else { throwCastErr(LitType::FORMAT); } }
       // operator mcsl::regex()  const { if (_type == LitType::REGEX)  { return _regexLit;  } else { throwCastErr(LitType::REGEX);  } }
       operator index<Type>() { if(_type == LitType::TYPEID) { return _typeid; } else { throwCastErr(LitType::TYPEID); }}

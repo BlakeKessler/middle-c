@@ -3,7 +3,7 @@
 
 #include "OpDecoder.hpp"
 
-#include "raw_str_span.hpp"
+#include "str_slice.hpp"
 #include "assert.hpp"
 #include <algorithm>
 

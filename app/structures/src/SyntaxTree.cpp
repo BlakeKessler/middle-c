@@ -343,8 +343,8 @@ template<> void clef::SyntaxTree::__printf<clef::Literal>(index<const Literal> i
       case LitType::FLOAT: std::printf("%lf", (flong)node); break;
 
       case LitType::CHAR: std::printf("'%c'", (char)node); break;
-      case LitType::STRING: std::printf("\"%.*s\"", ((const mcsl::raw_str_span)node).size(), ((const mcsl::raw_str_span)node).begin()); break;
-      case LitType::INTERP_STR: std::printf("`%.*s`", ((const mcsl::raw_str_span)node).size(), ((const mcsl::raw_str_span)node).begin()); break;
+      case LitType::STRING: std::printf("\"%.*s\"", ((const mcsl::str_slice)node).size(), ((const mcsl::str_slice)node).begin()); break;
+      case LitType::INTERP_STR: std::printf("`%.*s`", ((const mcsl::str_slice)node).size(), ((const mcsl::str_slice)node).begin()); break;
       
       case LitType::FORMAT: UNREACHABLE; //!TODO: implement
       case LitType::REGEX: UNREACHABLE; //!TODO: implement

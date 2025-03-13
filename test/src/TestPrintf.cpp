@@ -15,7 +15,7 @@ int main() {
    mcslout.writef<ulong>(0, 'u', {10});
    mcslout.write('\n');
 
-   mcslout.writef<ulong>(0xA, 'u', {16, 15, 1, false, true, true});
+   mcslout.writef<ulong>(0xA, 'u', {16, 7, 1, false, true, true});
    mcslout.write('\n');
    mcslout.writef<ulong>(0124, 'u', {8, 4, 6, true, false, true});
    mcslout.write('\n');

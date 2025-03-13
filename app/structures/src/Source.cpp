@@ -35,7 +35,7 @@ clef::Source clef::Source::readFile(const char* path) {
       lineCount += (_buf[i] == '\n');
    }
    //allocate array of lines
-   mcsl::array<mcsl::raw_str_span> _lines(lineCount);
+   mcsl::array<mcsl::str_slice> _lines(lineCount);
    //find line breaks and fill array of lines
    char* current = _buf.begin();
    uint len;

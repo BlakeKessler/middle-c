@@ -4,10 +4,10 @@
 #include "CLEF.hpp"
 #include "KeywordDecoder.hpp"
 
-#include "raw_str_span.hpp"
+#include "str_slice.hpp"
 
 namespace clef {
-   constexpr KeywordID decodeKeyword(const mcsl::raw_str_span& str) { return KeywordDecoder::keywordID(str); }
+   constexpr KeywordID decodeKeyword(const mcsl::str_slice& str) { return KeywordDecoder::keywordID(str); }
 };
 
 #endif //KEYWORD_DATA_HPP
