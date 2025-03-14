@@ -5,7 +5,8 @@
 int main() {
    mcsl::File mcslout = mcsl::File::ReopenLibcFile(stdout);
    
-   mcslout.printf(mcsl::str_slice::make_from_cstr("%u %u %u %u %u\n"), 10, 124, 125325, 643, 0);
+   mcslout.printf(mcsl::str_slice::make_from_cstr("%#u %u %u %u %u\n"), 10, 124, 125325, 643, 0);
+   mcslout.printf(mcsl::str_slice::make_from_cstr("%r %R %r %r\n%#r\n"), 10, 124, 125325, 643, 0);
 
    // mcslout.writef<ulong>(0xA, 'u', {16, 15, 1, false, true, true});
    // mcslout.write('|');
