@@ -17,5 +17,7 @@ int main() {
 
    mcslout.printf(_FMT_("%.10,16u\n%#,2u\n"), 0x12AB325, 0b1001001010101010110101010);
 
+   mcslout.printf(_FMT_("|%%|\n"));
+
    // mcslout.flush(); //should be handled by the destructor
 }
