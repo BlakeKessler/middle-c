@@ -17,11 +17,13 @@ int main() {
 
    mcslout.printf(_FMT_("%.10,16u\n%#,2u\n"), 0x12AB325, 0b1001001010101010110101010);
 
-   mcslout.printf(_FMT_("|%%|\n"));
+   mcslout.printf(_FMT_("\n|%%|\n\n"));
 
 
 
    mcslout.printf(_FMT_("%f\n"), 1.0);
+   mcslout.printf(_FMT_("%f\n"), 10.0);
+   mcslout.printf(_FMT_("%.6f\n"), 0.01);
    mcslout.printf(_FMT_("%.0f\n"), 0.9);
    mcslout.printf(_FMT_("%.6e\n"), 1.0);
    mcslout.printf(_FMT_("%.6e\n"), 0.0);
@@ -29,12 +31,17 @@ int main() {
    mcslout.printf(_FMT_("%.0e\t|\t%.6e\n"), 0.9, 0.9);
    mcslout.printf(_FMT_("%.6e\n"), -11.0);
    mcslout.printf(_FMT_("%.6e\n"), 10.0);
-   mcslout.printf(_FMT_("%.6e\t|\t%.6e\n"), 100.0, 0.1);
+   mcslout.printf(_FMT_("%.6e\n"), 100.0);
+   mcslout.printf(_FMT_("%.6e\n"), 0.1);
    mcslout.printf(_FMT_("%.6e\n"), 9.9);
-   mcslout.printf(_FMT_("%.6e\n"), 3.0);
-   mcslout.printf(_FMT_("%.6e\n"), -33759071367523108756780.0);
-   mcslout.printf(_FMT_("%.6,16e\n"), 15.0);
-   mcslout.printf(_FMT_("%.6,16e\n"), 17.0);
+   mcslout.printf(_FMT_("%#.6e\n"), 3.0);
+   mcslout.printf(_FMT_("%#.6e\n"), -33759071367523108756780.0);
+   mcslout.printf(_FMT_("%#.6,16e\n"), 15.0);
+   mcslout.printf(_FMT_("%#.6,16e\n"), 17.0);
+   mcslout.printf(_FMT_("%#.6e\n"), -33759071367523108175691837658926580236573266899858265986328567826582365879365872365897326578756780.0);
+   mcslout.printf(_FMT_("%#.6e\n"), -337590713675231081756918376589265802365732668998582659863285678265823658792658792365789623589762389756287565982365872365897326578756780.0);
+   mcslout.printf(_FMT_("%#.6,2e\n"), -33759071367523108756780.0);
+   mcslout.printf(_FMT_("%#.6,8e\n"), -33759071367523108756780.0);
 
    mcslout.printf(_FMT_("%f | %f | %f\n"), mcsl::Inf, -mcsl::Inf, mcsl::NaN);
 
