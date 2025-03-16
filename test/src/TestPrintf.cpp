@@ -32,8 +32,11 @@ int main() {
    mcslout.printf(_FMT_("%.6e\t|\t%.6e\n"), 100.0, 0.1);
    mcslout.printf(_FMT_("%.6e\n"), 9.9);
    mcslout.printf(_FMT_("%.6e\n"), 3.0);
+   mcslout.printf(_FMT_("%.6e\n"), -33759071367523108756780.0);
    mcslout.printf(_FMT_("%.6,16e\n"), 15.0);
    mcslout.printf(_FMT_("%.6,16e\n"), 17.0);
+
+   mcslout.printf(_FMT_("%f | %f | %f\n"), mcsl::Inf, -mcsl::Inf, mcsl::NaN);
 
    // mcslout.flush(); //should be handled by the destructor
 }
