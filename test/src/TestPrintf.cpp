@@ -19,5 +19,13 @@ int main() {
 
    mcslout.printf(_FMT_("|%%|\n"));
 
+
+
+   mcslout.printf(_FMT_("%f\n"), 1.0);
+   mcslout.printf(_FMT_("%.6e\n"), 1.0);
+   mcslout.printf(_FMT_("%.6e\n"), 0.0);
+   mcslout.printf(_FMT_("%.6e\n"), -1.0);
+   mcslout.printf(_FMT_("%.6e\n"), 3.0);
+
    // mcslout.flush(); //should be handled by the destructor
 }
