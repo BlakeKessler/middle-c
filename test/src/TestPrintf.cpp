@@ -30,10 +30,10 @@ int main() {
    mcslout.printf(_FMT_("%.6e\n"), -1.0);
    mcslout.printf(_FMT_("%.0e\t|\t%.6e\n"), 0.9, 0.9);
    mcslout.printf(_FMT_("%.6e\n"), -11.0);
-   mcslout.printf(_FMT_("%.6e\n"), 10.0);
-   mcslout.printf(_FMT_("%.6e\n"), 100.0);
-   mcslout.printf(_FMT_("%.6e\n"), 0.1);
-   mcslout.printf(_FMT_("%.6e\n"), 9.9);
+   mcslout.printf(_FMT_("|%20.6e|\n"), 10.0);
+   mcslout.printf(_FMT_("|%-20.6e|\n"), 100.0);
+   mcslout.printf(_FMT_("|%+20.6e|\n"), 0.1);
+   mcslout.printf(_FMT_("|%020.6e|\n"), 9.9);
    mcslout.printf(_FMT_("%#.6e\n"), 3.0);
    mcslout.printf(_FMT_("%#.6e\n"), -33759071367523108756780.0);
    mcslout.printf(_FMT_("%#.6,16e\n"), 15.0);
@@ -44,6 +44,8 @@ int main() {
    mcslout.printf(_FMT_("%#.6,8e\n"), -33759071367523108756780.0);
 
    mcslout.printf(_FMT_("%f | %f | %f\n"), mcsl::Inf, -mcsl::Inf, mcsl::NaN);
+
+   mcslout.printf(_FMT_("\n|%s|\n%c%c\n"), mcsl::str_slice::make_from_cstr("ayo this thing on?"), ':', ')');
 
    // mcslout.flush(); //should be handled by the destructor
 }
