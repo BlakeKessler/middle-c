@@ -73,7 +73,8 @@ template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef:
    using Prop = OpProps;
    using Type = TokenType;
    using _ = OpData;
-   auto lit = mcsl::str_slice::make_from_cstr;
+   #define lit mcsl::str_slice::make_from_cstr
+   // using lit = mcsl::raw_buf_str<MAX_OP_LEN, ubyte>;
    ubyte prec = 16;
    return OpDecoder{
       _(lit("#"),   Op::PREPROCESSOR,      Prop::PREFIX,      0,      Type::PREPROC_INIT), //preprocessor
@@ -173,6 +174,7 @@ template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef:
 
       _(lit(","),   Op::COMMA,             Prop::INFIX_LEFT,  --prec, Type::OP          )  //comma
    };
+   #undef lit
 }
 
 #endif //OP_DECODER_CPP

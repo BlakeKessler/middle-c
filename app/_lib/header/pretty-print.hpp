@@ -3,29 +3,33 @@
 
 #include "CLEF.hpp"
 
+#include "str_slice.hpp"
+
+#undef NULL
+
 namespace clef {
-   constexpr const char* toString(const NodeType);
-   constexpr const char* toString(const TokenType);
-   constexpr const char* toString(const TokenType);
-   constexpr const char* toString(const OpID);
-   constexpr const char* toString(const OpProps);
-   constexpr const char* toString(const KeywordID);
-   constexpr const char* toString(const BlockType);
-   constexpr const char* toString(const BlockDelimRole);
-   constexpr const char* toString(const PtxtType);
-   constexpr const char* toString(const LitType);
-   // constexpr const char* toString(const TypeQualMask);
-   // constexpr const char* toString(const SymbolProp);
-   constexpr const char* toString(const FundTypeID);
+   constexpr const mcsl::str_slice toString(const NodeType);
+   constexpr const mcsl::str_slice toString(const TokenType);
+   constexpr const mcsl::str_slice toString(const TokenType);
+   constexpr const mcsl::str_slice toString(const OpID);
+   constexpr const mcsl::str_slice toString(const OpProps);
+   constexpr const mcsl::str_slice toString(const KeywordID);
+   constexpr const mcsl::str_slice toString(const BlockType);
+   constexpr const mcsl::str_slice toString(const BlockDelimRole);
+   constexpr const mcsl::str_slice toString(const PtxtType);
+   constexpr const mcsl::str_slice toString(const LitType);
+   // constexpr const mcsl::str_slice toString(const TypeQualMask);
+   // constexpr const mcsl::str_slice toString(const SymbolProp);
+   constexpr const mcsl::str_slice toString(const FundTypeID);
 };
 
 
 
 #pragma region inlinesrc
 
-#define CASE(enumerator, name) case enumerator: return name
+#define CASE(enumerator, name) case enumerator: return mcsl::str_slice::make_from_cstr(name)
 
-constexpr const char* clef::toString(const NodeType type) {
+constexpr const mcsl::str_slice clef::toString(const NodeType type) {
    using enum NodeType;
    switch (type) {
       CASE(ERROR, "error");
@@ -72,7 +76,7 @@ constexpr const char* clef::toString(const NodeType type) {
    UNREACHABLE;
 }
 
-constexpr const char* clef::toString(const TokenType type) {
+constexpr const mcsl::str_slice clef::toString(const TokenType type) {
    using enum TokenType;
    switch (type) {
       CASE(NONE, "none");
@@ -95,7 +99,7 @@ constexpr const char* clef::toString(const TokenType type) {
    UNREACHABLE;
 }
 
-constexpr const char* clef::toString(const OpID op) {
+constexpr const mcsl::str_slice clef::toString(const OpID op) {
    using enum OpID;
    switch (op) {
       CASE(NULL, "null");
@@ -236,7 +240,7 @@ constexpr const char* clef::toString(const OpID op) {
    UNREACHABLE;
 }
 
-constexpr const char* clef::toString(const OpProps props) {
+constexpr const mcsl::str_slice clef::toString(const OpProps props) {
    using enum OpProps;
    switch (props) {
       CASE(NULL, "null");
@@ -264,7 +268,7 @@ constexpr const char* clef::toString(const OpProps props) {
    UNREACHABLE;
 }
 
-constexpr const char* clef::toString(const KeywordID kw) {
+constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
    using enum KeywordID;
    switch (kw) {
       CASE(_NOT_A_KEYWORD, "not_a_keyword");
@@ -400,7 +404,7 @@ constexpr const char* clef::toString(const KeywordID kw) {
    UNREACHABLE;
 }
 
-constexpr const char* clef::toString(const BlockType type) {
+constexpr const mcsl::str_slice clef::toString(const BlockType type) {
    using enum BlockType;
    switch (type) {
       CASE(NONE, "none");
@@ -422,7 +426,7 @@ constexpr const char* clef::toString(const BlockType type) {
    UNREACHABLE;
 }
 
-constexpr const char* clef::toString(const BlockDelimRole role) {
+constexpr const mcsl::str_slice clef::toString(const BlockDelimRole role) {
    using enum BlockDelimRole;
    switch (role) {
       CASE(NULL, "null");
@@ -433,7 +437,7 @@ constexpr const char* clef::toString(const BlockDelimRole role) {
    UNREACHABLE;
 }
 
-constexpr const char* clef::toString(const PtxtType type) {
+constexpr const mcsl::str_slice clef::toString(const PtxtType type) {
    using enum PtxtType;
    switch (type) {
       CASE(NULL, "NULL");
@@ -461,7 +465,7 @@ constexpr const char* clef::toString(const PtxtType type) {
    UNREACHABLE;
 }
 
-constexpr const char* clef::toString(const LitType type) {
+constexpr const mcsl::str_slice clef::toString(const LitType type) {
    using enum LitType;
    switch (type) {
       CASE(NONE, "none");
@@ -483,7 +487,7 @@ constexpr const char* clef::toString(const LitType type) {
    UNREACHABLE;
 }
 
-constexpr const char* clef::toString(const FundTypeID type) {
+constexpr const mcsl::str_slice clef::toString(const FundTypeID type) {
    using enum FundTypeID;
    switch (type) {
       CASE(NULL, "null");

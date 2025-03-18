@@ -8,6 +8,8 @@
 #include <cstring>
 #include <cmath>
 
+#include "MAP_MACRO.h"
+
 //derived to base
 void clef::astNode::downCast(NodeType newType) {
    if (canDownCastTo(_nodeType, newType)) {
@@ -39,49 +41,13 @@ void clef::astNode::anyCast(NodeType newType) {
 
 
 //sizeof node from node type
-#define typecase(type) case type::nodeType(): return sizeof(type)
+#define typecase(type) case type::nodeType(): return sizeof(type);
 uint clef::nodeSizeof(NodeType t) {
    switch (t) {
       case NodeType::NONE: return 0;
       case NodeType::ERROR: return 0;
 
-      typecase(Identifier);
-      typecase(Variable);
-      typecase(Function);
-      typecase(Type);
-      typecase(VariadicParameter);
-      typecase(FundamentalType);
-      typecase(FunctionSignature);
-      typecase(Enum);
-      typecase(Mask);
-      typecase(Union);
-      typecase(Namespace);
-      typecase(Interface);
-      typecase(Struct);
-      typecase(Class);
-      typecase(GenericType);
-      typecase(Scope);
-      typecase(Literal);
-      typecase(Expression);
-      typecase(Declaration);
-      typecase(ForLoop);
-      typecase(ForeachLoop);
-      typecase(WhileLoop);
-      typecase(DoWhileLoop);
-      typecase(If);
-      typecase(Switch);
-      typecase(Match);
-      typecase(TryCatch);
-      typecase(Asm);
-      typecase(ForLoopParams);
-      typecase(ForeachLoopParams);
-      typecase(SwitchCases);
-      typecase(MatchCases);
-      typecase(Statement);
-      typecase(StatementSequence);
-      typecase(ArgumentList);
-      typecase(ParameterList);
-      typecase(SpecializerList);
+      MCSL_MAP(typecase, ALL_AST_NODE_T)
    }
 }
 #undef typecase
@@ -99,51 +65,17 @@ void clef::astNode::print() const {
    }
 }
 //formatted print
-#define CASE(var) case decltype(var)::nodeType(): var.printf(); break
+#define CASE(var) case decltype(var)::nodeType(): var.printf(); break;
 void clef::astNode::printf() const {
    switch (_nodeType) {
-      CASE(_identifier);
-      CASE(_variable);
-      CASE(_function);
-      CASE(_type);
-      CASE(_variadicParameter);
-      CASE(_fundamentalType);
-      CASE(_functionSignature);
-      CASE(_enum);
-      CASE(_mask);
-      CASE(_union);
-      CASE(_namespace);
-      CASE(_interface);
-      CASE(_struct);
-      CASE(_class);
-      CASE(_genericType);
-      CASE(_scope);
-      CASE(_literal);
-      CASE(_expression);
-      CASE(_declaration);
-      CASE(_forLoop);
-      CASE(_foreachLoop);
-      CASE(_whileLoop);
-      CASE(_doWhileLoop);
-      CASE(_if);
-      CASE(_switch);
-      CASE(_match);
-      CASE(_tryCatch);
-      CASE(_asm);
-      CASE(_forLoopParams);
-      CASE(_foreachLoopParams);
-      CASE(_switchCases);
-      CASE(_matchCases);
-      CASE(_statement);
-      CASE(_statementSequence);
-      CASE(_argumentList);
-      CASE(_parameterList);
-      CASE(_specializerList);
-
       case NodeType::NONE: std::printf("NULL NODE"); break;
       case NodeType::ERROR: std::printf("ERORR NODE"); break;
+      
+      MCSL_MAP(CASE, CLEF_ALL_AST_NODE_UNION_MEMBS)
    }
 }
 #undef CASE
+
+#include "MAP_MACRO_UNDEF.h"
 
 #endif //AST_NODE_CPP

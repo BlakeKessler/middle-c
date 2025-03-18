@@ -2,7 +2,7 @@
 #define SOURCE_CPP
 
 #include "Source.hpp"
-#include <cstdio>
+#include "fs.hpp"
 #include <filesystem>
 #include "assert.hpp"
 
@@ -12,19 +12,12 @@ namespace fs = std::filesystem;
 //!returns a Source object with the data
 //!NOTE: std::fgets to get a line
 clef::Source clef::Source::readFile(const char* path) {
-   //get file size and allocate buffer
-   //extra char allocated to ensure null-termination
+   //read file into a string
    const uint fileSize = fs::file_size(fs::path(path));
-
-   mcsl::string _buf{fileSize};
-   // _buf.reserve_exact(fileSize);
-
-   //open, read, close, back-fill file
-   FILE* srcFile = std::fopen(path, "r");
-   const uint charsRead = std::fread(_buf.begin(), 1, fileSize, srcFile);
-   _buf.UNSAFE_RESIZE(charsRead);
-   std::fclose(srcFile);
-   assert(charsRead == _buf.size(), "incorrect number of characters read from source code file");
+   mcsl::File srcFile(path, "r");
+   mcsl::string _buf = srcFile.readChars(fileSize);
+   srcFile.close();
+   assert(fileSize == _buf.size(), "incorrect number of characters read from source code file");
 
    //validate file encoding (UTF-8)
    //!NOTE: UNFINISHED
@@ -32,7 +25,7 @@ clef::Source clef::Source::readFile(const char* path) {
 
    //find number of lines
    uint lineCount = 1;
-   for (uint i = 0; i < charsRead; ++i) {
+   for (uint i = 0; i < _buf.size(); ++i) {
       lineCount += (_buf[i] == '\n');
    }
    //allocate array of lines
