@@ -258,7 +258,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
                   operandStack.push_back(+tree.make<Literal>(tokIt++->unprocessedStrVal()));
                   goto PARSE_EXPR_CONTINUE;
 
-               default: logError(ErrCode::PARSER_NOT_IMPLEMENTED, "cannot currently parse this plaintext segment type (%hhu)", +tokIt->ptxtType());
+               default: logError(ErrCode::PARSER_NOT_IMPLEMENTED, "cannot currently parse this plaintext segment type (%u)", +tokIt->ptxtType());
                //!TODO: support other types of plaintext literal
             }
             UNREACHABLE;
@@ -352,7 +352,7 @@ template<bool isDecl> clef::index<clef::Identifier> clef::Parser::tryParseIdenti
       if (!tryConsumeOperator(OpID::SCOPE_RESOLUTION)) { break; }
 
       if (tokIt->type() == TokenType::KEYWORD) { logError(ErrCode::BAD_IDEN, "keywords may not name or be members of scopes"); }
-      else if (tokIt->type() != TokenType::IDEN) { logError(ErrCode::BAD_IDEN, "only identifiers may name or be members of scopes (%hhu)", +tokIt->type()); }
+      else if (tokIt->type() != TokenType::IDEN) { logError(ErrCode::BAD_IDEN, "only identifiers may name or be members of scopes (%u)", +tokIt->type()); }
    } while (true);
    
    return name;

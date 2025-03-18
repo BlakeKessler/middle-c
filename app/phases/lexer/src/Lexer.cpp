@@ -48,7 +48,7 @@ clef::SourceTokens clef::Lexer::LexSource(Source&& src) {
                case 'x': case 'X': radix = 16; break;
             }
             if (++curr >= end || !mcsl::is_digit(*curr, radix)) {
-               throwError(ErrCode::BAD_LITERAL, "radix specifier must be followed by digits");
+               throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix specifier must be followed by digits"));
             }
             goto PROCESS_NUM;
 
@@ -68,7 +68,7 @@ PROCESS_NUM:
                isReal = true;
                //check first digit
                if (++curr >= end || !mcsl::is_digit(*curr, radix)) {
-                  throwError(ErrCode::BAD_LITERAL, "radix point must be followed by digits");
+                  throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix point must be followed by digits"));
                }
                //skip following digits
                do {
@@ -80,11 +80,11 @@ PROCESS_NUM:
             if (curr + 2 < end && curr[0] == '~' && curr[1] == '^') {
                isReal = true;
                curr += 2;
-               if (curr >= end) { throwError(ErrCode::BAD_LITERAL, "radix separator must be followed by digits"); }
+               if (curr >= end) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }
                //skip sign if present
-               if (*curr == '-' || *curr == '+') { if (++curr >= end) { throwError(ErrCode::BAD_LITERAL, "radix separator must be followed by digits"); }}
+               if (*curr == '-' || *curr == '+') { if (++curr >= end) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }}
                //check first digit
-               if (!mcsl::is_digit(*curr, radix)) { throwError(ErrCode::BAD_LITERAL, "radix separator must be followed by digits"); }
+               if (!mcsl::is_digit(*curr, radix)) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }
                //skip following digits
                do {
                   if (++curr >= end) { goto PUSH_NUM_TOK; }
@@ -93,7 +93,7 @@ PROCESS_NUM:
 
 PUSH_NUM_TOK:
             if (curr < end && mcsl::is_letter(*curr)) {
-               throwError(ErrCode::BAD_LITERAL, "identifier may not start with digit, and numeric literal must not be directly followed by identifier without separating whitespace");
+               throwError(ErrCode::BAD_LITERAL, mcsl::FMT("identifier may not start with digit, and numeric literal must not be directly followed by identifier without separating whitespace"));
             }
 
             //convert to number and push token to stream
@@ -192,13 +192,13 @@ PUSH_NUM_TOK:
                      case OpID::BLOCK_CMNT: break;
                      case OpID::BLOCK_CMNT_OPEN: 
                         do {
-                           if (curr >= end) { throwError(ErrCode::BAD_CMNT, "unclosed block comment"); }
+                           if (curr >= end) { throwError(ErrCode::BAD_CMNT, mcsl::FMT("unclosed block comment")); }
                            OpData tmp = OPERATORS[mcsl::str_slice{curr,end}];
                            if (tmp == OpID::BLOCK_CMNT_CLOSE) { curr += tmp.size(); break; }
                            ++curr;
                         } while (true);
                         break;
-                     case OpID::BLOCK_CMNT_CLOSE: throwError(ErrCode::BAD_CMNT, "floating block comment closing delimiter");
+                     case OpID::BLOCK_CMNT_CLOSE: throwError(ErrCode::BAD_CMNT, mcsl::FMT("floating block comment closing delimiter"));
 
                      case OpID::LINE_CMNT:
                         while (curr < end) {
@@ -235,7 +235,7 @@ PUSH_NUM_TOK:
          //UNPRINTABLE CHAR (illegal)
          default:
             debug_assert(*curr < 32 || *curr > 126);
-            throwError(ErrCode::LEXER_UNSPEC, "invalid character (%hhu)", *curr);
+            throwError(ErrCode::LEXER_UNSPEC, mcsl::FMT("invalid character (%u)"), *curr);
       }
    }
 
@@ -248,7 +248,7 @@ char clef::Lexer::parseChar(char*& curr, char* const end) {
    char ch;
    if (*curr >= 32 && *curr <= 126) {
       if (*curr == ESCAPE_CHAR) {
-         if (++curr >= end) { throwError(ErrCode::BAD_LITERAL, "incomplete character literal"); }
+         if (++curr >= end) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("incomplete character literal")); }
          switch (*curr) {
             #pragma region numescseq
             case 'b': case 'B': { //1-8 binary digits
@@ -261,7 +261,7 @@ char clef::Lexer::parseChar(char*& curr, char* const end) {
                   }
                   ++curr;
                }
-               if (numEnd != curr) { throwError(ErrCode::BAD_LITERAL, "bad binary numeric escape sequence"); }
+               if (numEnd != curr) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("bad binary numeric escape sequence")); }
                ch = (char)mcsl::str_to_uint(numBegin, numEnd, 2);
                break;
             }
@@ -276,7 +276,7 @@ char clef::Lexer::parseChar(char*& curr, char* const end) {
                   }
                   ++curr;
                }
-               if (numEnd != curr) { throwError(ErrCode::BAD_LITERAL, "bad octal numeric escape sequence"); }
+               if (numEnd != curr) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("bad octal numeric escape sequence")); }
                //parse digit sequence
                do { //!NOTE: kinda unsafe, but should alwawys work if implemented correctly
                   debug_assert(numEnd > numBegin);
@@ -298,7 +298,7 @@ char clef::Lexer::parseChar(char*& curr, char* const end) {
                   }
                   ++curr;
                }
-               if (numEnd != curr) { throwError(ErrCode::BAD_LITERAL, "bad decimal numeric escape sequence"); }
+               if (numEnd != curr) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("bad decimal numeric escape sequence")); }
                //parse digit sequence
                do { //!NOTE: kinda unsafe, but should alwawys work if implemented correctly
                   debug_assert(numEnd > numBegin);
@@ -319,7 +319,7 @@ char clef::Lexer::parseChar(char*& curr, char* const end) {
                   }
                   ++curr;
                }
-               if (numEnd != curr) { throwError(ErrCode::BAD_LITERAL, "bad hexidecimal numeric escape sequence"); }
+               if (numEnd != curr) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("bad hexidecimal numeric escape sequence")); }
                ch = (char)mcsl::str_to_uint(numBegin, numEnd, 16);
                break;
             }
@@ -333,7 +333,7 @@ char clef::Lexer::parseChar(char*& curr, char* const end) {
             case 't': ch = '\t'; ++curr; break;
             case 'v': ch = '\v'; ++curr; break;
 
-            default: if (*curr < 32 || *curr > 126) { throwError(ErrCode::BAD_LITERAL, "unprintable escaped character literal (%hhu)", *curr); }
+            default: if (*curr < 32 || *curr > 126) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("unprintable escaped character literal (%u)"), *curr); }
                //!NOTE: INCOMPLETE - needs a warning for unrecognized escape sequence
                [[fallthrough]];
             case '\'': [[fallthrough]];
@@ -347,7 +347,7 @@ char clef::Lexer::parseChar(char*& curr, char* const end) {
          ch = *curr;
          ++curr;
       }
-   } else { throwError(ErrCode::BAD_LITERAL, "unprintable character literal (%hhu)", *curr); }
+   } else { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("unprintable character literal (%u)"), *curr); }
 
    return ch;
 }
@@ -355,7 +355,7 @@ char clef::Lexer::parseChar(char*& curr, char* const end) {
 bool clef::Lexer::lexChar(char*& curr, char* const end, mcsl::dyn_arr<Token>& toks) {
    ++curr; //skip opening quote
    const char tmp = parseChar(curr, end);
-   if (curr >= end || *curr != CHAR_DELIM) { throwError(ErrCode::BAD_LITERAL, "character literal may only contain a single character/escape sequence"); }
+   if (curr >= end || *curr != CHAR_DELIM) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("character literal may only contain a single character/escape sequence")); }
    ++curr; //skip closing quote
    toks.emplace_back(tmp);
    return true;
@@ -367,7 +367,7 @@ bool clef::Lexer::lexStr(char*& curr, char* const end, char* const tokBegin, mcs
       }
    }
    if (curr >= end || *curr != STR_DELIM) {
-      throwError(ErrCode::BAD_LITERAL, "unclosed string literal");
+      throwError(ErrCode::BAD_LITERAL, mcsl::FMT("unclosed string literal"));
    }
    ++curr;
    toks.emplace_back(mcsl::str_slice{tokBegin+1,curr-1}, PtxtType::UNPROCESSED_STR);
@@ -388,14 +388,14 @@ bool clef::Lexer::lexInterpStr(char*& curr, char* const end, char* const tokBegi
                lexExpr(curr, end, toks);
             }
             if (curr >= end) {
-               throwError(ErrCode::BAD_LITERAL, "unclosed interpolated string literal");
+               throwError(ErrCode::BAD_LITERAL, mcsl::FMT("unclosed interpolated string literal"));
             }
          }
       }
    }
    }
    if (curr >= end || *curr != INTERP_STR_DELIM) {
-      throwError(ErrCode::BAD_LITERAL, "unclosed interpolated string literal");
+      throwError(ErrCode::BAD_LITERAL, mcsl::FMT("unclosed interpolated string literal"));
    }
    ++curr;
    toks.emplace_back(mcsl::str_slice{tokBegin+1,curr-1}, PtxtType::UNPROCESSED_STR);
@@ -434,7 +434,7 @@ bool clef::Lexer::lexExpr(char*& curr, char* const end, mcsl::dyn_arr<Token>& to
                case 'x': case 'X': radix = 16; break;
             }
             if (++curr >= end || !mcsl::is_digit(*curr, radix)) {
-               throwError(ErrCode::BAD_LITERAL, "radix specifier must be followed by digits");
+               throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix specifier must be followed by digits"));
             }
             goto PROCESS_NUM;
 
@@ -454,7 +454,7 @@ bool clef::Lexer::lexExpr(char*& curr, char* const end, mcsl::dyn_arr<Token>& to
                isReal = true;
                //check first digit
                if (++curr >= end || !mcsl::is_digit(*curr, radix)) {
-                  throwError(ErrCode::BAD_LITERAL, "radix point must be followed by digits");
+                  throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix point must be followed by digits"));
                }
                //skip following digits
                do {
@@ -466,11 +466,11 @@ bool clef::Lexer::lexExpr(char*& curr, char* const end, mcsl::dyn_arr<Token>& to
             if (curr + 2 < end && curr[0] == '~' && curr[1] == '^') {
                isReal = true;
                curr += 2;
-               if (curr >= end) { throwError(ErrCode::BAD_LITERAL, "radix separator must be followed by digits"); }
+               if (curr >= end) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }
                //skip sign if present
-               if (*curr == '-' || *curr == '+') { if (++curr >= end) { throwError(ErrCode::BAD_LITERAL, "radix separator must be followed by digits"); }}
+               if (*curr == '-' || *curr == '+') { if (++curr >= end) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }}
                //check first digit
-               if (!mcsl::is_digit(*curr, radix)) { throwError(ErrCode::BAD_LITERAL, "radix separator must be followed by digits"); }
+               if (!mcsl::is_digit(*curr, radix)) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }
                //skip following digits
                do {
                   if (++curr >= end) { goto PUSH_NUM_TOK; }
@@ -479,7 +479,7 @@ bool clef::Lexer::lexExpr(char*& curr, char* const end, mcsl::dyn_arr<Token>& to
 
 PUSH_NUM_TOK:
             if (curr < end && mcsl::is_letter(*curr)) {
-               throwError(ErrCode::BAD_LITERAL, "identifier may not start with digit, and numeric literal must not be directly followed by identifier without separating whitespace");
+               throwError(ErrCode::BAD_LITERAL, mcsl::FMT("identifier may not start with digit, and numeric literal must not be directly followed by identifier without separating whitespace"));
             }
 
             //convert to number and push token to stream
@@ -577,13 +577,13 @@ PUSH_NUM_TOK:
                      case OpID::BLOCK_CMNT: break;
                      case OpID::BLOCK_CMNT_OPEN: 
                         do {
-                           if (curr >= end) { throwError(ErrCode::BAD_CMNT, "unclosed block comment"); }
+                           if (curr >= end) { throwError(ErrCode::BAD_CMNT, mcsl::FMT("unclosed block comment")); }
                            OpData tmp = OPERATORS[mcsl::str_slice{curr,end}];
                            if (tmp == OpID::BLOCK_CMNT_CLOSE) { curr += tmp.size(); break; }
                            ++curr;
                         } while (true);
                         break;
-                     case OpID::BLOCK_CMNT_CLOSE: throwError(ErrCode::BAD_CMNT, "floating block comment closing delimiter");
+                     case OpID::BLOCK_CMNT_CLOSE: throwError(ErrCode::BAD_CMNT, mcsl::FMT("floating block comment closing delimiter"));
 
                      case OpID::LINE_CMNT:
                         while (curr < end) {
@@ -620,7 +620,7 @@ PUSH_NUM_TOK:
          //UNPRINTABLE CHAR (illegal)
          default:
             debug_assert(*curr < 32 || *curr > 126);
-            throwError(ErrCode::LEXER_UNSPEC, "invalid character (%hhu)", *curr);
+            throwError(ErrCode::LEXER_UNSPEC, mcsl::FMT("invalid character (%u)"), *curr);
       }
    }
    return true;

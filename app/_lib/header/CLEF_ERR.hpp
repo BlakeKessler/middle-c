@@ -14,11 +14,11 @@ namespace clef {
 
 //!CLEF formatted error thrower
 void clef::throwError(const clef::ErrCode code, const mcsl::str_slice formatStr, auto&&... args) {
-   mcsl::printf("\n");
+   mcsl::printf(mcsl::FMT("\n"));
    mcsl::stdout.flush();
-   mcsl::err_printf("\033[31;1;4mCLEF ERROR:\033[0m %s", ERR_MSG_ARR[+code]);
+   mcsl::err_printf(mcsl::FMT("\033[31;1;4mCLEF ERROR:\033[0m %s"), ERR_MSG_ARR[+code]);
    mcsl::err_printf(formatStr, args...);
-   mcsl::err_printf("\n");
+   mcsl::err_printf(mcsl::FMT("\n"));
    mcsl::stderr.flush();
    #ifdef NDEBUG
       std::exit(EXIT_FAILURE);
@@ -28,11 +28,11 @@ void clef::throwError(const clef::ErrCode code, const mcsl::str_slice formatStr,
 }
 //!CLEF formatted error thrower with line num
 void clef::throwError(const clef::ErrCode code, const uint lineNum, const mcsl::str_slice formatStr, auto&&... args) {
-   mcsl::printf("\n");
+   mcsl::printf(mcsl::FMT("\n"));
    mcsl::stdout.flush();
-   mcsl::err_printf("\033[31;1;4mCLEF ERROR:\033[0m %s", ERR_MSG_ARR[+code]);
+   mcsl::err_printf(mcsl::FMT("\033[31;1;4mCLEF ERROR:\033[0m %s"), ERR_MSG_ARR[+code]);
    mcsl::err_printf(formatStr, args...);
-   mcsl::err_printf(" \033[35m(line %u)\033[0m\n", lineNum);
+   mcsl::err_printf(mcsl::FMT(" \033[35m(line %u)\033[0m\n"), lineNum);
    mcsl::stderr.flush();
    #ifdef NDEBUG
       std::exit(EXIT_FAILURE);

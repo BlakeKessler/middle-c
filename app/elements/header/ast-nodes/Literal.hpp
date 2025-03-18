@@ -35,7 +35,7 @@ struct clef::Literal {
       Literal(mcsl::str_slice str, const LitType type):_strLit{str},_type{type} {
          //check type
          if (_type != LitType::STRING && _type != LitType::INTERP_STR && _type != LitType::FORMAT && _type != LitType::REGEX) {
-            throwError(ErrCode::BAD_LITERAL, "attempt to construct string-like Literal node with non-string-like LitType");
+            throwError(ErrCode::BAD_LITERAL, mcsl::FMT("attempt to construct string-like Literal node with non-string-like LitType"));
          }
       }
       Literal(index<Type> typeID):_typeid{typeID},_type{LitType::TYPEID} {}
@@ -52,7 +52,7 @@ struct clef::Literal {
 
       LitType type() const { return _type; }
 
-      [[noreturn]] void throwCastErr(LitType target) const { throwError(ErrCode::BAD_LIT_CAST, "%hhu to %hhu", +_type, +target); }
+      [[noreturn]] void throwCastErr(LitType target) const { throwError(ErrCode::BAD_LIT_CAST, mcsl::FMT("%u to %u"), +_type, +target); }
 
       #pragma region cast
       operator ulong()        const { if (_type == LitType::UINT)   { return _uintLit;   } else { throwCastErr(LitType::UINT);   } }

@@ -118,7 +118,7 @@ struct clef::astNode {
       void verticalCast(NodeType);
       void anyCast(NodeType);
 
-      [[noreturn]] void throwCastErr(NodeType target) const { throwError(ErrCode::BAD_NODE_CAST, "%hhu to %hhu", +_nodeType, +target); }
+      [[noreturn]] void throwCastErr(NodeType target) const { throwError(ErrCode::BAD_NODE_CAST, mcsl::FMT("%u to %u"), +_nodeType, +target); }
 
 
 

@@ -111,7 +111,7 @@ void clef::Parser::logError [[noreturn]] (const clef::ErrCode code, const char* 
    _errno = code;
    tokIt->printf();
    tree.printf();
-   clef::throwError(code, formatStr, std::forward<decltype(args)>(args)...);
+   clef::throwError(code, mcsl::FMT(formatStr), std::forward<decltype(args)>(args)...);
 }
 #pragma GCC diagnostic pop
 #pragma endregion inlinesrc
