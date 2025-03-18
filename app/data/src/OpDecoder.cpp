@@ -73,104 +73,105 @@ template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef:
    using Prop = OpProps;
    using Type = TokenType;
    using _ = OpData;
+   auto lit = mcsl::str_slice::make_from_cstr;
    ubyte prec = 16;
    return OpDecoder{
-      _("#",   Op::PREPROCESSOR,      Prop::PREFIX,      0,      Type::PREPROC_INIT), //preprocessor
-      _("::",  Op::SCOPE_RESOLUTION,  Prop::INFIX_LEFT,  0,      Type::OP          ), //scope resolution
-      _("\\",  Op::ESCAPE,            Prop::PREFIX,      0,      Type::ESC         ), //escape character
-      _(";",   Op::EOS,               Prop::PREFIX,      0,      Type::EOS         ), //end of statement
-      _("//",  Op::LINE_CMNT,         Prop::PREFIX,      0,      Type::BLOCK_DELIM ), //line comment
-      _("/*",  Op::BLOCK_CMNT_OPEN,   Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //block comment
-      _("*/",  Op::BLOCK_CMNT_CLOSE,  Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //block comment
-      _("\'",  Op::CHAR,              Prop::DELIM,       0,      Type::BLOCK_DELIM ), //char
-      _("\"",  Op::STRING,            Prop::DELIM,       0,      Type::BLOCK_DELIM ), //string
-      _("`",   Op::INTERP_STRING,     Prop::DELIM,       0,      Type::BLOCK_DELIM ), //interpolated string
+      _(lit("#"),   Op::PREPROCESSOR,      Prop::PREFIX,      0,      Type::PREPROC_INIT), //preprocessor
+      _(lit("::"),  Op::SCOPE_RESOLUTION,  Prop::INFIX_LEFT,  0,      Type::OP          ), //scope resolution
+      _(lit("\\"),  Op::ESCAPE,            Prop::PREFIX,      0,      Type::ESC         ), //escape character
+      _(lit(";"),   Op::EOS,               Prop::PREFIX,      0,      Type::EOS         ), //end of statement
+      _(lit("//"),  Op::LINE_CMNT,         Prop::PREFIX,      0,      Type::BLOCK_DELIM ), //line comment
+      _(lit("/*"),  Op::BLOCK_CMNT_OPEN,   Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //block comment
+      _(lit("*/"),  Op::BLOCK_CMNT_CLOSE,  Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //block comment
+      _(lit("\'"),  Op::CHAR,              Prop::DELIM,       0,      Type::BLOCK_DELIM ), //char
+      _(lit("\""),  Op::STRING,            Prop::DELIM,       0,      Type::BLOCK_DELIM ), //string
+      _(lit("`"),   Op::INTERP_STRING,     Prop::DELIM,       0,      Type::BLOCK_DELIM ), //interpolated string
 
 
-      _("(",   Op::CALL_OPEN,         Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //function calls/functional casts
-      _(")",   Op::CALL_CLOSE,        Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //function calls/functional casts
-      _("[",   Op::SUBSCRIPT_OPEN,    Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //subscript
-      _("]",   Op::SUBSCRIPT_CLOSE,   Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //subscript
-      _("{",   Op::LIST_OPEN,         Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //scope/functional casts
-      _("}",   Op::LIST_CLOSE,        Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //scope/functional casts
-      _("<:",  Op::SPECIALIZER_OPEN,  Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //specifier
-      _(":>",  Op::SPECIALIZER_CLOSE, Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //specifier
+      _(lit("("),   Op::CALL_OPEN,         Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //function calls/functional casts
+      _(lit(")"),   Op::CALL_CLOSE,        Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //function calls/functional casts
+      _(lit("["),   Op::SUBSCRIPT_OPEN,    Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //subscript
+      _(lit("]"),   Op::SUBSCRIPT_CLOSE,   Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //subscript
+      _(lit("{"),   Op::LIST_OPEN,         Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //scope/functional casts
+      _(lit("}"),   Op::LIST_CLOSE,        Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //scope/functional casts
+      _(lit("<:"),  Op::SPECIALIZER_OPEN,  Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //specifier
+      _(lit(":>"),  Op::SPECIALIZER_CLOSE, Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //specifier
 
 
 
 
 
-      _("++",  Op::INC,               Prop::PREFIX,      0,      Type::OP          ), //pre-increment
-      _("--",  Op::DEC,               Prop::PREFIX,      0,      Type::OP          ), //pre-decrement
-      _(".",   Op::MEMBER_ACCESS,     Prop::INFIX_LEFT,  0,      Type::OP          ), //element access
-      _("->",  Op::PTR_MEMBER_ACCESS, Prop::INFIX_LEFT,  0,      Type::OP          ), //element access
-      _("..",  Op::RANGE,             Prop::INFIX_LEFT,  0,      Type::OP          ), //range
-      _("...", Op::SPREAD,            Prop::INFIX_LEFT,  0,      Type::OP          ), //array spread
+      _(lit("++"),  Op::INC,               Prop::PREFIX,      0,      Type::OP          ), //pre-increment
+      _(lit("--"),  Op::DEC,               Prop::PREFIX,      0,      Type::OP          ), //pre-decrement
+      _(lit("."),   Op::MEMBER_ACCESS,     Prop::INFIX_LEFT,  0,      Type::OP          ), //element access
+      _(lit("->"),  Op::PTR_MEMBER_ACCESS, Prop::INFIX_LEFT,  0,      Type::OP          ), //element access
+      _(lit(".."),  Op::RANGE,             Prop::INFIX_LEFT,  0,      Type::OP          ), //range
+      _(lit("..."), Op::SPREAD,            Prop::INFIX_LEFT,  0,      Type::OP          ), //array spread
 
-      _("++",  Op::INC,               Prop::POSTFIX,     0,      Type::OP          ), //post-increment
-      _("--",  Op::DEC,               Prop::POSTFIX,     0,      Type::OP          ), //post-decrement
-      _("+",   Op::UNARY_PLUS,        Prop::PREFIX,      0,      Type::OP          ), //unary plus
-      _("-",   Op::UNARY_MINUS,       Prop::PREFIX,      0,      Type::OP          ), //integer negation
-      _("!",   Op::LOGICAL_NOT,       Prop::POSTFIX,     0,      Type::OP          ), //logical negation
-      _("~",   Op::BIT_NOT,           Prop::POSTFIX,     0,      Type::OP          ), //bitwise negation
-      _("&",   Op::ADDRESS_OF,        Prop::PREFIX,      0,      Type::OP          ), //reference/address of
-      _("*",   Op::DEREF,             Prop::PREFIX,      0,      Type::OP          ), //raw pointer/dereference
-      _("&",   Op::REFERENCE,         Prop::TYPE_MOD,    0,      Type::OP          ), //reference/address of
-      _("*",   Op::RAW_PTR,           Prop::TYPE_MOD,    0,      Type::OP          ), //raw pointer/dereference
-      _("@",   Op::UNIQUE_PTR,        Prop::TYPE_MOD,    0,      Type::OP          ), //unique pointer
-      _("$",   Op::SHARED_PTR,        Prop::TYPE_MOD,    0,      Type::OP          ), //shared pointer
-      _("`",   Op::WEAK_PTR,          Prop::TYPE_MOD,    0,      Type::OP          ), //weak pointer
-      _("%",   Op::ITERATOR,          Prop::TYPE_MOD,    0,      Type::OP          ), //iterator
+      _(lit("++"),  Op::INC,               Prop::POSTFIX,     0,      Type::OP          ), //post-increment
+      _(lit("--"),  Op::DEC,               Prop::POSTFIX,     0,      Type::OP          ), //post-decrement
+      _(lit("+"),   Op::UNARY_PLUS,        Prop::PREFIX,      0,      Type::OP          ), //unary plus
+      _(lit("-"),   Op::UNARY_MINUS,       Prop::PREFIX,      0,      Type::OP          ), //integer negation
+      _(lit("!"),   Op::LOGICAL_NOT,       Prop::POSTFIX,     0,      Type::OP          ), //logical negation
+      _(lit("~"),   Op::BIT_NOT,           Prop::POSTFIX,     0,      Type::OP          ), //bitwise negation
+      _(lit("&"),   Op::ADDRESS_OF,        Prop::PREFIX,      0,      Type::OP          ), //reference/address of
+      _(lit("*"),   Op::DEREF,             Prop::PREFIX,      0,      Type::OP          ), //raw pointer/dereference
+      _(lit("&"),   Op::REFERENCE,         Prop::TYPE_MOD,    0,      Type::OP          ), //reference/address of
+      _(lit("*"),   Op::RAW_PTR,           Prop::TYPE_MOD,    0,      Type::OP          ), //raw pointer/dereference
+      _(lit("@"),   Op::UNIQUE_PTR,        Prop::TYPE_MOD,    0,      Type::OP          ), //unique pointer
+      _(lit("$"),   Op::SHARED_PTR,        Prop::TYPE_MOD,    0,      Type::OP          ), //shared pointer
+      _(lit("`"),   Op::WEAK_PTR,          Prop::TYPE_MOD,    0,      Type::OP          ), //weak pointer
+      _(lit("%"),   Op::ITERATOR,          Prop::TYPE_MOD,    0,      Type::OP          ), //iterator
 
-      _(".*",  Op::METHOD_PTR,        Prop::INFIX_LEFT,  --prec, Type::OP          ), //pointer to member
-      _("->*", Op::ARROW_METHOD_PTR,  Prop::INFIX_LEFT,    prec, Type::OP          ), //pointer to member
+      _(lit(".*"),  Op::METHOD_PTR,        Prop::INFIX_LEFT,  --prec, Type::OP          ), //pointer to member
+      _(lit("->*"), Op::ARROW_METHOD_PTR,  Prop::INFIX_LEFT,    prec, Type::OP          ), //pointer to member
 
-      _("^^",  Op::EXP,               Prop::INFIX_LEFT,  --prec, Type::OP          ), //exponentiation
+      _(lit("^^"),  Op::EXP,               Prop::INFIX_LEFT,  --prec, Type::OP          ), //exponentiation
 
-      _("*",   Op::MUL,               Prop::INFIX_LEFT,  --prec, Type::OP          ), //multiplication
-      _("/",   Op::DIV,               Prop::INFIX_LEFT,    prec, Type::OP          ), //division
-      _("%",   Op::MOD,               Prop::INFIX_LEFT,    prec, Type::OP          ), //modulo
+      _(lit("*"),   Op::MUL,               Prop::INFIX_LEFT,  --prec, Type::OP          ), //multiplication
+      _(lit("/"),   Op::DIV,               Prop::INFIX_LEFT,    prec, Type::OP          ), //division
+      _(lit("%"),   Op::MOD,               Prop::INFIX_LEFT,    prec, Type::OP          ), //modulo
 
-      _("+",   Op::ADD,               Prop::INFIX_LEFT,  --prec, Type::OP          ), //addition
-      _("-",   Op::SUB,               Prop::INFIX_LEFT,    prec, Type::OP          ), //subtraction
+      _(lit("+"),   Op::ADD,               Prop::INFIX_LEFT,  --prec, Type::OP          ), //addition
+      _(lit("-"),   Op::SUB,               Prop::INFIX_LEFT,    prec, Type::OP          ), //subtraction
 
-      _("<<",  Op::SHIFT_LEFT,        Prop::INFIX_LEFT,  --prec, Type::OP          ), //left bit-shift
-      _(">>",  Op::SHIFT_RIGHT,       Prop::INFIX_LEFT,    prec, Type::OP          ), //right bit-shift
+      _(lit("<<"),  Op::SHIFT_LEFT,        Prop::INFIX_LEFT,  --prec, Type::OP          ), //left bit-shift
+      _(lit(">>"),  Op::SHIFT_RIGHT,       Prop::INFIX_LEFT,    prec, Type::OP          ), //right bit-shift
 
-      _("<=>", Op::THREE_WAY_COMP,    Prop::INFIX_LEFT,  --prec, Type::OP          ), //three-way comparison
+      _(lit("<=>"), Op::THREE_WAY_COMP,    Prop::INFIX_LEFT,  --prec, Type::OP          ), //three-way comparison
 
-      _("<",   Op::LESSER,            Prop::INFIX_LEFT,  --prec, Type::OP          ), //less than
-      _(">",   Op::GREATER,           Prop::INFIX_LEFT,    prec, Type::OP          ), //greater than
-      _("<=",  Op::LESSER_OR_EQ,      Prop::INFIX_LEFT,    prec, Type::OP          ), //less than or equal to
-      _(">=",  Op::GREATER_OR_EQ,     Prop::INFIX_LEFT,    prec, Type::OP          ), //greather than or equal to
+      _(lit("<"),   Op::LESSER,            Prop::INFIX_LEFT,  --prec, Type::OP          ), //less than
+      _(lit(">"),   Op::GREATER,           Prop::INFIX_LEFT,    prec, Type::OP          ), //greater than
+      _(lit("<="),  Op::LESSER_OR_EQ,      Prop::INFIX_LEFT,    prec, Type::OP          ), //less than or equal to
+      _(lit(">="),  Op::GREATER_OR_EQ,     Prop::INFIX_LEFT,    prec, Type::OP          ), //greather than or equal to
 
-      _("==",  Op::IS_EQUAL,          Prop::INFIX_LEFT,  --prec, Type::OP          ), //equality
-      _("!=",  Op::IS_UNEQUAL,        Prop::INFIX_LEFT,    prec, Type::OP          ), //inequality
+      _(lit("=="),  Op::IS_EQUAL,          Prop::INFIX_LEFT,  --prec, Type::OP          ), //equality
+      _(lit("!="),  Op::IS_UNEQUAL,        Prop::INFIX_LEFT,    prec, Type::OP          ), //inequality
 
-      _("&",   Op::BIT_AND,           Prop::INFIX_LEFT,  --prec, Type::OP          ), //bitwise AND
-      _("^",   Op::BIT_XOR,           Prop::INFIX_LEFT,  --prec, Type::OP          ), //bitwise XOR
-      _("|",   Op::BIT_OR,            Prop::INFIX_LEFT,  --prec, Type::OP          ), //bitwise OR
-      _("&&",  Op::LOGICAL_AND,       Prop::INFIX_LEFT,  --prec, Type::OP          ), //logical AND
-      _("||",  Op::LOGICAL_OR,        Prop::INFIX_LEFT,  --prec, Type::OP          ), //logical OR
+      _(lit("&"),   Op::BIT_AND,           Prop::INFIX_LEFT,  --prec, Type::OP          ), //bitwise AND
+      _(lit("^"),   Op::BIT_XOR,           Prop::INFIX_LEFT,  --prec, Type::OP          ), //bitwise XOR
+      _(lit("|"),   Op::BIT_OR,            Prop::INFIX_LEFT,  --prec, Type::OP          ), //bitwise OR
+      _(lit("&&"),  Op::LOGICAL_AND,       Prop::INFIX_LEFT,  --prec, Type::OP          ), //logical AND
+      _(lit("||"),  Op::LOGICAL_OR,        Prop::INFIX_LEFT,  --prec, Type::OP          ), //logical OR
 
-      _("??",  Op::COALESCE,          Prop::INFIX_RIGHT, --prec, Type::OP          ), //null coalescing
-      _("?",   Op::INLINE_IF,         Prop::INFIX_RIGHT,   prec, Type::OP          ), //inline if
-      _(":",   Op::INLINE_ELSE,       Prop::INFIX_RIGHT,   prec, Type::OP          ), //inline else
-      _("=",   Op::ASSIGN,            Prop::INFIX_RIGHT,   prec, Type::OP          ), //direct assignment
-      _("+=",  Op::ADD_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (add)
-      _("-=",  Op::SUB_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (sub)
-      _("*=",  Op::MUL_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (mul)
-      _("/=",  Op::DIV_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (div)
-      _("%=",  Op::MOD_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (mod)
-      _("^^=", Op::EXP_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (exp)
-      _("<<=", Op::SHL_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (shl)
-      _(">>=", Op::SHR_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (shr)
-      _("&=",  Op::AND_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (AND)
-      _("^=",  Op::XOR_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (XOR)
-      _("|=",  Op::OR_ASSIGN,         Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (OR)
-      _("??=", Op::COALESCE_ASSIGN,   Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (null coalescing)
+      _(lit("??"),  Op::COALESCE,          Prop::INFIX_RIGHT, --prec, Type::OP          ), //null coalescing
+      _(lit("?"),   Op::INLINE_IF,         Prop::INFIX_RIGHT,   prec, Type::OP          ), //inline if
+      _(lit(":"),   Op::INLINE_ELSE,       Prop::INFIX_RIGHT,   prec, Type::OP          ), //inline else
+      _(lit("="),   Op::ASSIGN,            Prop::INFIX_RIGHT,   prec, Type::OP          ), //direct assignment
+      _(lit("+="),  Op::ADD_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (add)
+      _(lit("-="),  Op::SUB_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (sub)
+      _(lit("*="),  Op::MUL_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (mul)
+      _(lit("/="),  Op::DIV_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (div)
+      _(lit("%="),  Op::MOD_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (mod)
+      _(lit("^^="), Op::EXP_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (exp)
+      _(lit("<<="), Op::SHL_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (shl)
+      _(lit(">>="), Op::SHR_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (shr)
+      _(lit("&="),  Op::AND_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (AND)
+      _(lit("^="),  Op::XOR_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (XOR)
+      _(lit("|="),  Op::OR_ASSIGN,         Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (OR)
+      _(lit("??="), Op::COALESCE_ASSIGN,   Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (null coalescing)
 
-      _(",",   Op::COMMA,             Prop::INFIX_LEFT,  --prec, Type::OP          )  //comma
+      _(lit(","),   Op::COMMA,             Prop::INFIX_LEFT,  --prec, Type::OP          )  //comma
    };
 }
 

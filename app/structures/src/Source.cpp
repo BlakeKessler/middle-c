@@ -22,6 +22,7 @@ clef::Source clef::Source::readFile(const char* path) {
    //open, read, close, back-fill file
    FILE* srcFile = std::fopen(path, "r");
    const uint charsRead = std::fread(_buf.begin(), 1, fileSize, srcFile);
+   _buf.UNSAFE_RESIZE(charsRead);
    std::fclose(srcFile);
    assert(charsRead == _buf.size(), "incorrect number of characters read from source code file");
 

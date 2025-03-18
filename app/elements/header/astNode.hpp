@@ -46,6 +46,14 @@
 #include "NamespaceSpec.hpp"
 #include "ObjTypeSpec.hpp"
 
+
+#include "MAP_MACRO.h"
+#define CLEF_ALL_AST_NODE_UNION_MEMBS \
+   _identifier, _variable, _function, _type, _variadicParameter, _fundamentalType, _functionSignature, _enum,           \
+   _mask, _union, _namespace, _interface, _struct, _class, _genericType, _scope, _literal, _expression, _declaration,   \
+   _forLoop, _foreachLoop, _whileLoop, _doWhileLoop, _if, _switch, _match, _tryCatch, _asm, _forLoopParams,             \
+   _foreachLoopParams, _switchCases, _matchCases, _statement, _statementSequence, _argumentList, _parameterList, _specializerList
+
 struct clef::astNode {
    private:
       union {
@@ -100,43 +108,7 @@ struct clef::astNode {
       astNode(const astNode& other) { std::memcpy(this, &other, sizeof(self)); }
       astNode& operator=(const astNode& other) { new (this) astNode{other}; return self; }
       #define _def_ctor(varName) astNode(decltype(varName)& node):varName{node},_nodeType{decltype(varName)::nodeType()} {}
-      _def_ctor(_identifier)
-      _def_ctor(_variable)
-      _def_ctor(_function)
-      _def_ctor(_type)
-      _def_ctor(_variadicParameter)
-      _def_ctor(_fundamentalType)
-      _def_ctor(_functionSignature)
-      _def_ctor(_enum)
-      _def_ctor(_mask)
-      _def_ctor(_union)
-      _def_ctor(_namespace)
-      _def_ctor(_interface)
-      _def_ctor(_struct)
-      _def_ctor(_class)
-      _def_ctor(_genericType)
-      _def_ctor(_scope)
-      _def_ctor(_literal)
-      _def_ctor(_expression)
-      _def_ctor(_declaration)
-      _def_ctor(_forLoop)
-      _def_ctor(_foreachLoop)
-      _def_ctor(_whileLoop)
-      _def_ctor(_doWhileLoop)
-      _def_ctor(_if)
-      _def_ctor(_switch)
-      _def_ctor(_match)
-      _def_ctor(_tryCatch)
-      _def_ctor(_asm)
-      _def_ctor(_forLoopParams)
-      _def_ctor(_foreachLoopParams)
-      _def_ctor(_switchCases)
-      _def_ctor(_matchCases)
-      _def_ctor(_statement)
-      _def_ctor(_statementSequence)
-      _def_ctor(_argumentList)
-      _def_ctor(_parameterList)
-      _def_ctor(_specializerList)
+      MCSL_MAP(_def_ctor, CLEF_ALL_AST_NODE_UNION_MEMBS)
       #undef _def_ctor
       #pragma endregion constructors
 
@@ -154,44 +126,7 @@ struct clef::astNode {
       #define _def_cast_func(varName) \
          operator decltype(varName)&() { if (_nodeType == decltype(varName)::nodeType()) { return varName; } else { throwCastErr(decltype(varName)::nodeType()); }} \
          operator const decltype(varName)&() const { if (_nodeType == decltype(varName)::nodeType()) { return varName; } else { throwCastErr(decltype(varName)::nodeType()); }}
-      _def_cast_func(_identifier)
-      _def_cast_func(_variable)
-      _def_cast_func(_function)
-      _def_cast_func(_type)
-      _def_cast_func(_variadicParameter)
-      _def_cast_func(_fundamentalType)
-      _def_cast_func(_functionSignature)
-      _def_cast_func(_enum)
-      _def_cast_func(_mask)
-      _def_cast_func(_union)
-      _def_cast_func(_namespace)
-      _def_cast_func(_interface)
-      _def_cast_func(_struct)
-      _def_cast_func(_class)
-      _def_cast_func(_genericType)
-      _def_cast_func(_scope)
-      _def_cast_func(_literal)
-      _def_cast_func(_expression)
-      _def_cast_func(_declaration)
-      _def_cast_func(_forLoop)
-      _def_cast_func(_foreachLoop)
-      _def_cast_func(_whileLoop)
-      _def_cast_func(_doWhileLoop)
-      _def_cast_func(_if)
-      _def_cast_func(_switch)
-      _def_cast_func(_match)
-      _def_cast_func(_tryCatch)
-      _def_cast_func(_asm)
-      _def_cast_func(_forLoopParams)
-      _def_cast_func(_foreachLoopParams)
-      _def_cast_func(_switchCases)
-      _def_cast_func(_matchCases)
-      _def_cast_func(_statement)
-      _def_cast_func(_statementSequence)
-      _def_cast_func(_argumentList)
-      _def_cast_func(_parameterList)
-      _def_cast_func(_specializerList)
-
+      MCSL_MAP(_def_cast_func, CLEF_ALL_AST_NODE_UNION_MEMBS)
       #undef _def_cast_func
       #pragma endregion cast
 
@@ -202,5 +137,7 @@ struct clef::astNode {
 namespace clef {
    uint nodeSizeof(NodeType);
 };
+
+#include "MAP_MACRO_UNDEF.h"
 
 #endif //AST_NODE_HPP
