@@ -4,7 +4,7 @@
 #include "ast-nodes/Identifier.hpp"
 #include "pretty-print.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 bool clef::Identifier::operator==(const Identifier& other) const {
    if (+_keywordID || +other._keywordID) {
@@ -14,18 +14,18 @@ bool clef::Identifier::operator==(const Identifier& other) const {
 }
 
 void clef::Identifier::__printName() const {
-   std::printf("\033[4m");
+   mcsl::printf(mcsl::FMT("\033[4m"));
    if (+_keywordID) {
-      std::printf("%s", toString(_keywordID));
+      mcsl::printf(mcsl::FMT("%s"), toString(_keywordID));
    } else {
-      std::printf("%.*s", _name_size, _name_buf);
+      mcsl::printf(mcsl::FMT("%s"), _name_size, _name_buf);
    }
-   std::printf("\033[24m");
+   mcsl::printf(mcsl::FMT("\033[24m"));
 }
 void clef::Identifier::__printf(const char* nodetype) const {
-   std::printf("%s: ", nodetype);
+   mcsl::printf(mcsl::FMT("%s: "), nodetype);
    __printName();
-   std::printf(" (scope: id=%u)", +scopeName());
+   mcsl::printf(mcsl::FMT(" (scope: id=%u)"), +scopeName());
 }
 void clef::Identifier::printf() const {
    __printf("identifier");

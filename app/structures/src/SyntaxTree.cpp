@@ -4,7 +4,9 @@
 #include "SyntaxTree.hpp"
 
 #include "pretty-print.hpp"
-#include <cstdio>
+#include "io.hpp"
+
+#include "MAP_MACRO.h"
 
 #define ID(fund) id = fund; break
 //!NOTE: currently uses LP64 data model no matter what
@@ -146,10 +148,10 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
 
 void clef::SyntaxTree::print() const {
    for (uint i = 1; i < _buf.size(); ++i) {
-      std::printf("\n\t%u: ", i);
+      mcsl::printf(mcsl::FMT("\n\t%u: "), i);
       _buf[i].printf();
    }
-   std::printf("\n");
+   mcsl::printf(mcsl::FMT("\n"));
 }
 
 void clef::SyntaxTree::printf() const {
@@ -158,7 +160,7 @@ void clef::SyntaxTree::printf() const {
 
 void clef::SyntaxTree::__indent(uint indents) const {
    while (indents--) {
-      std::printf("   ");
+      mcsl::printf(mcsl::FMT("   "));
    }
 }
 
@@ -179,15 +181,15 @@ template<> void clef::SyntaxTree::__printf<clef::Identifier>(index<const Identif
    const Identifier& node = self[i];
    if (node.scopeName()) { //parent scope
       __printf<Identifier>(node.scopeName(), indents);
-      std::printf("::");
+      mcsl::printf(mcsl::FMT("::"));
    } else { //indent
       __indent(indents);
    }
 
    if (+node.keywordID()) { //keyword
-      std::printf("%s", toString(node.keywordID()));
+      mcsl::printf(mcsl::FMT("%s"), toString(node.keywordID()));
    } else { //standard identifier
-      std::printf("%.*s", node.name().size(), node.name().begin());
+      mcsl::printf(mcsl::FMT("%s"), node.name().size(), node.name().begin());
    }
 
    if (node.specializer()) {
@@ -214,22 +216,22 @@ template<> void clef::SyntaxTree::__printf<clef::Variable>(index<const Variable>
    __printf<Type>(node.type(), indents);
    __printf<Identifier>(i, 0);
    if (node.val()) {
-      std::printf(" = ");
+      mcsl::printf(mcsl::FMT(" = "));
       __printf<Expr>(node.val(), 0);
    }
 }
 template<> void clef::SyntaxTree::__printf<clef::VariadicParam>(index<const VariadicParam> i, const uint indents) const {
    __printf<Type>(i, indents);
-   std::printf("...");
+   mcsl::printf(mcsl::FMT("..."));
 }
 template<> void clef::SyntaxTree::__printf<clef::FundamentalType>(index<const FundamentalType> i, const uint indents) const {
    __indent(indents);
-   std::printf("%s", toString(self[i].id()));
+   mcsl::printf(mcsl::FMT("%s"), toString(self[i].id()));
 }
 template<> void clef::SyntaxTree::__printf<clef::FunctionSignature>(index<const FunctionSignature> i, const uint indents) const {
    const FuncSig& node = self[i];
    __printf<ParamList>(node.params(), indents);
-   std::printf(" -> ");
+   mcsl::printf(mcsl::FMT(" -> "));
    __printf<Type>(node.returnType(), 0);
 }
 template<> void clef::SyntaxTree::__printf<clef::Scope>(index<const Scope> i, const uint indents) const {
@@ -239,95 +241,95 @@ template<> void clef::SyntaxTree::__printf<clef::Function>(index<const Function>
    const Function& node = self[i];
    __printf<Identifier>(i, indents);
    __printf<FuncSig>(node.signature(), 0);
-   std::printf(" ");
+   mcsl::printf(mcsl::FMT(" "));
    __printf<Scope>(node.procedure(), indents);
 }
 template<> void clef::SyntaxTree::__printf<clef::Enum>(index<const Enum> i, const uint indents) const {
    const Enum& node = self[i];
    __indent(indents);
-   std::printf("enum ");
+   mcsl::printf(mcsl::FMT("enum "));
    __printf<Type>(i, 0);
 
    if (node.baseType()) {
-      std::printf(" : ");
+      mcsl::printf(mcsl::FMT(" : "));
       __printf<Type>(node.baseType(), 0);
    }
 
-   std::printf(" {\n");
+   mcsl::printf(mcsl::FMT(" {\n"));
    const ParamList& members = self[node.enumerators()];
    for (uint index = 0; index < members.size(); ++index) {
       __printf<Variable>(members[index], indents + 1);
-      std::printf(";\n");
+      mcsl::printf(mcsl::FMT(";\n"));
    }
    __indent(indents);
-   std::printf("};\n");
+   mcsl::printf(mcsl::FMT("};\n"));
 }
 template<> void clef::SyntaxTree::__printf<clef::Mask>(index<const Mask> i, const uint indents) const {
    const Mask& node = self[i];
    __indent(indents);
-   std::printf("mask ");
+   mcsl::printf(mcsl::FMT("mask "));
    __printf<Type>(i, 0);
 
    if (node.baseType()) {
-      std::printf(" : ");
+      mcsl::printf(mcsl::FMT(" : "));
       __printf<Type>(node.baseType(), 0);
    }
    
-   std::printf(" {\n");
+   mcsl::printf(mcsl::FMT(" {\n"));
    const ParamList& members = self[node.enumerators()];
    for (uint index = 0; index < members.size(); ++index) {
       __printf<Variable>(members[index], indents + 1);
-      std::printf(";\n");
+      mcsl::printf(mcsl::FMT(";\n"));
    }
    __indent(indents);
-   std::printf("};\n");
+   mcsl::printf(mcsl::FMT("};\n"));
 }
 template<> void clef::SyntaxTree::__printf<clef::Union>(index<const Union> i, const uint indents) const {
    const Union& node = self[i];
    __indent(indents);
-   std::printf("union ");
+   mcsl::printf(mcsl::FMT("union "));
    __printf<Type>(i, 0);
    
-   std::printf(" {\n");
+   mcsl::printf(mcsl::FMT(" {\n"));
    const ParamList& members = self[node.members()];
    for (uint index = 0; index < members.size(); ++index) {
       __printf<Variable>(members[index], indents + 1);
-      std::printf(";\n");
+      mcsl::printf(mcsl::FMT(";\n"));
    }
    __indent(indents);
-   std::printf("};\n");
+   mcsl::printf(mcsl::FMT("};\n"));
 }
 template<> void clef::SyntaxTree::__printf<clef::Namespace>(index<const Namespace> i, const uint indents) const {
    __indent(indents);
-   std::printf("namespace ");
+   mcsl::printf(mcsl::FMT("namespace "));
    __printf<Type>(i, 0);
-   std::printf(" ");
+   mcsl::printf(mcsl::FMT(" "));
    __printf(self[i].spec(), indents + 1);
-   std::printf(";\n");
+   mcsl::printf(mcsl::FMT(";\n"));
 }
 template<> void clef::SyntaxTree::__printf<clef::Interface>(index<const Interface> i, const uint indents) const {
    __indent(indents);
-   std::printf("interface ");
+   mcsl::printf(mcsl::FMT("interface "));
    __printf<Type>(i, 0);
-   std::printf(" ");
+   mcsl::printf(mcsl::FMT(" "));
    __printf(self[i].spec(), indents + 1);
-   std::printf(";\n");
+   mcsl::printf(mcsl::FMT(";\n"));
 }
 template<> void clef::SyntaxTree::__printf<clef::Struct>(index<const Struct> i, const uint indents) const {
    __indent(indents);
-   std::printf("struct ");
+   mcsl::printf(mcsl::FMT("struct "));
    __printf<Type>(i, 0);
-   std::printf(" ");
+   mcsl::printf(mcsl::FMT(" "));
    __printf(self[i].spec(), indents + 1);
-   std::printf(";\n");
+   mcsl::printf(mcsl::FMT(";\n"));
 }
 template<> void clef::SyntaxTree::__printf<clef::Class>(index<const Class> i, const uint indents) const {
    __indent(indents);
-   std::printf("class ");
+   mcsl::printf(mcsl::FMT("class "));
    __printf<Type>(i, 0);
-   std::printf(" ");
+   mcsl::printf(mcsl::FMT(" "));
    __printf(self[i].spec(), indents + 1);
-   std::printf(";\n");
+   mcsl::printf(mcsl::FMT(";\n"));
 }
 template<> void clef::SyntaxTree::__printf<clef::GenericType>(index<const GenericType> i, const uint indents) const {
    __printf<Type>(i, indents);
@@ -336,15 +338,15 @@ template<> void clef::SyntaxTree::__printf<clef::Literal>(index<const Literal> i
    const Literal& node = self[i];
    switch (node.type()) {
       case LitType::NONE: UNREACHABLE;
-      case LitType::POINTER: std::printf("%p", (const void*)node); break;
+      case LitType::POINTER: mcsl::printf(mcsl::FMT("%r"), (const void*)node); break;
 
-      case LitType::UINT: std::printf("%lu", (ulong)node); break;
-      case LitType::SINT: std::printf("%ld", (slong)node); break;
-      case LitType::FLOAT: std::printf("%lf", (flong)node); break;
+      case LitType::UINT: mcsl::printf(mcsl::FMT("%u"), (ulong)node); break;
+      case LitType::SINT: mcsl::printf(mcsl::FMT("%i"), (slong)node); break;
+      case LitType::FLOAT: mcsl::printf(mcsl::FMT("%f"), (flong)node); break;
 
-      case LitType::CHAR: std::printf("'%c'", (char)node); break;
-      case LitType::STRING: std::printf("\"%.*s\"", ((const mcsl::str_slice)node).size(), ((const mcsl::str_slice)node).begin()); break;
-      case LitType::INTERP_STR: std::printf("`%.*s`", ((const mcsl::str_slice)node).size(), ((const mcsl::str_slice)node).begin()); break;
+      case LitType::CHAR: mcsl::printf(mcsl::FMT("'%c'"), (char)node); break;
+      case LitType::STRING: mcsl::printf(mcsl::FMT("\"%s\""), ((const mcsl::str_slice)node).size(), ((const mcsl::str_slice)node).begin()); break;
+      case LitType::INTERP_STR: mcsl::printf(mcsl::FMT("`%s`"), ((const mcsl::str_slice)node).size(), ((const mcsl::str_slice)node).begin()); break;
       
       case LitType::FORMAT: UNREACHABLE; //!TODO: implement
       case LitType::REGEX: UNREACHABLE; //!TODO: implement
@@ -426,51 +428,17 @@ void clef::SyntaxTree::__printf(index<const ObjTypeSpec> i, const uint indents) 
    //!TODO: implement
 }
 
-#define typecase(T) case T::nodeType(): __printf<T>(+i, indents); break
+#define typecase(T) case T::nodeType(): __printf<T>(+i, indents); break;
 void clef::SyntaxTree::__printf(index<const astNode> i, uint indents) const {
    switch (self[i].nodeType()) {
       case NodeType::NONE: break;
-      case NodeType::ERROR: throwError(ErrCode::UNSPEC, "\n\033[31mERROR NODE: %u\033[39m\n", +i); break;
+      case NodeType::ERROR: throwError(ErrCode::UNSPEC, mcsl::FMT("\n\033[31mERROR NODE: %u\033[39m\n"), +i); break;
 
-      typecase(Identifier);
-      typecase(Variable);
-      typecase(Function);
-      typecase(Type);
-      typecase(VariadicParameter);
-      typecase(FundamentalType);
-      typecase(FunctionSignature);
-      typecase(Enum);
-      typecase(Mask);
-      typecase(Union);
-      typecase(Namespace);
-      typecase(Interface);
-      typecase(Struct);
-      typecase(Class);
-      typecase(GenericType);
-      typecase(Scope);
-      typecase(Literal);
-      typecase(Expression);
-      typecase(Declaration);
-      typecase(ForLoop);
-      typecase(ForeachLoop);
-      typecase(WhileLoop);
-      typecase(DoWhileLoop);
-      typecase(If);
-      typecase(Switch);
-      typecase(Match);
-      typecase(TryCatch);
-      typecase(Asm);
-      typecase(ForLoopParams);
-      typecase(ForeachLoopParams);
-      typecase(SwitchCases);
-      typecase(MatchCases);
-      typecase(Statement);
-      typecase(StatementSequence);
-      typecase(ArgumentList);
-      typecase(ParameterList);
-      typecase(SpecializerList);
+      MCSL_MAP(typecase, ALL_AST_NODE_T)
    }
 }
 #undef typecase
+
+#include "MAP_MACRO_UNDEF.h"
 
 #endif //SYNTAX_TREE_CPP

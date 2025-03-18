@@ -4,10 +4,10 @@
 #include "ast-nodes/types/FundamentalType.hpp"
 #include "pretty-print.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::FundType::printf() const {
-   std::printf("fundamental type: %s", toString(id()));
+   mcsl::printf(mcsl::FMT("fundamental type: %s"), toString(id()));
 }
 
 #endif //FUND_TYPE_CPP

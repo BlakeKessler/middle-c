@@ -3,10 +3,12 @@
 
 #include "SourceTokens.hpp"
 
+#include "io.hpp"
+
 void clef::SourceTokens::printf() const {
    for (const Token* it = _tokens.begin(); it < _tokens.end(); ++it) {
       it->printf();
-      std::printf("\n");
+      mcsl::printf(mcsl::FMT("\n"));
    }
 }
 

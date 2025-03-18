@@ -3,10 +3,10 @@
 
 #include "ast-nodes/exprs/WhileLoop.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::WhileLoop::printf() const {
-   std::printf("WHILE (id=%u) {id=%u}", +condition(), +procedure());
+   mcsl::printf(mcsl::FMT("WHILE (id=%u) {id=%u}"), +condition(), +procedure());
 }
 
 #endif //WHILE_LOOP_CPP

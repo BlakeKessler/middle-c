@@ -3,11 +3,11 @@
 
 #include "ast-nodes/types/Enum.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::Enum::printf() const {
    __printf("enum");
-   std::printf(" : (base: id=%u) {members: id=%u}", +baseType(), +enumerators());
+   mcsl::printf(mcsl::FMT(" : (base: id=%u) {members: id=%u}"), +baseType(), +enumerators());
 }
 
 #endif //ENUM_CPP

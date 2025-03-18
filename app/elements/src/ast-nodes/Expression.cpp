@@ -4,8 +4,7 @@
 #include "ast-nodes/Expression.hpp"
 #include "astNode.hpp"
 #include "pretty-print.hpp"
-
-#include <cstdio>
+#include "io.hpp"
 
 clef::Expression::Expression(OpID op, index<Type> type, index<ArgList> ctorArgs):
    _op{op},
@@ -17,21 +16,21 @@ clef::Expression::Expression(OpID op, index<Type> type, index<ArgList> ctorArgs)
 }
 
 void clef::Expression::printf() const {
-   std::printf("expression: op=%s(", toString(opID()));
+   mcsl::printf(mcsl::FMT("expression: op=%s("), toString(opID()));
    if (+lhsType()) {
-      std::printf("lhs: %s{id=%u}", toString(lhsType()), +lhs());
+      mcsl::printf(mcsl::FMT("lhs: %s{id=%u}"), toString(lhsType()), +lhs());
 
-      if (+rhsType() || +extraType()) { std::printf(", "); }
+      if (+rhsType() || +extraType()) { mcsl::printf(mcsl::FMT(", ")); }
    }
    if (+rhsType()) {
-      std::printf("rhs: %s{id=%u}", toString(rhsType()), +rhs());
+      mcsl::printf(mcsl::FMT("rhs: %s{id=%u}"), toString(rhsType()), +rhs());
 
-      if (+extraType()) { std::printf(", "); }
+      if (+extraType()) { mcsl::printf(mcsl::FMT(", ")); }
    }
    if (+extraType()) {
-      std::printf("extra: %s{id=%u}", toString(extraType()), +extra());
+      mcsl::printf(mcsl::FMT("extra: %s{id=%u}"), toString(extraType()), +extra());
    }
-   std::printf(")");
+   mcsl::printf(mcsl::FMT(")"));
 }
 
 #endif //EXPRESSION_CPP

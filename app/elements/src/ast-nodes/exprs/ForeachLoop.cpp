@@ -3,10 +3,10 @@
 
 #include "ast-nodes/exprs/ForeachLoop.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::ForeachLoop::printf() const {
-   std::printf("FOREACH (id=%u) {id=%u}", +params(), +procedure());
+   mcsl::printf(mcsl::FMT("FOREACH (id=%u) {id=%u}"), +params(), +procedure());
 }
 
 #endif //FOREACH_LOOP_CPP

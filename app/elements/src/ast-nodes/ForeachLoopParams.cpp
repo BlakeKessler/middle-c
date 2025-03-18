@@ -2,11 +2,10 @@
 #define FOREACH_LOOP_PARAMS_CPP
 
 #include "ast-nodes/ForeachLoopParams.hpp"
-
-#include <cstdio>
+#include "io.hpp"
 
 void clef::ForeachLoopParams::printf() const {
-   std::printf("FOREACH_PARAMS (id=%u : id=%u)", +iterator(), +target());
+   mcsl::printf(mcsl::FMT("FOREACH_PARAMS (id=%u : id=%u)"), +iterator(), +target());
 }
 
 #endif //FOREACH_LOOP_PARAMS_CPP

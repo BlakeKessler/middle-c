@@ -3,10 +3,10 @@
 
 #include "ast-nodes/exprs/Asm.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::Asm::printf() const {
-   std::printf("ASM (not implemented)");
+   mcsl::printf(mcsl::FMT("ASM (not implemented)"));
 }
 
 #endif //ASM_CPP

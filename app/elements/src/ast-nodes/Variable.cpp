@@ -3,11 +3,11 @@
 
 #include "ast-nodes/Variable.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::Variable::printf() const {
    __printf("variable");
-   std::printf(": (type id=%u) = (value id=%u)", +type(), +val());
+   mcsl::printf(mcsl::FMT(": (type id=%u) = (value id=%u)"), +type(), +val());
 }
 
 #endif //VAR_CPP

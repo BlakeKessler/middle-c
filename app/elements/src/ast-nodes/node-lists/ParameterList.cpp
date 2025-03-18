@@ -3,17 +3,17 @@
 
 #include "ast-nodes/node-lists/ParameterList.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::ParamList::printf() const {
-   std::printf("parameters (");
+   mcsl::printf(mcsl::FMT("parameters ("));
    if (size()) {
-      std::printf("id=%u", +self[0]);
+      mcsl::printf(mcsl::FMT("id=%u"), +self[0]);
       for (uint i = 1; i < size(); ++i) {
-         std::printf(", id=%u", +self[i]);
+         mcsl::printf(mcsl::FMT(", id=%u"), +self[i]);
       }
    }
-   std::printf(")");
+   mcsl::printf(mcsl::FMT(")"));
 }
 
 #endif //PARAM_LIST_CPP

@@ -3,11 +3,11 @@
 
 #include "ast-nodes/types/Struct.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::Struct::printf() const {
    __printf("struct");
-   std::printf(" {spec: id=%u}", +spec());
+   mcsl::printf(mcsl::FMT(" {spec: id=%u}"), +spec());
 }
 
 #endif //STRUCT_CPP

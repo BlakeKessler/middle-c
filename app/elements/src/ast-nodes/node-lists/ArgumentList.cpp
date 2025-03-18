@@ -3,17 +3,17 @@
 
 #include "ast-nodes/node-lists/ArgumentList.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::ArgList::printf() const {
-   std::printf("arguments (");
+   mcsl::printf(mcsl::FMT("arguments ("));
    if (size()) {
-      std::printf("id=%u", +self[0]);
+      mcsl::printf(mcsl::FMT("id=%u"), +self[0]);
       for (uint i = 1; i < size(); ++i) {
-         std::printf(", id=%u", +self[i]);
+         mcsl::printf(mcsl::FMT(", id=%u"), +self[i]);
       }
    }
-   std::printf(")");
+   mcsl::printf(mcsl::FMT(")"));
 }
 
 #endif //ARG_LIST_CPP

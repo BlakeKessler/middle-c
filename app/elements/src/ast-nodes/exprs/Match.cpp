@@ -3,10 +3,10 @@
 
 #include "ast-nodes/exprs/Match.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::Match::printf() const {
-   std::printf("MATCH (id=%u) {id=%u}", +condition(), +cases());
+   mcsl::printf(mcsl::FMT("MATCH (id=%u) {id=%u}"), +condition(), +cases());
 }
 
 #endif //MATCH_CPP

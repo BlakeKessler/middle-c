@@ -3,12 +3,12 @@
 
 #include "ast-nodes/exprs/If.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::If::printf() const {
-   std::printf("IF (id=%u) {id=%u}", +condition(), +procedure());
+   mcsl::printf(mcsl::FMT("IF (id=%u) {id=%u}"), +condition(), +procedure());
    if (elseStmt()) {
-      std::printf(" ELSE {id=%u}", +elseStmt());
+      mcsl::printf(mcsl::FMT(" ELSE {id=%u}"), +elseStmt());
    }
 }
 

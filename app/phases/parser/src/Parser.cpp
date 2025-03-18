@@ -313,12 +313,12 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
 
    while (operatorStack.size()) { eval(); }
    if (operandStack.size() != 1) {
-      std::printf("%u excess operand(s)\n", operandStack.size() - 1);
+      mcsl::printf(mcsl::FMT("%u excess operand(s)\n"), operandStack.size() - 1);
       for (uint i = 0; i < operandStack.size(); ++i) { //!NOTE: this is for debugging - don't forget to remove
          tree[operandStack[i]].printf();
-         std::printf("\n");
+         mcsl::printf(mcsl::FMT("\n"));
       }
-      std::fflush(stdout);
+      mcsl::stdout.flush();
       logError(ErrCode::BAD_EXPR, "invalid expression");
    }
    return toExpr(operandStack[0]);

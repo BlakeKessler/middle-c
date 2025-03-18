@@ -3,11 +3,11 @@
 
 #include "ast-nodes/types/Interface.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::Interface::printf() const {
    __printf("interface");
-   std::printf(" {spec: id=%u}", +spec());
+   mcsl::printf(mcsl::FMT(" {spec: id=%u}"), +spec());
 }
 
 #endif //INTERFACE_CPP

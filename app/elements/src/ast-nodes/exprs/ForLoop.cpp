@@ -3,10 +3,10 @@
 
 #include "ast-nodes/exprs/ForLoop.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::ForLoop::printf() const {
-   std::printf("FOR (id=%u) {id=%u}", +params(), +procedure());
+   mcsl::printf(mcsl::FMT("FOR (id=%u) {id=%u}"), +params(), +procedure());
 }
 
 #endif //FOR_LOOP_CPP

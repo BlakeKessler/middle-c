@@ -3,12 +3,12 @@
 
 #include "ast-nodes/Scope.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::Scope::printf() const {
-   std::printf("scope:");
+   mcsl::printf(mcsl::FMT("scope:"));
    for (uint i = 0; i < size(); ++i) {
-      std::printf(" id=%u;", +self[i]);
+      mcsl::printf(mcsl::FMT(" id=%u;"), +self[i]);
    }
 }
 

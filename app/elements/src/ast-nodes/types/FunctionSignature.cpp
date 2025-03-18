@@ -3,11 +3,11 @@
 
 #include "ast-nodes/types/FunctionSignature.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::FuncSig::printf() const {
    __printf("function signature");
-   std::printf(": (id=%u) -> id=%u", +params(), +returnType());
+   mcsl::printf(mcsl::FMT(": (id=%u) -> id=%u"), +params(), +returnType());
 }
 
 #endif //FUNC_SIG_CPP

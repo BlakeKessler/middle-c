@@ -3,10 +3,10 @@
 
 #include "ast-nodes/exprs/TryCatch.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::TryCatch::printf() const {
-   std::printf("TRY {id=%u} CATCH (id=%u) {id=%u}", +procedure(), +err(), +errHandler());
+   mcsl::printf(mcsl::FMT("TRY {id=%u} CATCH (id=%u) {id=%u}"), +procedure(), +err(), +errHandler());
 }
 
 #endif //TRY_CATCH_CPP

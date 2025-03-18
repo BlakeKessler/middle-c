@@ -3,13 +3,13 @@
 
 #include "ast-nodes/node-lists/MatchCases.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::MatchCases::printf() const {
-   std::printf("MATCH_CASES:");
+   mcsl::printf(mcsl::FMT("MATCH_CASES:"));
    for (uint i = 0; i < size(); ++i) {
       auto tmp = self[i];
-      std::printf(" {case (id=%u): {id=%u}}", +tmp.first, +tmp.second);
+      mcsl::printf(mcsl::FMT(" {case (id=%u): {id=%u}}"), +tmp.first, +tmp.second);
    }
 }
 

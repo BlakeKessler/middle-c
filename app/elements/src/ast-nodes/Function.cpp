@@ -3,11 +3,11 @@
 
 #include "ast-nodes/Function.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::Function::printf() const {
    __printf("function");
-   std::printf(" - (signature id=%u) {procedure id=%u}", +signature(), +procedure());
+   mcsl::printf(mcsl::FMT(" - (signature id=%u) {procedure id=%u}"), +signature(), +procedure());
 }
 
 #endif //FUNC_CPP

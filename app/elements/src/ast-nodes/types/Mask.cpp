@@ -3,11 +3,11 @@
 
 #include "ast-nodes/types/Mask.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::Mask::printf() const {
    __printf("mask");
-   std::printf(" : (base: id=%u) {members: id=%u}", +baseType(), +enumerators());
+   mcsl::printf(mcsl::FMT(" : (base: id=%u) {members: id=%u}"), +baseType(), +enumerators());
 }
 
 #endif //MASK_CPP

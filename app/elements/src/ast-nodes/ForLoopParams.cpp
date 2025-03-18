@@ -3,10 +3,10 @@
 
 #include "ast-nodes/ForLoopParams.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::ForLoopParams::printf() const {
-   std::printf("FOR_PARAMS: (id=%u; id=%u; id=%u)", +decl(), +condition(), +increment());
+   mcsl::printf(mcsl::FMT("FOR_PARAMS: (id=%u; id=%u; id=%u)"), +decl(), +condition(), +increment());
 }
 
 #endif //FOR_LOOP_PARAMS

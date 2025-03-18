@@ -3,11 +3,11 @@
 
 #include "ast-nodes/types/Union.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::Union::printf() const {
    __printf("union");
-   std::printf(" {memebers: id=%u}", +members());
+   mcsl::printf(mcsl::FMT(" {memebers: id=%u}"), +members());
 }
 
 #endif //UNION_CPP

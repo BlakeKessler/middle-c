@@ -39,14 +39,14 @@ bool clef::Symbol::update_alloc() {
 //!access internal name table
 template<mcsl::str_t str_t> clef::Symbol& clef::Symbol::at(const str_t& str) {
    if (!+(_props & SymbolProp::HAS_NAME_TABLE)) {
-      mcsl::__throw(mcsl::ErrCode::SEGFAULT, "Symbol Table Entry for '%.*s' does not have a Symbol Table", str.size(), str.begin());
+      mcsl::__throw(mcsl::ErrCode::SEGFAULT, mcsl::FMT("Symbol Table Entry for '%s' does not have a Symbol Table"), str);
    }
    return self[str];
 }
 //!access internal name table
 template<mcsl::str_t str_t> const clef::Symbol& clef::Symbol::at(const str_t& str) const {
    if (!+(_props & SymbolProp::HAS_NAME_TABLE)) {
-      mcsl::__throw(mcsl::ErrCode::SEGFAULT, "Symbol Table Entry for '%.*s' does not have a Symbol Table", str.size(), str.begin());
+      mcsl::__throw(mcsl::ErrCode::SEGFAULT, mcsl::FMT("Symbol Table Entry for '%s' does not have a Symbol Table"), str);
    }
    return self[str];
 }

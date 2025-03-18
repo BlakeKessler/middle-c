@@ -3,10 +3,10 @@
 
 #include "ast-nodes/exprs/Declaration.hpp"
 
-#include <cstdio>
+#include "io.hpp"
 
 void clef::Decl::printf() const {
-   std::printf("declaration (name: id=%u) : (type: id=%u)", +name(), +type());
+   mcsl::printf(mcsl::FMT("declaration (name: id=%u) : (type: id=%u)"), +name(), +type());
 }
 
 #endif //DECL_CPP
