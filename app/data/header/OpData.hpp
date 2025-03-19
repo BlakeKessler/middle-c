@@ -9,6 +9,8 @@
 #include "arr_span.hpp"
 #include "raw_buf_str.hpp"
 
+#include "io.hpp"
+
 struct alignas(8) clef::OpData {
    private:
       mcsl::raw_buf_str<MAX_OP_LEN, ubyte> _opStr;
@@ -59,7 +61,7 @@ struct alignas(8) clef::OpData {
       constexpr operator OpID() const { return _id; }
       constexpr operator OpProps() const { return _props; }
 
-      void printf() const { return _opStr.printf(); }
+      uint printf() const { return mcsl::printf(_opStr.slice()); }
 };
 
 #endif //OP_DATA_HPP

@@ -6,6 +6,8 @@
 #include "ENUMS.hpp"
 #include "CLEF_ERR.hpp"
 
+#include "throw.hpp"
+
 namespace clef {
    //utilities
    class allocator;

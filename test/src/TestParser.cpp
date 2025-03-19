@@ -31,7 +31,7 @@ int main(const int argc, char** argv) {
 
    //offer to print debug info
    mcsl::printf(mcsl::FMT("quit (q); print parser debug info (p): "));
-   char ch = mcsl::get();
+   char ch = mcsl::read();
    mcsl::printf(mcsl::FMT("\n%s\n"), BIG_HEADER);
    switch (ch) {
       case 'q':

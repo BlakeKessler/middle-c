@@ -8,12 +8,12 @@
 
 namespace clef {
    extern const mcsl::str_slice ERR_MSG_ARR[];
-   void throwError(const clef::ErrCode code, const mcsl::str_slice formatStr, auto&&... args);
-   void throwError(const clef::ErrCode code, const uint lineNum, const mcsl::str_slice formatStr, auto&&... args);
+   [[noreturn]] void throwError(const clef::ErrCode code, const mcsl::str_slice formatStr, auto&&... args);
+   [[noreturn]] void throwError(const clef::ErrCode code, const uint lineNum, const mcsl::str_slice formatStr, auto&&... args);
 }
 
 //!CLEF formatted error thrower
-void clef::throwError(const clef::ErrCode code, const mcsl::str_slice formatStr, auto&&... args) {
+[[noreturn]] void clef::throwError(const clef::ErrCode code, const mcsl::str_slice formatStr, auto&&... args) {
    mcsl::printf(mcsl::FMT("\n"));
    mcsl::stdout.flush();
    mcsl::err_printf(mcsl::FMT("\033[31;1;4mCLEF ERROR:\033[0m %s"), ERR_MSG_ARR[+code]);
@@ -27,7 +27,7 @@ void clef::throwError(const clef::ErrCode code, const mcsl::str_slice formatStr,
    #endif
 }
 //!CLEF formatted error thrower with line num
-void clef::throwError(const clef::ErrCode code, const uint lineNum, const mcsl::str_slice formatStr, auto&&... args) {
+[[noreturn]] void clef::throwError(const clef::ErrCode code, const uint lineNum, const mcsl::str_slice formatStr, auto&&... args) {
    mcsl::printf(mcsl::FMT("\n"));
    mcsl::stdout.flush();
    mcsl::err_printf(mcsl::FMT("\033[31;1;4mCLEF ERROR:\033[0m %s"), ERR_MSG_ARR[+code]);

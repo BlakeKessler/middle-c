@@ -5,35 +5,35 @@
 #include "CLEF.hpp"
 
 //!array of CLEF error message prefix strings
-const char* clef::ERR_MSG_ARR[] {
-   "UNSPECIFIED ERROR: ",
+const mcsl::str_slice clef::ERR_MSG_ARR[] {
+   mcsl::FMT("UNSPECIFIED ERROR: "),
 
-   "LEXER ERROR: ",
-   "UN-IMPLEMENTED LEXER FEATURE: ",
+   mcsl::FMT("LEXER ERROR: "),
+   mcsl::FMT("UN-IMPLEMENTED LEXER FEATURE: "),
 
-   "PARSER ERROR: ",
-   "UN-IMPLEMENTED PARSER FEATURE: ",
+   mcsl::FMT("PARSER ERROR: "),
+   mcsl::FMT("UN-IMPLEMENTED PARSER FEATURE: "),
    //syntax errors
-   "BAD PARAMTER BLOCK: ",
-   "BAD LITERAL: ",
-   "BAD COMMENT TOKEN: ",
-   "BAD IDENTIFIER: ",
-   "ILLEGAL USE OF KEYWORD: ",
+   mcsl::FMT("BAD PARAMTER BLOCK: "),
+   mcsl::FMT("BAD LITERAL: "),
+   mcsl::FMT("BAD COMMENT TOKEN: "),
+   mcsl::FMT("BAD IDENTIFIER: "),
+   mcsl::FMT("ILLEGAL USE OF KEYWORD: "),
 
-   "MISSING KEYWORD: ",
-   "MISSING OPERATOR: ",
-   "MISSING BLOCK DELIMITER: ",
-   "MISSING END-OF-STATEMENT TOKEN: ",
+   mcsl::FMT("MISSING KEYWORD: "),
+   mcsl::FMT("MISSING OPERATOR: "),
+   mcsl::FMT("MISSING BLOCK DELIMITER: "),
+   mcsl::FMT("MISSING END-OF-STATEMENT TOKEN: "),
    
-   "BAD STATEMENT: ",
-   "BAD EXPRESSION: ",
-   "BAD BLOCK DELIMITER: ",
-   "UNCLOSED BLOCK: ",
-   "BAD FUNCTION DECLARATION: ",
-   "BAD DECLARATION: ",
+   mcsl::FMT("BAD STATEMENT: "),
+   mcsl::FMT("BAD EXPRESSION: "),
+   mcsl::FMT("BAD BLOCK DELIMITER: "),
+   mcsl::FMT("UNCLOSED BLOCK: "),
+   mcsl::FMT("BAD FUNCTION DECLARATION: "),
+   mcsl::FMT("BAD DECLARATION: "),
    //ast/ast node errors
-   "BAD LITERAL CAST: ",
-   "BAD AST NODE CAST: "
+   mcsl::FMT("BAD LITERAL CAST: "),
+   mcsl::FMT("BAD AST NODE CAST: ")
 };
 
 #endif //CLEF_ERR_CPP
