@@ -1,7 +1,7 @@
-#include "fs.hpp"
+#include "io.hpp"
 
 // #define TMP_FILE "/tmp/testwritef.txt"
-#define _FMT_ mcsl::str_slice::make_from_cstr
+#define FMT mcsl::FMT
 
 int main() {
    mcsl::File mcslout = mcsl::File::ReopenLibcFile(stdout);
