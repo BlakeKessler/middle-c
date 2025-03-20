@@ -3,8 +3,6 @@
 
 #include "astNode.hpp"
 #include "pretty-print.hpp"
-
-#include <cstring>
 #include "math.hpp"
 
 #include "MAP_MACRO.h"
@@ -56,7 +54,7 @@ void clef::astNode::print() const {
    const uint byteCount = nodeSizeof(_nodeType);
    const uint intCount = (uint)mcsl::ceil(((float)byteCount) / sizeof(ulong));
    ulong buf[sizeof(astNode) / sizeof(ulong) + (sizeof(astNode) % sizeof(ulong) != 0)]{};
-   std::memcpy(buf, this, byteCount);
+   mcsl::memcpy((ubyte*)buf, (ubyte*)this, byteCount);
 
    mcsl::printf(mcsl::FMT("%u:"), +_nodeType);
    for (uint i = 0; i < intCount; ++i) {
