@@ -65,11 +65,11 @@ namespace clef {
       template<typename T> concept astNode_t = requires { {T::nodeType()} -> mcsl::same_t<NodeType>; };
       template<typename T> concept astNode_ptr_t = mcsl::ptr_t<T> && astNode_t<mcsl::remove_ptr<T>>;
       template<typename T> concept operand_t = mcsl::is_t<T, clef::Identifier> || mcsl::is_t<T,Expression>;
-      #define ALL_FUND_AST_NODE_T Expression, Function, Literal, Scope, Type, ForLoopParams, ForeachLoopParams, Identifier, Statement, Variable
-      #define ALL_EXPR_AST_NODE_T Declaration, If, ForLoop, ForeachLoop, WhileLoop, DoWhileLoop, Switch, Match, TryCatch, Asm
-      #define ALL_NODE_LIST_AST_NODE_T ArgumentList, MatchCases, ParameterList, SpecializerList, StatementSequence, SwitchCases
-      #define ALL_TYPE_AST_NODE_T Class, Enum, Mask, FunctionSignature, FundamentalType, GenericType, Interface, Namespace, Struct, Union, VariadicParameter
-      #define ALL_AST_NODE_T ALL_FUND_AST_NODE_T, ALL_EXPR_AST_NODE_T, ALL_NODE_LIST_AST_NODE_T, ALL_TYPE_AST_NODE_T
+      #define CLEF_ALL_FUND_AST_NODE_T Expression, Function, Literal, Scope, Type, ForLoopParams, ForeachLoopParams, Identifier, Statement, Variable
+      #define CLEF_ALL_EXPR_AST_NODE_T Declaration, If, ForLoop, ForeachLoop, WhileLoop, DoWhileLoop, Switch, Match, TryCatch, Asm
+      #define CLEF_ALL_NODE_LIST_AST_NODE_T ArgumentList, MatchCases, ParameterList, SpecializerList, StatementSequence, SwitchCases
+      #define CLEF_ALL_TYPE_AST_NODE_T Class, Enum, Mask, FunctionSignature, FundamentalType, GenericType, Interface, Namespace, Struct, Union, VariadicParameter
+      #define CLEF_ALL_AST_NODE_T CLEF_ALL_FUND_AST_NODE_T, CLEF_ALL_EXPR_AST_NODE_T, CLEF_ALL_NODE_LIST_AST_NODE_T, CLEF_ALL_TYPE_AST_NODE_T
    class ObjTypeSpec;
    class InterfaceSpec;
    class NamespaceSpec;
@@ -80,6 +80,7 @@ namespace clef {
    class SourceTokens;
    class SymbolTable;
    class SyntaxTree;
+      template<typename T> struct astTNB; //astTreeNodeBundle
 
    //classes for phases of compilation
    class Lexer;

@@ -89,8 +89,23 @@ class clef::SyntaxTree {
       index<ObjTypeSpec> allocObjTypeSpec() { return _objSpecBuf.emplace_back() - _objSpecBuf.begin(); }
 };
 
+//!astTreeNodeBundle - for printf
+template<typename T> struct clef::astTNB {
+   const SyntaxTree& tree;
+   const T& obj;
+};
+
+#define __DEF_AST_TNB(T) template<> struct clef::astTNB<clef::T>;
+#include "MAP_MACRO.h"
+MCSL_MAP(__DEF_AST_TNB, CLEF_ALL_AST_NODE_T)
+#include "MAP_MACRO_UNDEF.h"
+#undef __DEF_AST_TNB
+
 namespace mcsl {
    inline File& write(File& file, const clef::SyntaxTree& obj) { obj.printf(file); return file; }
+
+   uint writef(File& file, const clef::SyntaxTree& tree, char mode, FmtArgs args);
+   template<typename T> uint writef(File& file, const clef::astTNB<T> obj, char mode, FmtArgs args);
 };
 
 #pragma region inlinesrc

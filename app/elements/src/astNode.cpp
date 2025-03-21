@@ -44,7 +44,7 @@ uint clef::nodeSizeof(NodeType t) {
       case NodeType::NONE: return 0;
       case NodeType::ERROR: return 0;
 
-      MCSL_MAP(typecase, ALL_AST_NODE_T)
+      MCSL_MAP(typecase, CLEF_ALL_AST_NODE_T)
    }
 }
 #undef typecase

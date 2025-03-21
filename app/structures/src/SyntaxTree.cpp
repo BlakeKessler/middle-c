@@ -432,7 +432,7 @@ void clef::SyntaxTree::__printf(mcsl::File& file, index<const astNode> i, uint i
       case NodeType::NONE: break;
       case NodeType::ERROR: throwError(ErrCode::UNSPEC, mcsl::FMT("\n\033[31mERROR NODE: %u\033[39m\n"), +i); break;
 
-      MCSL_MAP(typecase, ALL_AST_NODE_T)
+      MCSL_MAP(typecase, CLEF_ALL_AST_NODE_T)
    }
 }
 #undef typecase
