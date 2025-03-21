@@ -46,8 +46,10 @@ class clef::SourceTokens {
       const mcsl::dyn_arr<Token>& tokens() const { return _tokens; }
       Source& source() { return _src; }
       const Source& source() const { return _src; }
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::SourceTokens&);
 };
 
 #endif //SOURCE_TOKENS_HPP

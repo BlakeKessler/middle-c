@@ -7,54 +7,56 @@
 #include "unreachable.hpp"
 #include "io.hpp"
 
-void clef::Token::printf() const {
-   switch (_type) {
+mcsl::File& mcsl::write(File& file, const clef::Token& tok) {
+   using namespace clef;
+   switch (tok.type()) {
       case TokenType::NONE:
-         mcsl::printf(mcsl::FMT("\033[31mNULL TOKEN\033[39m"));
+         file.printf(mcsl::FMT("\033[31mNULL TOKEN\033[39m"));
          break;
       case TokenType::IDEN:
-         mcsl::printf(mcsl::FMT("\033[35mIDENTIFIER:\033[39m %s"), _name);
+         file.printf(mcsl::FMT("\033[35mIDENTIFIER:\033[39m %s"), tok.name());
          break;
       case TokenType::KEYWORD:
-         mcsl::printf(mcsl::FMT("\033[35mKEYWORD:\033[39m %s"), toString(_keyword));
+         file.printf(mcsl::FMT("\033[35mKEYWORD:\033[39m %s"), toString(tok.keywordID()));
          break;
       case TokenType::INT_NUM:
-         mcsl::printf(mcsl::FMT("\033[35mINTEGER:\033[39m %u"), _intVal);
+         file.printf(mcsl::FMT("\033[35mINTEGER:\033[39m %u"), tok.intVal());
          break;
       case TokenType::REAL_NUM:
-         mcsl::printf(mcsl::FMT("\033[35mREAL NUMBER:\033[39m %f"), _realVal);
+         file.printf(mcsl::FMT("\033[35mREAL NUMBER:\033[39m %f"), tok.realVal());
          break;
       case TokenType::OP:
-         mcsl::printf(mcsl::FMT("\033[35mOPERATOR:\033[39;1m \033[34m%s\033[39;22m \033[3m[%s]\033[23m"), toString(_op.opID()), toString(_op.props()));
+         file.printf(mcsl::FMT("\033[35mOPERATOR:\033[39;1m \033[34m%s\033[39;22m \033[3m[%s]\033[23m"), toString(tok.opID()), toString(tok.opProps()));
          break;
       case TokenType::PREPROC_INIT:
-         mcsl::printf(mcsl::FMT("\033[35mINVOKE PREPROCESSOR\033[39m"));
+         file.printf(mcsl::FMT("\033[35mINVOKE PREPROCESSOR\033[39m"));
          break;
       case TokenType::PREPROC_EOS:
-         mcsl::printf(mcsl::FMT("\033[35mEXIT PREPROCESSOR\033[39m"));
+         file.printf(mcsl::FMT("\033[35mEXIT PREPROCESSOR\033[39m"));
          break;
       case TokenType::EOS:
-         mcsl::printf(mcsl::FMT("\033[35mEND OF STATEMENT\033[39m"));
+         file.printf(mcsl::FMT("\033[35mEND OF STATEMENT\033[39m"));
          break;
       case TokenType::ESC:
-         mcsl::printf(mcsl::FMT("\033[35mESCAPE CHARACTER\033[39m"));
+         file.printf(mcsl::FMT("\033[35mESCAPE CHARACTER\033[39m"));
          break;
       case TokenType::BLOCK_DELIM:
-         mcsl::printf(mcsl::FMT("\033[35mBLOCK DELIMITER:\033[39m %s \033[3m[%s]\033[23m"), toString(_blockDelim.first), toString(_blockDelim.second));
+         file.printf(mcsl::FMT("\033[35mBLOCK DELIMITER:\033[39m %s \033[3m[%s]\033[23m"), toString(tok.blockType()), toString(tok.blockDelimRole()));
          break;
       case TokenType::PTXT_SEG:
-         mcsl::printf(mcsl::FMT("\033[35mPLAINTEXT SEGMENT (\033[3m%s\033[23m):\033[39m "), toString(_ptxtType));
-         switch (_ptxtType) {
-            case PtxtType::CHAR           : mcsl::printf(mcsl::FMT("%c"), _charVal); break;
-            case PtxtType::STR            : mcsl::printf(mcsl::FMT("%s"), _strVal); break;
-            case PtxtType::UNPROCESSED_STR: mcsl::printf(mcsl::FMT("%s"), _strVal); break;
+         file.printf(mcsl::FMT("\033[35mPLAINTEXT SEGMENT (\033[3m%s\033[23m):\033[39m "), toString(tok.ptxtType()));
+         switch (tok.ptxtType()) {
+            case PtxtType::CHAR           : file.printf(mcsl::FMT("%c"), tok.charVal()); break;
+            case PtxtType::STR            : file.printf(mcsl::FMT("%s"), tok.strVal()); break;
+            case PtxtType::UNPROCESSED_STR: file.printf(mcsl::FMT("%s"), tok.unprocessedStrVal()); break;
 
-            default: throwError(ErrCode::LEXER_NOT_IMPLEMENTED, mcsl::FMT("\033[35munimplemented plaintext segment type used (%s)\033[39m"), toString(_ptxtType));
+            default: throwError(clef::ErrCode::LEXER_NOT_IMPLEMENTED, mcsl::FMT("\033[35munimplemented plaintext segment type used (%s)\033[39m"), toString(tok.ptxtType()));
          }
          break;
       
       default: UNREACHABLE;
    }
+   return file;
 }
 
 #endif //TOKEN_CPP

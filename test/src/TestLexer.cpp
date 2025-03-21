@@ -3,38 +3,37 @@
 
 #include "Lexer.hpp"
 
-#include <cstring>
-#include <string>
-#include <sstream>
-#include <iostream>
+#include "io.hpp"
+
+#define FMT mcsl::FMT
 
 int main(int argc, char** argv) {
    //check that file was provided
    if (argc < 2) {
-      std::printf("No file path provided\n");
-      return -1;
+      mcsl::err_printf(FMT("No file path provided\n"));
+      return EXIT_FAILURE;
    }
 
    //read file
    clef::Source src = clef::Source::readFile(argv[1]);
 
    //print file contents
-   char fileDelim[] = "----------------------\n";
-   std::printf("Printing \"%s\" (%u lines, %u chars)\n%s", argv[1], src.lineCount(), src.buf().size(), fileDelim);
+   const mcsl::str_slice fileDelim = FMT("----------------------\n");
+   mcsl::printf(FMT("Printing \"%s\" (%u lines, %u chars)\n%s"), FMT(argv[1]), src.lineCount(), src.buf().size(), fileDelim);
    for (uint i = 0; i < src.lineCount(); ++i) {
-      std::printf("line %u: %.*s", i + 1, src.line(i).size(), src.line(i).data());
+      mcsl::printf(FMT("line %u: %s"), i + 1, src.line(i));
    }
-   std::printf("\n%sDone printing file.\n", fileDelim);
+   mcsl::printf(FMT("\n%sDone printing file.\n"), fileDelim);
 
 
    //tokenize
-   std::printf("\nLexing file.\n");
+   mcsl::printf(FMT("\nLexing file.\n"));
    clef::SourceTokens tokens = clef::Lexer::LexSource(std::move(src));
 
    //print tokens
-   std::printf("\nPrinting tokens (%u tokens)\n%s", tokens.size(), fileDelim);
-   tokens.printf();
-   std::printf("%sDone printing tokens.\n", fileDelim);
+   mcsl::printf(FMT("\nPrinting tokens (%u tokens)\n%s"), tokens.size(), fileDelim);
+   mcsl::write(mcsl::stdout, tokens);
+   mcsl::printf(FMT("%sDone printing tokens.\n"), fileDelim);
 }
 
 #endif //TOKENIZER_TEST

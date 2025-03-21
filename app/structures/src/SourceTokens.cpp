@@ -5,11 +5,13 @@
 
 #include "io.hpp"
 
-void clef::SourceTokens::printf() const {
-   for (const Token* it = _tokens.begin(); it < _tokens.end(); ++it) {
-      it->printf();
-      mcsl::printf(mcsl::FMT("\n"));
+mcsl::File& mcsl::write(File& file, const clef::SourceTokens& toks) {
+   using namespace clef;
+   for (const Token* it = toks.begin(); it < toks.end(); ++it) {
+      write(file, *it);
+      write(file, '\n');
    }
+   return file;
 }
 
 #endif //SOURCE_TOKENS_CPP

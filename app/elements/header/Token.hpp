@@ -56,12 +56,14 @@ struct clef::Token {
       KeywordID keywordID() const { debug_assert(_type == TokenType::KEYWORD); return _keyword; }
       OpData op() const { debug_assert(_type == TokenType::OP); return _op; }
       OpID opID() const { debug_assert(_type == TokenType::OP); return _op; }
+      OpProps opProps() const { debug_assert(_type == TokenType::OP); return _op.props(); }
       BlockType blockType() const { debug_assert(_type == TokenType::BLOCK_DELIM); return _blockDelim.first; }
       BlockDelimRole blockDelimRole() const { debug_assert(_type == TokenType::BLOCK_DELIM); return _blockDelim.second; }
       PtxtType ptxtType() const { debug_assert(_type == TokenType::PTXT_SEG); return _ptxtType; }
+};
 
-      //printing
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::Token&);
 };
 
 #endif //TOKEN_HPP
