@@ -5,11 +5,12 @@
 
 #include "io.hpp"
 
-void clef::If::printf() const {
-   mcsl::printf(mcsl::FMT("IF (id=%u) {id=%u}"), +condition(), +procedure());
-   if (elseStmt()) {
-      mcsl::printf(mcsl::FMT(" ELSE {id=%u}"), +elseStmt());
+mcsl::File& mcsl::write(File& file, const clef::If& obj) {
+   file.printf(FMT("IF (id=%u) {id=%u}"), +obj.condition(), +obj.procedure());
+   if (obj.elseStmt()) {
+      file.printf(FMT(" ELSE {id=%u}"), +obj.elseStmt());
    }
+   return file;
 }
 
 #endif //IF_CPP

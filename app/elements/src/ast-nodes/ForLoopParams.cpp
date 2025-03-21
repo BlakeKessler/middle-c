@@ -5,8 +5,9 @@
 
 #include "io.hpp"
 
-void clef::ForLoopParams::printf() const {
-   mcsl::printf(mcsl::FMT("FOR_PARAMS: (id=%u; id=%u; id=%u)"), +decl(), +condition(), +increment());
+mcsl::File& mcsl::write(File& file, const clef::ForLoopParams& obj) {
+   mcsl::printf(mcsl::FMT("FOR_PARAMS: (id=%u; id=%u; id=%u)"), +obj.decl(), +obj.condition(), +obj.increment());
+   return file;
 }
 
 #endif //FOR_LOOP_PARAMS

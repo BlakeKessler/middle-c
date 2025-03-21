@@ -85,8 +85,10 @@ struct clef::Literal {
             case LitType::TYPEID    : return    _typeid == other._typeid;
          }
       }
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::Literal&);
 };
 
 #endif //LITERAL_HPP

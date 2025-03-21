@@ -16,8 +16,10 @@ struct clef::Scope : public clef::StatementSequence {
       using StatementSequence::StatementSequence;
       // Scope():StatementSequence{} {}
       // Scope(StatementSequence& stmts):StatementSequence{stmts} {}
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::Scope&);
 };
 
 #endif //SCOPE_HPP

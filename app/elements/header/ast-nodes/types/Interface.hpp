@@ -20,8 +20,10 @@ struct clef::Interface : public clef::Type {
 
       index<InterfaceSpec>& spec() { return _spec; }
       index<const InterfaceSpec> spec() const { return _spec; }
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::Interface&);
 };
 
 #endif //INTERFACE_HPP

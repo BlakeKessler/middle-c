@@ -23,8 +23,10 @@ struct clef::Enum : public clef::Type {
 
       index<ParameterList>& enumerators() { return _enumerators; }
       index<const ParameterList> enumerators() const { return _enumerators; }
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::Enum&);
 };
 
 #endif //ENUM_HPP

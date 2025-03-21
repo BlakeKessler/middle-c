@@ -5,9 +5,10 @@
 
 #include "io.hpp"
 
-void clef::Variable::printf() const {
-   __printf("variable");
-   mcsl::printf(mcsl::FMT(": (type id=%u) = (value id=%u)"), +type(), +val());
+mcsl::File& mcsl::write(File& file, const clef::Variable& obj) {
+   obj.printAs(file, FMT("variable"));
+   file.printf(mcsl::FMT(": (type id=%u) = (value id=%u)"), +obj.type(), +obj.val());
+   return file;
 }
 
 #endif //VAR_CPP

@@ -5,8 +5,9 @@
 
 #include "io.hpp"
 
-void clef::Asm::printf() const {
-   mcsl::printf(mcsl::FMT("ASM (not implemented)"));
+mcsl::File& mcsl::write(File& file, const clef::Asm& obj) {
+   file.printf(FMT("ASM (not implemented)"));
+   return file;
 }
 
 #endif //ASM_CPP

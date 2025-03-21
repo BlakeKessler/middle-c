@@ -5,9 +5,10 @@
 
 #include "io.hpp"
 
-void clef::Struct::printf() const {
-   __printf("struct");
-   mcsl::printf(mcsl::FMT(" {spec: id=%u}"), +spec());
+mcsl::File& mcsl::write(File& file, const clef::Struct& obj) {
+   obj.printAs(file, FMT("struct"));
+   file.printf(FMT(" {spec: id=%u}"), +obj.spec());
+   return file;
 }
 
 #endif //STRUCT_CPP

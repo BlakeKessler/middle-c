@@ -19,8 +19,10 @@ struct clef::ForeachLoopParams {
 
       index<const Variable> iterator() const { return _it; }
       index<const Expr> target() const { return _target; }
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::ForeachLoopParams);
 };
 
 #endif //FOREACH_LOOP_PARAMS_HPP

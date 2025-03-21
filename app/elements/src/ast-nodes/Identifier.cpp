@@ -13,22 +13,23 @@ bool clef::Identifier::operator==(const Identifier& other) const {
    return sameName(other) && sameScope(other);
 }
 
-void clef::Identifier::__printName() const {
-   mcsl::printf(mcsl::FMT("\033[4m"));
+void clef::Identifier::__printName(mcsl::File& file) const {
+   file.printf(mcsl::FMT("\033[4m"));
    if (+_keywordID) {
-      mcsl::printf(mcsl::FMT("%s"), toString(_keywordID));
+      file.printf(mcsl::FMT("%s"), toString(_keywordID));
    } else {
-      mcsl::printf(mcsl::FMT("%s"), _name_size, _name_buf);
+      file.printf(mcsl::FMT("%s"), _name_size, _name_buf);
    }
-   mcsl::printf(mcsl::FMT("\033[24m"));
+   file.printf(mcsl::FMT("\033[24m"));
 }
-void clef::Identifier::__printf(const char* nodetype) const {
-   mcsl::printf(mcsl::FMT("%s: "), nodetype);
-   __printName();
-   mcsl::printf(mcsl::FMT(" (scope: id=%u)"), +scopeName());
+void clef::Identifier::printAs(mcsl::File& file, const mcsl::str_slice nodetype) const {
+   file.printf(mcsl::FMT("%s: "), nodetype);
+   __printName(file);
+   file.printf(mcsl::FMT(" (scope: id=%u)"), +scopeName());
 }
-void clef::Identifier::printf() const {
-   __printf("identifier");
+mcsl::File& mcsl::write(File& file, const clef::Identifier& obj) {
+   obj.printAs(file, FMT("identifier"));
+   return file;
 }
 
 #endif //IDENTIFIER_CPP

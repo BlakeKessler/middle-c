@@ -36,8 +36,10 @@ struct clef::ParameterList : public mcsl::contig_base<index<Variable>> {
       auto* emplace(const uint i, auto&&... args) requires mcsl::valid_ctor<Variable, decltype(args)...> { return _params->emplace(i, std::forward<decltype(args)>(args)...); }
       auto* emplace_back(auto&&... args) requires mcsl::valid_ctor<Variable, decltype(args)...> { return _params->emplace_back(std::forward<decltype(args)>(args)...); }
       #pragma endregion dyn_arr
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::ParamList&);
 };
 
 #endif //PARAM_LIST_HPP

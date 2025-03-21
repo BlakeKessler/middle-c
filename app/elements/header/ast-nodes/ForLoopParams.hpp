@@ -22,8 +22,10 @@ struct clef::ForLoopParams {
       index<const Expr> decl() const { return _declExpr; }
       index<const Expr> condition() const { return _cond; }
       index<const Expr> increment() const { return _inc; }
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::ForLoopParams&);
 };
 
 #endif //FOR_LOOP_PARAMS_HPP

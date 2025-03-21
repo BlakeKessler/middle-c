@@ -5,8 +5,9 @@
 
 #include "io.hpp"
 
-void clef::WhileLoop::printf() const {
-   mcsl::printf(mcsl::FMT("WHILE (id=%u) {id=%u}"), +condition(), +procedure());
+mcsl::File& mcsl::write(File& file, const clef::WhileLoop& obj) {
+   file.printf(FMT("WHILE (id=%u) {id=%u}"), +obj.condition(), +obj.procedure());
+   return file;
 }
 
 #endif //WHILE_LOOP_CPP

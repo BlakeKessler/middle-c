@@ -21,8 +21,10 @@ struct clef::Function : public clef::Identifier {
       index<const FuncSig> signature() const { return _signature; }
       index<Scope>& procedure() { return _procedure; }
       index<const Scope> procedure() const { return _procedure; }
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::Function&);
 };
 
 #endif //FUNCTION_HPP

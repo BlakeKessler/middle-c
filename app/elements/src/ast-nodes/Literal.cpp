@@ -6,25 +6,27 @@
 
 #include "io.hpp"
 
-void clef::Literal::printf() const {
-   mcsl::printf(mcsl::FMT("%s literal: "), toString(type()));
-   switch (type()) {
+mcsl::File& mcsl::write(mcsl::File& file, const clef::Literal& obj) {
+   using namespace clef;
+   file.printf(mcsl::FMT("%s literal: "), toString(obj.type()));
+   switch (obj.type()) {
       case LitType::NONE: break;
 
-      case LitType::POINTER: mcsl::printf(mcsl::FMT("%r"), _ptrLit); break;
+      case LitType::POINTER: file.printf(mcsl::FMT("%r"), (const void*)obj); break;
 
-      case LitType::UINT: mcsl::printf(mcsl::FMT("%u"), _uintLit); break;
-      case LitType::SINT: mcsl::printf(mcsl::FMT("%i"), _sintLit); break;
-      case LitType::FLOAT: mcsl::printf(mcsl::FMT("%f"), _floatLit); break;
+      case LitType::UINT: file.printf(mcsl::FMT("%u"), (ulong)obj); break;
+      case LitType::SINT: file.printf(mcsl::FMT("%i"), (slong)obj); break;
+      case LitType::FLOAT: file.printf(mcsl::FMT("%f"), (flong)obj); break;
 
-      case LitType::CHAR: mcsl::printf(mcsl::FMT("%c"), _charLit); break;
+      case LitType::CHAR: file.printf(mcsl::FMT("%c"), (char)obj); break;
       case LitType::STRING: [[fallthrough]];
       case LitType::INTERP_STR: [[fallthrough]];
       case LitType::FORMAT: [[fallthrough]];
-      case LitType::REGEX: mcsl::printf(mcsl::FMT("%s"), _regexLit.size(), _regexLit.begin()); break;
+      case LitType::REGEX: file.printf(mcsl::FMT("%s"), (const str_slice&)obj); break;
 
-      case LitType::TYPEID: mcsl::printf(mcsl::FMT("%u"), +_typeid); break;
+      case LitType::TYPEID: file.printf(mcsl::FMT("%u"), (clef::index<const Type>)obj); break;
    }
+   return file;
 }
 
 #endif //LITERAL_CPP

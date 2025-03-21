@@ -5,8 +5,9 @@
 
 #include "io.hpp"
 
-void clef::Decl::printf() const {
-   mcsl::printf(mcsl::FMT("declaration (name: id=%u) : (type: id=%u)"), +name(), +type());
+mcsl::File& mcsl::write(File& file, const clef::Decl& obj) {
+   file.printf(FMT("declaration (name: id=%u) : (type: id=%u)"), +obj.name(), +obj.type());
+   return file;
 }
 
 #endif //DECL_CPP

@@ -18,8 +18,10 @@ struct clef::Match : public clef::Statement {
       index<const Expr> condition() const { return _lhs; }
       index<MatchCases>& cases() { return reinterpret_cast<index<MatchCases>&>(_rhs); }
       index<const MatchCases> cases() const { return _rhs; }
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::Match&);
 };
 
 #endif //MATCH_HPP

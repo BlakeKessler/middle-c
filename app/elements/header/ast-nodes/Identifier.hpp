@@ -15,8 +15,7 @@ struct clef::Identifier {
       const KeywordID _keywordID;
 
    protected:
-      void __printName() const;
-      void __printf(const char* nodetype) const;
+      void __printName(mcsl::File& file) const;
 
    public:
       static constexpr NodeType nodeType() { return NodeType::IDEN; }
@@ -38,8 +37,12 @@ struct clef::Identifier {
       inline bool sameScope(const Identifier& other) const { return _scopeName == other._scopeName; }
       inline bool sameName(const Identifier& other) const { return name() == other.name(); }
       bool operator==(const Identifier& other) const;
+      
+      void printAs(mcsl::File& file, const mcsl::str_slice nodetype) const;
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::Identifier&);
 };
 
 #endif //IDENTIFIER_HPP

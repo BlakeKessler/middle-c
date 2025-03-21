@@ -12,8 +12,10 @@ struct clef::GenericType : public clef::Type {
       static constexpr NodeType nodeType() { return NodeType::GENERIC; }
 
       using Type::Type;
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::GenericType&);
 };
 
 #endif //GENERIC_TYPE_HPP

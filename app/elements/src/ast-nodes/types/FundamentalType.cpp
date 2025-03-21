@@ -6,8 +6,9 @@
 
 #include "io.hpp"
 
-void clef::FundType::printf() const {
-   mcsl::printf(mcsl::FMT("fundamental type: %s"), toString(id()));
+mcsl::File& mcsl::write(File& file, const clef::FundType& obj) {
+   file.printf(FMT("fundamental type: %s"), clef::toString(obj.id()));
+   return file;
 }
 
 #endif //FUND_TYPE_CPP

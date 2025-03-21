@@ -12,8 +12,10 @@ struct clef::Type : public clef::Identifier {
       static constexpr NodeType nodeType() { return NodeType::TYPE; }
 
       using Identifier::Identifier;
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::Type&);
 };
 
 #endif //TYPE_HPP

@@ -18,8 +18,10 @@ struct clef::WhileLoop : public clef::Statement {
       index<const Expr> condition() const { return _lhs; }
       index<Scope>& procedure() { return reinterpret_cast<index<Scope>&>(_rhs); }
       index<const Scope> procedure() const { return _rhs; }
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::WhileLoop&);
 };
 
 #endif //WHILE_LOOP_HPP

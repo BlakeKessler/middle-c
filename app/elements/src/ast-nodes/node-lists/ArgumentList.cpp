@@ -5,15 +5,16 @@
 
 #include "io.hpp"
 
-void clef::ArgList::printf() const {
-   mcsl::printf(mcsl::FMT("arguments ("));
-   if (size()) {
-      mcsl::printf(mcsl::FMT("id=%u"), +self[0]);
-      for (uint i = 1; i < size(); ++i) {
-         mcsl::printf(mcsl::FMT(", id=%u"), +self[i]);
+mcsl::File& mcsl::write(File& file, const clef::ArgList& obj) {
+   file.printf(FMT("arguments ("));
+   if (obj.size()) {
+      file.printf(FMT("id=%u"), +obj[0]);
+      for (uint i = 1; i < obj.size(); ++i) {
+         file.printf(FMT(", id=%u"), +obj[i]);
       }
    }
-   mcsl::printf(mcsl::FMT(")"));
+   file.printf(mcsl::FMT(")"));
+   return file;
 }
 
 #endif //ARG_LIST_CPP

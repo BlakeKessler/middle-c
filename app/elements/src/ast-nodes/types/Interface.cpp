@@ -5,9 +5,10 @@
 
 #include "io.hpp"
 
-void clef::Interface::printf() const {
-   __printf("interface");
-   mcsl::printf(mcsl::FMT(" {spec: id=%u}"), +spec());
+mcsl::File& mcsl::write(File& file, const clef::Interface& obj) {
+   obj.printAs(file, FMT("interface"));
+   file.printf(FMT(" {spec: id=%u}"), +obj.spec());
+   return file;
 }
 
 #endif //INTERFACE_CPP

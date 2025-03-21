@@ -5,8 +5,9 @@
 
 #include "io.hpp"
 
-void clef::DoWhileLoop::printf() const {
-   mcsl::printf(mcsl::FMT("DO {id=%u} WHILE (id=%u)"), +procedure(), +condition());
+mcsl::File& mcsl::write(File& file, const clef::DoWhileLoop& obj) {
+   file.printf(FMT("DO {id=%u} WHILE (id=%u)"), +obj.procedure(), +obj.condition());
+   return file;
 }
 
 #endif //DO_WHILE_LOOP_CPP

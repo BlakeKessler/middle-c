@@ -3,8 +3,9 @@
 
 #include "ast-nodes/types/GenericType.hpp"
 
-void clef::GenericType::printf() const {
-   __printf("generic type");
+mcsl::File& mcsl::write(File& file, const clef::GenericType& obj) {
+   obj.printAs(file, FMT("generic type"));
+   return file;
 }
 
 #endif //GENERIC_TYPE_CPP

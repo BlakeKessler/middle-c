@@ -5,9 +5,10 @@
 
 #include "io.hpp"
 
-void clef::Mask::printf() const {
-   __printf("mask");
-   mcsl::printf(mcsl::FMT(" : (base: id=%u) {members: id=%u}"), +baseType(), +enumerators());
+mcsl::File& mcsl::write(File& file, const clef::Mask& obj) {
+   obj.printAs(file, FMT("mask"));
+   file.printf(FMT(" : (base: id=%u) {members: id=%u}"), +obj.baseType(), +obj.enumerators());
+   return file;
 }
 
 #endif //MASK_CPP

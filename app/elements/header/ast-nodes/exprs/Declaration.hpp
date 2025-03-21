@@ -20,8 +20,10 @@ struct clef::Declaration : public clef::Expression {
       index<const Type> type() const { return _lhs; }
       index<Identifier>& name() { return reinterpret_cast<index<Identifier>&>(_rhs); }
       index<const Identifier> name() const { return _rhs; }
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::Decl&);
 };
 
 #endif //DECL_HPP

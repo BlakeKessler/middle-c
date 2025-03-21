@@ -21,8 +21,10 @@ struct clef::TryCatch : public clef::Statement {
       index<const Scope> procedure() const { return _lhs; }
       index<const Variable> err() const { return _rhs; }
       index<const Scope> errHandler() const { return _extra; }
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::TryCatch&);
 };
 
 #endif //TRY_CATCH_HPP

@@ -19,12 +19,12 @@ class clef::SyntaxTree {
 
       allocator _alloc;
 
-      void __indent(uint indents) const;
-      void __printf(index<const astNode>, const uint indents) const;
-      template<astNode_t T> void __printf(index<const T>, const uint indents) const;
-      void __printf(index<const InterfaceSpec>, const uint indents) const;
-      void __printf(index<const NamespaceSpec>, const uint indents) const;
-      void __printf(index<const ObjTypeSpec>, const uint indents) const;
+      void __indent(mcsl::File&, uint indents) const;
+      void __printf(mcsl::File&, index<const astNode>, const uint indents) const;
+      template<astNode_t T> void __printf(mcsl::File&, index<const T>, const uint indents) const;
+      void __printf(mcsl::File&, index<const InterfaceSpec>, const uint indents) const;
+      void __printf(mcsl::File&, index<const NamespaceSpec>, const uint indents) const;
+      void __printf(mcsl::File&, index<const ObjTypeSpec>, const uint indents) const;
    public:
       SyntaxTree():_buf{},_ifaceSpecBuf{},_nsSpecBuf{},_objSpecBuf{},_alloc{} {
          _buf.emplace_back(NodeType::ERROR);
@@ -51,8 +51,8 @@ class clef::SyntaxTree {
       index<FundType> getFundType(const KeywordID fundTypeKeyword);
       index<astNode> getValueKeyword(const KeywordID valueKeyword);
 
-      void printf() const;
-      void print() const;
+      void printf(mcsl::File&) const;
+      void print(mcsl::File&) const;
 
       astNode& getNode(const uint i) { assume(i); return _buf[i]; }
       const astNode& getNode(const uint i) const { assume(i); return _buf[i]; }
@@ -87,6 +87,10 @@ class clef::SyntaxTree {
       index<InterfaceSpec> allocInterfaceSpec() { return _ifaceSpecBuf.emplace_back() - _ifaceSpecBuf.begin(); }
       index<NamespaceSpec> allocNamespaceSpec() { return _nsSpecBuf.emplace_back() - _nsSpecBuf.begin(); }
       index<ObjTypeSpec> allocObjTypeSpec() { return _objSpecBuf.emplace_back() - _objSpecBuf.begin(); }
+};
+
+namespace mcsl {
+   inline File& write(File& file, const clef::SyntaxTree& obj) { obj.printf(file); return file; }
 };
 
 #pragma region inlinesrc

@@ -27,14 +27,17 @@ struct clef::SpecializerList {
       
       operator ArgList() { assume(!_isDecl); return _baseSpecList; }
       operator const ArgList() const { assume(!_isDecl); return _baseSpecList; }
-
-      void printf() const {
-         if (_isDecl) {
-            _declSpecList.printf();
-         } else {
-            _baseSpecList.printf();
-         }
-      }
 };
+
+namespace mcsl {
+   inline File& write(File& file, const clef::SpecList& obj) {
+      if (obj.isDecl()) {
+         write(file, (const clef::ParamList&)obj);
+      } else {
+         write(file, (const clef::ArgList&)obj);
+      }
+      return file;
+   }
+}
 
 #endif //SPEC_LIST_HPP

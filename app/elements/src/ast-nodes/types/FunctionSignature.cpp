@@ -5,9 +5,10 @@
 
 #include "io.hpp"
 
-void clef::FuncSig::printf() const {
-   __printf("function signature");
-   mcsl::printf(mcsl::FMT(": (id=%u) -> id=%u"), +params(), +returnType());
+mcsl::File& mcsl::write(File& file, const clef::FuncSig& obj) {
+   obj.printAs(file, FMT("function signature"));
+   file.printf(FMT(": (id=%u) -> id=%u"), +obj.params(), +obj.returnType());
+   return file;
 }
 
 #endif //FUNC_SIG_CPP

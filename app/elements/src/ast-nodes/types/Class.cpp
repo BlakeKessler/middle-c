@@ -5,9 +5,10 @@
 
 #include "io.hpp"
 
-void clef::Class::printf() const {
-   __printf("class");
-   mcsl::printf(mcsl::FMT(" {spec: id=%u}"), +spec());
+mcsl::File& mcsl::write(File& file, const clef::Class& obj) {
+   obj.printAs(file, FMT("class"));
+   file.printf(FMT(" {spec: id=%u}"), +obj.spec());
+   return file;
 }
 
 #endif //CLASS_CPP

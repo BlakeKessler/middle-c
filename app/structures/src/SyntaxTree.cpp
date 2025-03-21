@@ -146,290 +146,288 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
 }
 
 
-void clef::SyntaxTree::print() const {
+void clef::SyntaxTree::print(mcsl::File& file) const {
    for (uint i = 1; i < _buf.size(); ++i) {
-      mcsl::printf(mcsl::FMT("\n\t%u: "), i);
-      _buf[i].printf();
+      file.printf(mcsl::FMT("\n\t%u: "), i);
+      mcsl::write(mcsl::stdout, _buf[i]);
    }
-   mcsl::printf(mcsl::FMT("\n"));
+   file.printf(mcsl::FMT("\n"));
 }
 
-void clef::SyntaxTree::printf() const {
-   __printf((index<astNode>)(1), 0);
+void clef::SyntaxTree::printf(mcsl::File& file) const {
+   __printf(file, (index<astNode>)(1), 0);
 }
 
-void clef::SyntaxTree::__indent(uint indents) const {
-   while (indents--) {
-      mcsl::printf(mcsl::FMT("   "));
-   }
+void clef::SyntaxTree::__indent(mcsl::File& file, uint indents) const {
+   file.write(mcsl::PAD_CHAR, 3 * indents);
 }
 
-template<> void clef::SyntaxTree::__printf<clef::ArgList>(index<const ArgList> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::ArgList>(mcsl::File& file, index<const ArgList> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
-template<> void clef::SyntaxTree::__printf<clef::ParamList>(index<const ParamList> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::ParamList>(mcsl::File& file, index<const ParamList> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
-template<> void clef::SyntaxTree::__printf<clef::SpecList>(index<const SpecList> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::SpecList>(mcsl::File& file, index<const SpecList> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
 
-template<> void clef::SyntaxTree::__printf<clef::Identifier>(index<const Identifier> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::Identifier>(mcsl::File& file, index<const Identifier> i, const uint indents) const {
    const Identifier& node = self[i];
    if (node.scopeName()) { //parent scope
-      __printf<Identifier>(node.scopeName(), indents);
-      mcsl::printf(mcsl::FMT("::"));
+      __printf<Identifier>(file, node.scopeName(), indents);
+      file.printf(mcsl::FMT("::"));
    } else { //indent
-      __indent(indents);
+      __indent(file, indents);
    }
 
    if (+node.keywordID()) { //keyword
-      mcsl::printf(mcsl::FMT("%s"), toString(node.keywordID()));
+      file.printf(mcsl::FMT("%s"), toString(node.keywordID()));
    } else { //standard identifier
-      mcsl::printf(mcsl::FMT("%s"), node.name().size(), node.name().begin());
+      file.printf(mcsl::FMT("%s"), node.name().size(), node.name().begin());
    }
 
    if (node.specializer()) {
-      __printf<SpecializerList>(node.specializer(), 0);
+      __printf<SpecializerList>(file, node.specializer(), 0);
    }
 }
-template<> void clef::SyntaxTree::__printf<clef::Type>(index<const Type> i, const uint indents) const {
-   __printf<Identifier>(i, indents);
+template<> void clef::SyntaxTree::__printf<clef::Type>(mcsl::File& file, index<const Type> i, const uint indents) const {
+   __printf<Identifier>(file, i, indents);
 }
-template<> void clef::SyntaxTree::__printf<clef::Expr>(index<const Expr> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::Expr>(mcsl::File& file, index<const Expr> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
-template<> void clef::SyntaxTree::__printf<clef::Stmt>(index<const Stmt> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::Stmt>(mcsl::File& file, index<const Stmt> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
-template<> void clef::SyntaxTree::__printf<clef::StmtSeq>(index<const StmtSeq> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::StmtSeq>(mcsl::File& file, index<const StmtSeq> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
-template<> void clef::SyntaxTree::__printf<clef::Variable>(index<const Variable> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::Variable>(mcsl::File& file, index<const Variable> i, const uint indents) const {
    const Variable& node = self[i];
-   __printf<Type>(node.type(), indents);
-   __printf<Identifier>(i, 0);
+   __printf<Type>(file, node.type(), indents);
+   __printf<Identifier>(file, i, 0);
    if (node.val()) {
-      mcsl::printf(mcsl::FMT(" = "));
-      __printf<Expr>(node.val(), 0);
+      file.printf(mcsl::FMT(" = "));
+      __printf<Expr>(file, node.val(), 0);
    }
 }
-template<> void clef::SyntaxTree::__printf<clef::VariadicParam>(index<const VariadicParam> i, const uint indents) const {
-   __printf<Type>(i, indents);
-   mcsl::printf(mcsl::FMT("..."));
+template<> void clef::SyntaxTree::__printf<clef::VariadicParam>(mcsl::File& file, index<const VariadicParam> i, const uint indents) const {
+   __printf<Type>(file, i, indents);
+   file.printf(mcsl::FMT("..."));
 }
-template<> void clef::SyntaxTree::__printf<clef::FundamentalType>(index<const FundamentalType> i, const uint indents) const {
-   __indent(indents);
-   mcsl::printf(mcsl::FMT("%s"), toString(self[i].id()));
+template<> void clef::SyntaxTree::__printf<clef::FundamentalType>(mcsl::File& file, index<const FundamentalType> i, const uint indents) const {
+   __indent(file, indents);
+   file.printf(mcsl::FMT("%s"), toString(self[i].id()));
 }
-template<> void clef::SyntaxTree::__printf<clef::FunctionSignature>(index<const FunctionSignature> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::FunctionSignature>(mcsl::File& file, index<const FunctionSignature> i, const uint indents) const {
    const FuncSig& node = self[i];
-   __printf<ParamList>(node.params(), indents);
-   mcsl::printf(mcsl::FMT(" -> "));
-   __printf<Type>(node.returnType(), 0);
+   __printf<ParamList>(file, node.params(), indents);
+   file.printf(mcsl::FMT(" -> "));
+   __printf<Type>(file, node.returnType(), 0);
 }
-template<> void clef::SyntaxTree::__printf<clef::Scope>(index<const Scope> i, const uint indents) const {
-   __printf<StmtSeq>(i, indents);
+template<> void clef::SyntaxTree::__printf<clef::Scope>(mcsl::File& file, index<const Scope> i, const uint indents) const {
+   __printf<StmtSeq>(file, i, indents);
 }
-template<> void clef::SyntaxTree::__printf<clef::Function>(index<const Function> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::Function>(mcsl::File& file, index<const Function> i, const uint indents) const {
    const Function& node = self[i];
-   __printf<Identifier>(i, indents);
-   __printf<FuncSig>(node.signature(), 0);
-   mcsl::printf(mcsl::FMT(" "));
-   __printf<Scope>(node.procedure(), indents);
+   __printf<Identifier>(file, i, indents);
+   __printf<FuncSig>(file, node.signature(), 0);
+   file.printf(mcsl::FMT(" "));
+   __printf<Scope>(file, node.procedure(), indents);
 }
-template<> void clef::SyntaxTree::__printf<clef::Enum>(index<const Enum> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::Enum>(mcsl::File& file, index<const Enum> i, const uint indents) const {
    const Enum& node = self[i];
-   __indent(indents);
-   mcsl::printf(mcsl::FMT("enum "));
-   __printf<Type>(i, 0);
+   __indent(file, indents);
+   file.printf(mcsl::FMT("enum "));
+   __printf<Type>(file, i, 0);
 
    if (node.baseType()) {
-      mcsl::printf(mcsl::FMT(" : "));
-      __printf<Type>(node.baseType(), 0);
+      file.printf(mcsl::FMT(" : "));
+      __printf<Type>(file, node.baseType(), 0);
    }
 
-   mcsl::printf(mcsl::FMT(" {\n"));
+   file.printf(mcsl::FMT(" {\n"));
    const ParamList& members = self[node.enumerators()];
    for (uint index = 0; index < members.size(); ++index) {
-      __printf<Variable>(members[index], indents + 1);
-      mcsl::printf(mcsl::FMT(";\n"));
+      __printf<Variable>(file, members[index], indents + 1);
+      file.printf(mcsl::FMT(";\n"));
    }
-   __indent(indents);
-   mcsl::printf(mcsl::FMT("};\n"));
+   __indent(file, indents);
+   file.printf(mcsl::FMT("};\n"));
 }
-template<> void clef::SyntaxTree::__printf<clef::Mask>(index<const Mask> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::Mask>(mcsl::File& file, index<const Mask> i, const uint indents) const {
    const Mask& node = self[i];
-   __indent(indents);
-   mcsl::printf(mcsl::FMT("mask "));
-   __printf<Type>(i, 0);
+   __indent(file, indents);
+   file.printf(mcsl::FMT("mask "));
+   __printf<Type>(file, i, 0);
 
    if (node.baseType()) {
-      mcsl::printf(mcsl::FMT(" : "));
-      __printf<Type>(node.baseType(), 0);
+      file.printf(mcsl::FMT(" : "));
+      __printf<Type>(file, node.baseType(), 0);
    }
    
-   mcsl::printf(mcsl::FMT(" {\n"));
+   file.printf(mcsl::FMT(" {\n"));
    const ParamList& members = self[node.enumerators()];
    for (uint index = 0; index < members.size(); ++index) {
-      __printf<Variable>(members[index], indents + 1);
-      mcsl::printf(mcsl::FMT(";\n"));
+      __printf<Variable>(file, members[index], indents + 1);
+      file.printf(mcsl::FMT(";\n"));
    }
-   __indent(indents);
-   mcsl::printf(mcsl::FMT("};\n"));
+   __indent(file, indents);
+   file.printf(mcsl::FMT("};\n"));
 }
-template<> void clef::SyntaxTree::__printf<clef::Union>(index<const Union> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::Union>(mcsl::File& file, index<const Union> i, const uint indents) const {
    const Union& node = self[i];
-   __indent(indents);
-   mcsl::printf(mcsl::FMT("union "));
-   __printf<Type>(i, 0);
+   __indent(file, indents);
+   file.printf(mcsl::FMT("union "));
+   __printf<Type>(file, i, 0);
    
-   mcsl::printf(mcsl::FMT(" {\n"));
+   file.printf(mcsl::FMT(" {\n"));
    const ParamList& members = self[node.members()];
    for (uint index = 0; index < members.size(); ++index) {
-      __printf<Variable>(members[index], indents + 1);
-      mcsl::printf(mcsl::FMT(";\n"));
+      __printf<Variable>(file, members[index], indents + 1);
+      file.printf(mcsl::FMT(";\n"));
    }
-   __indent(indents);
-   mcsl::printf(mcsl::FMT("};\n"));
+   __indent(file, indents);
+   file.printf(mcsl::FMT("};\n"));
 }
-template<> void clef::SyntaxTree::__printf<clef::Namespace>(index<const Namespace> i, const uint indents) const {
-   __indent(indents);
-   mcsl::printf(mcsl::FMT("namespace "));
-   __printf<Type>(i, 0);
-   mcsl::printf(mcsl::FMT(" "));
-   __printf(self[i].spec(), indents + 1);
-   mcsl::printf(mcsl::FMT(";\n"));
+template<> void clef::SyntaxTree::__printf<clef::Namespace>(mcsl::File& file, index<const Namespace> i, const uint indents) const {
+   __indent(file, indents);
+   file.printf(mcsl::FMT("namespace "));
+   __printf<Type>(file, i, 0);
+   file.printf(mcsl::FMT(" "));
+   __printf(file, self[i].spec(), indents + 1);
+   file.printf(mcsl::FMT(";\n"));
 }
-template<> void clef::SyntaxTree::__printf<clef::Interface>(index<const Interface> i, const uint indents) const {
-   __indent(indents);
-   mcsl::printf(mcsl::FMT("interface "));
-   __printf<Type>(i, 0);
-   mcsl::printf(mcsl::FMT(" "));
-   __printf(self[i].spec(), indents + 1);
-   mcsl::printf(mcsl::FMT(";\n"));
+template<> void clef::SyntaxTree::__printf<clef::Interface>(mcsl::File& file, index<const Interface> i, const uint indents) const {
+   __indent(file, indents);
+   file.printf(mcsl::FMT("interface "));
+   __printf<Type>(file, i, 0);
+   file.printf(mcsl::FMT(" "));
+   __printf(file, self[i].spec(), indents + 1);
+   file.printf(mcsl::FMT(";\n"));
 }
-template<> void clef::SyntaxTree::__printf<clef::Struct>(index<const Struct> i, const uint indents) const {
-   __indent(indents);
-   mcsl::printf(mcsl::FMT("struct "));
-   __printf<Type>(i, 0);
-   mcsl::printf(mcsl::FMT(" "));
-   __printf(self[i].spec(), indents + 1);
-   mcsl::printf(mcsl::FMT(";\n"));
+template<> void clef::SyntaxTree::__printf<clef::Struct>(mcsl::File& file, index<const Struct> i, const uint indents) const {
+   __indent(file, indents);
+   file.printf(mcsl::FMT("struct "));
+   __printf<Type>(file, i, 0);
+   file.printf(mcsl::FMT(" "));
+   __printf(file, self[i].spec(), indents + 1);
+   file.printf(mcsl::FMT(";\n"));
 }
-template<> void clef::SyntaxTree::__printf<clef::Class>(index<const Class> i, const uint indents) const {
-   __indent(indents);
-   mcsl::printf(mcsl::FMT("class "));
-   __printf<Type>(i, 0);
-   mcsl::printf(mcsl::FMT(" "));
-   __printf(self[i].spec(), indents + 1);
-   mcsl::printf(mcsl::FMT(";\n"));
+template<> void clef::SyntaxTree::__printf<clef::Class>(mcsl::File& file, index<const Class> i, const uint indents) const {
+   __indent(file, indents);
+   file.printf(mcsl::FMT("class "));
+   __printf<Type>(file, i, 0);
+   file.printf(mcsl::FMT(" "));
+   __printf(file, self[i].spec(), indents + 1);
+   file.printf(mcsl::FMT(";\n"));
 }
-template<> void clef::SyntaxTree::__printf<clef::GenericType>(index<const GenericType> i, const uint indents) const {
-   __printf<Type>(i, indents);
+template<> void clef::SyntaxTree::__printf<clef::GenericType>(mcsl::File& file, index<const GenericType> i, const uint indents) const {
+   __printf<Type>(file, i, indents);
 }
-template<> void clef::SyntaxTree::__printf<clef::Literal>(index<const Literal> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::Literal>(mcsl::File& file, index<const Literal> i, const uint indents) const {
    const Literal& node = self[i];
    switch (node.type()) {
       case LitType::NONE: UNREACHABLE;
-      case LitType::POINTER: mcsl::printf(mcsl::FMT("%r"), (const void*)node); break;
+      case LitType::POINTER: file.printf(mcsl::FMT("%r"), (const void*)node); break;
 
-      case LitType::UINT: mcsl::printf(mcsl::FMT("%u"), (ulong)node); break;
-      case LitType::SINT: mcsl::printf(mcsl::FMT("%i"), (slong)node); break;
-      case LitType::FLOAT: mcsl::printf(mcsl::FMT("%f"), (flong)node); break;
+      case LitType::UINT: file.printf(mcsl::FMT("%u"), (ulong)node); break;
+      case LitType::SINT: file.printf(mcsl::FMT("%i"), (slong)node); break;
+      case LitType::FLOAT: file.printf(mcsl::FMT("%f"), (flong)node); break;
 
-      case LitType::CHAR: mcsl::printf(mcsl::FMT("'%c'"), (char)node); break;
-      case LitType::STRING: mcsl::printf(mcsl::FMT("\"%s\""), ((const mcsl::str_slice)node).size(), ((const mcsl::str_slice)node).begin()); break;
-      case LitType::INTERP_STR: mcsl::printf(mcsl::FMT("`%s`"), ((const mcsl::str_slice)node).size(), ((const mcsl::str_slice)node).begin()); break;
+      case LitType::CHAR: file.printf(mcsl::FMT("'%c'"), (char)node); break;
+      case LitType::STRING: file.printf(mcsl::FMT("\"%s\""), ((const mcsl::str_slice)node).size(), ((const mcsl::str_slice)node).begin()); break;
+      case LitType::INTERP_STR: file.printf(mcsl::FMT("`%s`"), ((const mcsl::str_slice)node).size(), ((const mcsl::str_slice)node).begin()); break;
       
       case LitType::FORMAT: UNREACHABLE; //!TODO: implement
       case LitType::REGEX: UNREACHABLE; //!TODO: implement
 
-      case LitType::TYPEID: __printf<Type>((index<const Type>)node, indents); break;
+      case LitType::TYPEID: __printf<Type>(file, (index<const Type>)node, indents); break;
    }
 }
-template<> void clef::SyntaxTree::__printf<clef::Decl>(index<const Decl> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::Decl>(mcsl::File& file, index<const Decl> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
 
 
-template<> void clef::SyntaxTree::__printf<clef::SwitchCases>(index<const SwitchCases> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::SwitchCases>(mcsl::File& file, index<const SwitchCases> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
-template<> void clef::SyntaxTree::__printf<clef::MatchCases>(index<const MatchCases> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::MatchCases>(mcsl::File& file, index<const MatchCases> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
-template<> void clef::SyntaxTree::__printf<clef::Switch>(index<const Switch> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::Switch>(mcsl::File& file, index<const Switch> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
-template<> void clef::SyntaxTree::__printf<clef::Match>(index<const Match> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::Match>(mcsl::File& file, index<const Match> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
-template<> void clef::SyntaxTree::__printf<clef::TryCatch>(index<const TryCatch> i, const uint indents) const {
-   UNREACHABLE;
-   //!TODO: implement
-}
-
-template<> void clef::SyntaxTree::__printf<clef::ForLoopParams>(index<const ForLoopParams> i, const uint indents) const {
-   UNREACHABLE;
-   //!TODO: implement
-}
-template<> void clef::SyntaxTree::__printf<clef::ForeachLoopParams>(index<const ForeachLoopParams> i, const uint indents) const {
-   UNREACHABLE;
-   //!TODO: implement
-}
-template<> void clef::SyntaxTree::__printf<clef::ForLoop>(index<const ForLoop> i, const uint indents) const {
-   UNREACHABLE;
-   //!TODO: implement
-}
-template<> void clef::SyntaxTree::__printf<clef::ForeachLoop>(index<const ForeachLoop> i, const uint indents) const {
-   UNREACHABLE;
-   //!TODO: implement
-}
-template<> void clef::SyntaxTree::__printf<clef::WhileLoop>(index<const WhileLoop> i, const uint indents) const {
-   UNREACHABLE;
-   //!TODO: implement
-}
-template<> void clef::SyntaxTree::__printf<clef::DoWhileLoop>(index<const DoWhileLoop> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::TryCatch>(mcsl::File& file, index<const TryCatch> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
 
-template<> void clef::SyntaxTree::__printf<clef::If>(index<const If> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::ForLoopParams>(mcsl::File& file, index<const ForLoopParams> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
-template<> void clef::SyntaxTree::__printf<clef::Asm>(index<const Asm> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::ForeachLoopParams>(mcsl::File& file, index<const ForeachLoopParams> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::ForLoop>(mcsl::File& file, index<const ForLoop> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::ForeachLoop>(mcsl::File& file, index<const ForeachLoop> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::WhileLoop>(mcsl::File& file, index<const WhileLoop> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+template<> void clef::SyntaxTree::__printf<clef::DoWhileLoop>(mcsl::File& file, index<const DoWhileLoop> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
 
-void clef::SyntaxTree::__printf(index<const InterfaceSpec> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::If>(mcsl::File& file, index<const If> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
-void clef::SyntaxTree::__printf(index<const NamespaceSpec> i, const uint indents) const {
-   UNREACHABLE;
-   //!TODO: implement
-}
-void clef::SyntaxTree::__printf(index<const ObjTypeSpec> i, const uint indents) const {
+template<> void clef::SyntaxTree::__printf<clef::Asm>(mcsl::File& file, index<const Asm> i, const uint indents) const {
    UNREACHABLE;
    //!TODO: implement
 }
 
-#define typecase(T) case T::nodeType(): __printf<T>(+i, indents); break;
-void clef::SyntaxTree::__printf(index<const astNode> i, uint indents) const {
+void clef::SyntaxTree::__printf(mcsl::File& file, index<const InterfaceSpec> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+void clef::SyntaxTree::__printf(mcsl::File& file, index<const NamespaceSpec> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+void clef::SyntaxTree::__printf(mcsl::File& file, index<const ObjTypeSpec> i, const uint indents) const {
+   UNREACHABLE;
+   //!TODO: implement
+}
+
+#define typecase(T) case T::nodeType(): __printf<T>(file, +i, indents); break;
+void clef::SyntaxTree::__printf(mcsl::File& file, index<const astNode> i, uint indents) const {
    switch (self[i].nodeType()) {
       case NodeType::NONE: break;
       case NodeType::ERROR: throwError(ErrCode::UNSPEC, mcsl::FMT("\n\033[31mERROR NODE: %u\033[39m\n"), +i); break;

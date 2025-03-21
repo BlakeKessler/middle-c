@@ -5,8 +5,9 @@
 
 #include "io.hpp"
 
-void clef::Switch::printf() const {
-   mcsl::printf(mcsl::FMT("SWITCH (id=%u) {id=%u}"), +condition(), +cases());
+mcsl::File& mcsl::write(File& file, const clef::Switch& obj) {
+   file.printf(FMT("SWITCH (id=%u) {id=%u}"), +obj.condition(), +obj.cases());
+   return file;
 }
 
 #endif //SWITCH_CPP

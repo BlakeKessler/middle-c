@@ -5,11 +5,12 @@
 
 #include "io.hpp"
 
-void clef::Scope::printf() const {
-   mcsl::printf(mcsl::FMT("scope:"));
-   for (uint i = 0; i < size(); ++i) {
-      mcsl::printf(mcsl::FMT(" id=%u;"), +self[i]);
+mcsl::File& mcsl::write(File& file, const clef::Scope& obj) {
+   file.printf(FMT("scope:"));
+   for (uint i = 0; i < obj.size(); ++i) {
+      file.printf(FMT(" id=%u;"), +obj[i]);
    }
+   return file;
 }
 
 #endif //SCOPE_CPP

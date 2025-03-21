@@ -20,8 +20,10 @@ struct clef::Namespace : public clef::Type {
 
       index<NamespaceSpec>& spec() { return _spec; }
       index<const NamespaceSpec> spec() const { return _spec; }
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::Namespace&);
 };
 
 #endif //NAMESPACE_HPP

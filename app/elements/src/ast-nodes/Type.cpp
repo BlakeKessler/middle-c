@@ -3,8 +3,9 @@
 
 #include "ast-nodes/Type.hpp"
 
-void clef::Type::printf() const {
-   __printf("type");
+mcsl::File& mcsl::write(File& file, const clef::Type& obj) {
+   obj.printAs(file, FMT("type"));
+   return file;
 }
 
 #endif //TYPE_CPP

@@ -17,8 +17,10 @@ struct clef::FundamentalType : public clef::Type {
 
       FundTypeID& id() { return _id; }
       FundTypeID id() const { return _id; }
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::FundType&);
 };
 
 #endif //FUND_TYPE_HPP

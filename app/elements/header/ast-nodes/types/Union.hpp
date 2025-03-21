@@ -19,8 +19,10 @@ struct clef::Union : public clef::Type {
 
       index<ParameterList>& members() { return _members; }
       index<const ParameterList> members() const { return _members; }
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::Union&);
 };
 
 #endif //UNION_HPP

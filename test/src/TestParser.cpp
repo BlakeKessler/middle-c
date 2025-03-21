@@ -19,14 +19,14 @@ int main(const int argc, char** argv) {
    mcsl::printf(mcsl::FMT("%s"), BIG_HEADER);
    clef::SourceTokens tokens = clef::Lexer::LexFile(argv[1]);
    mcsl::printf(mcsl::FMT("\033[1mTokens:\033[22m\n%s"), SMALL_HEADER);
-   tokens.printf();
+   mcsl::write(mcsl::stdout, tokens);
    mcsl::printf(mcsl::FMT("\n%s"),BIG_HEADER);
 
    //abstract syntax tree
    clef::SyntaxTree tree{};
    clef::Parser::parse(tokens, tree);
    mcsl::printf(mcsl::FMT("\033[1mAbstract Syntax Tree:\033[22m\n%s"), SMALL_HEADER);
-   tree.printf();
+   mcsl::write(mcsl::stdout, tree);
    mcsl::printf(mcsl::FMT("\n%s\n"), BIG_HEADER);
 
    //offer to print debug info
@@ -37,7 +37,7 @@ int main(const int argc, char** argv) {
       case 'q':
          break;
       case 'p':
-         tree.print();
+         tree.print(mcsl::stdout);
          mcsl::printf(mcsl::FMT("\n%s\n"), BIG_HEADER);
          break;
       default:

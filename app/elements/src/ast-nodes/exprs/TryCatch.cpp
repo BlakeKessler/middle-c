@@ -5,8 +5,9 @@
 
 #include "io.hpp"
 
-void clef::TryCatch::printf() const {
-   mcsl::printf(mcsl::FMT("TRY {id=%u} CATCH (id=%u) {id=%u}"), +procedure(), +err(), +errHandler());
+mcsl::File& mcsl::write(File& file, const clef::TryCatch& obj) {
+   file.printf(FMT("TRY {id=%u} CATCH (id=%u) {id=%u}"), +obj.procedure(), +obj.err(), +obj.errHandler());
+   return file;
 }
 
 #endif //TRY_CATCH_CPP

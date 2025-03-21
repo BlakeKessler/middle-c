@@ -5,9 +5,10 @@
 
 #include "io.hpp"
 
-void clef::Namespace::printf() const {
-   __printf("namespace");
-   mcsl::printf(mcsl::FMT(" {spec: id=%u}"), +spec());
+mcsl::File& mcsl::write(File& file, const clef::Namespace& obj) {
+   obj.printAs(file, FMT("namespace"));
+   file.printf(FMT(" {spec: id=%u}"), +obj.spec());
+   return file;
 }
 
 #endif //NAMESPACE_CPP

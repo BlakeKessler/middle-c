@@ -5,9 +5,10 @@
 
 #include "io.hpp"
 
-void clef::Function::printf() const {
-   __printf("function");
-   mcsl::printf(mcsl::FMT(" - (signature id=%u) {procedure id=%u}"), +signature(), +procedure());
+mcsl::File& mcsl::write(File& file, const clef::Function& obj) {
+   obj.printAs(file, FMT("function"));
+   file.printf(FMT(" - (signature id=%u) {procedure id=%u}"), +obj.signature(), +obj.procedure());
+   return file;
 }
 
 #endif //FUNC_CPP

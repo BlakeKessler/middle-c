@@ -5,12 +5,13 @@
 
 #include "io.hpp"
 
-void clef::SwitchCases::printf() const {
-   mcsl::printf(mcsl::FMT("SWITCH_CASES {id=%u}:"), +procedure());
-   for (uint i = 0; i < size(); ++i) {
-      auto tmp = self[i];
-      mcsl::printf(mcsl::FMT(" {case (id=%u): id=%u}"), +tmp.first, +tmp.second);
+mcsl::File& mcsl::write(File& file, const clef::SwitchCases& obj) {
+   file.printf(FMT("SWITCH_CASES {id=%u}:"), +obj.procedure());
+   for (uint i = 0; i < obj.size(); ++i) {
+      auto tmp = obj[i];
+      file.printf(FMT(" {case (id=%u): id=%u}"), +tmp.first, +tmp.second);
    }
+   return file;
 }
 
 #endif //SWITCH_CASES_CPP

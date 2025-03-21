@@ -131,7 +131,11 @@ struct clef::astNode {
       #pragma endregion cast
 
       void print() const;
-      void printf() const;
+      void writeTo(mcsl::File&) const;
+};
+
+namespace mcsl {
+   inline File& write(File& file, const clef::astNode& obj) { obj.writeTo(file); return file; }
 };
 
 namespace clef {

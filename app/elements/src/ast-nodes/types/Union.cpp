@@ -5,9 +5,10 @@
 
 #include "io.hpp"
 
-void clef::Union::printf() const {
-   __printf("union");
-   mcsl::printf(mcsl::FMT(" {memebers: id=%u}"), +members());
+mcsl::File& mcsl::write(File& file, const clef::Union& obj) {
+   obj.printAs(file, FMT("union"));
+   file.printf(FMT(" {memebers: id=%u}"), +obj.members());
+   return file;
 }
 
 #endif //UNION_CPP

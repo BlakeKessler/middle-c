@@ -73,8 +73,10 @@ struct clef::Expression {
       template<astNode_t T> void setLHS(index<T> lhs) { setLHS(lhs, T::nodeType()); }
       template<astNode_t T> void setRHS(index<T> rhs) { setRHS(rhs, T::nodeType()); }
       template<astNode_t T> void setExtra(index<T> extra) { setExtra(extra, T::nodeType()); }
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::Expr&);
 };
 
 #endif //EXPR_HPP

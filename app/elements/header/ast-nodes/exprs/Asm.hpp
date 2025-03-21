@@ -18,8 +18,10 @@ struct clef::Asm : public clef::Statement {
          //inout vars
       //clobbers
       //labels
+};
 
-      void printf() const;
+namespace mcsl {
+   File& write(File&, const clef::Asm&);
 };
 
 #endif //ASM_HPP

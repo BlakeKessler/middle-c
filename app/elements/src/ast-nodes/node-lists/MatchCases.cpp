@@ -5,12 +5,13 @@
 
 #include "io.hpp"
 
-void clef::MatchCases::printf() const {
-   mcsl::printf(mcsl::FMT("MATCH_CASES:"));
-   for (uint i = 0; i < size(); ++i) {
-      auto tmp = self[i];
-      mcsl::printf(mcsl::FMT(" {case (id=%u): {id=%u}}"), +tmp.first, +tmp.second);
+mcsl::File& mcsl::write(File& file, const clef::MatchCases& obj) {
+   file.printf(FMT("MATCH_CASES:"));
+   for (uint i = 0; i < obj.size(); ++i) {
+      auto tmp = obj[i];
+      file.printf(FMT(" {case (id=%u): {id=%u}}"), +tmp.first, +tmp.second);
    }
+   return file;
 }
 
 #endif //MATCH_CASES_CPP

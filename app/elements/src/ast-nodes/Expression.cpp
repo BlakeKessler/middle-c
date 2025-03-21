@@ -15,22 +15,24 @@ clef::Expression::Expression(OpID op, index<Type> type, index<ArgList> ctorArgs)
       debug_assert(op == OpID::CALL_INVOKE || op == OpID::LIST_INVOKE);
 }
 
-void clef::Expression::printf() const {
-   mcsl::printf(mcsl::FMT("expression: op=%s("), toString(opID()));
-   if (+lhsType()) {
-      mcsl::printf(mcsl::FMT("lhs: %s{id=%u}"), toString(lhsType()), +lhs());
+mcsl::File& mcsl::write(File& file, const clef::Expr& expr) {
+   using namespace clef;
+   file.printf(mcsl::FMT("expression: op=%s("), toString(expr.opID()));
+   if (+expr.lhsType()) {
+      file.printf(mcsl::FMT("lhs: %s{id=%u}"), toString(expr.lhsType()), +expr.lhs());
 
-      if (+rhsType() || +extraType()) { mcsl::printf(mcsl::FMT(", ")); }
+      if (+expr.rhsType() || +expr.extraType()) { file.printf(mcsl::FMT(", ")); }
    }
-   if (+rhsType()) {
-      mcsl::printf(mcsl::FMT("rhs: %s{id=%u}"), toString(rhsType()), +rhs());
+   if (+expr.rhsType()) {
+      file.printf(mcsl::FMT("rhs: %s{id=%u}"), toString(expr.rhsType()), +expr.rhs());
 
-      if (+extraType()) { mcsl::printf(mcsl::FMT(", ")); }
+      if (+expr.extraType()) { file.printf(mcsl::FMT(", ")); }
    }
-   if (+extraType()) {
-      mcsl::printf(mcsl::FMT("extra: %s{id=%u}"), toString(extraType()), +extra());
+   if (+expr.extraType()) {
+      file.printf(mcsl::FMT("extra: %s{id=%u}"), toString(expr.extraType()), +expr.extra());
    }
-   mcsl::printf(mcsl::FMT(")"));
+   file.printf(mcsl::FMT(")"));
+   return file;
 }
 
 #endif //EXPRESSION_CPP

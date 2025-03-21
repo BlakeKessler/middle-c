@@ -315,7 +315,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
    if (operandStack.size() != 1) {
       mcsl::printf(mcsl::FMT("%u excess operand(s)\n"), operandStack.size() - 1);
       for (uint i = 0; i < operandStack.size(); ++i) { //!NOTE: this is for debugging - don't forget to remove
-         tree[operandStack[i]].printf();
+         mcsl::write(mcsl::stdout, tree[operandStack[i]]);
          mcsl::printf(mcsl::FMT("\n"));
       }
       mcsl::stdout.flush();

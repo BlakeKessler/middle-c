@@ -3,8 +3,9 @@
 
 #include "ast-nodes/types/VariadicParameter.hpp"
 
-void clef::VariadicParam::printf() const {
-   __printf("variadic parameter");
+mcsl::File& mcsl::write(File& file, const clef::VariadicParam& obj) {
+   obj.printAs(file, FMT("variadic parameter"));
+   return file;
 }
 
 #endif //VAR_PARAM_CPP

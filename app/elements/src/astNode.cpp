@@ -62,11 +62,12 @@ void clef::astNode::print() const {
    }
 }
 //formatted print
-#define CASE(var) case decltype(var)::nodeType(): var.printf(); break;
-void clef::astNode::printf() const {
-   switch (_nodeType) {
-      case NodeType::NONE: mcsl::printf(mcsl::FMT("NULL NODE")); break;
-      case NodeType::ERROR: mcsl::printf(mcsl::FMT("ERORR NODE")); break;
+#define CASE(var) case decltype(var)::nodeType(): write(file, var); break;
+void clef::astNode::writeTo(mcsl::File& file) const {
+   using namespace clef;
+   switch (nodeType()) {
+      case NodeType::NONE: file.printf(mcsl::FMT("NULL NODE")); break;
+      case NodeType::ERROR: file.printf(mcsl::FMT("ERORR NODE")); break;
       
       MCSL_MAP(CASE, CLEF_ALL_AST_NODE_UNION_MEMBS)
    }
