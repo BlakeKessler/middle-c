@@ -92,21 +92,22 @@ class clef::SyntaxTree {
 //!astTreeNodeBundle - for printf
 template<typename T> struct clef::astTNB {
    const SyntaxTree& tree;
-   const T& obj;
+   const index<const T> obj;
 };
 
-#define __DEF_AST_TNB(T) template<> struct clef::astTNB<clef::T>;
 #include "MAP_MACRO.h"
-MCSL_MAP(__DEF_AST_TNB, CLEF_ALL_AST_NODE_T)
-#include "MAP_MACRO_UNDEF.h"
-#undef __DEF_AST_TNB
+#define __DEF_TNB_WRITEF(T) uint writef(File& file, const clef::astTNB<clef::T> obj, char mode, FmtArgs args);
 
 namespace mcsl {
    inline File& write(File& file, const clef::SyntaxTree& obj) { obj.printf(file); return file; }
 
    uint writef(File& file, const clef::SyntaxTree& tree, char mode, FmtArgs args);
-   template<typename T> uint writef(File& file, const clef::astTNB<T> obj, char mode, FmtArgs args);
+   
+   MCSL_MAP(__DEF_TNB_WRITEF, CLEF_ALL_AST_NODE_T)
 };
+
+#undef __DEF_TNB_WRITEF
+#include "MAP_MACRO_UNDEF.h"
 
 #pragma region inlinesrc
 

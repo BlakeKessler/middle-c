@@ -28,6 +28,7 @@ COMPILE := $(COMPILER) $(FLAGS) $(addprefix -I, $(MODULES) $(filter %/header, $(
 .PHONY: clean
 clean:
 	rm -rf _build
+
 #set up directory structure
 .PHONY: setup
 setup:
