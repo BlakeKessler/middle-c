@@ -6,7 +6,7 @@
 #include "pretty-print.hpp"
 #include "io.hpp"
 
-#define MAKE_TNB(expr) clef::astTNB{obj.tree, expr}
+#define TNB(expr) clef::astTNB{obj.tree, expr}
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Literal> obj, char mode, FmtArgs fmt) {
    using namespace clef;
@@ -51,7 +51,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Literal> obj, char 
          case LitType::FORMAT: [[fallthrough]];
          case LitType::REGEX: charsPrinted += writef(file, (const str_slice)lit, 'b', fmt); break;
 
-         case LitType::TYPEID: charsPrinted += writef(file, astTNB<Type>{obj.tree, (clef::index<const Type>)lit}, 'b', fmt);
+         case LitType::TYPEID: charsPrinted += writef(file, TNB((clef::index<const Type>)lit), 'b', fmt);
       }
       return charsPrinted;
    } else {
@@ -69,113 +69,384 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::If> obj, char mode,
    }
    const If& ifstmt = obj.tree[obj.obj];
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      return file.printf(FMT("if (%s) %s else %s;"), MAKE_TNB(ifstmt.condition()), MAKE_TNB(ifstmt.procedure()), MAKE_TNB(ifstmt.elseStmt())); //!TODO: make this handle null indices in a more human-readable way (EX: prevent else statements from printing as `else if () {...} ;`)
+      if (!ifstmt.condition()) { //else
+         debug_assert(!ifstmt.elseStmt());
+         return file.printf(FMT("%s;"), TNB(ifstmt.procedure()));
+      }
+      if (ifstmt.elseStmt()) { //if with else
+         return file.printf(FMT("if (%s) %s else %s"), TNB(ifstmt.condition()), TNB(ifstmt.procedure()), TNB(ifstmt.elseStmt()));
+      } else { //if without else
+         return file.printf(FMT("if (%s) %s;"), TNB(ifstmt.condition()), TNB(ifstmt.procedure()));
+      }
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
-      return file.printf(FMT("%b%b%b"), MAKE_TNB(ifstmt.condition()), MAKE_TNB(ifstmt.procedure()), MAKE_TNB(ifstmt.elseStmt()));
+      return file.printf(FMT("%b%b%b"), TNB(ifstmt.condition()), TNB(ifstmt.procedure()), TNB(ifstmt.elseStmt()));
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<If>"), mode);
    }
    UNREACHABLE;
 }
 
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ForLoop> obj, char mode, FmtArgs fmt) {
+   using namespace clef;
+   if (!obj.obj) {
+      return 0;
+   }
+   const ForLoop& loop = obj.tree[obj.obj];
+   if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
+      return file.printf(FMT("for (%s) %s;"), TNB(loop.params()), TNB(loop.procedure()));
+   } else if ((mode | CASE_BIT) == 'b') { //print in binary format
+      return file.printf(FMT("%b%b"), TNB(loop.params()), TNB(loop.procedure()));
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<ForLoop>"), mode);
+   }
+   UNREACHABLE;
+}
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ForLoopParams> obj, char mode, FmtArgs fmt) {
+   using namespace clef;
+   if (!obj.obj) {
+      return 0;
+   }
+   const ForLoopParams& params = obj.tree[obj.obj];
+   if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
+      return file.printf(FMT("%s; %s; %s"), TNB(params.decl()), TNB(params.condition()), TNB(params.increment()));
+   } else if ((mode | CASE_BIT) == 'b') { //print in binary format
+      return file.printf(FMT("%b%b%b"), TNB(params.decl()), TNB(params.condition()), TNB(params.increment()));
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<ForLoopParams>"), mode);
+   }
+   UNREACHABLE;
+}
+
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ForeachLoop> obj, char mode, FmtArgs fmt) {
+   using namespace clef;
+   if (!obj.obj) {
+      return 0;
+   }
+   const ForeachLoop& loop = obj.tree[obj.obj];
+   if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
+      return file.printf(FMT("foreach (%s) %s;"), TNB(loop.params()), TNB(loop.procedure()));
+   } else if ((mode | CASE_BIT) == 'b') { //print in binary format
+      return file.printf(FMT("%b%b"), TNB(loop.params()), TNB(loop.procedure()));
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<ForeachLoop>"), mode);
+   }
+   UNREACHABLE;
+}
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ForeachLoopParams> obj, char mode, FmtArgs fmt) {
+   using namespace clef;
+   if (!obj.obj) {
+      return 0;
+   }
+   const ForeachLoopParams& params = obj.tree[obj.obj];
+   if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
+      return file.printf(FMT("%s : %s"), TNB(params.iterator()), TNB(params.target()));
+   } else if ((mode | CASE_BIT) == 'b') { //print in binary format
+      return file.printf(FMT("%b%b"), TNB(params.iterator()), TNB(params.target()));
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<ForeachLoopParams>"), mode);
+   }
+   UNREACHABLE;
+}
+
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::WhileLoop> obj, char mode, FmtArgs fmt) {
+   using namespace clef;
+   if (!obj.obj) {
+      return 0;
+   }
+   const WhileLoop& loop = obj.tree[obj.obj];
+   if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
+      return file.printf(FMT("while (%s) %s;"), TNB(loop.condition()), TNB(loop.procedure()));
+   } else if ((mode | CASE_BIT) == 'b') { //print in binary format
+      return file.printf(FMT("%b%b"), TNB(loop.condition()), TNB(loop.procedure()));
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<WhileLoop>"), mode);
+   }
+   UNREACHABLE;
+}
+
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::DoWhileLoop> obj, char mode, FmtArgs fmt) {
+   using namespace clef;
+   if (!obj.obj) {
+      return 0;
+   }
+   const DoWhileLoop& loop = obj.tree[obj.obj];
+   if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
+      return file.printf(FMT("do %s while (%s);"), TNB(loop.procedure()), TNB(loop.condition()));
+   } else if ((mode | CASE_BIT) == 'b') { //print in binary format
+      return file.printf(FMT("%b%b"), TNB(loop.procedure()), TNB(loop.condition()));
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<DoWhileLoop>"), mode);
+   }
+   UNREACHABLE;
+}
+
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Switch> obj, char mode, FmtArgs fmt) {
+   using namespace clef;
+   if (!obj.obj) {
+      return 0;
+   }
+   const Switch& switchstmt = obj.tree[obj.obj];
+   if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
+      return file.printf(FMT("switch (%s) %s;"), TNB(switchstmt.condition()), TNB(switchstmt.cases()));
+   } else if ((mode | CASE_BIT) == 'b') { //print in binary format
+      return file.printf(FMT("%b%b"), TNB(switchstmt.condition()), TNB(switchstmt.cases()));
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Switch>"), mode);
+   }
+   UNREACHABLE;
+}
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Match> obj, char mode, FmtArgs fmt) {
+   using namespace clef;
+   if (!obj.obj) {
+      return 0;
+   }
+   const Match& matchstmt = obj.tree[obj.obj];
+   if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
+      return file.printf(FMT("switch (%s) %s;"), TNB(matchstmt.condition()), TNB(matchstmt.cases()));
+   } else if ((mode | CASE_BIT) == 'b') { //print in binary format
+      return file.printf(FMT("%b%b"), TNB(matchstmt.condition()), TNB(matchstmt.cases()));
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Match>"), mode);
+   }
+   UNREACHABLE;
+}
+
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TryCatch> obj, char mode, FmtArgs fmt) {
+   using namespace clef;
+   if (!obj.obj) {
+      return 0;
+   }
+   const TryCatch& trycatch = obj.tree[obj.obj];
+   if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
+      return file.printf(FMT("try %s catch (%s) %s;"), TNB(trycatch.procedure()), TNB(trycatch.err()), TNB(trycatch.errHandler()));
+   } else if ((mode | CASE_BIT) == 'b') { //print in binary format
+      return file.printf(FMT("%b%b%b"), TNB(trycatch.procedure()), TNB(trycatch.err()), TNB(trycatch.errHandler()));
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<TryCatch>"), mode);
+   }
+   UNREACHABLE;
+}
+
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Decl> obj, char mode, FmtArgs fmt) {
+   using namespace clef;
+   if (!obj.obj) {
+      return 0;
+   }
+   const Decl& decl = obj.tree[obj.obj];
+   if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
+      return file.printf(FMT("let %s %s"), TNB(decl.type()), TNB(decl.name()));
+   } else if ((mode | CASE_BIT) == 'b') { //print in binary format
+      return file.printf(FMT("%b%b"), TNB(decl.type()), TNB(decl.name()));
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Decl>"), mode);
+   }
+   UNREACHABLE;
+}
+
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Asm> obj, char mode, FmtArgs fmt) {
+   clef::throwError(clef::ErrCode::PARSER_NOT_IMPLEMENTED, FMT("inline ASM is not implemented yet"));
+}
+
 #pragma endregion exprs
 
-//!TODO: convert all of these into writef implementations
-/*
-mcsl::File& mcsl::write(File& file, const clef::Expr& expr) {
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Stmt> obj, char mode, FmtArgs fmt) {
+   return file.printf(FMT("%s;"), TNB((clef::index<const clef::Expr>(obj.obj))));
+}
+
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mode, FmtArgs fmt) { //!TODO: add parens if relative precedence indicates that it would be required
    using namespace clef;
-   file.printf(mcsl::FMT("expression: op=%s("), toString(expr.opID()));
-   if (+expr.lhsType()) {
-      file.printf(mcsl::FMT("lhs: %s{id=%u}"), toString(expr.lhsType()), +expr.lhs());
+   using enum OpID;
+   if (!obj.obj) {
+      return 0;
+   }
+   #define TNB_AST(expr) TNB((clef::index<const clef::astNode>)expr)
+   #define BIN(op) file.printf(FMT("%s" op "%s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()))
+   const clef::Expr& expr = obj.tree[obj.obj];
+   if ((mode | mcsl::CASE_BIT) == 's') {
+      switch (expr.opID()) {
+         case NULL:
+            debug_assert(!expr.rhs() && !expr.extra());
+            return file.printf(FMT("%s"), TNB_AST(expr.lhs()));
 
-      if (+expr.rhsType() || +expr.extraType()) { file.printf(mcsl::FMT(", ")); }
-   }
-   if (+expr.rhsType()) {
-      file.printf(mcsl::FMT("rhs: %s{id=%u}"), toString(expr.rhsType()), +expr.rhs());
+         case ESCAPE: return file.printf(FMT("\\"));
+         case EOS   : return file.printf(FMT(";"));
 
-      if (+expr.extraType()) { file.printf(mcsl::FMT(", ")); }
-   }
-   if (+expr.extraType()) {
-      file.printf(mcsl::FMT("extra: %s{id=%u}"), toString(expr.extraType()), +expr.extra());
-   }
-   file.printf(mcsl::FMT(")"));
-   return file;
-}
-mcsl::File& mcsl::write(File& file, const clef::ForeachLoopParams obj) {
-   file.printf(mcsl::FMT("FOREACH_PARAMS (id=%u : id=%u)"), +obj.iterator(), +obj.target());
-   return file;
-}
-mcsl::File& mcsl::write(File& file, const clef::ForLoopParams& obj) {
-   mcsl::printf(mcsl::FMT("FOR_PARAMS: (id=%u; id=%u; id=%u)"), +obj.decl(), +obj.condition(), +obj.increment());
-   return file;
-}
-mcsl::File& mcsl::write(File& file, const clef::Function& obj) {
-   obj.printAs(file, FMT("function"));
-   file.printf(FMT(" - (signature id=%u) {procedure id=%u}"), +obj.signature(), +obj.procedure());
-   return file;
-}
-bool clef::Identifier::operator==(const Identifier& other) const {
-   if (+_keywordID || +other._keywordID) {
-      return _keywordID == other._keywordID;
-   }
-   return sameName(other) && sameScope(other);
-}
-void clef::Identifier::__printName(mcsl::File& file) const {
-   file.printf(mcsl::FMT("\033[4m"));
-   if (+_keywordID) {
-      file.printf(mcsl::FMT("%s"), toString(_keywordID));
-   } else {
-      file.printf(mcsl::FMT("%s"), _name_size, _name_buf);
-   }
-   file.printf(mcsl::FMT("\033[24m"));
-}
-void clef::Identifier::printAs(mcsl::File& file, const mcsl::str_slice nodetype) const {
-   file.printf(mcsl::FMT("%s: "), nodetype);
-   __printName(file);
-   file.printf(mcsl::FMT(" (scope: id=%u)"), +scopeName());
-}
-mcsl::File& mcsl::write(File& file, const clef::Identifier& obj) {
-   obj.printAs(file, FMT("identifier"));
-   return file;
-}
-mcsl::File& mcsl::write(mcsl::File& file, const clef::Literal& obj) {
-   using namespace clef;
-   file.printf(mcsl::FMT("%s literal: "), toString(obj.type()));
-   switch (obj.type()) {
-      case LitType::NONE: break;
+         case STRING       : UNREACHABLE;
+         case CHAR         : UNREACHABLE;
+         case INTERP_STRING: UNREACHABLE;
 
-      case LitType::POINTER: file.printf(mcsl::FMT("%r"), (const void*)obj); break;
+         case LINE_CMNT       : UNREACHABLE;
+         case BLOCK_CMNT      : UNREACHABLE;
+         case BLOCK_CMNT_OPEN : UNREACHABLE;
+         case BLOCK_CMNT_CLOSE: UNREACHABLE;
 
-      case LitType::UINT: file.printf(mcsl::FMT("%u"), (ulong)obj); break;
-      case LitType::SINT: file.printf(mcsl::FMT("%i"), (slong)obj); break;
-      case LitType::FLOAT: file.printf(mcsl::FMT("%f"), (flong)obj); break;
+         case CALL_INVOKE: //parens 
+            TODO;
+         case SUBSCRIPT_INVOKE: //square brackets 
+            TODO;
+         case LIST_INVOKE: //curly brackets 
+            TODO;
+         case SPECIALIZER_INVOKE: //triangle brackets 
+            TODO;
 
-      case LitType::CHAR: file.printf(mcsl::FMT("%c"), (char)obj); break;
-      case LitType::STRING: [[fallthrough]];
-      case LitType::INTERP_STR: [[fallthrough]];
-      case LitType::FORMAT: [[fallthrough]];
-      case LitType::REGEX: file.printf(mcsl::FMT("%s"), (const str_slice&)obj); break;
+         case CALL_OPEN        : UNREACHABLE;
+         case CALL_CLOSE       : UNREACHABLE;
+         case SUBSCRIPT_OPEN   : UNREACHABLE;
+         case SUBSCRIPT_CLOSE  : UNREACHABLE;
+         case LIST_OPEN        : UNREACHABLE;
+         case LIST_CLOSE       : UNREACHABLE;
+         case SPECIALIZER_OPEN : UNREACHABLE;
+         case SPECIALIZER_CLOSE: UNREACHABLE;
 
-      case LitType::TYPEID: file.printf(mcsl::FMT("%u"), (clef::index<const Type>)obj); break;
+         case CHAR_INVOKE      : UNREACHABLE;
+         case STR_INVOKE       : UNREACHABLE;
+
+         case INTERP_STR_INVOKE: TODO;
+         case TERNARY_INVOKE   :
+            #define __exprI clef::index<const clef::Expr>
+            return file.printf(FMT("%s ? %s : %s"), TNB((__exprI)expr.lhs()), TNB((__exprI)expr.rhs()), TNB((__exprI)expr.extra()));
+            #undef __exprI
+
+         case PREPROCESSOR: TODO;
+
+         case SCOPE_RESOLUTION: UNREACHABLE;
+
+         case INC: //increment
+            if (expr.lhs()) { //!NOTE: might have these two backwards
+               return file.printf(FMT("%s++"), TNB_AST(expr.lhs()));
+            } else {
+               debug_assert(expr.rhs());
+               return file.printf(FMT("++%s"), TNB_AST(expr.rhs()));
+            }
+            UNREACHABLE;
+         case DEC: //decrement
+         if (expr.lhs()) { //!NOTE: might have these two backwards
+            return file.printf(FMT("%s--"), TNB_AST(expr.lhs()));
+         } else {
+            debug_assert(expr.rhs());
+            return file.printf(FMT("--%s"), TNB_AST(expr.rhs()));
+         }
+         UNREACHABLE;
+
+         case MEMBER_ACCESS    : //.
+            debug_assert(expr.lhs());
+            debug_assert(expr.rhs());
+            return BIN(".");
+         case PTR_MEMBER_ACCESS: // ->
+            debug_assert(expr.lhs());
+            debug_assert(expr.rhs());
+            return BIN("->");
+         case METHOD_PTR       : // .*
+            debug_assert(expr.lhs());
+            debug_assert(expr.rhs());
+            return BIN(".*");
+         case ARROW_METHOD_PTR : // ->*
+            debug_assert(expr.lhs());
+            debug_assert(expr.rhs());
+            return BIN("->*");
+
+         case RANGE : return BIN(".."); //relies on printing null nodes being a no-op (not an error)
+         case SPREAD: return BIN("..."); //relies on printing null nodes being a no-op (not an error)
+         
+         case ADD: return BIN(" + ");
+         case SUB: return BIN(" - ");
+         case MUL: return BIN(" * ");
+         case DIV: return BIN(" / ");
+         case MOD: return BIN(" %% ");
+         case EXP: return BIN(" ^^ ");
+         
+         case LOGICAL_NOT: return file.printf(FMT("!%s"), TNB_AST(expr.lhs()));
+         case LOGICAL_AND: return BIN(" && ");
+         case LOGICAL_OR : return BIN(" || ");
+
+         case BIT_NOT    : return file.printf(FMT("~%s"), TNB_AST(expr.lhs()));
+         case BIT_AND    : return BIN(" & ");
+         case BIT_OR     : return BIN(" | ");
+         case BIT_XOR    : return BIN(" ^ ");
+         case SHIFT_LEFT : return BIN(" << ");
+         case SHIFT_RIGHT: return BIN(" >> ");
+         
+         
+         case UNIQUE_PTR: TODO;
+         case SHARED_PTR: TODO;
+         case WEAK_PTR  : TODO;
+         case ITERATOR  : TODO;
+         
+
+         case THREE_WAY_COMP: return BIN(" <=> ");
+         case LESSER        : return BIN(" < ");
+         case GREATER       : return BIN(" > ");
+         case LESSER_OR_EQ  : return BIN(" <= ");
+         case GREATER_OR_EQ : return BIN(" >= ");
+
+         case IS_EQUAL  : return BIN(" == ");
+         case IS_UNEQUAL: return BIN(" != ");
+         // case IS_EQUAL_STRICT  : return BIN(" === ");
+         // case IS_UNEQUAL_STRICT: return BIN(" !== ");
+
+         case COALESCE: return BIN(" ?? "); //null coalescing
+
+         case INLINE_IF  : UNREACHABLE; //ternary operator opener
+         case INLINE_ELSE: UNREACHABLE; //ternary operator closer
+
+         case ASSIGN: return BIN(" = ");
+         // case CONST_ASSIGN: return BIN(" := ");
+         case ADD_ASSIGN: return BIN(" += ");
+         case SUB_ASSIGN: return BIN(" -= ");
+         case MUL_ASSIGN: return BIN(" *= ");
+         case DIV_ASSIGN: return BIN(" /= ");
+         case MOD_ASSIGN: return BIN(" %%= ");
+         case EXP_ASSIGN: return BIN(" ^^= ");
+         case SHL_ASSIGN: return BIN(" <<= ");
+         case SHR_ASSIGN: return BIN(" >>= ");
+         case AND_ASSIGN: return BIN(" &= ");
+         case XOR_ASSIGN: return BIN(" ^= ");
+         case OR_ASSIGN : return BIN(" |= ");
+         case COALESCE_ASSIGN: return BIN(" ??= ");
+
+         case COMMA: return BIN(", ");
+
+
+
+         //keyword pseudo-operators
+         case FOR      : return writef(file, clef::astTNB<clef::ForLoop>    (obj.tree, +obj.obj), mode, fmt);
+         case FOREACH  : return writef(file, clef::astTNB<clef::ForeachLoop>(obj.tree, +obj.obj), mode, fmt);
+         case WHILE    : return writef(file, clef::astTNB<clef::WhileLoop>  (obj.tree, +obj.obj), mode, fmt);
+         case DO_WHILE : return writef(file, clef::astTNB<clef::DoWhileLoop>(obj.tree, +obj.obj), mode, fmt);
+         case IF       : return writef(file, clef::astTNB<clef::If>         (obj.tree, +obj.obj), mode, fmt);
+         case SWITCH   : return writef(file, clef::astTNB<clef::Switch>     (obj.tree, +obj.obj), mode, fmt);
+         case MATCH    : return writef(file, clef::astTNB<clef::Match>      (obj.tree, +obj.obj), mode, fmt);
+         case TRY_CATCH: return writef(file, clef::astTNB<clef::TryCatch>   (obj.tree, +obj.obj), mode, fmt);
+         case ASM      : return writef(file, clef::astTNB<clef::Asm>        (obj.tree, +obj.obj), mode, fmt);
+         case DECL     : return writef(file, clef::astTNB<clef::Decl>       (obj.tree, +obj.obj), mode, fmt);
+
+         case GOTO: return file.printf(FMT("goto %s;"), TNB_AST(expr.lhs()));
+         case GOTO_CASE: return file.printf(FMT("goto case %s;"), TNB_AST(expr.lhs()));
+
+         case BREAK   : return file.printf(FMT("break;"));
+         case CONTINUE: return file.printf(FMT("continue;"));
+         
+         case THROW        : return file.printf(FMT("throw %s;"), TNB_AST(expr.lhs()));
+         case ASSERT       : return file.printf(FMT("assert %s;"), TNB_AST(expr.lhs()));
+         case DEBUG_ASSERT : return file.printf(FMT("debug_assert %s;"), TNB_AST(expr.lhs()));
+         case STATIC_ASSERT: return file.printf(FMT("static_assert %s;"), TNB_AST(expr.lhs()));
+         case ASSUME       : return file.printf(FMT("assume %s;"), TNB_AST(expr.lhs()));
+         case RETURN       : return file.printf(FMT("return %s;"), TNB_AST(expr.lhs()));
+
+         case ALIAS:
+            if (expr.rhs()) {
+               return file.printf(FMT("using %s = %s;"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
+            } else {
+               return file.printf(FMT("using %s;"), TNB_AST(expr.lhs()));
+            }
+      }
+   } else if ((mode | mcsl::CASE_BIT) == 'b') {
+      TODO;
    }
-   return file;
+   #undef BIN
+   #undef TNB_AST
 }
-mcsl::File& mcsl::write(File& file, const clef::Scope& obj) {
-   file.printf(FMT("scope:"));
-   for (uint i = 0; i < obj.size(); ++i) {
-      file.printf(FMT(" id=%u;"), +obj[i]);
-   }
-   return file;
-}
-mcsl::File& mcsl::write(File& file, const clef::Type& obj) {
-   obj.printAs(file, FMT("type"));
-   return file;
-}
-mcsl::File& mcsl::write(File& file, const clef::Variable& obj) {
-   obj.printAs(file, FMT("variable"));
-   file.printf(mcsl::FMT(": (type id=%u) = (value id=%u)"), +obj.type(), +obj.val());
-   return file;
-}
-*/
+
+#undef TNB
 
 #endif //CLEF_AST_PRINTF_CPP

@@ -230,6 +230,7 @@ constexpr const mcsl::str_slice clef::toString(const OpID op) {
       CASE(ASSERT, "ASSERT");
       CASE(DEBUG_ASSERT, "DEBUG_ASSERT");
       CASE(STATIC_ASSERT, "STATIC_ASSERT");
+      CASE(ASSUME, "ASSUME");
       CASE(RETURN, "RETURN");
 
       CASE(ALIAS, "ALIAS");

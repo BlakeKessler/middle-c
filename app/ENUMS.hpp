@@ -272,6 +272,7 @@ namespace clef {
       ASSERT,
       DEBUG_ASSERT,
       STATIC_ASSERT,
+      ASSUME,
       RETURN,
 
       ALIAS,
