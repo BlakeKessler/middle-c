@@ -7,6 +7,10 @@
 #include "io.hpp"
 
 #define TNB(expr) clef::astTNB{obj.tree, expr}
+#define TNB_AST(expr) TNB((clef::index<const clef::astNode>)expr)
+#define TNB_CAST(T) clef::astTNB<clef::T>(obj.tree, +obj.i)
+
+//!TODO: probably shouldn't just return 0 without doing anything when printing with `%b`
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Literal> obj, char mode, FmtArgs fmt) {
    using namespace clef;
@@ -258,7 +262,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Stmt> obj, char mod
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Stmt>"), mode);
    }
    UNREACHABLE;
-   
 }
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mode, FmtArgs fmt) { //!TODO: add parens if relative precedence indicates that it would be required
@@ -267,8 +270,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
    if (!obj.i) {
       return 0;
    }
-   #define TNB_AST(expr) TNB((clef::index<const clef::astNode>)expr)
-   #define TNB_CAST(T) clef::astTNB<clef::T>(obj.tree, +obj.i)
+   
    #define BIN(op) file.printf(FMT("%s" op "%s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()))
    const clef::Expr& expr = obj.tree[obj.i];
    if ((mode | mcsl::CASE_BIT) == 's') {
@@ -471,10 +473,55 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
       }
    }
    #undef BIN
-   #undef TNB_CAST
-   #undef TNB_AST
 }
 
+
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Scope> obj, char mode, FmtArgs fmt) {
+   if ((mode | mcsl::CASE_BIT) == 's') {
+      return file.printf(FMT("{\n%s\n}"), TNB((clef::index<const clef::StmtSeq>(obj.i))));
+   } else if ((mode | mcsl::CASE_BIT) == 'b') {
+      return writef(file, TNB((clef::index<const clef::StmtSeq>(obj.i))), mode, fmt);
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Scope>"), mode);
+   }
+   UNREACHABLE;
+}
+
+
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, char mode, FmtArgs fmt) {
+   using namespace clef;
+   if (!obj.i) {
+      return 0;
+   }
+   const Identifier& iden = obj.tree[obj.i];
+   if ((mode | mcsl::CASE_BIT) == 's') {
+      if (+iden.keywordID()) { //keyword
+         return file.printf(FMT("%s"), toString(iden.keywordID()));
+      }
+
+      uint charsPrinted = 0;
+      if (iden.scopeName()) {
+         charsPrinted += file.printf(FMT("%s::"), TNB(iden.scopeName()));
+      }
+      charsPrinted += file.printf(FMT("%s"), iden.name());
+      if (iden.specializer()) {
+         charsPrinted += file.printf(FMT("<%s>"), iden.specializer());
+      }
+      return charsPrinted;
+   } else if ((mode | mcsl::CASE_BIT) == 'b') {
+      return writef(file, TNB((clef::index<const clef::StmtSeq>(obj.i))), mode, fmt);
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Scope>"), mode);
+   }
+   UNREACHABLE;
+}
+
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Type> obj, char mode, FmtArgs fmt) {
+   return writef(file, TNB_CAST(Identifier), mode, fmt);
+}
+
+#undef TNB_CAST
+#undef TNB_AST
 #undef TNB
 
 #endif //CLEF_AST_PRINTF_CPP
