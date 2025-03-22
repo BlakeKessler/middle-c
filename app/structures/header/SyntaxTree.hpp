@@ -92,7 +92,7 @@ class clef::SyntaxTree {
 //!astTreeNodeBundle - for printf
 template<typename T> struct clef::astTNB {
    const SyntaxTree& tree;
-   const index<const T> obj;
+   const index<const T> i;
 };
 
 #include "MAP_MACRO.h"
