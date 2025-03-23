@@ -81,6 +81,7 @@ namespace clef {
    class SymbolTable;
    class SyntaxTree;
       template<typename T> struct astTNB; //astTreeNodeBundle
+      struct indenter;
 
    //classes for phases of compilation
    class Lexer;
@@ -91,6 +92,8 @@ template<typename T> struct clef::index {
    uint i;
 
    index(const uint n = {}):i{n} {}
+   // index(index<T> n):i{+n} {}
+   // index(index<const T> n):i{+n} {}
 
    operator uint&() { return i; }
    operator uint() const { return i; }
@@ -98,6 +101,7 @@ template<typename T> struct clef::index {
    uint operator+() const { return i; }
 
    operator index<const T>() const { return i; }
+   index<const T> toConst() const { return i; }
 
    template<typename parent_t> requires (mcsl::is_t<T, parent_t>) operator index<parent_t>() { return i; }
    template<typename parent_t> requires (mcsl::is_t<T, parent_t>) operator index<const parent_t>() const { return i; }

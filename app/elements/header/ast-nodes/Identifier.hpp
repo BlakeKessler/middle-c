@@ -12,7 +12,10 @@ struct clef::Identifier {
       const uint _name_size;
       index<Identifier> _scopeName;
       index<SpecList> _specializer;
-      const KeywordID _keywordID;
+      KeywordID _keywordID;
+   protected: //!TODO: use these
+      FundTypeID _id;
+      uint8 pad[2];
 
    protected:
       void __printName(mcsl::File& file) const;
@@ -31,7 +34,7 @@ struct clef::Identifier {
       index<Identifier>& scopeName() { return _scopeName; }
       index<const Identifier> scopeName() const { return _scopeName; }
 
-      const mcsl::str_slice name() const { return {const_cast<char*>(_name_buf), _name_size}; } //unqualified name
+      const mcsl::str_slice name() const { return mcsl::str_slice::make(_name_buf, _name_size); } //unqualified name
       KeywordID keywordID() const { return _keywordID; }
 
       inline bool sameScope(const Identifier& other) const { return _scopeName == other._scopeName; }

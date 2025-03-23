@@ -58,6 +58,7 @@ class clef::SyntaxTree {
       const astNode& getNode(const uint i) const { assume(i); return _buf[i]; }
 
       template<typename T> const T& operator[](index<const T> i) const { assume(i); return *(self + i); }
+      template<typename T> const T& operator[](index<T> i) const { return self[i.toConst()]; }
       template<typename T> T& operator[](index<T> i) { assume(i); return *(self + i); }
 
       template<astNode_t T> const T* operator+(index<const T> i) const { return (const T*)(_buf + i); }
@@ -89,20 +90,37 @@ class clef::SyntaxTree {
       index<ObjTypeSpec> allocObjTypeSpec() { return _objSpecBuf.emplace_back() - _objSpecBuf.begin(); }
 };
 
+//!quick little struct to indent when printing newlines in a `printf` call
+struct clef::indenter {
+   static constexpr uint indentSize = 3;
+   
+   uint indents;
+
+   operator uint() const { return indents; }
+   operator uint&() { return indents; }
+};
+
 //!astTreeNodeBundle - for printf
 template<typename T> struct clef::astTNB {
    const SyntaxTree& tree;
-   const index<const T> i;
+   index<const T> i;
+   indenter indents = 0;
+
+   const T& get() const { return tree[i]; }
+   const T& operator*() const { return tree[i]; }
+   const T* operator->() const { return tree + i; }
+
+   operator bool() const { return i; }
 };
 
 #include "MAP_MACRO.h"
 #define __DEF_TNB_WRITEF(T) uint writef(File& file, const clef::astTNB<clef::T> obj, char mode, FmtArgs args);
 
 namespace mcsl {
-   inline File& write(File& file, const clef::SyntaxTree& obj) { obj.printf(file); return file; }
+   uint writef(File& file, const clef::indenter i, char mode, FmtArgs args);
 
+   inline File& write(File& file, const clef::SyntaxTree& obj) { obj.printf(file); return file; }
    uint writef(File& file, const clef::SyntaxTree& tree, char mode, FmtArgs args);
-   
    MCSL_MAP(__DEF_TNB_WRITEF, CLEF_ALL_AST_NODE_T)
 };
 
