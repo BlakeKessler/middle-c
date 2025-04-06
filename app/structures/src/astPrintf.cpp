@@ -25,6 +25,7 @@ uint mcsl::writef(mcsl::File& file, const clef::indenter i, char mode, FmtArgs f
 #define TNB_INDENT(expr) clef::astTNB{obj.tree, expr, obj.indents + 1}
 #define TNB_AST(expr) TNB((clef::index<const clef::astNode>)expr)
 #define TNB_CAST(T) clef::astTNB<clef::T>(obj.tree, +obj.i, obj.indents)
+#define TNB_CAST_INDENT(T) TNB_INDENT(clef::index<const clef::T>(obj.i))
 
 //!TODO: probably shouldn't just return 0 without doing anything when printing with `%b`
 
@@ -71,7 +72,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Literal> obj, char 
          case LitType::FORMAT: [[fallthrough]];
          case LitType::REGEX: return file.printf(FMT("\"%s\""), (const str_slice)lit);
 
-         case LitType::TYPEID: return writef(file, astTNB<Type>{obj.tree, (clef::index<const Type>)lit}, mode, fmt);
+         case LitType::TYPEID: return writef(file, astTNB<Type>{obj.tree, (clef::index<const Type>)lit, obj.indents}, mode, fmt);
       }
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       uint charsPrinted = writef(file, +lit.type(), 'b', fmt); //write literal type
@@ -326,13 +327,13 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case BLOCK_CMNT_OPEN : UNREACHABLE;
          case BLOCK_CMNT_CLOSE: UNREACHABLE;
 
-         case CALL_INVOKE: //parens 
+         case CALL_INVOKE: //parens
             TODO;
-         case SUBSCRIPT_INVOKE: //square brackets 
+         case SUBSCRIPT_INVOKE: //square brackets
             TODO;
-         case LIST_INVOKE: //curly brackets 
+         case LIST_INVOKE: //curly brackets
             TODO;
-         case SPECIALIZER_INVOKE: //triangle brackets 
+         case SPECIALIZER_INVOKE: //triangle brackets
             TODO;
 
          case CALL_OPEN        : UNREACHABLE;
@@ -542,11 +543,11 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
       debug_assert(iden.name().size() || !iden.name().data());
       charsPrinted += file.printf(FMT("%s"), iden.name());
       if (iden.specializer()) {
-         charsPrinted += file.printf(FMT("<%s>"), iden.specializer());
+         charsPrinted += file.printf(FMT("<%s>"), TNB(iden.specializer()));
       }
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
-      return writef(file, TNB((clef::index<const clef::StmtSeq>(obj.i))), mode, fmt);
+      return writef(file, TNB_CAST(StmtSeq), mode, fmt);
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Scope>"), mode);
    }
@@ -564,9 +565,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Variable> obj, char
    }
    const Variable& var = *obj;
    if ((mode | CASE_BIT) == 's') {
-      return file.printf(FMT("%s %s"), var.type(), TNB_CAST(Identifier));
+      return file.printf(FMT("%s %s"), TNB(var.type()), TNB_CAST(Identifier));
    } else if ((mode | CASE_BIT) == 'b') {
-      return file.printf(FMT("%b%b"), var.type(), TNB_CAST(Identifier));
+      return file.printf(FMT("%b%b"), TNB(var.type()), TNB_CAST(Identifier));
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Variable>"), mode);
    }
@@ -580,9 +581,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Function> obj, char
    }
    const Function& func = *obj;
    if ((mode | CASE_BIT) == 's') {
-      return file.printf(FMT("func %s%s %s;"), TNB_CAST(Identifier), func.signature(), func.procedure());
+      return file.printf(FMT("func %s%s %s;"), TNB_CAST(Identifier), TNB(func.signature()), TNB(func.procedure()));
    } else if ((mode | CASE_BIT) == 'b') {
-      return file.printf(FMT("%b%b%b"), TNB_CAST(Identifier), func.signature(), func.procedure());
+      return file.printf(FMT("%b%b%b"), TNB_CAST(Identifier), TNB(func.signature()), TNB(func.procedure()));
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Function>"), mode);
    }
@@ -597,7 +598,15 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ArgList> obj, char 
       return 0;
    }
    if ((mode | CASE_BIT) == 's' || (mode | CASE_BIT) == 'b') {
-      return writef(file, obj->span(), mode, fmt);
+      auto span = obj->span();
+      uint charsPrinted = 0;
+      for (uint i = 0; i < span.size();) {
+         charsPrinted += writef(file, TNB(span[i]), mode, fmt);
+         if (++i < span.size() && (mode | CASE_BIT) == 's' && !fmt.altMode) {
+            charsPrinted += writef(file, FMT(", "), mode, fmt);
+         }
+      }
+      return charsPrinted;
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<ArgList>"), mode);
    }
@@ -609,8 +618,17 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ParamList> obj, cha
       return 0;
    }
    if ((mode | CASE_BIT) == 's' || (mode | CASE_BIT) == 'b') {
-      return writef(file, obj->span(), mode, fmt);
-   } else {
+      auto span = obj->span();
+      uint charsPrinted = 0;
+      for (uint i = 0; i < span.size();) {
+         charsPrinted += writef(file, TNB(span[i]), mode, fmt);
+         if (++i < span.size() && (mode | CASE_BIT) == 's' && !fmt.altMode) {
+            charsPrinted += writef(file, FMT(", "), mode, fmt);
+         }
+      }
+      return charsPrinted;
+   }
+   else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<ParamList>"), mode);
    }
    UNREACHABLE;
@@ -623,9 +641,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::SpecList> obj, char
    const SpecList& list = *obj;
    if ((mode | CASE_BIT) == 's' || (mode | CASE_BIT) == 'b') {
       if (list.isDecl()) {
-         return writef(file, ((const ParamList)list).span(), mode, fmt);
+         return writef(file, TNB_CAST(ParamList), mode, fmt);
       } else {
-         return writef(file, ((const ArgList)list).span(), mode, fmt);
+         return writef(file, TNB_CAST(ArgList), mode, fmt);
       }
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<SpecList>"), mode);
@@ -641,11 +659,16 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::StmtSeq> obj, char 
    if ((mode | CASE_BIT) == 's') {
       uint charsPrinted = 0;
       for (uint i = 0; i < span.size(); ++i) {
-         charsPrinted += file.printf(FMT("%S%s"), obj.indents, TNB(span[i].toConst()));
+         charsPrinted += file.printf(FMT("%S%s"), obj.indents, TNB(span[i]));
       }
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
-      return writef(file, span, mode, fmt);
+      auto span = obj->span();
+      uint charsPrinted = 0;
+      for (uint i = 0; i < span.size(); ++i) {
+         charsPrinted += writef(file, TNB(span[i]), mode, fmt);
+      }
+      return charsPrinted;
    }
    else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<StmtSeq>"), mode);
@@ -659,9 +682,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::StmtSeq> obj, char 
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::VariadicParam> obj, char mode, FmtArgs fmt) {
    if ((mode | CASE_BIT) == 's') {
-      return file.printf(FMT("%s..."), TNB((clef::index<const clef::Type>(obj.i))));
+      return file.printf(FMT("%s..."), TNB_CAST(Type));
    } else if ((mode | CASE_BIT) == 'b') {
-      return writef(file, TNB((clef::index<const clef::Type>(obj.i))), mode, fmt);
+      return writef(file, TNB_CAST(Type), mode, fmt);
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<VariadicParam>"), mode);
    }
@@ -687,7 +710,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Union> obj, char mo
 
       charsPrinted += file.printf(FMT(" {"));
       for (uint i = 0; i < span.size(); ++i) { //print members
-         charsPrinted += file.printf(FMT("%S%s;"), membIndents, TNB(span[i].toConst()));
+         charsPrinted += file.printf(FMT("%S%s;"), membIndents, TNB(span[i]));
       }
       charsPrinted += file.printf(FMT("%S};"), obj.indents);
       return charsPrinted;

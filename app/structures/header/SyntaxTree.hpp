@@ -109,6 +109,10 @@ template<typename T> struct clef::astTNB {
    index<const T> i;
    indenter indents = 0;
 
+   astTNB(const SyntaxTree& t, uint n, indenter ind = 0):tree{t}, i{n}, indents{ind} {}
+   astTNB(const SyntaxTree& t, index<const T> n, indenter ind = 0):tree{t}, i{n}, indents{ind} {}
+   astTNB(const SyntaxTree& t, index<T> n, indenter ind = 0):tree{t}, i{n}, indents{ind} {}
+
    const T& get() const { return tree[i]; }
    const T& operator*() const { return tree[i]; }
    const T* operator->() const { return tree + i; }
