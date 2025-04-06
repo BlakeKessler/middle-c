@@ -145,9 +145,4 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
    return make<Expr>(op, self[lhsI].nodeType(), self[rhsI].nodeType(), lhsI, rhsI);
 }
 
-uint mcsl::writef(File& file, const clef::SyntaxTree& tree, char mode, FmtArgs args) {
-   using namespace clef;
-   return writef(file, astTNB<astNode>{tree, 1, 0}, mode, args);
-}
-
 #endif //SYNTAX_TREE_CPP

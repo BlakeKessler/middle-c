@@ -6,6 +6,13 @@
 #include "pretty-print.hpp"
 #include "io.hpp"
 
+uint mcsl::writef(File& file, const clef::SyntaxTree& tree, char mode, FmtArgs args) {
+   assume((mode | CASE_BIT) == 's');
+   return writef(file, clef::astTNB<clef::astNode>{tree, 1, 0}, mode, args) + (file.write('\n'), 1);
+}
+
+
+
 uint mcsl::writef(mcsl::File& file, const clef::indenter i, char mode, FmtArgs fmt) {
    assume((mode | CASE_BIT) == 's');
    file.write('\n');
@@ -532,6 +539,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
       if (iden.scopeName()) {
          charsPrinted += file.printf(FMT("%s::"), TNB(iden.scopeName()));
       }
+      debug_assert(iden.name().size() || !iden.name().data());
       charsPrinted += file.printf(FMT("%s"), iden.name());
       if (iden.specializer()) {
          charsPrinted += file.printf(FMT("<%s>"), iden.specializer());

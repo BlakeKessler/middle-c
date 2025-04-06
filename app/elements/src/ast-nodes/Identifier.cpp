@@ -18,7 +18,7 @@ void clef::Identifier::__printName(mcsl::File& file) const {
    if (+_keywordID) {
       file.printf(mcsl::FMT("%s"), toString(_keywordID));
    } else {
-      file.printf(mcsl::FMT("%s"), _name_size, _name_buf);
+      file.printf(mcsl::FMT("%s"), name());
    }
    file.printf(mcsl::FMT("\033[24m"));
 }
