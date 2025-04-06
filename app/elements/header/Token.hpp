@@ -64,6 +64,7 @@ struct clef::Token {
 
 namespace mcsl {
    File& write(File&, const clef::Token&);
+   uint writef(File&, const clef::Token&, char mode, FmtArgs args);
 };
 
 #endif //TOKEN_HPP

@@ -21,6 +21,25 @@ uint mcsl::writef(mcsl::File& file, const clef::indenter i, char mode, FmtArgs f
 
 //!TODO: probably shouldn't just return 0 without doing anything when printing with `%b`
 
+#define NODE_CAST_TNB_WRITEF(T) case T::nodeType(): return writef(file, TNB(clef::index<const clef::T>(obj.i)), mode, args);
+#include "MAP_MACRO.h"
+uint mcsl::writef(File& file, const clef::astTNB<clef::astNode> obj, char mode, FmtArgs args) {
+   using namespace clef;
+   if (!obj) {
+      return 0;
+   }
+   switch (obj->nodeType()) {
+      MCSL_MAP(NODE_CAST_TNB_WRITEF, CLEF_ALL_AST_NODE_T)
+      
+      case NodeType::NONE:
+      case NodeType::ERROR:
+         UNREACHABLE;
+   }
+}
+#include "MAP_MACRO_UNDEF.h"
+#undef NODE_CAST_TNB_WRITEF
+
+
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Literal> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -764,6 +783,32 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::FuncSig> obj, char 
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<FuncSig>"), mode);
    }
    UNREACHABLE;
+}
+
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::FundType> obj, char mode, FmtArgs fmt) {
+   TODO;
+}
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::GenericType> obj, char mode, FmtArgs fmt) {
+   TODO;
+}
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Class> obj, char mode, FmtArgs fmt) {
+   TODO;
+}
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Struct> obj, char mode, FmtArgs fmt) {
+   TODO;
+}
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Interface> obj, char mode, FmtArgs fmt) {
+   TODO;
+}
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Namespace> obj, char mode, FmtArgs fmt) {
+   TODO;
+}
+
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::SwitchCases> obj, char mode, FmtArgs fmt) {
+   TODO;
+}
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::MatchCases> obj, char mode, FmtArgs fmt) {
+   TODO;
 }
 
 #pragma endregion types

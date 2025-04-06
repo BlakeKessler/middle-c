@@ -59,4 +59,50 @@ mcsl::File& mcsl::write(File& file, const clef::Token& tok) {
    return file;
 }
 
+uint mcsl::writef(File& file, const clef::Token& tok, char mode, FmtArgs args) {
+   using namespace clef;
+   const char intMode = (mode | CASE_BIT) == 'b' ? mode : ('i' | (mode & ~CASE_BIT));
+   const char fltMode = (mode | CASE_BIT) == 'b' ? mode : ('f' | (mode & ~CASE_BIT));
+   switch (tok.type()) {
+      case TokenType::NONE:
+         UNREACHABLE;
+      case TokenType::IDEN:
+         return writef(file, tok.name(), mode, args);
+      case TokenType::KEYWORD:
+         return writef(file, toString(tok.keywordID()), mode, args);
+      case TokenType::INT_NUM:
+         return writef(file, tok.intVal(), intMode, args);
+      case TokenType::REAL_NUM:
+         return writef(file, tok.realVal(), fltMode, args);
+      case TokenType::OP:
+         return writef(file, toString(tok.opID()), mode, args);
+      case TokenType::PREPROC_INIT:
+         return file.write(PREPROC_INIT), 1;
+      case TokenType::PREPROC_EOS:
+         return file.write('\n'), 1;
+      case TokenType::EOS:
+         return file.write(EOS), 1;
+      case TokenType::ESC:
+         return file.write(ESCAPE_CHAR), 1;
+      case TokenType::BLOCK_DELIM: //!TODO: make this print the actual tokens instead of the string description
+         return writef(file, toString(tok.blockType()), mode, args);
+         // file.printf(mcsl::FMT("\033[35mBLOCK DELIMITER:\033[39m %s \033[3m[%s]\033[23m"), toString(tok.blockType()), toString(tok.blockDelimRole()));
+         // break;
+      case TokenType::PTXT_SEG:
+         switch (tok.ptxtType()) {
+            case PtxtType::CHAR:
+               return file.write(tok.charVal()), 1;
+            case PtxtType::STR:
+               return writef(file, tok.strVal(), mode, args);
+            case PtxtType::UNPROCESSED_STR:
+               return writef(file, tok.unprocessedStrVal(), mode, args);
+
+            default: throwError(clef::ErrCode::LEXER_NOT_IMPLEMENTED, mcsl::FMT("\033[35munimplemented plaintext segment type used (%s)\033[39m"), toString(tok.ptxtType()));
+         }
+      
+      default: UNREACHABLE;
+   }
+   UNREACHABLE;
+}
+
 #endif //TOKEN_CPP

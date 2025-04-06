@@ -50,6 +50,7 @@ class clef::SourceTokens {
 
 namespace mcsl {
    File& write(File&, const clef::SourceTokens&);
+   uint writef(File&, const clef::SourceTokens&, char mode, FmtArgs args);
 };
 
 #endif //SOURCE_TOKENS_HPP

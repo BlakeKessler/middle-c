@@ -14,4 +14,16 @@ mcsl::File& mcsl::write(File& file, const clef::SourceTokens& toks) {
    return file;
 }
 
+uint mcsl::writef(File& file, const clef::SourceTokens& toks, char mode, FmtArgs args) {
+   using namespace clef;
+   assume((mode | CASE_BIT) == 's');
+   uint charsPrinted = 0;
+   for (const Token* it = toks.begin(); it < toks.end(); ++it) {
+      charsPrinted += mcsl::writef(file, *it, mode, args);
+      // mcsl::write(' '), ++charsPrinted;
+      mcsl::write('\n'), ++charsPrinted;
+   }
+   return charsPrinted;
+}
+
 #endif //SOURCE_TOKENS_CPP

@@ -54,6 +54,7 @@ class clef::SyntaxTree {
       void printf(mcsl::File&) const;
       void print(mcsl::File&) const;
 
+      uint nodeCount() const { return _buf.size(); }
       astNode& getNode(const uint i) { assume(i); return _buf[i]; }
       const astNode& getNode(const uint i) const { assume(i); return _buf[i]; }
 
@@ -96,6 +97,8 @@ struct clef::indenter {
    
    uint indents;
 
+   indenter(uint i): indents{i} {}
+
    operator uint() const { return indents; }
    operator uint&() { return indents; }
 };
@@ -121,6 +124,7 @@ namespace mcsl {
 
    inline File& write(File& file, const clef::SyntaxTree& obj) { obj.printf(file); return file; }
    uint writef(File& file, const clef::SyntaxTree& tree, char mode, FmtArgs args);
+   uint writef(File& file, const clef::astTNB<clef::astNode> obj, char mode, FmtArgs args);
    MCSL_MAP(__DEF_TNB_WRITEF, CLEF_ALL_AST_NODE_T)
 };
 

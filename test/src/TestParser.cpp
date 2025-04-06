@@ -19,14 +19,16 @@ int main(const int argc, char** argv) {
    mcsl::printf(mcsl::FMT("%s"), BIG_HEADER);
    clef::SourceTokens tokens = clef::Lexer::LexFile(argv[1]);
    mcsl::printf(mcsl::FMT("\033[1mTokens:\033[22m\n%s"), SMALL_HEADER);
-   mcsl::write(mcsl::stdout, tokens);
+   // mcsl::writef(mcsl::stdout, tokens, 's', mcsl::FmtArgs());
+   mcsl::printf(mcsl::FMT("%s"), tokens);
    mcsl::printf(mcsl::FMT("\n%s"),BIG_HEADER);
 
    //abstract syntax tree
    clef::SyntaxTree tree{};
    clef::Parser::parse(tokens, tree);
    mcsl::printf(mcsl::FMT("\033[1mAbstract Syntax Tree:\033[22m\n%s"), SMALL_HEADER);
-   mcsl::write(mcsl::stdout, tree);
+   // mcsl::writef(mcsl::stdout, tree, 's', mcsl::FmtArgs());
+   mcsl::printf(mcsl::FMT("%s"), tree);
    mcsl::printf(mcsl::FMT("\n%s\n"), BIG_HEADER);
 
    //offer to print debug info
