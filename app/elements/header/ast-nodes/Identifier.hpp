@@ -13,9 +13,9 @@ struct clef::Identifier {
       index<Identifier> _scopeName;
       index<SpecList> _specializer;
       KeywordID _keywordID;
-   protected: //!TODO: use these
+   protected:
       FundTypeID _id;
-      uint8 pad[2];
+      uint8 pad[2]; //!TODO: use this
 
    protected:
       void __printName(mcsl::File& file) const;
