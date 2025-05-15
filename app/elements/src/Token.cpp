@@ -61,8 +61,8 @@ mcsl::File& mcsl::write(File& file, const clef::Token& tok) {
 
 uint mcsl::writef(File& file, const clef::Token& tok, char mode, FmtArgs args) {
    using namespace clef;
-   const char intMode = (mode | CASE_BIT) == 'b' ? mode : ('i' | (mode & ~CASE_BIT));
-   const char fltMode = (mode | CASE_BIT) == 'b' ? mode : ('f' | (mode & ~CASE_BIT));
+   const char intMode = (mode | CASE_BIT) == 'b' ? mode : ('i' | (mode & CASE_BIT));
+   const char fltMode = (mode | CASE_BIT) == 'b' ? mode : ('f' | (mode & CASE_BIT));
    switch (tok.type()) {
       case TokenType::NONE:
          UNREACHABLE;
