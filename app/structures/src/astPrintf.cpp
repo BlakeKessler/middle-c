@@ -25,6 +25,7 @@ uint mcsl::writef(mcsl::File& file, const clef::indenter i, char mode, FmtArgs f
 #define TNB_INDENT(expr) clef::astTNB{obj.tree, expr, obj.indents + 1}
 #define TNB_AST(expr) TNB((clef::index<const clef::astNode>)expr)
 #define TNB_CAST(T) clef::astTNB<clef::T>(obj.tree, +obj.i, obj.indents)
+#define TNB_CAST2(T, expr) clef::astTNB<clef::T>(obj.tree, expr, obj.indents)
 #define TNB_CAST_INDENT(T) TNB_INDENT(clef::index<const clef::T>(obj.i))
 
 //!TODO: probably shouldn't just return 0 without doing anything when printing with `%b`
@@ -291,9 +292,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Asm> obj, char mode
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Stmt> obj, char mode, FmtArgs fmt) {
    if ((mode | CASE_BIT) == 's') {
-      return file.printf(FMT("%s;"), TNB((clef::index<const clef::Expr>(obj.i))));
+      return file.printf(FMT("%s;"), TNB_CAST(Expr));
    } else if ((mode | CASE_BIT) == 'b') {
-      return writef(file, TNB((clef::index<const clef::Expr>(obj.i))), mode, fmt);
+      return writef(file, TNB_CAST(Expr), mode, fmt);
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Stmt>"), mode);
    }
@@ -328,13 +329,13 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case BLOCK_CMNT_CLOSE: UNREACHABLE;
 
          case CALL_INVOKE: //parens
-            TODO;
+            return file.printf(FMT("%s(%s)"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
          case SUBSCRIPT_INVOKE: //square brackets
-            TODO;
+            return file.printf(FMT("%s[%s]"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
          case LIST_INVOKE: //curly brackets
-            TODO;
+            return file.printf(FMT("%s{%s}"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
          case SPECIALIZER_INVOKE: //triangle brackets
-            TODO;
+            return file.printf(FMT("%s<%s>"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
 
          case CALL_OPEN        : UNREACHABLE;
          case CALL_CLOSE       : UNREACHABLE;
@@ -350,9 +351,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
 
          case INTERP_STR_INVOKE: TODO;
          case TERNARY_INVOKE   :
-            #define __exprI clef::index<const clef::Expr>
-            return file.printf(FMT("%s ? %s : %s"), TNB((__exprI)expr.lhs()), TNB((__exprI)expr.rhs()), TNB((__exprI)expr.extra()));
-            #undef __exprI
+            return file.printf(FMT("%s ? %s : %s"), TNB_CAST2(Expr, expr.lhs()), TNB_CAST2(Expr, expr.rhs()), TNB_CAST2(Expr, expr.extra()));
 
          case PREPROCESSOR: TODO;
 
@@ -467,24 +466,24 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case ASM      : return writef(file, TNB_CAST(Asm),         mode, fmt);
          case DECL     : return writef(file, TNB_CAST(Decl),        mode, fmt);
 
-         case GOTO: return file.printf(FMT("goto %s;"), TNB_AST(expr.lhs()));
-         case GOTO_CASE: return file.printf(FMT("goto case %s;"), TNB_AST(expr.lhs()));
+         case GOTO: return file.printf(FMT("goto %s"), TNB_AST(expr.lhs()));
+         case GOTO_CASE: return file.printf(FMT("goto case %s"), TNB_AST(expr.lhs()));
 
-         case BREAK   : return file.printf(FMT("break;"));
-         case CONTINUE: return file.printf(FMT("continue;"));
+         case BREAK   : return file.printf(FMT("break"));
+         case CONTINUE: return file.printf(FMT("continue"));
          
-         case THROW        : return file.printf(FMT("throw %s;"), TNB_AST(expr.lhs()));
-         case ASSERT       : return file.printf(FMT("assert %s;"), TNB_AST(expr.lhs()));
-         case DEBUG_ASSERT : return file.printf(FMT("debug_assert %s;"), TNB_AST(expr.lhs()));
-         case STATIC_ASSERT: return file.printf(FMT("static_assert %s;"), TNB_AST(expr.lhs()));
-         case ASSUME       : return file.printf(FMT("assume %s;"), TNB_AST(expr.lhs()));
-         case RETURN       : return file.printf(FMT("return %s;"), TNB_AST(expr.lhs()));
+         case THROW        : return file.printf(FMT("throw %s"), TNB_AST(expr.lhs()));
+         case ASSERT       : return file.printf(FMT("assert %s"), TNB_AST(expr.lhs()));
+         case DEBUG_ASSERT : return file.printf(FMT("debug_assert %s"), TNB_AST(expr.lhs()));
+         case STATIC_ASSERT: return file.printf(FMT("static_assert %s"), TNB_AST(expr.lhs()));
+         case ASSUME       : return file.printf(FMT("assume %s"), TNB_AST(expr.lhs()));
+         case RETURN       : return file.printf(FMT("return %s"), TNB_AST(expr.lhs()));
 
          case ALIAS:
             if (expr.rhs()) {
-               return file.printf(FMT("using %s = %s;"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
+               return file.printf(FMT("using %s = %s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
             } else {
-               return file.printf(FMT("using %s;"), TNB_AST(expr.lhs()));
+               return file.printf(FMT("using %s"), TNB_AST(expr.lhs()));
             }
       }
    } else if ((mode | CASE_BIT) == 'b') {
@@ -515,9 +514,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Scope> obj, char mode, FmtArgs fmt) {
    if ((mode | CASE_BIT) == 's') {
-      return file.printf(FMT("{%s%S}"), TNB_INDENT((clef::index<const clef::StmtSeq>(obj.i))), obj.indents);
+      return file.printf(FMT("{%s%S}"), TNB_CAST_INDENT(StmtSeq), obj.indents);
    } else if ((mode | CASE_BIT) == 'b') {
-      return writef(file, TNB((clef::index<const clef::StmtSeq>(obj.i))), mode, fmt);
+      return writef(file, TNB_CAST(StmtSeq), mode, fmt);
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Scope>"), mode);
    }
@@ -744,7 +743,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Enum> obj, char mod
 
       charsPrinted += file.printf(FMT(" {"));
       for (uint i = 0; i < span.size(); ++i) { //print enumerators
-         charsPrinted += file.printf(FMT("%S%s"), membIndents, TNB((clef::index<const clef::Identifier>)span[i]));
+         charsPrinted += file.printf(FMT("%S%s"), membIndents, TNB_CAST2(Identifier, +span[i]));
          if (obj.tree[span[i]].val()) {
             charsPrinted += file.printf(FMT(" = %s,"), TNB(obj.tree[span[i]].val()));
          } else {
@@ -782,7 +781,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Mask> obj, char mod
       
       charsPrinted += file.printf(FMT(" {"));
       for (uint i = 0; i < span.size(); ++i) { //print enumerators
-         charsPrinted += file.printf(FMT("%S%s"), membIndents, TNB((clef::index<const clef::Identifier>)span[i]));
+         charsPrinted += file.printf(FMT("%S%s"), membIndents, TNB_CAST2(Identifier, +span[i]));
          if (obj.tree[span[i]].val()) {
             charsPrinted += file.printf(FMT(" = %s,"), TNB(obj.tree[span[i]].val()));
          } else {
