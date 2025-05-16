@@ -217,6 +217,9 @@ template<> void clef::SyntaxTree::__printf<clef::Literal>(mcsl::File& file, inde
 template<> void clef::SyntaxTree::__printf<clef::Decl>(mcsl::File& file, index<const Decl> i, const uint indents) const {
    TODO;
 }
+template<> void clef::SyntaxTree::__printf<clef::TypeDecl>(mcsl::File& file, index<const TypeDecl> i, const uint indents) const {
+   TODO;
+}
 
 
 template<> void clef::SyntaxTree::__printf<clef::SwitchCases>(mcsl::File& file, index<const SwitchCases> i, const uint indents) const {
@@ -261,16 +264,6 @@ template<> void clef::SyntaxTree::__printf<clef::Asm>(mcsl::File& file, index<co
    TODO;
 }
 
-void clef::SyntaxTree::__printf(mcsl::File& file, index<const InterfaceSpec> i, const uint indents) const {
-   TODO;
-}
-void clef::SyntaxTree::__printf(mcsl::File& file, index<const NamespaceSpec> i, const uint indents) const {
-   TODO;
-}
-void clef::SyntaxTree::__printf(mcsl::File& file, index<const ObjTypeSpec> i, const uint indents) const {
-   TODO;
-}
-
 #define typecase(T) case T::nodeType(): __printf<T>(file, +i, indents); break;
 void clef::SyntaxTree::__printf(mcsl::File& file, index<const astNode> i, uint indents) const {
    switch (self[i].nodeType()) {
@@ -278,6 +271,7 @@ void clef::SyntaxTree::__printf(mcsl::File& file, index<const astNode> i, uint i
       case NodeType::ERROR: throwError(ErrCode::UNSPEC, mcsl::FMT("\n\033[31mERROR NODE: %u\033[39m\n"), +i); break;
 
       MCSL_MAP(typecase, CLEF_ALL_AST_NODE_T)
+      MCSL_MAP(typecase, CLEF_ALL_PSEUDO_NODE_T)
    }
 }
 #undef typecase

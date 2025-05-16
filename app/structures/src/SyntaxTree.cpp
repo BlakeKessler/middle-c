@@ -113,6 +113,7 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
 
       case Expression::nodeType():
       case Declaration::nodeType():
+      case TypeDeclaration::nodeType():
       case Statement::nodeType():
       case ForLoop::nodeType():
       case ForeachLoop::nodeType():
@@ -123,6 +124,9 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
       case Match::nodeType():
       case TryCatch::nodeType():
       case Asm::nodeType():
+      case ObjTypeSpec::nodeType():
+      case InterfaceSpec::nodeType():
+      case NamespaceSpec::nodeType():
          return +index;
 
 

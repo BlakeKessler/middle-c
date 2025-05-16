@@ -21,10 +21,7 @@ class clef::SyntaxTree {
 
       void __indent(mcsl::File&, uint indents) const;
       void __printf(mcsl::File&, index<const astNode>, const uint indents) const;
-      template<astNode_t T> void __printf(mcsl::File&, index<const T>, const uint indents) const;
-      void __printf(mcsl::File&, index<const InterfaceSpec>, const uint indents) const;
-      void __printf(mcsl::File&, index<const NamespaceSpec>, const uint indents) const;
-      void __printf(mcsl::File&, index<const ObjTypeSpec>, const uint indents) const;
+      template<pseudoNode_t T> void __printf(mcsl::File&, index<const T>, const uint indents) const;
    public:
       SyntaxTree():_buf{},_ifaceSpecBuf{},_nsSpecBuf{},_objSpecBuf{},_alloc{} {
          _buf.emplace_back(NodeType::ERROR);

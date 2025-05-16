@@ -285,7 +285,51 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Decl> obj, char mod
 }
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char mode, FmtArgs fmt) {
-   TODO;
+   using namespace clef;
+   if (!obj) {
+      return 0;
+   }
+   const TypeDecl& decl = *obj;
+   if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
+      uint charCount = file.printf(FMT("%s %s"), TNB(decl.objType()), TNB(decl.name()));
+      if (decl.spec()) {
+         switch (decl.specType()) {
+            case NodeType::OBJ_TYPE_SPEC:
+               charCount += file.printf(FMT(" {%s};"), TNB_INDENT(decl.objSpec()));
+               break;
+            case NodeType::INTERFACE_SPEC:
+               charCount += file.printf(FMT(" {%s};"), TNB_INDENT(decl.ifaceSpec()));
+               break;
+            case NodeType::NAMESPACE_SPEC:
+               charCount += file.printf(FMT(" {%s};"), TNB_INDENT(decl.nsSpec()));
+               break;
+            default:
+               UNREACHABLE;
+         }
+      } else {
+         charCount += file.printf(FMT(";"));
+      }
+      return charCount;
+   } else if ((mode | CASE_BIT) == 'b') { //print in binary format
+      uint charCount = file.printf(FMT("%b%b%b"), TNB(decl.objType()), TNB(decl.name()), +decl.specType());
+      switch (decl.specType()) {
+         case NodeType::OBJ_TYPE_SPEC:
+            charCount += file.printf(FMT("%b"), TNB_INDENT(decl.objSpec()));
+            break;
+         case NodeType::INTERFACE_SPEC:
+            charCount += file.printf(FMT("%b"), TNB_INDENT(decl.ifaceSpec()));
+            break;
+         case NodeType::NAMESPACE_SPEC:
+            charCount += file.printf(FMT("%b"), TNB_INDENT(decl.nsSpec()));
+            break;
+         default:
+            UNREACHABLE;
+      }
+      return charCount;
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<TypeDecl>"), mode);
+   }
+   UNREACHABLE;
 }
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Asm> obj, char mode, FmtArgs fmt) {

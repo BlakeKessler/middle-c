@@ -45,6 +45,7 @@ uint clef::nodeSizeof(NodeType t) {
       case NodeType::ERROR: return 0;
 
       MCSL_MAP(typecase, CLEF_ALL_AST_NODE_T)
+      MCSL_MAP(typecase, CLEF_ALL_PSEUDO_NODE_T)
    }
 }
 #undef typecase
@@ -70,6 +71,11 @@ void clef::astNode::writeTo(mcsl::File& file) const {
       case NodeType::ERROR: file.printf(mcsl::FMT("ERORR NODE")); break;
       
       MCSL_MAP(CASE, CLEF_ALL_AST_NODE_UNION_MEMBS)
+
+      case NodeType::OBJ_TYPE_SPEC:
+      case NodeType::INTERFACE_SPEC:
+      case NodeType::NAMESPACE_SPEC:
+         UNREACHABLE;
    }
 }
 #undef CASE

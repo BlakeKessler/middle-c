@@ -72,6 +72,10 @@ constexpr const mcsl::str_slice clef::toString(const NodeType type) {
       CASE(ARG_LIST, "ARGUMENT_LIST");
       CASE(PARAM_LIST, "PARAMETER_LIST");
       CASE(SPEC_LIST, "SPECIALIZER_LIST");
+      CASE(MAKE_TYPE, "MAKE_TYPE");
+      CASE(OBJ_TYPE_SPEC, "OBJECT_TYPE_SPEC");
+      CASE(INTERFACE_SPEC, "INTERFACE_SPEC");
+      CASE(NAMESPACE_SPEC, "NAMESPACE_SPEC");
    }
    UNREACHABLE;
 }

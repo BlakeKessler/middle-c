@@ -63,7 +63,7 @@ namespace clef {
       struct ArgumentList; using ArgList = ArgumentList;
       struct ParameterList; using ParamList = ParameterList;
       struct SpecializerList; using SpecList = SpecializerList;
-      template<typename T> concept astNode_t = requires { {T::nodeType()} -> mcsl::same_t<NodeType>; } && !T::IsPseudoNode;
+      template<typename T> concept astNode_t = requires { {T::nodeType()} -> mcsl::same_t<NodeType>; } && !requires { T::IsPseudoNode; };
       template<typename T> concept astNode_ptr_t = mcsl::ptr_t<T> && astNode_t<mcsl::remove_ptr<T>>;
       template<typename T> concept pseudoNode_t = requires { {T::nodeType()} -> mcsl::same_t<NodeType>; };
       template<typename T> concept pseudoNode_ptr_t = mcsl::ptr_t<T> && pseudoNode_t<mcsl::remove_ptr<T>>;
@@ -76,6 +76,7 @@ namespace clef {
    class ObjTypeSpec;
    class InterfaceSpec;
    class NamespaceSpec;
+   #define CLEF_ALL_PSEUDO_NODE_T ObjTypeSpec, InterfaceSpec, NamespaceSpec
    struct Symbol;
 
    //containers for atomic compilation elements
@@ -91,8 +92,8 @@ namespace clef {
    class Parser;
 }
 
-template<typename Type> struct clef::index {
-   using T = Type;
+template<typename T> struct clef::index {
+   using Type = T;
 
    uint i;
 

@@ -19,7 +19,7 @@ struct clef::Class : public clef::Type {
       Class(const Type& name):Type{name},_spec{} {}
 
       index<ObjTypeSpec>& spec() { return _spec; }
-      index<const ObjTypeSpec> spec() const { return _spec; }
+      index<const ObjTypeSpec> spec() const { return _spec.toConst(); }
 };
 
 namespace mcsl {

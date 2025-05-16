@@ -5,6 +5,9 @@
 #include "CLEF.hpp"
 #include "ast-nodes/Statement.hpp"
 #include "ast-nodes/types/FundamentalType.hpp"
+#include "ObjTypeSpec.hpp"
+#include "InterfaceSpec.hpp"
+#include "NamespaceSpec.hpp"
 
 struct clef::TypeDeclaration : public clef::Statement {
    private:
@@ -30,6 +33,7 @@ struct clef::TypeDeclaration : public clef::Statement {
       index<const InterfaceSpec> ifaceSpec() const { return _extra; }
       index<NamespaceSpec>& nsSpec() { return reinterpret_cast<index<NamespaceSpec>&>(_extra); }
       index<const NamespaceSpec> nsSpec() const { return _extra; }
+      index<void> spec() const { return _extra; }
 };
 
 namespace mcsl {

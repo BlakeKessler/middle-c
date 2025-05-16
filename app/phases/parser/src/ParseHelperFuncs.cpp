@@ -262,6 +262,10 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
       case ArgumentList::nodeType():
       case ParameterList::nodeType():
       case SpecializerList::nodeType():
+      case NodeType::MAKE_TYPE:
+      case NodeType::OBJ_TYPE_SPEC:
+      case NodeType::INTERFACE_SPEC:
+      case NodeType::NAMESPACE_SPEC:
       case NodeType::NONE:
       case NodeType::ERROR:
          UNREACHABLE;
