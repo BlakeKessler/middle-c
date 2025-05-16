@@ -16,6 +16,7 @@ struct clef::Expression {
 
       friend struct Statement;
       friend struct Declaration;
+      friend struct TypeDeclaration;
       friend struct ForLoop;
       friend struct ForeachLoop;
       friend struct WhileLoop;
@@ -32,9 +33,10 @@ struct clef::Expression {
       Expression(OpID op, NodeType lhsType, NodeType rhsType, NodeType extraType, uint lhs, uint rhs, uint extra):_op{op},_lhsType{lhsType},_rhsType{rhsType},_extraType{extraType},_lhs{lhs},_rhs{rhs},_extra{extra} {}
       Expression(OpID op, NodeType lhsType, NodeType rhsType, uint lhs, uint rhs):Expression{op, lhsType, rhsType, NodeType::NONE, lhs, rhs, {}} {}
       Expression(OpID op, NodeType lhsType, uint lhs):Expression{op, lhsType, NodeType::NONE, lhs, {}} {}
-      template<astNode_t lhs_t, astNode_t rhs_t, astNode_t extra_t> Expression(OpID op, index<lhs_t> lhs, index<rhs_t> rhs, index<extra_t> extra):
+      template<pseudoNode_t lhs_t, pseudoNode_t rhs_t, pseudoNode_t extra_t> Expression(OpID op, index<lhs_t> lhs, index<rhs_t> rhs, index<extra_t> extra):
          _op{op},_lhsType{lhs_t::nodeType()},_rhsType{rhs_t::nodeType()},_extraType{extra_t::nodeType()},
          _lhs{+lhs},_rhs{+rhs},_extra{+extra} {}
+   
    public:
       static constexpr NodeType nodeType() { return NodeType::EXPR; }
 
@@ -70,9 +72,9 @@ struct clef::Expression {
       void setRHS(uint rhs, NodeType t) { _rhs = rhs; _rhsType = t; }
       void setExtra(uint extra, NodeType t) { _extra = extra; _extraType = t; }
 
-      template<astNode_t T> void setLHS(index<T> lhs) { setLHS(lhs, T::nodeType()); }
-      template<astNode_t T> void setRHS(index<T> rhs) { setRHS(rhs, T::nodeType()); }
-      template<astNode_t T> void setExtra(index<T> extra) { setExtra(extra, T::nodeType()); }
+      template<pseudoNode_t T> void setLHS(index<T> lhs) { setLHS(lhs, T::nodeType()); }
+      template<pseudoNode_t T> void setRHS(index<T> rhs) { setRHS(rhs, T::nodeType()); }
+      template<pseudoNode_t T> void setExtra(index<T> extra) { setExtra(extra, T::nodeType()); }
 };
 
 namespace mcsl {

@@ -77,6 +77,7 @@ namespace clef {
       EXPR,
          STMT,
             DECL,
+            MAKE_TYPE,
             FOR_LOOP,
             FOREACH_LOOP,
             WHILE_LOOP,
@@ -94,6 +95,11 @@ namespace clef {
       ARG_LIST,
       PARAM_LIST,
       SPEC_LIST,
+
+      //pseudo-nodes
+      OBJ_TYPE_SPEC,
+      INTERFACE_SPEC,
+      NAMESPACE_SPEC,
    };
    constexpr auto operator+(const NodeType t) noexcept { return std::to_underlying(t); }
    constexpr bool canDownCastTo(const NodeType from, const NodeType to) {
@@ -278,7 +284,8 @@ namespace clef {
       ALIAS,
 
       //other pseudo-operators
-      DECL,
+      LET,
+      MAKE_TYPE,
 
       //aliases
       LABEL_DELIM = INLINE_IF,
@@ -305,7 +312,7 @@ namespace clef {
    constexpr OpID& operator&=(OpID& lhs, const OpID rhs) { lhs = lhs & rhs; return lhs; }
    constexpr bool isOperator(const OpID x) { return x < OpID::__FIRST_PSEUDO_OP; }
 
-   constexpr bool isDecl(const OpID op) { return op == OpID::DECL; }
+   constexpr bool isDecl(const OpID op) { return op == OpID::LET; }
 
    constexpr bool isForLoop(const OpID op) { return op == OpID::FOR; }
    constexpr bool isForeachLoop(const OpID op) { return op == OpID::FOREACH; }

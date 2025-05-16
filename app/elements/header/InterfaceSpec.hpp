@@ -13,6 +13,9 @@ class clef::InterfaceSpec {
       mcsl::dyn_arr<index<Function>> _staticFuncs;
       mcsl::dyn_arr<index<Function>> _methods;
    public:
+      static const bool IsPseudoNode = true;
+      static constexpr NodeType nodeType() { return NodeType::INTERFACE_SPEC; }
+
       InterfaceSpec():_inheritedInterfaces{},_staticFuncs{},_methods{} {}
 
 

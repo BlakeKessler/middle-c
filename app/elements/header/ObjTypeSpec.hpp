@@ -20,6 +20,9 @@ class clef::ObjTypeSpec {
       mcsl::dyn_arr<index<Type>> _friendTypes;
 
    public:
+      static const bool IsPseudoNode = true;
+      static constexpr NodeType nodeType() { return NodeType::OBJ_TYPE_SPEC; }
+
       ObjTypeSpec():_inheritedTypes{},_staticVars{},_staticFuncs{},_memberTypes{},_members{},_methods{},_friendTypes{} {}
 
 

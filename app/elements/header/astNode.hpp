@@ -15,6 +15,7 @@
 #include "ast-nodes/Statement.hpp"
 #include "ast-nodes/Variable.hpp"
 #include "ast-nodes/exprs/Declaration.hpp"
+#include "ast-nodes/exprs/TypeDeclaration.hpp"
 #include "ast-nodes/exprs/If.hpp"
 #include "ast-nodes/exprs/ForLoop.hpp"
 #include "ast-nodes/exprs/ForeachLoop.hpp"
@@ -49,9 +50,9 @@
 
 #include "MAP_MACRO.h"
 #define CLEF_ALL_AST_NODE_UNION_MEMBS \
-   _identifier, _variable, _function, _type, _variadicParameter, _fundamentalType, _functionSignature, _enum,           \
-   _mask, _union, _namespace, _interface, _struct, _class, _genericType, _scope, _literal, _expression, _declaration,   \
-   _forLoop, _foreachLoop, _whileLoop, _doWhileLoop, _if, _switch, _match, _tryCatch, _asm, _forLoopParams,             \
+   _identifier, _variable, _function, _type, _variadicParameter, _fundamentalType, _functionSignature, _enum,                   \
+   _mask, _union, _namespace, _interface, _struct, _class, _genericType, _scope, _literal, _expression, _declaration, _typeDecl,\
+   _forLoop, _foreachLoop, _whileLoop, _doWhileLoop, _if, _switch, _match, _tryCatch, _asm, _forLoopParams,                     \
    _foreachLoopParams, _switchCases, _matchCases, _statement, _statementSequence, _argumentList, _parameterList, _specializerList
 
 struct clef::astNode {
@@ -76,6 +77,7 @@ struct clef::astNode {
          Literal _literal;
          Expression _expression;
          Declaration _declaration;
+         TypeDeclaration _typeDecl;
          ForLoop _forLoop;
          ForeachLoop _foreachLoop;
          WhileLoop _whileLoop;

@@ -13,7 +13,7 @@ struct clef::FundamentalType : public clef::Type {
       static constexpr NodeType nodeType() { return NodeType::FUND_TYPE; }
 
       FundamentalType():Type{} {}
-      FundamentalType(FundTypeID id):Type{} { _id = id; }
+      FundamentalType(FundTypeID id):Type{(bool)id ? toString(id) : mcsl::str_slice{}} { _id = id; }
       FundamentalType(FundTypeID id, const Type& name):Type{name} { _id = id; }
 
       FundTypeID& id() { return _id; }

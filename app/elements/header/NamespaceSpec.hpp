@@ -13,6 +13,9 @@ class clef::NamespaceSpec {
       mcsl::dyn_arr<index<Type>> _types;
 
    public:
+      static const bool IsPseudoNode = true;
+      static constexpr NodeType nodeType() { return NodeType::NAMESPACE_SPEC; }
+
       NamespaceSpec():_vars{},_funcs{},_types{} {}
 
       mcsl::dyn_arr<index<Variable>>& vars() {return _vars; }

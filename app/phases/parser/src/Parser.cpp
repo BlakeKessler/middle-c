@@ -42,6 +42,7 @@ START_PARSE_STMT:
 
             case KeywordID::ASM           : ++tokIt; return parseASM(); break;
             
+            //!TODO: these shouldn't be `Decl`s anymore (they should use `MAKE_TYPE` instead of `LET`)
             case KeywordID::CLASS         : ++tokIt; return tree.make<Stmt, Decl>(tree.getFundType(KeywordID::CLASS), parseClass());
             case KeywordID::STRUCT        : ++tokIt; return tree.make<Stmt, Decl>(tree.getFundType(KeywordID::STRUCT), parseStruct());
             case KeywordID::INTERFACE     : ++tokIt; return tree.make<Stmt, Decl>(tree.getFundType(KeywordID::INTERFACE), parseInterface());

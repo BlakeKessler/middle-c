@@ -236,7 +236,8 @@ constexpr const mcsl::str_slice clef::toString(const OpID op) {
       CASE(ALIAS, "ALIAS");
 
 
-      CASE(DECL, "DECLARATION");
+      CASE(LET, "LET");
+      CASE(MAKE_TYPE, "MAKE_TYPE");
    }
    UNREACHABLE;
 }

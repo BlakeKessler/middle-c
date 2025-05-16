@@ -284,6 +284,10 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Decl> obj, char mod
    UNREACHABLE;
 }
 
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char mode, FmtArgs fmt) {
+   TODO;
+}
+
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Asm> obj, char mode, FmtArgs fmt) {
    clef::throwError(clef::ErrCode::PARSER_NOT_IMPLEMENTED, FMT("inline ASM is not implemented yet"));
 }
@@ -464,7 +468,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case MATCH    : return writef(file, TNB_CAST(Match),       mode, fmt);
          case TRY_CATCH: return writef(file, TNB_CAST(TryCatch),    mode, fmt);
          case ASM      : return writef(file, TNB_CAST(Asm),         mode, fmt);
-         case DECL     : return writef(file, TNB_CAST(Decl),        mode, fmt);
+         case LET      : return writef(file, TNB_CAST(Decl),        mode, fmt);
 
          case GOTO: return file.printf(FMT("goto %s"), TNB_AST(expr.lhs()));
          case GOTO_CASE: return file.printf(FMT("goto case %s"), TNB_AST(expr.lhs()));
@@ -497,7 +501,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case MATCH    : return writef(file, TNB_CAST(Match),       mode, fmt);
          case TRY_CATCH: return writef(file, TNB_CAST(TryCatch),    mode, fmt);
          case ASM      : return writef(file, TNB_CAST(Asm),         mode, fmt);
-         case DECL     : return writef(file, TNB_CAST(Decl),        mode, fmt);
+         case LET      : return writef(file, TNB_CAST(Decl),        mode, fmt);
 
          default:
             return file.printf(FMT("%b%b%b%b%b%b"),

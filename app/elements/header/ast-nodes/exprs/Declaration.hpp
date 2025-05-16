@@ -13,7 +13,7 @@ struct clef::Declaration : public clef::Expression {
       static constexpr NodeType nodeType() { return NodeType::DECL; }
 
       Declaration():Expression{} {}
-      Declaration(index<Type> type, index<Identifier> name):Expression{OpID::DECL,type,name} {}
+      Declaration(index<Type> type, index<Identifier> name):Expression{OpID::LET,type,name} {}
 
 
       index<Type>& type() { return reinterpret_cast<index<Type>&>(_lhs); }
