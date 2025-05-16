@@ -5,6 +5,7 @@
 #include "CLEF.hpp"
 #include "ast-nodes/Statement.hpp"
 #include "ast-nodes/types/FundamentalType.hpp"
+#include "ast-nodes/node-lists/ParameterList.hpp"
 #include "ObjTypeSpec.hpp"
 #include "InterfaceSpec.hpp"
 #include "NamespaceSpec.hpp"
@@ -19,6 +20,7 @@ struct clef::TypeDeclaration : public clef::Statement {
       TypeDeclaration(index<FundType> objType, index<Identifier> name, index<ObjTypeSpec> spec):Statement{OpID::MAKE_TYPE,objType,name,spec} {}
       TypeDeclaration(index<FundType> objType, index<Identifier> name, index<InterfaceSpec> spec):Statement{OpID::MAKE_TYPE,objType,name,spec} {}
       TypeDeclaration(index<FundType> objType, index<Identifier> name, index<NamespaceSpec> spec):Statement{OpID::MAKE_TYPE,objType,name,spec} {}
+      TypeDeclaration(index<FundType> objType, index<Identifier> name, index<ParameterList> spec):Statement{OpID::MAKE_TYPE,objType,name,spec} {}
 
 
       index<FundType>& objType() { return reinterpret_cast<index<FundType>&>(_lhs); }
@@ -33,6 +35,8 @@ struct clef::TypeDeclaration : public clef::Statement {
       index<const InterfaceSpec> ifaceSpec() const { return _extra; }
       index<NamespaceSpec>& nsSpec() { return reinterpret_cast<index<NamespaceSpec>&>(_extra); }
       index<const NamespaceSpec> nsSpec() const { return _extra; }
+      index<ParameterList>& otherSpec() { return reinterpret_cast<index<ParameterList>&>(_extra); }
+      index<const ParameterList> otherSpec() const { return _extra; }
       index<void> spec() const { return _extra; }
 };
 

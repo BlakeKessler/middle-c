@@ -39,6 +39,7 @@ uint mcsl::writef(File& file, const clef::astTNB<clef::astNode> obj, char mode, 
    }
    switch (obj->nodeType()) {
       MCSL_MAP(NODE_CAST_TNB_WRITEF, CLEF_ALL_AST_NODE_T)
+      MCSL_MAP(NODE_CAST_TNB_WRITEF, CLEF_ALL_PSEUDO_NODE_T)
       
       case NodeType::NONE:
       case NodeType::ERROR:
@@ -295,14 +296,16 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
       if (decl.spec()) {
          switch (decl.specType()) {
             case NodeType::OBJ_TYPE_SPEC:
-               charCount += file.printf(FMT(" {%s};"), TNB_INDENT(decl.objSpec()));
+               charCount += file.printf(FMT(" {%s%S};"), TNB_INDENT(decl.objSpec()), obj.indents);
                break;
             case NodeType::INTERFACE_SPEC:
-               charCount += file.printf(FMT(" {%s};"), TNB_INDENT(decl.ifaceSpec()));
+               charCount += file.printf(FMT(" {%s%S};"), TNB_INDENT(decl.ifaceSpec()), obj.indents);
                break;
             case NodeType::NAMESPACE_SPEC:
-               charCount += file.printf(FMT(" {%s};"), TNB_INDENT(decl.nsSpec()));
+               charCount += file.printf(FMT(" {%s%S};"), TNB_INDENT(decl.nsSpec()), obj.indents);
                break;
+            case NodeType::PARAM_LIST:
+               TODO;
             default:
                UNREACHABLE;
          }
@@ -322,6 +325,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
          case NodeType::NAMESPACE_SPEC:
             charCount += file.printf(FMT("%b"), TNB_INDENT(decl.nsSpec()));
             break;
+         case NodeType::PARAM_LIST:
+            TODO;
          default:
             UNREACHABLE;
       }
@@ -513,6 +518,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case TRY_CATCH: return writef(file, TNB_CAST(TryCatch),    mode, fmt);
          case ASM      : return writef(file, TNB_CAST(Asm),         mode, fmt);
          case LET      : return writef(file, TNB_CAST(Decl),        mode, fmt);
+         case MAKE_TYPE: return writef(file, TNB_CAST(TypeDecl),    mode, fmt);
 
          case GOTO: return file.printf(FMT("goto %s"), TNB_AST(expr.lhs()));
          case GOTO_CASE: return file.printf(FMT("goto case %s"), TNB_AST(expr.lhs()));
@@ -546,6 +552,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case TRY_CATCH: return writef(file, TNB_CAST(TryCatch),    mode, fmt);
          case ASM      : return writef(file, TNB_CAST(Asm),         mode, fmt);
          case LET      : return writef(file, TNB_CAST(Decl),        mode, fmt);
+         case MAKE_TYPE: return writef(file, TNB_CAST(TypeDecl),    mode, fmt);
 
          default:
             return file.printf(FMT("%b%b%b%b%b%b"),
