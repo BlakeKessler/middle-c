@@ -34,13 +34,13 @@ class clef::ObjTypeSpec {
       mcsl::dyn_arr<index<Function>>& methods() { return _methods; }
       mcsl::dyn_arr<index<Type>>& friendTypes() { return _friendTypes; }
 
-      const mcsl::dyn_arr<index<Type>>& inheritedTypes() const { return _inheritedTypes; }
-      const mcsl::dyn_arr<index<Variable>>& staticVars() const { return _staticVars; }
-      const mcsl::dyn_arr<index<Function>>& staticFuncs() const { return _staticFuncs; }
-      const mcsl::dyn_arr<index<Type>>& memberTypes() const { return _memberTypes; }
-      const mcsl::dyn_arr<index<Variable>>& members() const { return _members; }
-      const mcsl::dyn_arr<index<Function>>& methods() const { return _methods; }
-      const mcsl::dyn_arr<index<Type>>& friendTypes() const { return _friendTypes; }
+      const mcsl::arr_span<index<Type>> inheritedTypes() const { return _inheritedTypes; }
+      const mcsl::arr_span<index<Variable>> staticVars() const { return _staticVars; }
+      const mcsl::arr_span<index<Function>> staticFuncs() const { return _staticFuncs; }
+      const mcsl::arr_span<index<Type>> memberTypes() const { return _memberTypes; }
+      const mcsl::arr_span<index<Variable>> members() const { return _members; }
+      const mcsl::arr_span<index<Function>> methods() const { return _methods; }
+      const mcsl::arr_span<index<Type>> friendTypes() const { return _friendTypes; }
 };
 
 #endif //OBJ_SPEC_HPP

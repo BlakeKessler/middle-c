@@ -296,14 +296,35 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
       if (decl.spec()) {
          switch (decl.specType()) {
             case NodeType::OBJ_TYPE_SPEC:
+               auto parentTypes = obj.tree[decl.objSpec()].inheritedTypes().span();
+               if (parentTypes.size()) {
+                  charCount += file.printf(FMT(" : %s"), parentTypes[0]);
+                  if (parentTypes.size() > 1) {
+                     for (clef::index<const clef::Type> parentType : parentTypes.span(1, parentTypes.size()-1)) {
+                        charCount += file.printf(FMT(", %s"), TNB(parentType));
+                     }
+                  }
+               }
                charCount += file.printf(FMT(" {%s%S};"), TNB_INDENT(decl.objSpec()), obj.indents);
                break;
+
             case NodeType::INTERFACE_SPEC:
+               auto parentTypes = obj.tree[decl.ifaceSpec()].inheritedInterfaces().span();
+               if (parentTypes.size()) {
+                  charCount += file.printf(FMT(" : %s"), parentTypes[0]);
+                  if (parentTypes.size() > 1) {
+                     for (clef::index<const clef::Type> parentType : parentTypes.span(1, parentTypes.size()-1)) {
+                        charCount += file.printf(FMT(", %s"), TNB(parentType));
+                     }
+                  }
+               }
                charCount += file.printf(FMT(" {%s%S};"), TNB_INDENT(decl.ifaceSpec()), obj.indents);
                break;
+
             case NodeType::NAMESPACE_SPEC:
                charCount += file.printf(FMT(" {%s%S};"), TNB_INDENT(decl.nsSpec()), obj.indents);
                break;
+               
             case NodeType::PARAM_LIST:
                TODO;
             default:
@@ -871,7 +892,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::FuncSig> obj, char 
 }
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::FundType> obj, char mode, FmtArgs fmt) {
-   TODO;
+   return writef(file, TNB_CAST(Type), mode, fmt);
 }
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::GenericType> obj, char mode, FmtArgs fmt) {
    TODO;
@@ -898,6 +919,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::MatchCases> obj, ch
 
 #pragma endregion types
 
+#undef TNB_CAST_INDENT
+#undef TNB_CAST2
 #undef TNB_CAST
 #undef TNB_AST
 #undef TNB_INDENT

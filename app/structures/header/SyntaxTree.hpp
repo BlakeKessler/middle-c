@@ -127,6 +127,7 @@ namespace mcsl {
    uint writef(File& file, const clef::SyntaxTree& tree, char mode, FmtArgs args);
    uint writef(File& file, const clef::astTNB<clef::astNode> obj, char mode, FmtArgs args);
    MCSL_MAP(__DEF_TNB_WRITEF, CLEF_ALL_AST_NODE_T)
+   MCSL_MAP(__DEF_TNB_WRITEF, CLEF_ALL_PSEUDO_NODE_T)
 };
 
 #undef __DEF_TNB_WRITEF
