@@ -295,7 +295,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
       uint charCount;
       if (decl.spec() && decl.specType() == NodeType::FUNC) {
-         charCount = file.printf(FMT(" %s"), TNB_CAST2(Function, decl.funcSpec()));
+         charCount = file.printf(FMT("%s"), TNB_CAST2(Function, decl.funcSpec()));
       } else {
          charCount = file.printf(FMT("%s %s"), TNB(decl.objType()), TNB(decl.name()));
       
