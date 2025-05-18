@@ -63,8 +63,8 @@ namespace clef {
          TYPE,
             VAR_PARAM,
             FUND_TYPE,
-            FUNC_SIG,
-            ENUM,
+               FUNC_SIG,
+            ENUM, //!TODO: make ENUM through CLASS extend FundType instead of just Type
             MASK,
             UNION,
             NAMESPACE,
