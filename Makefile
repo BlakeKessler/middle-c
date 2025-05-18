@@ -32,11 +32,10 @@ clean:
 #set up directory structure
 .PHONY: setup
 setup:
-	mkdir -p $(addprefix _build/,$(ALL_CODE_DIRS))
-	mkdir -p _build/test/src _build/out
+	mkdir -p $(addprefix _build/,$(ALL_CODE_DIRS)) _build/test/src _build/out
 
 #generate prereq makefiles
-$(ALL_AUTO_MAKEFILES): _build/%.mk : %.cpp
+$(ALL_AUTO_MAKEFILES): _build/%.mk : %.cpp | setup
 	(($(COMPILE) -MM $^) | (sed -E 's/([^ ]*)\.o([^u])?/_build\/\1.o _build\/\1.mk\2/') > $@) && echo $@
 
 #include prereq makefiles
@@ -52,29 +51,29 @@ $(ALL_AUTO_MAKEFILES): _build/%.mk : %.cpp
 # 	$(COMPILE) -c $< -o $@
 
 #compile object files
-$(ALL_OBJ_FILES): _build/%.o : %.cpp
+$(ALL_OBJ_FILES): _build/%.o : %.cpp | _build/%.mk setup
 	($(COMPILE) -c $^ -o $@) && echo $@
 
 
-#_build types of file
-.PHONY: makefiles
-makefiles: $(ALL_AUTO_MAKEFILES) #$(ALL_HEADER_FILES:%.hpp=_build/%.mk)
-# .PHONY: headers
-# headers: $(ALL_PCH_FILES)
+# #_build types of file
+# .PHONY: makefiles
+# makefiles: $(ALL_AUTO_MAKEFILES) #$(ALL_HEADER_FILES:%.hpp=_build/%.mk)
+# # .PHONY: headers
+# # headers: $(ALL_PCH_FILES)
 .PHONY: objects
 objects: $(ALL_OBJ_FILES)
 
 #compile unit test files
 .PHONY: Lexer
-Lexer: makefiles _build/test/src/TestLexer.mk test/src/TestLexer.cpp | $(ALL_OBJ_FILES)
+Lexer: _build/test/src/TestLexer.mk test/src/TestLexer.cpp | $(ALL_OBJ_FILES) setup
 	$(COMPILE) test/src/TestLexer.cpp $(shell find _build | grep "\.o$$") -o _build/out/$@.out
 .PHONY: Parser
-Parser: makefiles _build/test/src/TestParser.mk test/src/TestParser.cpp | $(ALL_OBJ_FILES)
+Parser: _build/test/src/TestParser.mk test/src/TestParser.cpp | $(ALL_OBJ_FILES) setup
 	$(COMPILE) test/src/TestParser.cpp $(shell find _build | grep "\.o$$") -o _build/out/$@.out
 
 .PHONY: StrToNum
-StrToNum: makefiles _build/test/src/TestStrToNum.mk test/src/TestStrToNum.cpp | $(ALL_OBJ_FILES)
+StrToNum: _build/test/src/TestStrToNum.mk test/src/TestStrToNum.cpp | $(ALL_OBJ_FILES) setup
 	$(COMPILE) test/src/TestStrToNum.cpp $(shell find _build | grep "\.o$$") -o _build/out/$@.out
 .PHONY: Printf
-Printf: makefiles _build/test/src/TestPrintf.mk test/src/TestPrintf.cpp | $(ALL_OBJ_FILES)
+Printf: _build/test/src/TestPrintf.mk test/src/TestPrintf.cpp | $(ALL_OBJ_FILES) setup
 	$(COMPILE) test/src/TestPrintf.cpp $(shell find _build | grep "\.o$$") -o _build/out/$@.out
