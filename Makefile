@@ -9,7 +9,6 @@ ALL_TESTS := $(wildcard test/src/*.cpp)
 
 ALL_AUTO_MAKEFILES := $(ALL_SRC_FILES:%.cpp=_build/%.mk) $(ALL_TESTS:%.cpp=_build/%.mk)
 ALL_OBJ_FILES := $(ALL_SRC_FILES:%.cpp=_build/%.o)
-# ALL_PCH_FILES := $(ALL_HEADER_FILES:%=_build/%.pch)
 
 #compiler
 COMPILER := clang++ -std=c++23
@@ -17,8 +16,6 @@ FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=
 # FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name -Wno-gcc-compat -Wno-trigraphs -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
 # COMPILER := g++ -std=c++23
 # FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -Wno-trigraphs -Wno-attributes -Wno-parentheses -Wno-class-memaccess -Wno-pessimizing-move
-
-# LINKER_FLAGS := -lbacktrace
 
 #compile commands
 COMPILE := $(COMPILER) $(FLAGS) $(addprefix -I, $(MODULES) $(filter %/header, $(ALL_CODE_DIRS)))
@@ -40,26 +37,15 @@ $(ALL_AUTO_MAKEFILES): _build/%.mk : %.cpp | setup
 
 #include prereq makefiles
 -include $(ALL_AUTO_MAKEFILES)
-# -include $(ALL_HEADER_FILES:%.hpp=_build/%.mk)
 
 #include unit test makefiles
 -include $(wildcard _build/test/*.mk)
-
-
-# #precompile headers
-# $(ALL_PCH_FILES): _build/%.hpp.pch : %.hpp _build/%.mk
-# 	$(COMPILE) -c $< -o $@
 
 #compile object files
 $(ALL_OBJ_FILES): _build/%.o : %.cpp | _build/%.mk setup
 	($(COMPILE) -c $^ -o $@) && echo $@
 
 
-# #_build types of file
-# .PHONY: makefiles
-# makefiles: $(ALL_AUTO_MAKEFILES) #$(ALL_HEADER_FILES:%.hpp=_build/%.mk)
-# # .PHONY: headers
-# # headers: $(ALL_PCH_FILES)
 .PHONY: objects
 objects: $(ALL_OBJ_FILES)
 
