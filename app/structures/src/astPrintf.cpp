@@ -27,6 +27,7 @@ uint mcsl::writef(mcsl::File& file, const clef::indenter i, char mode, FmtArgs f
 #define TNB_CAST(T) clef::astTNB<clef::T>(obj.tree, +obj.i, obj.indents)
 #define TNB_CAST2(T, expr) clef::astTNB<clef::T>(obj.tree, expr, obj.indents)
 #define TNB_CAST_INDENT(T) TNB_INDENT(clef::index<const clef::T>(obj.i))
+#define TNB_CAST_INDENT2(T, expr) TNB_INDENT(clef::index<const clef::T>(expr))
 
 //!TODO: probably shouldn't just return 0 without doing anything when printing with `%b`
 
@@ -292,48 +293,59 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
    }
    const TypeDecl& decl = *obj;
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      uint charCount = file.printf(FMT("%s %s"), TNB(decl.objType()), TNB(decl.name()));
-      if (decl.spec()) {
-         switch (decl.specType()) {
-            case NodeType::OBJ_TYPE_SPEC: {
-               auto parentTypes = obj.tree[decl.objSpec()].inheritedTypes().span();
-               if (parentTypes.size()) {
-                  charCount += file.printf(FMT(" : %s"), parentTypes[0]);
-                  if (parentTypes.size() > 1) {
-                     for (clef::index<const clef::Type> parentType : parentTypes.span(1, parentTypes.size()-1)) {
-                        charCount += file.printf(FMT(", %s"), TNB(parentType));
-                     }
-                  }
-               }
-               charCount += file.printf(FMT(" {%s%S}"), TNB_INDENT(decl.objSpec()), obj.indents);
-               break;
-            }
-
-            case NodeType::INTERFACE_SPEC: {
-               auto parentTypes = obj.tree[decl.ifaceSpec()].inheritedInterfaces().span();
-               if (parentTypes.size()) {
-                  charCount += file.printf(FMT(" : %s"), parentTypes[0]);
-                  if (parentTypes.size() > 1) {
-                     for (clef::index<const clef::Type> parentType : parentTypes.span(1, parentTypes.size()-1)) {
-                        charCount += file.printf(FMT(", %s"), TNB(parentType));
-                     }
-                  }
-               }
-               charCount += file.printf(FMT(" {%s%S};"), TNB_INDENT(decl.ifaceSpec()), obj.indents);
-               break;
-            }
-
-            case NodeType::NAMESPACE_SPEC:
-               charCount += file.printf(FMT(" {%s%S};"), TNB_INDENT(decl.nsSpec()), obj.indents);
-               break;
-               
-            case NodeType::PARAM_LIST:
-               TODO;
-            default:
-               UNREACHABLE;
-         }
+      uint charCount;
+      if (decl.spec() && decl.specType() == NodeType::FUNC) {
+         charCount = file.printf(FMT(" %s"), TNB_CAST2(Function, decl.funcSpec()));
       } else {
-         charCount += file.printf(FMT(";"));
+         charCount = file.printf(FMT("%s %s"), TNB(decl.objType()), TNB(decl.name()));
+      
+         if (decl.spec()) {
+            switch (decl.specType()) {
+               case NodeType::OBJ_TYPE_SPEC: {
+                  auto parentTypes = obj.tree[decl.objSpec()].inheritedTypes().span();
+                  if (parentTypes.size()) {
+                     charCount += file.printf(FMT(" : %s"), parentTypes[0]);
+                     if (parentTypes.size() > 1) {
+                        for (clef::index<const clef::Type> parentType : parentTypes.span(1, parentTypes.size()-1)) {
+                           charCount += file.printf(FMT(", %s"), TNB(parentType));
+                        }
+                     }
+                  }
+                  charCount += file.printf(FMT(" {%s%S}"), TNB_INDENT(decl.objSpec()), obj.indents);
+                  break;
+               }
+
+               case NodeType::INTERFACE_SPEC: {
+                  auto parentTypes = obj.tree[decl.ifaceSpec()].inheritedInterfaces().span();
+                  if (parentTypes.size()) {
+                     charCount += file.printf(FMT(" : %s"), parentTypes[0]);
+                     if (parentTypes.size() > 1) {
+                        for (clef::index<const clef::Type> parentType : parentTypes.span(1, parentTypes.size()-1)) {
+                           charCount += file.printf(FMT(", %s"), TNB(parentType));
+                        }
+                     }
+                  }
+                  charCount += file.printf(FMT(" {%s%S};"), TNB_INDENT(decl.ifaceSpec()), obj.indents);
+                  break;
+               }
+
+               case NodeType::NAMESPACE_SPEC:
+                  charCount += file.printf(FMT(" {%s%S};"), TNB_INDENT(decl.nsSpec()), obj.indents);
+                  break;
+                  
+               // case NodeType::FUNC: //handled separately
+               //    charCount += file.printf(FMT(" %s"), TNB_CAST2(Function, decl.funcSpec()));
+               //    break;
+
+               case NodeType::PARAM_LIST:
+                  TODO;
+
+               default:
+                  UNREACHABLE;
+            }
+         } else {
+            charCount += file.printf(FMT(";"));
+         }
       }
       return charCount;
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
@@ -658,7 +670,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Function> obj, char
    }
    const Function& func = *obj;
    if ((mode | CASE_BIT) == 's') {
-      return file.printf(FMT("func %s%s %s;"), TNB_CAST(Identifier), TNB(func.signature()), TNB(func.procedure()));
+      return file.printf(FMT("func %s%s %s"), TNB_CAST(Identifier), TNB(func.signature()), TNB(func.procedure()));
    } else if ((mode | CASE_BIT) == 'b') {
       return file.printf(FMT("%b%b%b"), TNB_CAST(Identifier), TNB(func.signature()), TNB(func.procedure()));
    } else {

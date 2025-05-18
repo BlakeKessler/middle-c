@@ -49,11 +49,7 @@ START_PARSE_STMT:
             case KeywordID::ENUM          : ++tokIt; { auto tmp = parseEnum(); return tree.make<TypeDecl>(tree.getFundType(KeywordID::ENUM), tmp, tree[tmp].enumerators()); }
             case KeywordID::MASK          : ++tokIt; { auto tmp = parseMask(); return tree.make<TypeDecl>(tree.getFundType(KeywordID::MASK), tmp, tree[tmp].enumerators()); }
             case KeywordID::NAMESPACE     : ++tokIt; { auto tmp = parseNamespace(); return tree.make<TypeDecl>(tree.getFundType(KeywordID::NAMESPACE), tmp, tree[tmp].spec()); }
-            case KeywordID::FUNC          : {
-               ++tokIt;
-               index<Function> funcptr = parseFunction();
-               return tree.make<Stmt, Decl>(tree[funcptr].signature(), funcptr);
-            }
+            case KeywordID::FUNC          : ++tokIt; { auto tmp = parseFunction(); return tree.make<TypeDecl>(tree[tmp].signature(), tmp, tmp); }
 
             
             case KeywordID::IF            : ++tokIt; return parseIf(); break;

@@ -20,6 +20,7 @@ struct clef::TypeDeclaration : public clef::Statement {
       TypeDeclaration(index<FundType> objType, index<Identifier> name, index<ObjTypeSpec> spec):Statement{OpID::MAKE_TYPE,objType,name,spec} {}
       TypeDeclaration(index<FundType> objType, index<Identifier> name, index<InterfaceSpec> spec):Statement{OpID::MAKE_TYPE,objType,name,spec} {}
       TypeDeclaration(index<FundType> objType, index<Identifier> name, index<NamespaceSpec> spec):Statement{OpID::MAKE_TYPE,objType,name,spec} {}
+      TypeDeclaration(index<FundType> objType, index<Identifier> name, index<Function> spec):Statement{OpID::MAKE_TYPE,objType,name,spec} {}
       TypeDeclaration(index<FundType> objType, index<Identifier> name, index<ParameterList> spec):Statement{OpID::MAKE_TYPE,objType,name,spec} {}
 
 
@@ -29,15 +30,17 @@ struct clef::TypeDeclaration : public clef::Statement {
       index<const Identifier> name() const { return _rhs; }
       
       NodeType specType() const { return _extraType; }
+      index<void> spec() const { return _extra; }
       index<ObjTypeSpec>& objSpec() { return reinterpret_cast<index<ObjTypeSpec>&>(_extra); }
       index<const ObjTypeSpec> objSpec() const { return _extra; }
       index<InterfaceSpec>& ifaceSpec() { return reinterpret_cast<index<InterfaceSpec>&>(_extra); }
       index<const InterfaceSpec> ifaceSpec() const { return _extra; }
       index<NamespaceSpec>& nsSpec() { return reinterpret_cast<index<NamespaceSpec>&>(_extra); }
       index<const NamespaceSpec> nsSpec() const { return _extra; }
+      index<Function>& funcSpec() { return reinterpret_cast<index<Function>&>(_extra); }
+      index<const Function> funcSpec() const { return _extra; }
       index<ParameterList>& otherSpec() { return reinterpret_cast<index<ParameterList>&>(_extra); }
       index<const ParameterList> otherSpec() const { return _extra; }
-      index<void> spec() const { return _extra; }
 };
 
 namespace mcsl {
