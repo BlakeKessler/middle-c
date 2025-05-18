@@ -22,9 +22,9 @@ class clef::InterfaceSpec {
       mcsl::dyn_arr<index<Interface>>& inheritedInterfaces() { return _inheritedInterfaces; }
       mcsl::dyn_arr<index<Function>>& staticFuncs() { return _staticFuncs; }
       mcsl::dyn_arr<index<Function>>& methods() { return _methods; }
-      const mcsl::dyn_arr<index<Interface>>& inheritedInterfaces() const { return _inheritedInterfaces; }
-      const mcsl::dyn_arr<index<Function>>& staticFuncs() const { return _staticFuncs; }
-      const mcsl::dyn_arr<index<Function>>& methods() const { return _methods; }
+      const mcsl::arr_span<index<Interface>> inheritedInterfaces() const { return _inheritedInterfaces.span(); }
+      const mcsl::arr_span<index<Function>> staticFuncs() const { return _staticFuncs.span(); }
+      const mcsl::arr_span<index<Function>> methods() const { return _methods.span(); }
 };
 
 #endif //INTERFACE_SPEC_HPP

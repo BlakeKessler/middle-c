@@ -295,7 +295,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
       uint charCount = file.printf(FMT("%s %s"), TNB(decl.objType()), TNB(decl.name()));
       if (decl.spec()) {
          switch (decl.specType()) {
-            case NodeType::OBJ_TYPE_SPEC:
+            case NodeType::OBJ_TYPE_SPEC: {
                auto parentTypes = obj.tree[decl.objSpec()].inheritedTypes().span();
                if (parentTypes.size()) {
                   charCount += file.printf(FMT(" : %s"), parentTypes[0]);
@@ -305,10 +305,11 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
                      }
                   }
                }
-               charCount += file.printf(FMT(" {%s%S};"), TNB_INDENT(decl.objSpec()), obj.indents);
+               charCount += file.printf(FMT(" {%s%S}"), TNB_INDENT(decl.objSpec()), obj.indents);
                break;
+            }
 
-            case NodeType::INTERFACE_SPEC:
+            case NodeType::INTERFACE_SPEC: {
                auto parentTypes = obj.tree[decl.ifaceSpec()].inheritedInterfaces().span();
                if (parentTypes.size()) {
                   charCount += file.printf(FMT(" : %s"), parentTypes[0]);
@@ -320,6 +321,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
                }
                charCount += file.printf(FMT(" {%s%S};"), TNB_INDENT(decl.ifaceSpec()), obj.indents);
                break;
+            }
 
             case NodeType::NAMESPACE_SPEC:
                charCount += file.printf(FMT(" {%s%S};"), TNB_INDENT(decl.nsSpec()), obj.indents);

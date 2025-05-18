@@ -21,9 +21,9 @@ class clef::NamespaceSpec {
       mcsl::dyn_arr<index<Variable>>& vars() {return _vars; }
       mcsl::dyn_arr<index<Function>>& funcs() {return _funcs; }
       mcsl::dyn_arr<index<Type>>& types() {return _types; }
-      const mcsl::dyn_arr<index<Variable>>& vars() const {return _vars; }
-      const mcsl::dyn_arr<index<Function>>& funcs() const {return _funcs; }
-      const mcsl::dyn_arr<index<Type>>& types() const {return _types; }
+      const mcsl::arr_span<index<Variable>> vars() const {return _vars.span(); }
+      const mcsl::arr_span<index<Function>> funcs() const {return _funcs.span(); }
+      const mcsl::arr_span<index<Type>> types() const {return _types.span(); }
 };
 
 #endif //NAMESPACE_SPEC_HPP

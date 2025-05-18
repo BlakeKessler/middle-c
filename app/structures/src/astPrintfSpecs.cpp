@@ -16,8 +16,8 @@
 //!TODO: probably shouldn't just return 0 without doing anything when printing with `%b`
 
 #define PRINT_ARR_S(arr, before)\
-for (auto elem : spec.arr()) {                                                   \
-   charsPrinted += file.printf(FMT("%S" before "%s;"), obj.indents, TNB(elem));  \
+for (auto elem : spec.arr()) {                                                \
+   charsPrinted += file.printf(FMT("%S" before "%s"), obj.indents, TNB(elem));\
 }
 #define PRINT_ARR_B(arr)\
 charsPrinted += file.printf(FMT("%b"), spec.arr().size());  \
