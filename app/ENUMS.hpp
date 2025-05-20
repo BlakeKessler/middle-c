@@ -752,25 +752,42 @@ namespace clef {
 
 
 
-   enum class QualMask : uint16 {
-      CONST,
-      CONSTEXPR,
-      IMMEDIATE,
-      VIEW,
-      NON_OWNING,
-      MUTABLE,
-      VOLATILE,
-      ATOMIC,
-      EXTERN,
-      INLINE,
-      NOEXCEPT,
-      VIRTUAL,
-      OVERRIDE,
+   enum class [[clang::flag_enum]] QualMask : uint16 {
+      _no_quals = 0,
 
-      PUBLIC,
-      PRIVATE,
-      PROTECTED,
+      CONST       =  1_m,
+      CONSTEXPR   =  2_m,
+      IMMEDIATE   =  3_m,
+      VIEW        =  4_m,
+      NON_OWNING  =  5_m,
+      MUTABLE     =  6_m,
+      VOLATILE    =  7_m,
+      ATOMIC      =  8_m,
+      EXTERN      =  9_m,
+      INLINE      = 10_m,
+      NOEXCEPT    = 11_m,
+      VIRTUAL     = 12_m,
+      OVERRIDE    = 13_m,
+
+      PUBLIC      = 14_m,
+      PRIVATE     = 15_m,
+      PROTECTED   = 16_m,
    };
+   constexpr auto operator+(const QualMask t) noexcept { return std::to_underlying(t); }
+   constexpr QualMask toQual(KeywordID kw) {
+      //check range
+      if (kw < KeywordID::__FIRST_QUAL || kw > KeywordID::__LAST_QUAL) {
+         return QualMask::_no_quals;
+      }
+      //apply identity
+      return (QualMask)(1 << (+kw - +KeywordID::__FIRST_QUAL));
+
+      //compile-time checks to ensure that this works
+      static_assert((+KeywordID::__LAST_QUAL - +KeywordID::__FIRST_QUAL + 1) == (sizeof(QualMask) * 8));
+      static_assert((1 << (+KeywordID::CONST - +KeywordID::__FIRST_QUAL)) == +QualMask::CONST);
+      static_assert((1 << (+KeywordID::PROTECTED - +KeywordID::__FIRST_QUAL)) == +QualMask::PROTECTED);
+   }
+   static_assert(toQual(KeywordID::PRIVATE) == QualMask::PRIVATE);
 }
 
 #endif //ENUMS_HPP
