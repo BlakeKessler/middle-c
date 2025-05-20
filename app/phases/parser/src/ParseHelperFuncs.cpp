@@ -92,7 +92,7 @@ clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName)
 clef::index<clef::Decl> clef::Parser::parseLetStmt(index<Identifier> scopeName) {
    if (tryConsumeKeyword(KeywordID::FUNC)) { [[unlikely]]; //handle functions separately
       index<Function> funcptr = parseFunction();
-      return tree.make<Decl>(tree[funcptr].signature(), funcptr, funcptr);
+      return tree.make<Decl>(tree[funcptr].signature(), funcptr, toExpr(+funcptr));
    }
    
    //declaration
