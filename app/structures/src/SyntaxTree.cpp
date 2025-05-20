@@ -9,7 +9,7 @@
 #include "MAP_MACRO.h"
 
 #define ID(fund) id = fund; break
-//!NOTE: currently uses LP64 data model no matter what
+//!TODO: support data models besides LP64
 clef::index<clef::FundType> clef::SyntaxTree::getFundType(const KeywordID keyword) {
    using enum FundTypeID;
    FundTypeID id;

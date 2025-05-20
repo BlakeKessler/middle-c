@@ -278,7 +278,7 @@ char clef::Lexer::parseChar(char*& curr, char* const end) {
                }
                if (numEnd != curr) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("bad octal numeric escape sequence")); }
                //parse digit sequence
-               do { //!NOTE: kinda unsafe, but should alwawys work if implemented correctly
+               do { //!NOTE: kinda unsafe, but should always work if implemented correctly
                   debug_assert(numEnd > numBegin);
                   ushort tmp = (ushort)mcsl::str_to_uint(numBegin, numEnd, 8);
                   if (tmp == (char)tmp) { ch = (char)tmp; break; }
@@ -300,7 +300,7 @@ char clef::Lexer::parseChar(char*& curr, char* const end) {
                }
                if (numEnd != curr) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("bad decimal numeric escape sequence")); }
                //parse digit sequence
-               do { //!NOTE: kinda unsafe, but should alwawys work if implemented correctly
+               do { //!NOTE: kinda unsafe, but should always work if implemented correctly
                   debug_assert(numEnd > numBegin);
                   ushort tmp = (ushort)mcsl::str_to_uint(numBegin, numEnd, 10);
                   if (tmp == (char)tmp) { ch = (char)tmp; break; }
@@ -334,7 +334,7 @@ char clef::Lexer::parseChar(char*& curr, char* const end) {
             case 'v': ch = '\v'; ++curr; break;
 
             default: if (*curr < 32 || *curr > 126) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("unprintable escaped character literal (%u)"), *curr); }
-               //!NOTE: INCOMPLETE - needs a warning for unrecognized escape sequence
+               //!TODO: warning for unrecognized escape sequence
                [[fallthrough]];
             case '\'': [[fallthrough]];
             case '\"': [[fallthrough]];

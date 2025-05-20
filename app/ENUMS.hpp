@@ -652,22 +652,22 @@ namespace clef {
       NULL = 0,
 
       CHAR = 1,
-      WCHAR,   //!NOTE: CURRENETLY UNSUPPORTED
-      CHAR8,   //!NOTE: CURRENETLY UNSUPPORTED
-      CHAR16,  //!NOTE: CURRENETLY UNSUPPORTED
-      CHAR32,  //!NOTE: CURRENETLY UNSUPPORTED
+      WCHAR,   //!TODO: currently unsupported
+      CHAR8,   //!TODO: currently unsupported
+      CHAR16,  //!TODO: currently unsupported
+      CHAR32,  //!TODO: currently unsupported
 
       STR = 9,
-      WSTR,    //!NOTE: CURRENETLY UNSUPPORTED
-      STR8,    //!NOTE: CURRENETLY UNSUPPORTED
-      STR16,   //!NOTE: CURRENETLY UNSUPPORTED
-      STR32,   //!NOTE: CURRENETLY UNSUPPORTED
+      WSTR,    //!TODO: currently unsupported
+      STR8,    //!TODO: currently unsupported
+      STR16,   //!TODO: currently unsupported
+      STR32,   //!TODO: currently unsupported
 
       UNPROCESSED_STR = 25,
-      UNPROCESSED_WSTR,    //!NOTE: CURRENETLY UNSUPPORTED
-      UNPROCESSED_STR8,    //!NOTE: CURRENETLY UNSUPPORTED
-      UNPROCESSED_STR16,   //!NOTE: CURRENETLY UNSUPPORTED
-      UNPROCESSED_STR32,   //!NOTE: CURRENETLY UNSUPPORTED
+      UNPROCESSED_WSTR,    //!TODO: currently unsupported
+      UNPROCESSED_STR8,    //!TODO: currently unsupported
+      UNPROCESSED_STR16,   //!TODO: currently unsupported
+      UNPROCESSED_STR32,   //!TODO: currently unsupported
 
       __STR_TYPE = 8,
    };

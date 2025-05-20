@@ -51,7 +51,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseClass() {
    return tree.make<TypeDecl>(tree.getFundType(KeywordID::CLASS), classptr, specIndex);
 }
 
-//!HACK: temporarily relies on clef::Parser::parseClass
+//!HACK: temporarily assumes that the syntax and memory layout of the AST nodes for structs and classes are identical and depends on clef::Parser::parseClass()
 clef::index<clef::TypeDecl> clef::Parser::parseStruct() {
    index<TypeDecl> decl = parseClass();
    tree[decl].objType() = tree.getFundType(KeywordID::STRUCT);
@@ -174,7 +174,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseEnum() {
    return tree.make<TypeDecl>(tree.getFundType(KeywordID::ENUM), enumptr, enumerators);
 }
 
-//!HACK: ASSUMES THAT THE SYNTAX AND MEMORY LAYOUT OF THE AST NODES FOR MASKS AND ENUMS ARE IDENTICAL
+//!HACK: temporarily assumes that the syntax and memory layout of the AST nodes for masks and enums are identical and depends on clef::Parser::parseEnum()
 clef::index<clef::TypeDecl> clef::Parser::parseMask() {
    index<TypeDecl> decl = parseEnum();
    tree[decl].objType() = tree.getFundType(KeywordID::MASK);

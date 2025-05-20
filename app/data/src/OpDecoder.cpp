@@ -25,7 +25,7 @@ requires ( sizeof...(Argv_t) == _size )
       OpData* back = _opBuf.begin();
       OpData* bufEnd = _opBuf.end();
 
-      while (++it < bufEnd) { //!NOTE: TEST THIS
+      while (++it < bufEnd) {
          if (it->opID() == back->opID()) {
             assert(back->combineWith(*it), "invalid operator combination (conflicting strings or precedences)");
          } else {

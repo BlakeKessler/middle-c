@@ -10,7 +10,6 @@ namespace fs = std::filesystem;
 
 //!read Middle C source code file into vector of lines of code
 //!returns a Source object with the data
-//!NOTE: std::fgets to get a line
 clef::Source clef::Source::readFile(const char* path) {
    //read file into a string
    const uint fileSize = fs::file_size(fs::path(path));
@@ -20,7 +19,7 @@ clef::Source clef::Source::readFile(const char* path) {
    assert(fileSize == _buf.size(), "incorrect number of characters read from source code file");
 
    //validate file encoding (UTF-8)
-   //!NOTE: UNFINISHED
+   //!TODO: validate file encoding
 
 
    //find number of lines

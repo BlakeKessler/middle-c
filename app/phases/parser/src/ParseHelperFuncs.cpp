@@ -140,7 +140,6 @@ clef::index<clef::Variable> clef::Parser::parseParam(index<Identifier> scopeName
    index<Identifier> varName = parseIdentifier(scopeName);
    return tree.remake<Variable>(varName, typeName, tree[varName]);
 }
-//!NOTE: does not support inline function definitions
 clef::index<clef::Variable> clef::Parser::parseDefaultableParam(index<Identifier> scopeName) {
    index<Variable> var = parseParam(scopeName);
    if (tryConsumeOperator(OpID::ASSIGN)) {

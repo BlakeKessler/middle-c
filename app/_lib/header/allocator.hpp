@@ -9,7 +9,7 @@
 
 //!allocates and manages dynamic memory blocks
 //!HACK: relies on all mcsl::dyn_arr<T> having identical memory layouts
-//!NOTE: would probably be a good idea to find a way to make this runtime-type-safe (std::type_info* would probably help)
+//!TODO: would probably be a good idea to find a way to make this runtime-type-safe (std::type_info* would probably help)
 //  should probably also make that only active in debug mode for efficiency
 class clef::allocator {
    private:
