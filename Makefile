@@ -52,14 +52,14 @@ objects: $(ALL_OBJ_FILES)
 #compile unit test files
 .PHONY: Lexer
 Lexer: _build/test/src/TestLexer.mk test/src/TestLexer.cpp | $(ALL_OBJ_FILES) setup
-	$(COMPILE) test/src/TestLexer.cpp $(shell find _build | grep "\.o$$") -o _build/out/$@.out
+	$(COMPILE) test/src/TestLexer.cpp $(shell find _build -name *.o) -o _build/out/$@.out
 .PHONY: Parser
 Parser: _build/test/src/TestParser.mk test/src/TestParser.cpp | $(ALL_OBJ_FILES) setup
-	$(COMPILE) test/src/TestParser.cpp $(shell find _build | grep "\.o$$") -o _build/out/$@.out
+	$(COMPILE) test/src/TestParser.cpp $(shell find _build -name *.o) -o _build/out/$@.out
 
 .PHONY: StrToNum
 StrToNum: _build/test/src/TestStrToNum.mk test/src/TestStrToNum.cpp | $(ALL_OBJ_FILES) setup
-	$(COMPILE) test/src/TestStrToNum.cpp $(shell find _build | grep "\.o$$") -o _build/out/$@.out
+	$(COMPILE) test/src/TestStrToNum.cpp $(shell find _build -name *.o) -o _build/out/$@.out
 .PHONY: Printf
 Printf: _build/test/src/TestPrintf.mk test/src/TestPrintf.cpp | $(ALL_OBJ_FILES) setup
-	$(COMPILE) test/src/TestPrintf.cpp $(shell find _build | grep "\.o$$") -o _build/out/$@.out
+	$(COMPILE) test/src/TestPrintf.cpp $(shell find _build -name *.o) -o _build/out/$@.out
