@@ -204,12 +204,14 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             if (kw == KeywordID::FUNC) {
                ++tokIt;
                operandStack.push_back(+parseFunction());
+               prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
             else if (kw == KeywordID::LET) {
                ++tokIt;
                operandStack.push_back(+parseLetStmt());
-               TODO;
+               prevTokIsOperand = true;
+               goto PARSE_EXPR_CONTINUE;
             }
             else if (isValue(kw)) {
                operandStack.push_back(tree.getValueKeyword(kw));
@@ -232,7 +234,6 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
                goto PARSE_EXPR_CONTINUE;
             }
             else if (isType(kw)) {
-               //!TODO: change for `let` syntax
                operandStack.push_back(+tree.getFundType(kw));
                ++tokIt;
                prevTokIsOperand = true;
@@ -295,12 +296,10 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
                debug_assert(operandStack.size());
                index<ArgList> args = parseArgList(blockType);
                operandStack.push_back(+tree.makeExpr(getInvoker(blockType),operandStack.pop_back(),(index<astNode>)args));
-               //!TODO: push invoker to operator stack?
             } else if (blockType == BlockType::INIT_LIST) { //tuple
                operandStack.push_back(+parseArgList(blockType));
             } else { //block subexpression
                operandStack.push_back(+parseExpr());
-               //!TODO: push invoker to operator stack?
                consumeBlockDelim(blockType, BlockDelimRole::CLOSE, "bad block subexpression");
             }
             prevTokIsOperand = true;
@@ -321,7 +320,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
          mcsl::write(mcsl::stdout, tree[operandStack[i]]);
          mcsl::printf(mcsl::FMT("\n"));
       }
-      mcsl::stdout.flush();
+      mcsl::flush();
       logError(ErrCode::BAD_EXPR, "invalid expression");
    }
    return toExpr(operandStack[0]);
