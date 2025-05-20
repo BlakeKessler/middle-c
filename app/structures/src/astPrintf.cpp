@@ -115,12 +115,12 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::If> obj, char mode,
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
       if (!ifstmt.condition()) { //else
          debug_assert(!ifstmt.elseStmt());
-         return file.printf(FMT("%s;"), TNB(ifstmt.procedure()));
+         return file.printf(FMT("%s"), TNB(ifstmt.procedure()));
       }
       if (ifstmt.elseStmt()) { //if with else
          return file.printf(FMT("if (%s) %s else %s"), TNB(ifstmt.condition()), TNB(ifstmt.procedure()), TNB(ifstmt.elseStmt()));
       } else { //if without else
-         return file.printf(FMT("if (%s) %s;"), TNB(ifstmt.condition()), TNB(ifstmt.procedure()));
+         return file.printf(FMT("if (%s) %s"), TNB(ifstmt.condition()), TNB(ifstmt.procedure()));
       }
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       return file.printf(FMT("%b%b%b"), TNB(ifstmt.condition()), TNB(ifstmt.procedure()), TNB(ifstmt.elseStmt()));
@@ -137,7 +137,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ForLoop> obj, char 
    }
    const ForLoop& loop = *obj;
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      return file.printf(FMT("for (%s) %s;"), TNB(loop.params()), TNB(loop.procedure()));
+      return file.printf(FMT("for (%s) %s"), TNB(loop.params()), TNB(loop.procedure()));
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       return file.printf(FMT("%b%b"), TNB(loop.params()), TNB(loop.procedure()));
    } else {
@@ -168,7 +168,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ForeachLoop> obj, c
    }
    const ForeachLoop& loop = *obj;
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      return file.printf(FMT("foreach (%s) %s;"), TNB(loop.params()), TNB(loop.procedure()));
+      return file.printf(FMT("foreach (%s) %s"), TNB(loop.params()), TNB(loop.procedure()));
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       return file.printf(FMT("%b%b"), TNB(loop.params()), TNB(loop.procedure()));
    } else {
@@ -199,7 +199,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::WhileLoop> obj, cha
    }
    const WhileLoop& loop = *obj;
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      return file.printf(FMT("while (%s) %s;"), TNB(loop.condition()), TNB(loop.procedure()));
+      return file.printf(FMT("while (%s) %s"), TNB(loop.condition()), TNB(loop.procedure()));
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       return file.printf(FMT("%b%b"), TNB(loop.condition()), TNB(loop.procedure()));
    } else {
@@ -215,7 +215,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::DoWhileLoop> obj, c
    }
    const DoWhileLoop& loop = *obj;
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      return file.printf(FMT("do %s while (%s);"), TNB(loop.procedure()), TNB(loop.condition()));
+      return file.printf(FMT("do %s while (%s)"), TNB(loop.procedure()), TNB(loop.condition()));
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       return file.printf(FMT("%b%b"), TNB(loop.procedure()), TNB(loop.condition()));
    } else {
@@ -231,7 +231,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Switch> obj, char m
    }
    const Switch& switchstmt = *obj;
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      return file.printf(FMT("switch (%s) %s;"), TNB(switchstmt.condition()), TNB(switchstmt.cases()));
+      return file.printf(FMT("switch (%s) %s"), TNB(switchstmt.condition()), TNB(switchstmt.cases()));
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       return file.printf(FMT("%b%b"), TNB(switchstmt.condition()), TNB(switchstmt.cases()));
    } else {
@@ -246,7 +246,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Match> obj, char mo
    }
    const Match& matchstmt = *obj;
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      return file.printf(FMT("switch (%s) %s;"), TNB(matchstmt.condition()), TNB(matchstmt.cases()));
+      return file.printf(FMT("match (%s) %s"), TNB(matchstmt.condition()), TNB(matchstmt.cases()));
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       return file.printf(FMT("%b%b"), TNB(matchstmt.condition()), TNB(matchstmt.cases()));
    } else {
@@ -262,7 +262,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TryCatch> obj, char
    }
    const TryCatch& trycatch = *obj;
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      return file.printf(FMT("try %s catch (%s) %s;"), TNB(trycatch.procedure()), TNB(trycatch.err()), TNB(trycatch.errHandler()));
+      return file.printf(FMT("try %s catch (%s) %s"), TNB(trycatch.procedure()), TNB(trycatch.err()), TNB(trycatch.errHandler()));
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       return file.printf(FMT("%b%b%b"), TNB(trycatch.procedure()), TNB(trycatch.err()), TNB(trycatch.errHandler()));
    } else {
