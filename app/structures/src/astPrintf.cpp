@@ -412,15 +412,18 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
       ubyte selfPrec = PRECS(expr.opID(), expr.lhs(), expr.rhs());
       if (canDownCastTo(NodeType::EXPR, expr.lhsType())) {
          const clef::Expr& lhs = obj.tree[(clef::index<Expr>)expr.lhs()];
-         lhsNeedsParens = selfPrec > PRECS(lhs.opID(), lhs.lhs(), lhs.rhs());
+         const uint prec = PRECS(lhs.opID(), lhs.lhs(), lhs.rhs());
+         lhsNeedsParens = prec && selfPrec > prec;
       }
       if (canDownCastTo(NodeType::EXPR, expr.rhsType())) {
          const clef::Expr& rhs = obj.tree[(clef::index<Expr>)expr.rhs()];
-         rhsNeedsParens = selfPrec > PRECS(rhs.opID(), rhs.lhs(), rhs.rhs());
+         const uint prec = PRECS(rhs.opID(), rhs.lhs(), rhs.rhs());
+         rhsNeedsParens = prec && selfPrec > prec;
       }
       if (canDownCastTo(NodeType::EXPR, expr.extraType())) {
          const clef::Expr& extra = obj.tree[(clef::index<Expr>)expr.extra()];
-         extraNeedsParens = selfPrec > PRECS(extra.opID(), extra.lhs(), extra.rhs());
+         const uint prec = PRECS(extra.opID(), extra.lhs(), extra.rhs());
+         extraNeedsParens = prec && selfPrec > prec;
       }
 
       switch (expr.opID()) {
