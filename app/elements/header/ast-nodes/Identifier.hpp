@@ -39,6 +39,9 @@ struct clef::Identifier {
 
       QualMask& quals() { return _quals; }
       QualMask quals() const { return _quals; }
+      void addQuals(QualMask mask) { _quals |= mask; }
+      void removeQuals(QualMask mask) { _quals &= ~mask; }
+      void setQualMask(QualMask mask) { _quals = mask; }
 
       inline bool sameScope(const Identifier& other) const { return _scopeName == other._scopeName; }
       inline bool sameName(const Identifier& other) const { return name() == other.name(); }
