@@ -64,7 +64,7 @@ namespace clef {
             VAR_PARAM,
             FUND_TYPE,
                FUNC_SIG,
-            ENUM, //!TODO: make ENUM through CLASS extend FundType instead of just Type
+            ENUM,
             MASK,
             UNION,
             NAMESPACE,
@@ -108,6 +108,8 @@ namespace clef {
             return from >= NodeType::IDEN && from <= NodeType::GENERIC;
          case NodeType::TYPE:
             return from >= NodeType::TYPE && from <= NodeType::GENERIC;
+         case NodeType::FUND_TYPE:
+            return from >= NodeType::FUND_TYPE && from <= NodeType::FUNC_SIG;
          case NodeType::EXPR:
             return from >= NodeType::EXPR && from <= NodeType::TRY_CATCH;
          case NodeType::STMT:

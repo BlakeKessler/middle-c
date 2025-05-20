@@ -4,6 +4,7 @@
 #include "SyntaxTree.hpp"
 #include "astNode.hpp"
 #include "pretty-print.hpp"
+#include "OperatorData.hpp"
 #include "io.hpp"
 
 uint mcsl::writef(File& file, const clef::SyntaxTree& tree, char mode, FmtArgs args) {
@@ -396,9 +397,29 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
       return 0;
    }
    
-   #define BIN(op) file.printf(FMT("%s" op "%s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()))
+   #define SUBEXPR(operand, expr, b, a) file.printf(operand##NeedsParens ? FMT(b "(%s)" a) : FMT(b "%s" a), expr)
+   #define BIN(op) SUBEXPR(lhs, TNB_AST(expr.lhs()),,op) + SUBEXPR(rhs, TNB_AST(expr.rhs()),,)
+   // #define BIN(op) file.printf(FMT("%s" op "%s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()))
    const clef::Expr& expr = *obj;
    if ((mode | CASE_BIT) == 's') {
+      //!TODO: handle special cases for precedence
+      bool lhsNeedsParens = false;
+      bool rhsNeedsParens = false;
+      bool extraNeedsParens = false;
+      ubyte selfPrec = PRECS(expr.opID(), expr.lhs(), expr.rhs());
+      if (canDownCastTo(NodeType::EXPR, expr.lhsType())) {
+         const clef::Expr& lhs = obj.tree[(clef::index<Expr>)expr.lhs()];
+         lhsNeedsParens = selfPrec > PRECS(lhs.opID(), lhs.lhs(), lhs.rhs());
+      }
+      if (canDownCastTo(NodeType::EXPR, expr.rhsType())) {
+         const clef::Expr& rhs = obj.tree[(clef::index<Expr>)expr.rhs()];
+         rhsNeedsParens = selfPrec > PRECS(rhs.opID(), rhs.lhs(), rhs.rhs());
+      }
+      if (canDownCastTo(NodeType::EXPR, expr.extraType())) {
+         const clef::Expr& extra = obj.tree[(clef::index<Expr>)expr.extra()];
+         extraNeedsParens = selfPrec > PRECS(extra.opID(), extra.lhs(), extra.rhs());
+      }
+
       switch (expr.opID()) {
          case NULL:
             debug_assert(!expr.rhs() && !expr.extra());
@@ -423,7 +444,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case LIST_INVOKE: //curly brackets
             return file.printf(FMT("%s{%s}"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
          case SPECIALIZER_INVOKE: //triangle brackets
-            return file.printf(FMT("%s<%s>"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
+            return file.printf(FMT("%s<:%s:>"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
 
          case CALL_OPEN        : UNREACHABLE;
          case CALL_CLOSE       : UNREACHABLE;
@@ -439,27 +460,34 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
 
          case INTERP_STR_INVOKE: TODO;
          case TERNARY_INVOKE   :
-            return file.printf(FMT("%s ? %s : %s"), TNB_CAST2(Expr, expr.lhs()), TNB_CAST2(Expr, expr.rhs()), TNB_CAST2(Expr, expr.extra()));
+            return SUBEXPR(lhs, TNB_CAST2(Expr, expr.lhs()),, " ? ")
+                 + SUBEXPR(rhs, TNB_CAST2(Expr, expr.rhs()),, " : ")
+                 + SUBEXPR(extra, TNB_CAST2(Expr, expr.extra()),,);
+            // return file.printf(FMT("%s ? %s : %s"), TNB_CAST2(Expr, expr.lhs()), TNB_CAST2(Expr, expr.rhs()), TNB_CAST2(Expr, expr.extra()));
 
          case PREPROCESSOR: TODO;
 
          case SCOPE_RESOLUTION: UNREACHABLE;
 
          case INC: //increment
-            if (expr.lhs()) { //!NOTE: might have these two backwards
-               return file.printf(FMT("%s++"), TNB_AST(expr.lhs()));
+            if (expr.lhs()) {
+               return SUBEXPR(lhs, TNB_AST(expr.lhs()),, "++");
+               // return file.printf(FMT("%s++"), TNB_AST(expr.lhs()));
             } else {
                debug_assert(expr.rhs());
-               return file.printf(FMT("++%s"), TNB_AST(expr.rhs()));
+               return SUBEXPR(rhs, TNB_AST(expr.rhs()), "++",);
+               // return file.printf(FMT("++%s"), TNB_AST(expr.rhs()));
             }
             UNREACHABLE;
          case DEC: //decrement
-         if (expr.lhs()) { //!NOTE: might have these two backwards
-            return file.printf(FMT("%s--"), TNB_AST(expr.lhs()));
-         } else {
-            debug_assert(expr.rhs());
-            return file.printf(FMT("--%s"), TNB_AST(expr.rhs()));
-         }
+            if (expr.lhs()) {
+               return SUBEXPR(lhs, TNB_AST(expr.lhs()),, "--");
+               // return file.printf(FMT("%s--"), TNB_AST(expr.lhs()));
+            } else {
+               debug_assert(expr.rhs());
+               return SUBEXPR(rhs, TNB_AST(expr.rhs()), "--",);
+               // return file.printf(FMT("--%s"), TNB_AST(expr.rhs()));
+            }
          UNREACHABLE;
 
          case MEMBER_ACCESS    : //.
@@ -489,11 +517,11 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case MOD: return BIN(" %% ");
          case EXP: return BIN(" ^^ ");
          
-         case LOGICAL_NOT: return file.printf(FMT("!%s"), TNB_AST(expr.lhs()));
+         case LOGICAL_NOT: return SUBEXPR(lhs, TNB_AST(expr.lhs()), "!",); //return file.printf(FMT("!%s"), TNB_AST(expr.lhs()));
          case LOGICAL_AND: return BIN(" && ");
          case LOGICAL_OR : return BIN(" || ");
 
-         case BIT_NOT    : return file.printf(FMT("~%s"), TNB_AST(expr.lhs()));
+         case BIT_NOT    : return SUBEXPR(lhs, TNB_AST(expr.lhs()), "~",); //return file.printf(FMT("~%s"), TNB_AST(expr.lhs()));
          case BIT_AND    : return BIN(" & ");
          case BIT_OR     : return BIN(" | ");
          case BIT_XOR    : return BIN(" ^ ");
@@ -599,6 +627,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
    }
    UNREACHABLE;
    #undef BIN
+   #undef SUBEXPR
 }
 
 

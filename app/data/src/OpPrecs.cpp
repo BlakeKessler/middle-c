@@ -1,107 +1,37 @@
-#ifndef OP_DECODER_CPP
-#define OP_DECODER_CPP
+#ifndef OP_PRECS_CPP
+#define OP_PRECS_CPP
 
-#include "OpDecoder.hpp"
+#include "OpPrecs.hpp"
 
-#include "str_slice.hpp"
-#include "assert.hpp"
-#include <algorithm>
+#pragma region inlinesrc
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-value"
+template <mcsl::is_t<clef::OpData>... Argv_t> constexpr clef::OpPrecs::OpPrecs(const Argv_t... initList):
+   _precs{} {
+      ((_precs[+initList.opID()][makeFlags(initList.props())] = initList.precedence()), ...);
+}
+#pragma GCC diagnostic pop
 
-template <uint _size> template <mcsl::is_t<clef::OpData>... Argv_t>
-constexpr clef::OpDecoder<_size>::OpDecoder(const Argv_t... initList)
-requires ( sizeof...(Argv_t) == _size )
-:_firstCharBuckets{},_opBuf{initList...},_opCount{0} {
-   //sort operators - descending order to:
-   // * ensure that longer matches come first
-   // * ensure that operators with higher precedence come first
-   std::sort(_opBuf.begin(), _opBuf.end(), [](const OpData& lhs, const OpData& rhs){
-      sint temp = lhs.toString() <=> rhs.toString();
-      return temp ? temp > 0 : lhs > rhs;
-   });
-
-   ///remove duplicates and adjust OpProps accordingly
-   {
-      OpData* it = _opBuf.begin();
-      OpData* back = _opBuf.begin();
-      OpData* bufEnd = _opBuf.end();
-
-      while (++it < bufEnd) { //!NOTE: TEST THIS
-         if (it->opID() == back->opID()) {
-            assert(back->combineWith(*it), "invalid operator combination (conflicting strings or precedences)");
-         } else {
-            *++back = *it;
-         }
-      }
-      _opCount = back - _opBuf.begin();
+constexpr ubyte clef::OpPrecs::makeFlags(OpProps props) {
+   using enum OpProps;
+   switch (props) {
+      case    TYPE_MOD: [[fallthrough]];
+      case      PREFIX: return 0b10;
+      case     POSTFIX: return 0b01;
+      case  INFIX_LEFT: [[fallthrough]];
+      case INFIX_RIGHT: return 0b11;
+      default         : UNREACHABLE;
    }
-   
-
-   //construct buckets (by first char)
-   uint start = 0;
-   for (uint i = 1; i < _opCount; ++i) {
-      //check for end of group
-      if (_opBuf[i].toString()[0] != _opBuf[start].toString()[0]) {
-         _firstCharBuckets[_opBuf[start].toString()[0] % _firstCharBuckets.size()] = {start, i};
-         start = i;
-      }
-   }
-   //handle last group
-   _firstCharBuckets[_opBuf[start].toString()[0] % _firstCharBuckets.size()] = {start, _opCount};
 }
 
-template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef::OpData clef::OpDecoder<_size>::operator[](const str_t& str) const {
-   //check string size
-   if (!str.size()) {
-      return OpData{};
-   }
-
-   //find operator group
-   const auto bucketBounds = self[str[0]];
-   if (str[0] == _opBuf[bucketBounds.first].toString()[0]) { //check that the first character is correct
-      for (uint i = bucketBounds.first; i < bucketBounds.second; ++i) {
-         if (!_opBuf[i].toString().substrcmp(str)) {
-            return _opBuf[i];
-         }
-      }
-   }
-   //no operator group found - return null group
-   return OpData{};
-}
-
-[[gnu::const]] constexpr auto clef::GetAllOplikesData() {
+constexpr clef::OpPrecs clef::GetAllOpPrecsData() {
    using Op = OpID;
    using Prop = OpProps;
    using Type = TokenType;
    using _ = OpData;
-   #define lit(str) mcsl::str_slice::make_from_cstr(str)
-   // using lit = mcsl::raw_buf_str<MAX_OP_LEN, ubyte>;
+   #define lit(str) mcsl::str_slice{}
    ubyte prec = 16;
-   return OpDecoder{
-      _(lit("#"),   Op::PREPROCESSOR,      Prop::PREFIX,      0,      Type::PREPROC_INIT), //preprocessor
-      _(lit("::"),  Op::SCOPE_RESOLUTION,  Prop::INFIX_LEFT,  0,      Type::OP          ), //scope resolution
-      _(lit("\\"),  Op::ESCAPE,            Prop::PREFIX,      0,      Type::ESC         ), //escape character
-      _(lit(";"),   Op::EOS,               Prop::PREFIX,      0,      Type::EOS         ), //end of statement
-      _(lit("//"),  Op::LINE_CMNT,         Prop::PREFIX,      0,      Type::BLOCK_DELIM ), //line comment
-      _(lit("/*"),  Op::BLOCK_CMNT_OPEN,   Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //block comment
-      _(lit("*/"),  Op::BLOCK_CMNT_CLOSE,  Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //block comment
-      _(lit("\'"),  Op::CHAR,              Prop::DELIM,       0,      Type::BLOCK_DELIM ), //char
-      _(lit("\""),  Op::STRING,            Prop::DELIM,       0,      Type::BLOCK_DELIM ), //string
-      _(lit("`"),   Op::INTERP_STRING,     Prop::DELIM,       0,      Type::BLOCK_DELIM ), //interpolated string
-
-
-      _(lit("("),   Op::CALL_OPEN,         Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //function calls/functional casts
-      _(lit(")"),   Op::CALL_CLOSE,        Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //function calls/functional casts
-      _(lit("["),   Op::SUBSCRIPT_OPEN,    Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //subscript
-      _(lit("]"),   Op::SUBSCRIPT_CLOSE,   Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //subscript
-      _(lit("{"),   Op::LIST_OPEN,         Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //scope/functional casts
-      _(lit("}"),   Op::LIST_CLOSE,        Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //scope/functional casts
-      _(lit("<:"),  Op::SPECIALIZER_OPEN,  Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //specifier
-      _(lit(":>"),  Op::SPECIALIZER_CLOSE, Prop::CLOSE_DELIM, 0,      Type::BLOCK_DELIM ), //specifier
-
-
-
-
-
+   return OpPrecs{
       _(lit("++"),  Op::INC,               Prop::PREFIX,      0,      Type::OP          ), //pre-increment
       _(lit("--"),  Op::DEC,               Prop::PREFIX,      0,      Type::OP          ), //pre-decrement
       _(lit("."),   Op::MEMBER_ACCESS,     Prop::INFIX_LEFT,  0,      Type::OP          ), //element access
@@ -177,4 +107,4 @@ template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef:
    #undef lit
 }
 
-#endif //OP_DECODER_CPP
+#endif //OP_PRECS_CPP

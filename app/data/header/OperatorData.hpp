@@ -6,9 +6,11 @@
 
 #include "OpData.hpp"
 #include "OpDecoder.hpp"
+#include "OpPrecs.hpp"
 
 namespace clef {
    /*constexpr*/ const OpDecoder OPERATORS = GetAllOplikesData();
+   constexpr OpPrecs PRECS = GetAllOpPrecsData();
 };
 
 #endif //OPERATOR_DATA_HPP
