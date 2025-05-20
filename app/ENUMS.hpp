@@ -774,6 +774,14 @@ namespace clef {
       PROTECTED   = 16_m,
    };
    constexpr auto operator+(const QualMask t) noexcept { return std::to_underlying(t); }
+   constexpr QualMask operator~(const QualMask lhs) noexcept { return (QualMask)(~+lhs); }
+   constexpr QualMask operator&(const QualMask lhs, const QualMask rhs) noexcept { return (QualMask)((+lhs) & (+rhs)); }
+   constexpr QualMask operator^(const QualMask lhs, const QualMask rhs) noexcept { return (QualMask)((+lhs) ^ (+rhs)); }
+   constexpr QualMask operator|(const QualMask lhs, const QualMask rhs) noexcept { return (QualMask)((+lhs) | (+rhs)); }
+   constexpr QualMask& operator&=(QualMask& lhs, const QualMask rhs) noexcept { return lhs = (QualMask)((+lhs) & (+rhs)); }
+   constexpr QualMask& operator^=(QualMask& lhs, const QualMask rhs) noexcept { return lhs = (QualMask)((+lhs) ^ (+rhs)); }
+   constexpr QualMask& operator|=(QualMask& lhs, const QualMask rhs) noexcept { return lhs = (QualMask)((+lhs) | (+rhs)); }
+   
    constexpr QualMask toQual(KeywordID kw) {
       //check range
       if (kw < KeywordID::__FIRST_QUAL || kw > KeywordID::__LAST_QUAL) {
