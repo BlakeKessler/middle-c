@@ -405,7 +405,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
    #define BIN(op) SUBEXPR(lhs, TNB_AST(expr.lhs()),,op) + SUBEXPR(rhs, TNB_AST(expr.rhs()),,)
    const clef::Expr& expr = *obj;
    if ((mode | CASE_BIT) == 's') {
-      //!TODO: handle special cases for precedence
       bool lhsNeedsParens = false;
       bool rhsNeedsParens = false;
       bool extraNeedsParens = false;
