@@ -515,11 +515,11 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case MOD: return BIN(" %% ");
          case EXP: return BIN(" ^^ ");
          
-         case LOGICAL_NOT: return SUBEXPR(lhs, TNB_AST(expr.lhs()), "!",);
+         case LOGICAL_NOT: return SUBEXPR(rhs, TNB_AST(expr.rhs()), "!",);
          case LOGICAL_AND: return BIN(" && ");
          case LOGICAL_OR : return BIN(" || ");
 
-         case BIT_NOT    : return SUBEXPR(lhs, TNB_AST(expr.lhs()), "~",);
+         case BIT_NOT    : return SUBEXPR(rhs, TNB_AST(expr.rhs()), "~",);
          case BIT_AND    : return BIN(" & ");
          case BIT_OR     : return BIN(" | ");
          case BIT_XOR    : return BIN(" ^ ");
