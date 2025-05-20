@@ -83,7 +83,7 @@ clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName)
    index<astNode> name = +parseIdentifier(scopeName);
    tree[name].upCast(NodeType::TYPE);
    while (tokIt->type() == TokenType::OP && +(tokIt->op().props() & OpProps::TYPE_MOD)) {
-      //!TODO: actually do something with the type modifiers
+      TODO;
       ++tokIt;
    }
    return +name;
@@ -195,15 +195,12 @@ template clef::index<clef::SpecList> clef::Parser::parseSpecList<true>(const Blo
 template clef::index<clef::SpecList> clef::Parser::parseSpecList<false>(const BlockType closer);
 
 
-//!TODO: implement parseQuals
 clef::TypeQualMask clef::Parser::parseQuals(const TypeQualMask illegalQuals) {
-   logError(ErrCode::PARSER_NOT_IMPLEMENTED, "type qualifiers are not yet supported");
+   TODO;
 }
-//!TODO: implement parsePreprocStmt
 clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
-   logError(ErrCode::PARSER_NOT_IMPLEMENTED, "preprocessor statements are not yet supported");
+   TODO;
 }
-//!TODO: implement parseCast
 clef::index<clef::Expr> clef::Parser::parseCast(KeywordID castID) {
    debug_assert(isCast(castID));
    consumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::OPEN, "must specify type of cast");

@@ -15,7 +15,7 @@ struct clef::Identifier {
       KeywordID _keywordID;
    protected:
       FundTypeID _id;
-      uint8 pad[2]; //!TODO: use this
+      uint8 pad[2]; //!TODO: use these bytes for something
 
    protected:
       void __printName(mcsl::File& file) const;

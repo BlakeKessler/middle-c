@@ -422,7 +422,7 @@ clef::index<clef::Switch> clef::Parser::parseSwitch() {
          index<Expr> caseExpr = parseExpr();
          consumeOperator(OpID::LABEL_DELIM, "bad CASE in SWITCH statement");
          
-         index<Stmt> firstStmt = parseStmt(); //!TODO: case expr1: case expr2: stmt;
+         index<Stmt> firstStmt = parseStmt(); //!TODO: handle code in the form of `case expr1: case expr2: stmt;`
          tree[procedure].push_back(firstStmt);
          tree[cases].push_back({caseExpr, firstStmt});
 
