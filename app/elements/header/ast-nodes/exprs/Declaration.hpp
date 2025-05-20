@@ -14,6 +14,7 @@ struct clef::Declaration : public clef::Expression {
 
       Declaration():Expression{} {}
       Declaration(index<Type> type, index<Identifier> name):Expression{OpID::LET,type,name} {}
+      template<astNode_t T> Declaration(index<Type> type, index<Identifier> name, index<T> value):Expression{OpID::LET,type,name,value} {}
 
 
       index<Type>& type() { return reinterpret_cast<index<Type>&>(_lhs); }

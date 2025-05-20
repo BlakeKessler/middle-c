@@ -89,15 +89,15 @@ clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName)
    return +name;
 }
 
-mcsl::pair<clef::index<clef::Stmt>, clef::index<clef::Variable>> clef::Parser::parseLetStmt(index<Identifier> scopeName) {
+clef::index<clef::Decl> clef::Parser::parseLetStmt(index<Identifier> scopeName) {
    if (tryConsumeKeyword(KeywordID::FUNC)) { [[unlikely]]; //handle functions separately
       index<Function> funcptr = parseFunction();
-      index<Variable> funcvar = tree.make<Variable>(tree[funcptr].signature(), tree[funcptr]); //!TODO: figure out how to represent function bodies as expressions?
-      return {tree.make<Stmt, Decl>(tree[funcptr].signature(), funcptr), funcvar};
+      return tree.make<Decl>(tree[funcptr].signature(), funcptr, funcptr);
    }
    
    //declaration
-   index<Variable> var = parseParam(scopeName);
+   index<Type> type = parseTypename(scopeName);
+   index<Identifier> varName = parseIdentifier(scopeName);
    //definition (optional)
    index<Expr> val;
    if (tryConsumeOperator(OpID::ASSIGN)) {
@@ -105,18 +105,20 @@ mcsl::pair<clef::index<clef::Stmt>, clef::index<clef::Variable>> clef::Parser::p
    }
    else if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN)) {
       index<ArgList> args = parseArgList(BlockType::INIT_LIST);
-      val = tree.make<Expr>(OpID::LIST_INVOKE, tree[var].type(), args);
+      val = tree.make<Expr>(OpID::LIST_INVOKE, type, args);
    }
    else if (tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN)) {
       index<ArgList> args = parseArgList(BlockType::CALL);
-      val = tree.make<Expr>(OpID::CALL_INVOKE, tree[var].type(), args);
+      val = tree.make<Expr>(OpID::CALL_INVOKE, type, args);
    } else {
       val = 0;
    }
-   tree[var].val() = val;
 
    consumeEOS("LET statement must end with EOS token");
-   return {tree.make<Stmt, Decl>(tree[var].type(), var), var};
+   if (val) {
+      return tree.make<Decl>(type, varName, val);
+   }
+   return tree.make<Decl>(type, varName);
 }
 
 clef::index<clef::Variable> clef::Parser::parseParam(index<Identifier> scopeName) {

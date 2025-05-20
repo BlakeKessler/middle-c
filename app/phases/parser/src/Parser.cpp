@@ -30,7 +30,10 @@ START_PARSE_STMT:
                break;
             case KeywordID::LET     : {
                ++tokIt;
-               return parseLetStmt().first;
+               index<Decl> tmp = parseLetStmt();
+               tree[(index<astNode>)(+tmp)].downCast(NodeType::EXPR);
+               tree[(index<astNode>)(+tmp)].upCast(NodeType::STMT);
+               return +tmp;
             } break;
 
             case KeywordID::NULLPTR : [[fallthrough]];
@@ -204,6 +207,11 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
                operandStack.push_back(+parseFunction());
                goto PARSE_EXPR_CONTINUE;
             }
+            else if (kw == KeywordID::LET) {
+               ++tokIt;
+               operandStack.push_back(+parseLetStmt());
+               TODO;
+            }
             else if (isValue(kw)) {
                operandStack.push_back(tree.getValueKeyword(kw));
                ++tokIt;
@@ -266,7 +274,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             }
             if (prevTokIsOperand) { //binary or postfix unary
                OpData op = tokIt->op();
-               while (operatorStack.size() && operatorStack.back().precedence() >= op.precedence()) { //!NOTE: UNFINISHED (does not consider associativity yet)
+               while (operatorStack.size() && operatorStack.back().precedence() >= op.precedence()) { //!TODO: associativity
                   eval();
                }
                op.removeProps(OpProps::PREFIX);
