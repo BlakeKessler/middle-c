@@ -467,10 +467,20 @@ namespace clef {
       MUTABLE,
       VOLATILE,
       ATOMIC,
-      EXPLICIT,
+      EXTERN,
+      INLINE,
+      NOEXCEPT,
+      VIRTUAL,
+      OVERRIDE,
+
+      PUBLIC,
+      PRIVATE,
+      PROTECTED,
 
       __FIRST_TYPE_QUAL = CONST,
-      __LAST_TYPE_QUAL = EXPLICIT,
+      __LAST_TYPE_QUAL = OVERRIDE,
+      __FIRST_QUAL = CONST,
+      __LAST_QUAL = PROTECTED,
 
       CAST,
       UP_CAST,
@@ -742,20 +752,21 @@ namespace clef {
 
 
 
-   enum class TypeQualMask : uint16 {
-      MUTABLE,
-      VOLATILE,
-      ATOMIC,
+   enum class QualMask : uint16 {
       CONST,
       CONSTEXPR,
       IMMEDIATE,
       VIEW,
-      OWNING,
+      NON_OWNING,
+      MUTABLE,
+      VOLATILE,
+      ATOMIC,
       EXTERN,
       INLINE,
       NOEXCEPT,
       VIRTUAL,
       OVERRIDE,
+
       PUBLIC,
       PRIVATE,
       PROTECTED,

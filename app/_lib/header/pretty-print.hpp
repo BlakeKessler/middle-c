@@ -280,132 +280,125 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(_NOT_A_KEYWORD, "not_a_keyword");
 
 
-      CASE(VOID, "VOID");
-      CASE(AUTO, "AUTO");
+      CASE(VOID, "void");
+      CASE(AUTO, "auto");
+
+      CASE(CHAR, "char");
+      CASE(CHAR_UTF_8, "char8");
+      CASE(CHAR_UTF_16, "char16");
+      CASE(CHAR_UTF_32, "char32");
+      
+      CASE(BOOL, "bool");
+      CASE(UBYTE, "ubyte");
+      CASE(USHORT, "ushort");
+      CASE(UINT, "uint");
+      CASE(ULONG, "ulong");
+      CASE(UINT_PTR, "uintptr");
+      CASE(UWORD, "uword");
+      CASE(UINT_8, "uint8");
+      CASE(UINT_16, "uint16");
+      CASE(UINT_32, "uint32");
+      CASE(UINT_64, "uint64");
+      CASE(UINT_128, "uint128");
+      CASE(UINT_256, "uint256");
+
+      CASE(SIGN_T, "sign_t");
+      CASE(SBYTE, "sbyte");
+      CASE(SSHORT, "sshort");
+      CASE(SINT, "sint");
+      CASE(SLONG, "slong");
+      CASE(SINT_PTR, "sintptr");
+      CASE(SWORD, "sword");
+      CASE(SINT_8, "sint8");
+      CASE(SINT_16, "sint16");
+      CASE(SINT_32, "sint32");
+      CASE(SINT_64, "sint64");
+      CASE(SINT_128, "sint128");
+      CASE(SINT_256, "sint256");
+
+      CASE(FLOAT, "float");
+      CASE(FLOAT_16, "float16");
+      CASE(FLOAT_32, "float32");
+      CASE(FLOAT_64, "float64");
+      CASE(FLOAT_128, "float128");
+      CASE(FLOAT_256, "float256");
 
 
-      CASE(CHAR, "CHAR");
-      CASE(CHAR_UTF_8, "CHAR_UTF_8");
-      CASE(CHAR_UTF_16, "CHAR_UTF_16");
-      CASE(CHAR_UTF_32, "CHAR_UTF_32");
+      CASE(CLASS, "class");
+      CASE(STRUCT, "struct");
+      CASE(INTERFACE, "interface");
+      CASE(UNION, "union");
+      CASE(ENUM, "enum");
+      CASE(ENUM_UNION, "enumunion");
+      CASE(MASK, "mask");
+      CASE(NAMESPACE, "namespace");
+      CASE(FUNC, "func");
 
 
-      CASE(BOOL, "BOOL");
-      CASE(UBYTE, "UBYTE");
-      CASE(USHORT, "USHORT");
-      CASE(UINT, "UINT");
-      CASE(ULONG, "ULONG");
-      CASE(UINT_PTR, "UINT_PTR");
-      CASE(UWORD, "UWORD");
+      
+      CASE(CONST, "const");
+      CASE(CONSTEXPR, "constexpr");
+      CASE(IMMEDIATE, "immediate");
+      CASE(VIEW, "view");
+      CASE(NON_OWNING, "notown");
+      CASE(MUTABLE, "mutable");
+      CASE(VOLATILE, "volatile");
+      CASE(ATOMIC, "atomic");
+      CASE(EXTERN, "extern");
+      CASE(INLINE, "inline");
+      CASE(NOEXCEPT, "noexcept");
+      CASE(VIRTUAL, "virtual");
+      CASE(OVERRIDE, "override");
 
-      CASE(SIGN_T, "SIGN_T");
-      CASE(SBYTE, "SBYTE");
-      CASE(SSHORT, "SSHORT");
-      CASE(SINT, "SINT");
-      CASE(SLONG, "SLONG");
-      CASE(SINT_PTR, "SINT_PTR");
-      CASE(SWORD, "SWORD");
+      CASE(PUBLIC, "public");
+      CASE(PRIVATE, "private");
+      CASE(PROTECTED, "protected");
 
+      CASE(CAST, "cast");
+      CASE(UP_CAST, "up_cast");
+      CASE(DYN_CAST, "dyn_cast");
+      CASE(BIT_CAST, "bit_cast");
+      CASE(CONST_CAST, "const_cast");
 
-      CASE(UINT_8, "UINT_8");
-      CASE(UINT_16, "UINT_16");
-      CASE(UINT_32, "UINT_32");
-      CASE(UINT_64, "UINT_64");
-      CASE(UINT_128, "UINT_128");
-      CASE(UINT_256, "UINT_256");
+      CASE(TYPEOF, "typeof");
+      CASE(SIZEOF, "sizeof");
+      CASE(ALIGNAS, "alignas");
+      CASE(ALIGNOF, "alignof");
 
-      CASE(SINT_8, "SINT_8");
-      CASE(SINT_16, "SINT_16");
-      CASE(SINT_32, "SINT_32");
-      CASE(SINT_64, "SINT_64");
-      CASE(SINT_128, "SINT_128");
-      CASE(SINT_256, "SINT_256");
+      CASE(GOTO, "goto");
+      CASE(RETURN, "return");
+      CASE(IF, "if");
+      CASE(ELSE, "else");
+      CASE(FOR, "for");
+      CASE(FOREACH, "foreach");
+      CASE(WHILE, "while");
+      CASE(DO, "do");
+      CASE(BREAK, "break");
+      CASE(CONTINUE, "continue");
+      CASE(SWITCH, "switch");
+      CASE(MATCH, "match");
+      CASE(CASE, "case");
+      CASE(DEFAULT, "default");
 
-      CASE(FLOAT, "FLOAT");
+      CASE(TRY, "try");
+      CASE(CATCH, "catch");
+      CASE(THROW, "throw");
 
-      CASE(FLOAT_16, "FLOAT_16");
-      CASE(FLOAT_32, "FLOAT_32");
-      CASE(FLOAT_64, "FLOAT_64");
-      CASE(FLOAT_128, "FLOAT_128");
-      CASE(FLOAT_256, "FLOAT_256");
+      CASE(THIS, "this");
+      CASE(SELF, "self");
 
+      CASE(TRUE, "true");
+      CASE(FALSE, "false");
+      CASE(NULLPTR, "null");
 
-
-
-
-
-
-      CASE(CLASS, "CLASS");
-      CASE(STRUCT, "STRUCT");
-      CASE(INTERFACE, "INTERFACE");
-      CASE(UNION, "UNION");
-      CASE(ENUM, "ENUM");
-      CASE(ENUM_UNION, "ENUM_UNION");
-      CASE(MASK, "MASK");
-      CASE(NAMESPACE, "NAMESPACE");
-      CASE(FUNC, "FUNC");
-
-      CASE(CONST, "CONST");
-      CASE(CONSTEXPR, "CONSTEXPR");
-      CASE(IMMEDIATE, "IMMEDIATE");
-      CASE(VIEW, "VIEW");
-      CASE(NON_OWNING, "NON_OWNING");
-      CASE(MUTABLE, "MUTABLE");
-      CASE(VOLATILE, "VOLATILE");
-      CASE(ATOMIC, "ATOMIC");
-      CASE(EXPLICIT, "EXPLICIT");
-
-      CASE(CAST, "CAST");
-      CASE(UP_CAST, "UP_CAST");
-      CASE(DYN_CAST, "DYN_CAST");
-      CASE(BIT_CAST, "BIT_CAST");
-      CASE(CONST_CAST, "CONST_CAST");
-
-      CASE(TYPEOF, "TYPEOF");
-      CASE(SIZEOF, "SIZEOF");
-      CASE(ALIGNAS, "ALIGNAS");
-      CASE(ALIGNOF, "ALIGNOF");
-
-
-      CASE(GOTO, "GOTO");
-      CASE(IF, "IF");
-      CASE(ELSE, "ELSE");
-      CASE(FOR, "FOR");
-      CASE(FOREACH, "FOREACH");
-      CASE(WHILE, "WHILE");
-      CASE(DO, "DO");
-      CASE(BREAK, "BREAK");
-      CASE(CONTINUE, "CONTINUE");
-      CASE(SWITCH, "SWITCH");
-      CASE(MATCH, "MATCH");
-      CASE(CASE, "CASE");
-      CASE(DEFAULT, "DEFAULT");
-      CASE(TRY, "TRY");
-      CASE(CATCH, "CATCH");
-      CASE(THROW, "THROW");
-
-
-
-
-      CASE(THIS, "THIS");
-      CASE(SELF, "SELF");
-
-      CASE(ASSERT, "ASSERT");
-      CASE(STATIC_ASSERT, "STATIC_ASSERT");
-      CASE(DEBUG_ASSERT, "DEBUG_ASSERT");
-      CASE(ASSUME, "ASSUME");
-
-      CASE(TRUE, "TRUE");
-      CASE(FALSE, "FALSE");
-
-      CASE(NULLPTR, "NULL");
-
-      CASE(RETURN, "RETURN");
-
-      CASE(LET, "LET");
-      CASE(ALIAS, "ALIAS");
-
-      CASE(ASM, "ASM");
+      CASE(ASSERT, "assert");
+      CASE(STATIC_ASSERT, "static_assert");
+      CASE(DEBUG_ASSERT, "debug_assert");
+      CASE(ASSUME, "assume");
+      
+      CASE(LET, "let");
+      CASE(ALIAS, "using");
+      CASE(ASM, "asm");
    }
    UNREACHABLE;
 }
