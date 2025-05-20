@@ -195,9 +195,6 @@ template clef::index<clef::SpecList> clef::Parser::parseSpecList<true>(const Blo
 template clef::index<clef::SpecList> clef::Parser::parseSpecList<false>(const BlockType closer);
 
 
-clef::TypeQualMask clef::Parser::parseQuals(const TypeQualMask illegalQuals) {
-   TODO;
-}
 clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
    TODO;
 }

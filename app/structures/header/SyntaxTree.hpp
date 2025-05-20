@@ -2,7 +2,6 @@
 #define SYNTAX_TREE_HPP
 
 #include "CLEF.hpp"
-#include "SymbolTable.hpp"
 #include "astNode.hpp"
 #include "allocator.hpp"
 
