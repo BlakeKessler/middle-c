@@ -655,6 +655,11 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
    const Identifier& iden = *obj;
    if ((mode | CASE_BIT) == 's') {
       if (+iden.keywordID()) { //keyword
+         debug_assert(!iden.scopeName());
+         if (isCast(iden.keywordID())) {
+            return file.printf(FMT("%s<:%s:>"), toString(iden.keywordID()), TNB(iden.specializer()));
+         }
+         debug_assert(!iden.specializer());
          return file.printf(FMT("%s"), toString(iden.keywordID()));
       }
 
@@ -665,7 +670,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
       debug_assert(iden.name().size() || !iden.name().data());
       charsPrinted += file.printf(FMT("%s"), iden.name());
       if (iden.specializer()) {
-         charsPrinted += file.printf(FMT("<%s>"), TNB(iden.specializer()));
+         charsPrinted += file.printf(FMT("<:%s:>"), TNB(iden.specializer()));
       }
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
