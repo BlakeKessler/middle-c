@@ -1,3 +1,5 @@
+default: Parser
+
 #directories and files
 MODULES := mcsl app frozen
 
