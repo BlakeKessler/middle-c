@@ -278,9 +278,13 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Decl> obj, char mod
    }
    const Decl& decl = *obj;
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      return file.printf(FMT("let %s %s"), TNB(decl.type()), TNB(decl.name()));
+      if (decl.value()) {
+         return file.printf(FMT("let %s %s = %s"), TNB(decl.type()), TNB(decl.name()), TNB_AST(decl.value()));
+      } else {
+         return file.printf(FMT("let %s %s"), TNB(decl.type()), TNB(decl.name()));
+      }
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
-      return file.printf(FMT("%b%b"), TNB(decl.type()), TNB(decl.name()));
+      return file.printf(FMT("%b%b%b"), TNB(decl.type()), TNB(decl.name()), TNB_AST(decl.value()));
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Decl>"), mode);
    }

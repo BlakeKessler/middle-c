@@ -10,11 +10,11 @@ class clef::ObjTypeSpec {
    private:
       mcsl::dyn_arr<index<Type>> _inheritedTypes; //includes implemented interfaces
 
-      mcsl::dyn_arr<index<Variable>> _staticVars;
+      mcsl::dyn_arr<index<Decl>> _staticVars;
       mcsl::dyn_arr<index<Function>> _staticFuncs;
-      mcsl::dyn_arr<index<Type>> _memberTypes;
+      mcsl::dyn_arr<index<TypeDecl>> _memberTypes;
 
-      mcsl::dyn_arr<index<Variable>> _members; //data members
+      mcsl::dyn_arr<index<Decl>> _members; //data members
       mcsl::dyn_arr<index<Function>> _methods;
 
       mcsl::dyn_arr<index<Type>> _friendTypes;
@@ -27,18 +27,18 @@ class clef::ObjTypeSpec {
 
 
       mcsl::dyn_arr<index<Type>>& inheritedTypes() { return _inheritedTypes; }
-      mcsl::dyn_arr<index<Variable>>& staticVars() { return _staticVars; }
+      mcsl::dyn_arr<index<Decl>>& staticVars() { return _staticVars; }
       mcsl::dyn_arr<index<Function>>& staticFuncs() { return _staticFuncs; }
-      mcsl::dyn_arr<index<Type>>& memberTypes() { return _memberTypes; }
-      mcsl::dyn_arr<index<Variable>>& members() { return _members; }
+      mcsl::dyn_arr<index<TypeDecl>>& memberTypes() { return _memberTypes; }
+      mcsl::dyn_arr<index<Decl>>& members() { return _members; }
       mcsl::dyn_arr<index<Function>>& methods() { return _methods; }
       mcsl::dyn_arr<index<Type>>& friendTypes() { return _friendTypes; }
 
       const mcsl::arr_span<index<Type>> inheritedTypes() const { return _inheritedTypes.span(); }
-      const mcsl::arr_span<index<Variable>> staticVars() const { return _staticVars.span(); }
+      const mcsl::arr_span<index<Decl>> staticVars() const { return _staticVars.span(); }
       const mcsl::arr_span<index<Function>> staticFuncs() const { return _staticFuncs.span(); }
-      const mcsl::arr_span<index<Type>> memberTypes() const { return _memberTypes.span(); }
-      const mcsl::arr_span<index<Variable>> members() const { return _members.span(); }
+      const mcsl::arr_span<index<TypeDecl>> memberTypes() const { return _memberTypes.span(); }
+      const mcsl::arr_span<index<Decl>> members() const { return _members.span(); }
       const mcsl::arr_span<index<Function>> methods() const { return _methods.span(); }
       const mcsl::arr_span<index<Type>> friendTypes() const { return _friendTypes.span(); }
 };

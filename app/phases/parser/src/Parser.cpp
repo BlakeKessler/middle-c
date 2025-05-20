@@ -31,8 +31,7 @@ START_PARSE_STMT:
             case KeywordID::LET     : {
                ++tokIt;
                index<Decl> tmp = parseLetStmt();
-               tree[(index<astNode>)(+tmp)].downCast(NodeType::EXPR);
-               tree[(index<astNode>)(+tmp)].upCast(NodeType::STMT);
+               tree[(index<astNode>)(+tmp)].anyCast(NodeType::STMT);
                return +tmp;
             } break;
 
@@ -45,13 +44,13 @@ START_PARSE_STMT:
 
             case KeywordID::ASM           : ++tokIt; return parseASM(); break;
             
-            case KeywordID::CLASS         : ++tokIt; { auto tmp = parseClass(); return tree.make<TypeDecl>(tree.getFundType(KeywordID::CLASS), tmp, tree[tmp].spec()); }
-            case KeywordID::STRUCT        : ++tokIt; { auto tmp = parseStruct(); return tree.make<TypeDecl>(tree.getFundType(KeywordID::STRUCT), tmp, tree[tmp].spec()); }
-            case KeywordID::INTERFACE     : ++tokIt; { auto tmp = parseInterface(); return tree.make<TypeDecl>(tree.getFundType(KeywordID::INTERFACE), tmp, tree[tmp].spec()); }
-            case KeywordID::UNION         : ++tokIt; { auto tmp = parseUnion(); return tree.make<TypeDecl>(tree.getFundType(KeywordID::UNION), tmp, tree[tmp].members()); }
-            case KeywordID::ENUM          : ++tokIt; { auto tmp = parseEnum(); return tree.make<TypeDecl>(tree.getFundType(KeywordID::ENUM), tmp, tree[tmp].enumerators()); }
-            case KeywordID::MASK          : ++tokIt; { auto tmp = parseMask(); return tree.make<TypeDecl>(tree.getFundType(KeywordID::MASK), tmp, tree[tmp].enumerators()); }
-            case KeywordID::NAMESPACE     : ++tokIt; { auto tmp = parseNamespace(); return tree.make<TypeDecl>(tree.getFundType(KeywordID::NAMESPACE), tmp, tree[tmp].spec()); }
+            case KeywordID::CLASS         : ++tokIt; { return parseClass(); }
+            case KeywordID::STRUCT        : ++tokIt; { return parseStruct(); }
+            case KeywordID::INTERFACE     : ++tokIt; { return parseInterface(); }
+            case KeywordID::UNION         : ++tokIt; { return parseUnion(); }
+            case KeywordID::ENUM          : ++tokIt; { return parseEnum(); }
+            case KeywordID::MASK          : ++tokIt; { return parseMask(); }
+            case KeywordID::NAMESPACE     : ++tokIt; { return parseNamespace(); }
             case KeywordID::FUNC          : ++tokIt; { auto tmp = parseFunction(); return tree.make<TypeDecl>(tree[tmp].signature(), tmp, tmp); }
 
             

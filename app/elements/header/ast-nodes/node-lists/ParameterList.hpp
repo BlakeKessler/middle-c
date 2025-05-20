@@ -6,7 +6,7 @@
 
 #include "dyn_arr.hpp"
 
-struct clef::ParameterList : public mcsl::contig_base<index<Variable>> {
+struct clef::ParameterList : public mcsl::contig_base<index<Variable>> { //!TODO: TypeDecl instead of Variable?
    private:
       mcsl::dyn_arr<index<Variable>>* _params;
    public:

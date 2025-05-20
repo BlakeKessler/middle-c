@@ -4,16 +4,19 @@
 #include "Parser.hpp"
 
 //!HACK: clef::Parser::parseStruct temporarily relies on this function
-clef::index<clef::Class> clef::Parser::parseClass() {
+clef::index<clef::TypeDecl> clef::Parser::parseClass() {
    index<Identifier> name = parseIdentifier<true>();
    
    if (tryConsumeEOS()) { //forward declaration
-      return tree.remake<Class>(name, tree.allocObjTypeSpec(), tree[(index<Type>)name]);
+      index<Class> classptr = tree.remake<Class>(name, tree[(index<Type>)name]);
+      return tree.make<TypeDecl>(tree.getFundType(KeywordID::CLASS), classptr);
    }
-
-   //inheritance (including implemented interfaces)
+   
    index<ObjTypeSpec> specIndex = tree.allocObjTypeSpec();
    ObjTypeSpec& spec = tree[specIndex];
+   index<Class> classptr = tree.remake<Class>(name, specIndex, tree[(index<Type>)name]);
+
+   //inheritance (including implemented interfaces)
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
       do {
          index<Type> parentType = parseTypename();
@@ -36,7 +39,7 @@ clef::index<clef::Class> clef::Parser::parseClass() {
          case KeywordID::MASK     : ++tokIt; {auto tmp = parseMask(); spec.memberTypes().push_back(tmp);} break;
          case KeywordID::NAMESPACE: ++tokIt; {auto tmp = parseNamespace(); spec.memberTypes().push_back(tmp);} break;
          case KeywordID::FUNC     : ++tokIt; {auto tmp = parseFunction(); spec.methods().push_back(tmp);} break; //!TODO: does not account for static functions
-         case KeywordID::LET      : TODO; //++tokIt; {auto tmp = parseLetStmt().second; spec.members().push_back(tmp); } break; //!TODO: does not account for static members
+         case KeywordID::LET      : ++tokIt; {auto tmp = parseLetStmt(); spec.members().push_back(tmp);} break; //!TODO: does not account for static members
          default: logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
       }
    }
@@ -45,30 +48,34 @@ clef::index<clef::Class> clef::Parser::parseClass() {
    consumeEOS("CLASS without EOS");
 
    //return
-   return tree.remake<Class>(name, specIndex, tree[(index<Type>)name]);
+   return tree.make<TypeDecl>(tree.getFundType(KeywordID::CLASS), classptr, specIndex);
 }
 
 //!HACK: temporarily relies on clef::Parser::parseClass
-clef::index<clef::Struct> clef::Parser::parseStruct() {
-   index<astNode> classptr = +parseClass();
-   tree[classptr].anyCast(NodeType::STRUCT);
-   return +classptr;
+clef::index<clef::TypeDecl> clef::Parser::parseStruct() {
+   index<TypeDecl> decl = parseClass();
+   tree[decl].objType() = tree.getFundType(KeywordID::STRUCT);
+   tree[(index<astNode>)tree[decl].name()].anyCast(NodeType::STRUCT);
+   return +decl;
 }
 
-clef::index<clef::Interface> clef::Parser::parseInterface() {
+clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
    index<Identifier> name = parseIdentifier<true>();
    
    if (tryConsumeEOS()) { //forward declaration
-      return tree.remake<Interface>(name, tree[(index<Type>)name]);
+      index<Interface> classptr = tree.remake<Interface>(name, tree[(index<Type>)name]);
+      return tree.make<TypeDecl>(tree.getFundType(KeywordID::INTERFACE), classptr);
    }
+
+   index<InterfaceSpec> specIndex = tree.allocInterfaceSpec();
+   InterfaceSpec& spec = tree[specIndex];
+   index<Interface> ifaceptr = tree.remake<Interface>(name, specIndex, tree[(index<Type>)name]);
    
    //inheritance
-   index<InterfaceSpec> spec = tree.allocInterfaceSpec();
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
       do {
-         index<Interface> parentType = (index<Interface>)parseIdentifier();
-            tree[(index<astNode>)parentType].upCast(NodeType::INTERFACE);
-         tree[spec].inheritedInterfaces().push_back(parentType);
+         index<Interface> parentType = [&](index<Type> iden){ return tree.remake<Interface>(iden, tree[iden]); }(parseTypename());
+         spec.inheritedInterfaces().push_back(parentType);
       } while (tryConsumeOperator(OpID::COMMA));
    }
 
@@ -79,9 +86,9 @@ clef::index<clef::Interface> clef::Parser::parseInterface() {
       consumeKeyword(KeywordID::FUNC, "INTERFACE can only contain functions");
       index<Function> func = parseFunction();
       // if (+(quals & TypeQualMask::STATIC)) {
-      //    tree[spec].staticFuncs().push_back(func);
+      //    spec.staticFuncs().push_back(func);
       // } else {
-         tree[spec].methods().push_back(func);
+         spec.methods().push_back(func);
       // }
    }
 
@@ -89,18 +96,21 @@ clef::index<clef::Interface> clef::Parser::parseInterface() {
    consumeEOS("INTERFACE without EOS");
 
    //return
-   return tree.remake<Interface>(name, spec, tree[(index<Type>)name]);
+   return tree.make<TypeDecl>(tree.getFundType(KeywordID::INTERFACE), ifaceptr, specIndex);
 }
 
-clef::index<clef::Union> clef::Parser::parseUnion() {
-   index<Identifier> name = tryParseIdentifier<true>();
+clef::index<clef::TypeDecl> clef::Parser::parseUnion() {
+   index<Identifier> name = parseIdentifier<true>();
 
    if (tryConsumeEOS()) { //forward declaration
       if (!name) {
          logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous UNION");
       }
-      return tree.remake<Union>(name, tree[(index<Type>)name]);
+      return tree.make<TypeDecl>(tree.getFundType(KeywordID::UNION), name);
    }
+
+   index<Union> unionptr = tree.remake<Union>(name, tree[(index<Type>)name]);
+   Union& spec = tree[unionptr];
 
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad UNION definition");
 
@@ -121,12 +131,12 @@ clef::index<clef::Union> clef::Parser::parseUnion() {
    consumeEOS("UNION without EOS");
 
    //return
-   return tree.remake<Union>(name, members, tree[(index<Type>)name]);
+   return tree.make<TypeDecl>(tree.getFundType(KeywordID::UNION), unionptr, spec.members());
 }
 
 //!HACK: clef::Parser::parseMask relies on this function - be careful changing observable behavior
-clef::index<clef::Enum> clef::Parser::parseEnum() {
-   index<Identifier> name = tryParseIdentifier<true>();
+clef::index<clef::TypeDecl> clef::Parser::parseEnum() {
+   index<Identifier> name = parseIdentifier<true>();
    index<Type> baseType;
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
       baseType = parseTypename();
@@ -136,11 +146,13 @@ clef::index<clef::Enum> clef::Parser::parseEnum() {
       if (!name) {
          logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous ENUM");
       }
-      return tree.remake<Enum>(name, tree[(index<Type>)name], baseType, tree.make<ParamList>(&tree.allocBuf<index<Variable>>()));
+      return tree.make<TypeDecl>(tree.getFundType(KeywordID::ENUM), name);
    }
+
 
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad ENUM definition");
    index<ParamList> enumerators = tree.make<ParamList>(&tree.allocBuf<index<Variable>>());
+   index<Enum> enumptr = tree.remake<Enum>(name, tree[(index<Type>)name], baseType, enumerators);
    if (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       do {
          index<Identifier> enumerator = parseIdentifier();
@@ -159,45 +171,52 @@ clef::index<clef::Enum> clef::Parser::parseEnum() {
    consumeEOS("ENUM without EOS");
 
    //return
-   return tree.remake<Enum>(name, tree[(index<Type>)name], baseType, enumerators);
+   return tree.make<TypeDecl>(tree.getFundType(KeywordID::ENUM), enumptr, enumerators);
 }
 
 //!HACK: ASSUMES THAT THE SYNTAX AND MEMORY LAYOUT OF THE AST NODES FOR MASKS AND ENUMS ARE IDENTICAL
-clef::index<clef::Mask> clef::Parser::parseMask() {
-   index<astNode> mask = +parseEnum();
-   tree[mask].anyCast(NodeType::MASK);
-   return +mask;
+clef::index<clef::TypeDecl> clef::Parser::parseMask() {
+   index<TypeDecl> decl = parseEnum();
+   tree[decl].objType() = tree.getFundType(KeywordID::MASK);
+   tree[(index<astNode>)tree[decl].name()].anyCast(NodeType::MASK);
+   return +decl;
 }
 
 //!TODO: implement enumunions
-clef::index<clef::EnumUnion> clef::Parser::parseEnumUnion() {
+clef::index<clef::TypeDecl> clef::Parser::parseEnumUnion() {
    logError(ErrCode::PARSER_NOT_IMPLEMENTED, "enumunions are not yet supported");
 }
 
-clef::index<clef::Namespace> clef::Parser::parseNamespace() {
+clef::index<clef::TypeDecl> clef::Parser::parseNamespace() {
    index<Identifier> name = parseIdentifier<true>();
    
    if (tryConsumeEOS()) { //forward declaration
-      return tree.remake<Namespace>(name, tree[(index<Type>)name]);
+      if (!name) {
+         logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous NAMESPACE");
+      }
+      return tree.make<TypeDecl>(tree.getFundType(KeywordID::NAMESPACE), name);
    }
+   
+   index<NamespaceSpec> specIndex = tree.allocNamespaceSpec();
+   NamespaceSpec& spec = tree[specIndex];
+   index<Namespace> namespaceptr = tree.remake<Namespace>(name, specIndex, tree[(index<Type>)name]);
 
    //definition
-   index<NamespaceSpec> spec = tree.allocNamespaceSpec();
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad CLASS definition");
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       if (tokIt->type() != TokenType::KEYWORD) {
          logError(ErrCode::BAD_STMT, "invalid statement in NAMESPACE definition");
       }
       switch (tokIt->keywordID()) {
-         case KeywordID::CLASS    : ++tokIt; {auto tmp = parseClass(); tree[spec].types().push_back(tmp);} break;
-         case KeywordID::STRUCT   : ++tokIt; {auto tmp = parseStruct(); tree[spec].types().push_back(tmp);} break;
-         case KeywordID::INTERFACE: ++tokIt; {auto tmp = parseInterface(); tree[spec].types().push_back(tmp);} break;
-         case KeywordID::UNION    : ++tokIt; {auto tmp = parseUnion(); tree[spec].types().push_back(tmp);} break;
-         case KeywordID::ENUM     : ++tokIt; {auto tmp = parseEnum(); tree[spec].types().push_back(tmp);} break;
-         case KeywordID::MASK     : ++tokIt; {auto tmp = parseMask(); tree[spec].types().push_back(tmp);} break;
-         case KeywordID::NAMESPACE: ++tokIt; {auto tmp = parseNamespace(); tree[spec].types().push_back(tmp);} break;
-         case KeywordID::FUNC     : ++tokIt; {auto tmp = parseFunction(); tree[spec].funcs().push_back(tmp);} break; //!NOTE: does not account for static functions
-         case KeywordID::LET      : TODO; //++tokIt; {auto tmp = parseLetStmt().second; tree[spec].vars().push_back(tmp); } break;
+         case KeywordID::CLASS    : ++tokIt; {auto tmp = parseClass(); spec.types().push_back(tmp);} break;
+         case KeywordID::STRUCT   : ++tokIt; {auto tmp = parseStruct(); spec.types().push_back(tmp);} break;
+         case KeywordID::INTERFACE: ++tokIt; {auto tmp = parseInterface(); spec.types().push_back(tmp);} break;
+         case KeywordID::UNION    : ++tokIt; {auto tmp = parseUnion(); spec.types().push_back(tmp);} break;
+         case KeywordID::ENUM     : ++tokIt; {auto tmp = parseEnum(); spec.types().push_back(tmp);} break;
+         case KeywordID::MASK     : ++tokIt; {auto tmp = parseMask(); spec.types().push_back(tmp);} break;
+         case KeywordID::NAMESPACE: ++tokIt; {auto tmp = parseNamespace(); spec.types().push_back(tmp);} break;
+         case KeywordID::FUNC     : ++tokIt; {auto tmp = parseFunction(); spec.funcs().push_back(tmp);} break; //!NOTE: does not account for static functions
+         case KeywordID::LET      : ++tokIt; {auto tmp = parseLetStmt(); spec.vars().push_back(tmp);} break;
          default: logError(ErrCode::BAD_STMT, "invalid statement in NAMESPACE definition");
       }
    }
@@ -206,7 +225,7 @@ clef::index<clef::Namespace> clef::Parser::parseNamespace() {
    consumeEOS("NAMESPACE without EOS");
 
    //return
-   return tree.remake<Namespace>(name, spec, tree[(index<Type>)name]);
+   return tree.make<TypeDecl>(tree.getFundType(KeywordID::NAMESPACE), namespaceptr, specIndex);
 }
 
 #endif

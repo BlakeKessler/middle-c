@@ -37,7 +37,7 @@ uint mcsl::writef(File& file, const clef::astTNB<clef::ObjTypeSpec> obj, char mo
       PRINT_ARR_S(staticVars, "static ")
       PRINT_ARR_S(staticFuncs, "static ")
       PRINT_ARR_S(memberTypes,)
-      PRINT_ARR_S(members, "let ")
+      PRINT_ARR_S(members,)
       PRINT_ARR_S(methods,)
       PRINT_ARR_S(friendTypes, "friend type ")
       return charsPrinted;

@@ -21,6 +21,8 @@ struct clef::Declaration : public clef::Expression {
       index<const Type> type() const { return _lhs; }
       index<Identifier>& name() { return reinterpret_cast<index<Identifier>&>(_rhs); }
       index<const Identifier> name() const { return _rhs; }
+      index<astNode>& value() { return reinterpret_cast<index<astNode>&>(_extra); }
+      index<const astNode> value() const { return _extra; }
 };
 
 namespace mcsl {

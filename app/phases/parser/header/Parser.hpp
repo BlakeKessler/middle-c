@@ -81,14 +81,14 @@ class clef::Parser {
       index<Function> parseFunction();
       index<Asm> parseASM();
       
-      index<Class> parseClass();
-      index<Struct> parseStruct();
-      index<Interface> parseInterface();
-      index<Union> parseUnion();
-      index<Enum> parseEnum();
-      index<EnumUnion> parseEnumUnion();
-      index<Mask> parseMask();
-      index<Namespace> parseNamespace();
+      index<TypeDecl> parseClass();
+      index<TypeDecl> parseStruct();
+      index<TypeDecl> parseInterface();
+      index<TypeDecl> parseUnion();
+      index<TypeDecl> parseEnum();
+      index<TypeDecl> parseEnumUnion();
+      index<TypeDecl> parseMask();
+      index<TypeDecl> parseNamespace();
 
       //error logging
       void logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, auto&&... args);
