@@ -15,7 +15,7 @@ struct clef::Identifier {
       KeywordID _keywordID;
    protected:
       FundTypeID _id;
-      uint8 pad[2]; //!TODO: use these bytes for something
+      TypeQualMask _quals;
 
    protected:
       void __printName(mcsl::File& file) const;
@@ -23,10 +23,10 @@ struct clef::Identifier {
    public:
       static constexpr NodeType nodeType() { return NodeType::IDEN; }
 
-      Identifier(const mcsl::str_slice name = {}, index<Identifier> scopeName = {}, index<SpecList> specializer = {}):_name_buf{name.begin()},_name_size{name.size()},_scopeName{scopeName},_specializer{specializer},_keywordID{KeywordID::_NOT_A_KEYWORD} {}
-      Identifier(const KeywordID id, index<SpecList> specializer = {}):_name_buf{},_name_size{},_scopeName{},_specializer{specializer},_keywordID{id} {}
+      Identifier(const mcsl::str_slice name = {}, index<Identifier> scopeName = {}, index<SpecList> specializer = {}, TypeQualMask quals = {}):_name_buf{name.begin()},_name_size{name.size()},_scopeName{scopeName},_specializer{specializer},_keywordID{KeywordID::_NOT_A_KEYWORD},_quals{quals} {}
+      Identifier(const KeywordID id, index<SpecList> specializer = {}, TypeQualMask quals = {}):_name_buf{},_name_size{},_scopeName{},_specializer{specializer},_keywordID{id},_quals{quals} {}
 
-      Identifier(const Identifier& other):_name_buf{other._name_buf},_name_size{other._name_size},_scopeName{other._scopeName},_specializer{other._specializer},_keywordID{other._keywordID} {}
+      Identifier(const Identifier& other):_name_buf{other._name_buf},_name_size{other._name_size},_scopeName{other._scopeName},_specializer{other._specializer},_keywordID{other._keywordID},_quals{other._quals} {}
       Identifier& operator=(const Identifier& other) { new (this) Identifier{other}; return self; }
 
       index<SpecList>& specializer() { return _specializer; }
@@ -36,6 +36,9 @@ struct clef::Identifier {
 
       const mcsl::str_slice name() const { return mcsl::str_slice::make(_name_buf, _name_size); } //unqualified name
       KeywordID keywordID() const { return _keywordID; }
+
+      TypeQualMask& quals() { return _quals; }
+      TypeQualMask quals() const { return _quals; }
 
       inline bool sameScope(const Identifier& other) const { return _scopeName == other._scopeName; }
       inline bool sameName(const Identifier& other) const { return name() == other.name(); }

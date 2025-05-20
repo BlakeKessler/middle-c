@@ -739,6 +739,27 @@ namespace clef {
       STRUCT,
       CLASS,
    };
+
+
+
+   enum class TypeQualMask : uint16 {
+      MUTABLE,
+      VOLATILE,
+      ATOMIC,
+      CONST,
+      CONSTEXPR,
+      IMMEDIATE,
+      VIEW,
+      OWNING,
+      EXTERN,
+      INLINE,
+      NOEXCEPT,
+      VIRTUAL,
+      OVERRIDE,
+      PUBLIC,
+      PRIVATE,
+      PROTECTED,
+   };
 }
 
 #endif //ENUMS_HPP
