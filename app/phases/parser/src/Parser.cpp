@@ -188,8 +188,12 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
          lhs = operandStack.pop_back();
          operandStack.push_back(+tree.makeExpr(op.opID(), lhs, rhs));
       } else {
-         debug_assert(+(op & OpProps::POSTFIX));
-         operandStack.push_back(+tree.makeExpr(op.opID(), rhs));
+         if (+(op & OpProps::POSTFIX)) {
+            operandStack.push_back(+tree.makeExpr(op.opID(), rhs));
+         } else {
+            debug_assert(+(op & OpProps::PREFIX));
+            operandStack.push_back(+tree.makeExpr(op.opID(), 0, rhs));
+         }
       }
    };
 
@@ -280,10 +284,12 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
                   eval();
                }
                op.removeProps(OpProps::PREFIX);
+               debug_assert(+op.props());
                operatorStack.push_back(op);
             } else { //prefix unary
                OpData op = tokIt->op();
                op.removeProps(OpProps::POSTFIX | OpProps::INFIX_LEFT | OpProps::INFIX_RIGHT);
+               debug_assert(+(op.props() & OpProps::PREFIX));
                operatorStack.push_back(op);
             }
             prevTokIsOperand = false;
