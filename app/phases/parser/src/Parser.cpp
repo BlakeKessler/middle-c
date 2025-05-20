@@ -91,12 +91,14 @@ START_PARSE_STMT:
             case KeywordID::TRY           : ++tokIt; return parseTryCatch(); break;
             case KeywordID::CATCH         : logError(ErrCode::BAD_KEYWORD, "floating CATCH");
 
-            case KeywordID::BREAK         : [[fallthrough]];
-            case KeywordID::CONTINUE      : {
+            case KeywordID::BREAK         :
                ++tokIt;
-               consumeEOS("bad nullary keyword (BREAK or CONTINUE)");
+               consumeEOS("bad BREAK");
+               return tree.make<Stmt>(KeywordID::BREAK);
+            case KeywordID::CONTINUE      :
+               ++tokIt;
+               consumeEOS("bad CONTINUE");
                return tree.make<Stmt>(KeywordID::CONTINUE);
-            }
 
             case KeywordID::THROW         : [[fallthrough]];
             case KeywordID::ASSERT        : [[fallthrough]];
