@@ -394,7 +394,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Stmt> obj, char mod
    UNREACHABLE;
 }
 
-uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mode, FmtArgs fmt) { //!TODO: add parens if relative precedence indicates that it would be required
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    using enum OpID;
    if (!obj) {
@@ -403,7 +403,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
    
    #define SUBEXPR(operand, expr, b, a) file.printf(operand##NeedsParens ? FMT(b "(%s)" a) : FMT(b "%s" a), expr)
    #define BIN(op) SUBEXPR(lhs, TNB_AST(expr.lhs()),,op) + SUBEXPR(rhs, TNB_AST(expr.rhs()),,)
-   // #define BIN(op) file.printf(FMT("%s" op "%s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()))
    const clef::Expr& expr = *obj;
    if ((mode | CASE_BIT) == 's') {
       //!TODO: handle special cases for precedence
@@ -467,7 +466,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
             return SUBEXPR(lhs, TNB_CAST2(Expr, expr.lhs()),, " ? ")
                  + SUBEXPR(rhs, TNB_CAST2(Expr, expr.rhs()),, " : ")
                  + SUBEXPR(extra, TNB_CAST2(Expr, expr.extra()),,);
-            // return file.printf(FMT("%s ? %s : %s"), TNB_CAST2(Expr, expr.lhs()), TNB_CAST2(Expr, expr.rhs()), TNB_CAST2(Expr, expr.extra()));
 
          case PREPROCESSOR: TODO;
 
@@ -476,21 +474,17 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case INC: //increment
             if (expr.lhs()) {
                return SUBEXPR(lhs, TNB_AST(expr.lhs()),, "++");
-               // return file.printf(FMT("%s++"), TNB_AST(expr.lhs()));
             } else {
                debug_assert(expr.rhs());
                return SUBEXPR(rhs, TNB_AST(expr.rhs()), "++",);
-               // return file.printf(FMT("++%s"), TNB_AST(expr.rhs()));
             }
             UNREACHABLE;
          case DEC: //decrement
             if (expr.lhs()) {
                return SUBEXPR(lhs, TNB_AST(expr.lhs()),, "--");
-               // return file.printf(FMT("%s--"), TNB_AST(expr.lhs()));
             } else {
                debug_assert(expr.rhs());
                return SUBEXPR(rhs, TNB_AST(expr.rhs()), "--",);
-               // return file.printf(FMT("--%s"), TNB_AST(expr.rhs()));
             }
          UNREACHABLE;
 
@@ -521,11 +515,11 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case MOD: return BIN(" %% ");
          case EXP: return BIN(" ^^ ");
          
-         case LOGICAL_NOT: return SUBEXPR(lhs, TNB_AST(expr.lhs()), "!",); //return file.printf(FMT("!%s"), TNB_AST(expr.lhs()));
+         case LOGICAL_NOT: return SUBEXPR(lhs, TNB_AST(expr.lhs()), "!",);
          case LOGICAL_AND: return BIN(" && ");
          case LOGICAL_OR : return BIN(" || ");
 
-         case BIT_NOT    : return SUBEXPR(lhs, TNB_AST(expr.lhs()), "~",); //return file.printf(FMT("~%s"), TNB_AST(expr.lhs()));
+         case BIT_NOT    : return SUBEXPR(lhs, TNB_AST(expr.lhs()), "~",);
          case BIT_AND    : return BIN(" & ");
          case BIT_OR     : return BIN(" | ");
          case BIT_XOR    : return BIN(" ^ ");
@@ -947,19 +941,19 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::FundType> obj, char
    return writef(file, TNB_CAST(Type), mode, fmt);
 }
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::GenericType> obj, char mode, FmtArgs fmt) {
-   TODO;
+   return writef(file, TNB_CAST(Type), mode, fmt);
 }
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Class> obj, char mode, FmtArgs fmt) {
-   TODO;
+   return writef(file, TNB_CAST(Type), mode, fmt);
 }
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Struct> obj, char mode, FmtArgs fmt) {
-   TODO;
+   return writef(file, TNB_CAST(Type), mode, fmt);
 }
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Interface> obj, char mode, FmtArgs fmt) {
-   TODO;
+   return writef(file, TNB_CAST(Type), mode, fmt);
 }
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Namespace> obj, char mode, FmtArgs fmt) {
-   TODO;
+   return writef(file, TNB_CAST(Type), mode, fmt);
 }
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::SwitchCases> obj, char mode, FmtArgs fmt) {

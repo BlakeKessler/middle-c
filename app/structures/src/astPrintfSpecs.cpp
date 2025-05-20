@@ -63,7 +63,22 @@ uint mcsl::writef(File& file, const clef::astTNB<clef::InterfaceSpec> obj, char 
       return 0;
    }
    const InterfaceSpec& spec = *obj;
-   TODO;
+   if ((mode | CASE_BIT) == 's') {
+      uint charsPrinted = 0;
+      // PRINT_ARR_S(inheritedInterfaces, "") //handled by caller
+      PRINT_ARR_S(staticFuncs, "static ")
+      PRINT_ARR_S(methods,)
+      return charsPrinted;
+   } else if ((mode | CASE_BIT) == 'b') {
+      uint charsPrinted = 0;
+      PRINT_ARR_B(staticFuncs)
+      PRINT_ARR_B(methods)
+      return charsPrinted;
+   }
+   else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<ObjTypeSpec>"), mode);
+   }
+   UNREACHABLE;
 }
 uint mcsl::writef(File& file, const clef::astTNB<clef::NamespaceSpec> obj, char mode, FmtArgs args) {
    using namespace clef;
@@ -71,7 +86,23 @@ uint mcsl::writef(File& file, const clef::astTNB<clef::NamespaceSpec> obj, char 
       return 0;
    }
    const NamespaceSpec& spec = *obj;
-   TODO;
+   if ((mode | CASE_BIT) == 's') {
+      uint charsPrinted = 0;
+      PRINT_ARR_S(vars,)
+      PRINT_ARR_S(funcs,)
+      PRINT_ARR_S(types,)
+      return charsPrinted;
+   } else if ((mode | CASE_BIT) == 'b') {
+      uint charsPrinted = 0;
+      PRINT_ARR_B(vars)
+      PRINT_ARR_B(funcs)
+      PRINT_ARR_B(types)
+      return charsPrinted;
+   }
+   else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<ObjTypeSpec>"), mode);
+   }
+   UNREACHABLE;
 }
 
 #undef PRINT_ARR_B
