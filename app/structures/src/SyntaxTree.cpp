@@ -91,6 +91,9 @@ clef::index<clef::astNode> clef::SyntaxTree::getValueKeyword(const KeywordID key
 }
 
 clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode> index) {
+   if (!index) {
+      return make<Expr>(op, NodeType::NONE, index);
+   }
    astNode& node = self[index];
    switch (node.nodeType()) {
       case Identifier::nodeType():
@@ -146,7 +149,7 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
 }
 
 clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode> lhsI, index<astNode> rhsI) {
-   return make<Expr>(op, self[lhsI].nodeType(), self[rhsI].nodeType(), lhsI, rhsI);
+   return make<Expr>(op, lhsI ? self[lhsI].nodeType() : NodeType::NONE, rhsI ? self[rhsI].nodeType() : NodeType::NONE, lhsI, rhsI);
 }
 
 #endif //SYNTAX_TREE_CPP
