@@ -43,8 +43,8 @@ constexpr clef::OpPrecs clef::GetAllOpPrecsData() {
       _(lit("--"),  Op::DEC,               Prop::POSTFIX,     0,      Type::OP          ), //post-decrement
       _(lit("+"),   Op::UNARY_PLUS,        Prop::PREFIX,      0,      Type::OP          ), //unary plus
       _(lit("-"),   Op::UNARY_MINUS,       Prop::PREFIX,      0,      Type::OP          ), //integer negation
-      _(lit("!"),   Op::LOGICAL_NOT,       Prop::POSTFIX,     0,      Type::OP          ), //logical negation
-      _(lit("~"),   Op::BIT_NOT,           Prop::POSTFIX,     0,      Type::OP          ), //bitwise negation
+      _(lit("!"),   Op::LOGICAL_NOT,       Prop::PREFIX,      0,      Type::OP          ), //logical negation
+      _(lit("~"),   Op::BIT_NOT,           Prop::PREFIX,      0,      Type::OP          ), //bitwise negation
       _(lit("&"),   Op::ADDRESS_OF,        Prop::PREFIX,      0,      Type::OP          ), //reference/address of
       _(lit("*"),   Op::DEREF,             Prop::PREFIX,      0,      Type::OP          ), //raw pointer/dereference
       _(lit("&"),   Op::REFERENCE,         Prop::TYPE_MOD,    0,      Type::OP          ), //reference/address of
