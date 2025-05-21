@@ -490,51 +490,51 @@ constexpr const mcsl::str_slice clef::toString(const LitType type) {
 constexpr const mcsl::str_slice clef::toString(const FundTypeID type) {
    using enum FundTypeID;
    switch (type) {
-      CASE(NULL, "null");
+      CASE(NULL, "\033[31mNULL TYPE\033[39m");
       CASE(FUNCTION_SIGNATURE, "FUNCTION_SIGNATURE");
 
-      CASE(VOID, "VOID");
-      CASE(AUTO, "AUTO");
+      CASE(VOID, "void");
+      CASE(AUTO, "auto");
 
-      CASE(CHAR, "CHAR");
-      CASE(CHAR8, "CHAR8");
-      CASE(CHAR16, "CHAR16");
-      CASE(CHAR32, "CHAR32");
+      CASE(CHAR, "char");
+      CASE(CHAR8, "char8");
+      CASE(CHAR16, "char16");
+      CASE(CHAR32, "char32");
 
-      CASE(BOOL, "BOOL");
-      CASE(UINT8, "UINT8");
-      CASE(UINT16, "UINT16");
-      CASE(UINT32, "UINT32");
-      CASE(UINT64, "UINT64");
-      CASE(UINT128, "UINT128");
-      CASE(UINT256, "UINT256");
+      CASE(BOOL, "bool");
+      CASE(UINT8, "uint8");
+      CASE(UINT16, "uint16");
+      CASE(UINT32, "uint32");
+      CASE(UINT64, "uint64");
+      CASE(UINT128, "uint128");
+      CASE(UINT256, "uint256");
 
-      CASE(SIGN_T, "SIGN_T");
-      CASE(SINT8, "SINT8");
-      CASE(SINT16, "SINT16");
-      CASE(SINT32, "SINT32");
-      CASE(SINT64, "SINT64");
-      CASE(SINT128, "SINT128");
-      CASE(SINT256, "SINT256");
+      CASE(SIGN_T, "sign_t");
+      CASE(SINT8, "sint8");
+      CASE(SINT16, "sint16");
+      CASE(SINT32, "sint32");
+      CASE(SINT64, "sint64");
+      CASE(SINT128, "sint128");
+      CASE(SINT256, "sint256");
 
-      CASE(FLOAT16, "FLOAT16");
-      CASE(FLOAT32, "FLOAT32");
-      CASE(FLOAT64, "FLOAT64");
-      CASE(FLOAT128, "FLOAT128");
-      CASE(FLOAT256, "FLOAT256");
+      CASE(FLOAT16, "float16");
+      CASE(FLOAT32, "float32");
+      CASE(FLOAT64, "float64");
+      CASE(FLOAT128, "float128");
+      CASE(FLOAT256, "float256");
 
       
       CASE(PTR, "POINTER");
       CASE(REF, "REFERENCE");
       
 
-      CASE(ENUM, "ENUM");
-      CASE(MASK, "MASK");
-      CASE(UNION, "UNION");
-      CASE(NAMESPACE, "NAMESPACE");
-      CASE(INTERFACE, "INTERFACE");
-      CASE(STRUCT, "STRUCT");
-      CASE(CLASS, "CLASS");
+      CASE(ENUM, "enum");
+      CASE(MASK, "mask");
+      CASE(UNION, "union");
+      CASE(NAMESPACE, "namespace");
+      CASE(INTERFACE, "interface");
+      CASE(STRUCT, "struct");
+      CASE(CLASS, "class");
    }
    UNREACHABLE;
 }
