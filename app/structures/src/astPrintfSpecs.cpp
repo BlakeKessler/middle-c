@@ -34,12 +34,12 @@ uint mcsl::writef(File& file, const clef::astTNB<clef::ObjTypeSpec> obj, char mo
    if ((mode | CASE_BIT) == 's') {
       uint charsPrinted = 0;
       // PRINT_ARR_S(inheritedTypes, "") //handled by caller
-      PRINT_ARR_S(staticVars, "static ")
-      PRINT_ARR_S(staticFuncs, "static ")
-      PRINT_ARR_S(memberTypes,)
-      PRINT_ARR_S(members,)
-      PRINT_ARR_S(methods,)
       PRINT_ARR_S(friendTypes, "friend type ")
+      PRINT_ARR_S(memberTypes,)
+      PRINT_ARR_S(staticVars, "static ")
+      PRINT_ARR_S(members,)
+      PRINT_ARR_S(staticFuncs, "static ")
+      PRINT_ARR_S(methods,)
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
       uint charsPrinted = 0;
@@ -88,9 +88,9 @@ uint mcsl::writef(File& file, const clef::astTNB<clef::NamespaceSpec> obj, char 
    const NamespaceSpec& spec = *obj;
    if ((mode | CASE_BIT) == 's') {
       uint charsPrinted = 0;
+      PRINT_ARR_S(types,)
       PRINT_ARR_S(vars,)
       PRINT_ARR_S(funcs,)
-      PRINT_ARR_S(types,)
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
       uint charsPrinted = 0;
