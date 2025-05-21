@@ -101,7 +101,23 @@ clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
 
    //definition
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad INTERFACE definition");
+   QualMask scope = QualMask::PUBLIC;
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
+      if (tryConsumeKeyword(KeywordID::PUBLIC)) {
+         scope = QualMask::PUBLIC;
+         consumeOperator(OpID::LABEL_DELIM, "invalid PUBLIC label");
+         continue;
+      }
+      if (tryConsumeKeyword(KeywordID::PRIVATE)) {
+         scope = QualMask::PRIVATE;
+         consumeOperator(OpID::LABEL_DELIM, "invalid PRIVATE label");
+         continue;
+      }
+      if (tryConsumeKeyword(KeywordID::PROTECTED)) {
+         scope = QualMask::PROTECTED;
+         consumeOperator(OpID::LABEL_DELIM, "invalid PROTECTED label");
+         continue;
+      }
       bool isStatic = tryConsumeKeyword(KeywordID::STATIC);
       consumeKeyword(KeywordID::FUNC, "INTERFACE can only contain functions");
       index<Function> func = parseFunction();
