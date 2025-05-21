@@ -57,6 +57,7 @@ class clef::Parser {
       void skipBlockComment();
       void skipLineComment();
 
+      QualMask parseQuals();
       template<bool isDecl = false> index<Identifier> tryParseIdentifier(index<Identifier> scopeName = 0);
       template<bool isDecl = false> index<Identifier> parseIdentifier(index<Identifier> scopeName = 0);
       index<Type> parseTypename(index<Identifier> scopeName = 0);

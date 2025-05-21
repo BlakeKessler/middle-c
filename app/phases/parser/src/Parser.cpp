@@ -329,12 +329,17 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
    return toExpr(operandStack[0]);
 }
 
-template<bool isDecl> clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(index<Identifier> scopeName) {
+clef::QualMask clef::Parser::parseQuals() {
    QualMask quals = QualMask::_no_quals;
    while (tokIt->type() == TokenType::KEYWORD && isQualifier(tokIt->keywordID())) {
       quals |= toQual(tokIt->keywordID());
       ++tokIt;
    }
+   return quals;
+}
+
+template<bool isDecl> clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(index<Identifier> scopeName) {
+   QualMask quals = parseQuals();
    //handle keywords
    if (tokIt->type() == TokenType::KEYWORD) {
       index<Identifier> keyword = tree.make<Identifier>(tokIt->keywordID(), index<SpecList>{}, quals);
