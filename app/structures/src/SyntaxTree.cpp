@@ -8,69 +8,68 @@
 
 #include "MAP_MACRO.h"
 
-#define ID(fund) id = fund; break
+#define ID(kw, fund) case KeywordID::kw: id = FundTypeID::fund; break
 //!TODO: support data models besides LP64
 clef::index<clef::FundType> clef::SyntaxTree::getFundType(const KeywordID keyword) {
-   using enum FundTypeID;
    FundTypeID id;
    switch (keyword) {
-      case KeywordID::VOID       : ID(VOID);
-      case KeywordID::AUTO       : ID(AUTO);
+      ID(VOID, VOID);
+      ID(AUTO, AUTO);
 
 
-      case KeywordID::CHAR       : ID(CHAR);
-      case KeywordID::CHAR_UTF_8 : ID(CHAR8);
-      case KeywordID::CHAR_UTF_16: ID(CHAR16);
-      case KeywordID::CHAR_UTF_32: ID(CHAR32);
+      ID(CHAR, CHAR);
+      ID(CHAR_UTF_8, CHAR8);
+      ID(CHAR_UTF_16, CHAR16);
+      ID(CHAR_UTF_32, CHAR32);
 
 
-      case KeywordID::BOOL       : ID(BOOL);
-      case KeywordID::UBYTE      : ID(UINT8);
-      case KeywordID::USHORT     : ID(UINT16);
-      case KeywordID::UINT       : ID(UINT32);
-      case KeywordID::ULONG      : ID(UINT64);
-      case KeywordID::UINT_PTR   : ID(UINT64);
-      case KeywordID::UWORD      : ID(UINT64);
+      ID(BOOL, BOOL);
+      ID(UBYTE, UINT8);
+      ID(USHORT, UINT16);
+      ID(UINT, UINT32);
+      ID(ULONG, UINT64);
+      ID(UINT_PTR, UINT64);
+      ID(UWORD, UINT64);
 
-      case KeywordID::SIGN_T     : ID(SIGN_T);
-      case KeywordID::SBYTE      : ID(SINT8);
-      case KeywordID::SSHORT     : ID(SINT16);
-      case KeywordID::SINT       : ID(SINT32);
-      case KeywordID::SLONG      : ID(SINT64);
-      case KeywordID::SINT_PTR   : ID(SINT64);
-      case KeywordID::SWORD      : ID(SINT64);
-
-
-      case KeywordID::UINT_8     : ID(UINT8);
-      case KeywordID::UINT_16    : ID(UINT16);
-      case KeywordID::UINT_32    : ID(UINT32);
-      case KeywordID::UINT_64    : ID(UINT64);
-      case KeywordID::UINT_128   : ID(UINT128);
-      case KeywordID::UINT_256   : ID(UINT256);
-
-      case KeywordID::SINT_8     : ID(SINT8);
-      case KeywordID::SINT_16    : ID(SINT16);
-      case KeywordID::SINT_32    : ID(SINT32);
-      case KeywordID::SINT_64    : ID(SINT64);
-      case KeywordID::SINT_128   : ID(SINT128);
-      case KeywordID::SINT_256   : ID(SINT256);
-
-      case KeywordID::FLOAT      : ID(FLOAT32);
-
-      case KeywordID::FLOAT_16   : ID(FLOAT16);
-      case KeywordID::FLOAT_32   : ID(FLOAT32);
-      case KeywordID::FLOAT_64   : ID(FLOAT64);
-      case KeywordID::FLOAT_128  : ID(FLOAT128);
-      case KeywordID::FLOAT_256  : ID(FLOAT256);
+      ID(SIGN_T, SIGN_T);
+      ID(SBYTE, SINT8);
+      ID(SSHORT, SINT16);
+      ID(SINT, SINT32);
+      ID(SLONG, SINT64);
+      ID(SINT_PTR, SINT64);
+      ID(SWORD, SINT64);
 
 
-      case KeywordID::ENUM       : ID(ENUM);
-      case KeywordID::MASK       : ID(MASK);
-      case KeywordID::UNION      : ID(UNION);
-      case KeywordID::NAMESPACE  : ID(NAMESPACE);
-      case KeywordID::INTERFACE  : ID(INTERFACE);
-      case KeywordID::STRUCT     : ID(STRUCT);
-      case KeywordID::CLASS      : ID(CLASS);
+      ID(UINT_8, UINT8);
+      ID(UINT_16, UINT16);
+      ID(UINT_32, UINT32);
+      ID(UINT_64, UINT64);
+      ID(UINT_128, UINT128);
+      ID(UINT_256, UINT256);
+
+      ID(SINT_8, SINT8);
+      ID(SINT_16, SINT16);
+      ID(SINT_32, SINT32);
+      ID(SINT_64, SINT64);
+      ID(SINT_128, SINT128);
+      ID(SINT_256, SINT256);
+
+      ID(FLOAT, FLOAT32);
+
+      ID(FLOAT_16, FLOAT16);
+      ID(FLOAT_32, FLOAT32);
+      ID(FLOAT_64, FLOAT64);
+      ID(FLOAT_128, FLOAT128);
+      ID(FLOAT_256, FLOAT256);
+
+
+      ID(ENUM, ENUM);
+      ID(MASK, MASK);
+      ID(UNION, UNION);
+      ID(NAMESPACE, NAMESPACE);
+      ID(INTERFACE, INTERFACE);
+      ID(STRUCT, STRUCT);
+      ID(CLASS, CLASS);
 
       default: UNREACHABLE;
    }
