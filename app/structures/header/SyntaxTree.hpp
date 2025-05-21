@@ -19,8 +19,6 @@ class clef::SyntaxTree {
       allocator _alloc;
 
       void __indent(mcsl::File&, uint indents) const;
-      void __printf(mcsl::File&, index<const astNode>, const uint indents) const;
-      template<pseudoNode_t T> void __printf(mcsl::File&, index<const T>, const uint indents) const;
    public:
       SyntaxTree():_buf{},_ifaceSpecBuf{},_nsSpecBuf{},_objSpecBuf{},_alloc{} {
          _buf.emplace_back(NodeType::ERROR);
@@ -122,12 +120,13 @@ template<typename T> struct clef::astTNB {
 namespace mcsl {
    uint writef(File& file, const clef::indenter i, char mode, FmtArgs args);
 
-   inline File& write(File& file, const clef::SyntaxTree& obj) { obj.printf(file); return file; }
    uint writef(File& file, const clef::SyntaxTree& tree, char mode, FmtArgs args);
    uint writef(File& file, const clef::astTNB<clef::astNode> obj, char mode, FmtArgs args);
    MCSL_MAP(__DEF_TNB_WRITEF, CLEF_ALL_AST_NODE_T)
    MCSL_MAP(__DEF_TNB_WRITEF, CLEF_ALL_PSEUDO_NODE_T)
    uint writef(File& file, clef::QualMask, char mode, FmtArgs args);
+
+   inline File& write(File& file, const clef::SyntaxTree& obj) { writef(file, obj, 's', {}); return file; }
 };
 
 #undef __DEF_TNB_WRITEF
