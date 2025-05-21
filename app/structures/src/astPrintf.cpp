@@ -650,6 +650,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
    }
    const Identifier& iden = *obj;
    if ((mode | CASE_BIT) == 's') {
+      if (iden.fundTypeID() != FundTypeID::NULL) {
+         return writef(file, TNB_CAST(FundType), mode, fmt);
+      }
       if (+iden.keywordID()) { //keyword
          debug_assert(!iden.scopeName());
          if (isCast(iden.keywordID())) {
@@ -678,16 +681,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
 }
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Type> obj, char mode, FmtArgs fmt) {
-   using namespace clef;
-   if ((mode | CASE_BIT) == 's') {
-      if (!obj) {
-         return 0;
-      }
-      const Type& type = *obj;
-      if (type.fundTypeID() != FundTypeID::NULL) {
-         return writef(file, TNB_CAST(FundType), mode, fmt);
-      }
-   }
    return writef(file, TNB_CAST(Identifier), mode, fmt);
 }
 
@@ -965,10 +958,10 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::FundType> obj, char
          return 0;
       }
       const FundType& type = *obj;
-      if (type.id() == FundTypeID::PTR) {
-         return file.printf(FMT("%s% s*"), TNB(type.specializer()), type.quals());
-      } else if (type.id() == FundTypeID::REF) {
-         return file.printf(FMT("%s% s&"), TNB(type.specializer()), type.quals());
+      switch (type.id()) {
+         case FundTypeID::PTR: return file.printf(FMT("%s% s*"), TNB(type.specializer()), type.quals());
+         case FundTypeID::REF: return file.printf(FMT("%s% s&"), TNB(type.specializer()), type.quals());
+         default: return file.printf(FMT("%s%s"), type.quals(), toString(type.fundTypeID()));
       }
    }
    return writef(file, TNB_CAST(Identifier), mode, fmt);
