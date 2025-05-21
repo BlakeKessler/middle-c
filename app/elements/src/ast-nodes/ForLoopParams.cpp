@@ -1,5 +1,5 @@
-#ifndef FOR_LOOP_PARAMS
-#define FOR_LOOP_PARAMS
+#ifndef FOR_LOOP_PARAMS_CPP
+#define FOR_LOOP_PARAMS_CPP
 
 #include "ast-nodes/ForLoopParams.hpp"
 
@@ -10,4 +10,4 @@ mcsl::File& mcsl::write(File& file, const clef::ForLoopParams& obj) {
    return file;
 }
 
-#endif //FOR_LOOP_PARAMS
+#endif //FOR_LOOP_PARAMS_CPP

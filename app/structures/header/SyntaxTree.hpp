@@ -9,9 +9,8 @@
 
 class clef::SyntaxTree {
    private:
-      // SymbolTable _names;
-
       mcsl::dyn_arr<astNode> _buf; //owning storage for member nodes
+      
       mcsl::dyn_arr<InterfaceSpec> _ifaceSpecBuf;
       mcsl::dyn_arr<NamespaceSpec> _nsSpecBuf;
       mcsl::dyn_arr<ObjTypeSpec> _objSpecBuf;
@@ -24,7 +23,6 @@ class clef::SyntaxTree {
          _nsSpecBuf.emplace_back();
          _objSpecBuf.emplace_back();
       }
-      // SyntaxTree(const SyntaxTree& other):_buf{other._buf},_ifaceSpecBuf{other._ifaceSpecBuf},_nsSpecBuf{},_objSpecBuf{},_alloc{other._alloc} {}
       SyntaxTree(SyntaxTree&& other):
          _buf{std::move(other._buf)},
          _ifaceSpecBuf{std::move(other._ifaceSpecBuf)},

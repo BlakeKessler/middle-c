@@ -2,21 +2,10 @@
 #ifndef ENUMS_HPP
 #define ENUMS_HPP
 
-// #include "CLEF.hpp"
 #include "CLEF_DEFINES.hpp"
 #include <utility>
-// #include <bit>
 
 #include "assert.hpp"
-
-// //for some reason clang and gcc don't like enumerators named FOR_LOOP_PARAMS?
-// //and for some reason it tries thinks it is redefining the macro (even though it is in a guarded file)?
-// #pragma GCC diagnostic push
-// #pragma GCC diagnostic ignored "-Wmacro-redefined"
-// #ifndef FOR_LOOP_PARAMS
-// #define FOR_LOOP_PARAMS __FOR_LOOP_PARAMS__
-// #endif
-// #pragma GCC diagnostic pop
 
 namespace clef {
    //!enum of CLEF error codes
@@ -87,7 +76,7 @@ namespace clef {
             MATCH,
             ASM,
             TRY_CATCH,
-      FOR_LOOP_PARAMS_,
+      FOR_LOOP_PARAMS,
       FOREACH_LOOP_PARAMS,
       SWITCH_CASES,
       MATCH_CASES,

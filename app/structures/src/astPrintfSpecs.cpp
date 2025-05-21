@@ -71,6 +71,7 @@ uint mcsl::writef(File& file, const clef::astTNB<clef::InterfaceSpec> obj, char 
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
       uint charsPrinted = 0;
+      PRINT_ARR_B(inheritedInterfaces)
       PRINT_ARR_B(staticFuncs)
       PRINT_ARR_B(methods)
       return charsPrinted;

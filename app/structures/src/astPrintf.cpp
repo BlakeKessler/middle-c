@@ -337,14 +337,12 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
                case NodeType::NAMESPACE_SPEC:
                   charCount += file.printf(FMT(" {%s%S};"), TNB_INDENT(decl.nsSpec()), obj.indents);
                   break;
-                  
-               // case NodeType::FUNC: //handled separately
-               //    charCount += file.printf(FMT(" %s"), TNB_CAST2(Function, decl.funcSpec()));
-               //    break;
 
                case NodeType::PARAM_LIST:
                   TODO;
 
+               case NodeType::FUNC:
+                  UNREACHABLE;
                default:
                   UNREACHABLE;
             }

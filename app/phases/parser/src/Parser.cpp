@@ -7,10 +7,10 @@
 
 void clef::Parser::parse(const SourceTokens& src, SyntaxTree& tree) {
    Parser parser{src, tree};
-   index<StmtSeq> globl = parser.tree.make<StmtSeq>(&tree.allocBuf<index<Stmt>>());
+   index<StmtSeq> global = parser.tree.make<StmtSeq>(&tree.allocBuf<index<Stmt>>());
    while (parser.tokIt < parser.endtok) {
       index<Stmt> stmt = parser.parseStmt();
-      tree[globl].push_back(stmt);
+      tree[global].push_back(stmt);
    }
    // return parser.tree;
 }

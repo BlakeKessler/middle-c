@@ -7,8 +7,6 @@
 #include "pretty-print.hpp"
 
 struct clef::FundamentalType : public clef::Type {
-   // private:
-   //    FundTypeID _id;
    public:
       static constexpr NodeType nodeType() { return NodeType::FUND_TYPE; }
 

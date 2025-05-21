@@ -20,7 +20,6 @@ namespace clef {
    struct DelimPair;
    struct KeywordSpec;
    class KeywordDecoder;
-   // template <uint _size> struct KeywordDecoder;
 
    //atomic compilation elements
    struct Token;
@@ -99,11 +98,6 @@ template<typename T> struct clef::index {
    uint i;
 
    index(const uint n = {}):i{n} {}
-   // index(const index<T> n):i{n.i} {}
-   // index(const std::enable_if<!mcsl::same_t<T, mcsl::remove_const<T>>, index<mcsl::remove_const<T>>> n):i{n.i} {}
-
-   // index(index<T> n):i{+n} {}
-   // index(index<const T> n):i{+n} {}
 
    operator uint&() { return i; }
    operator uint() const { return i; }

@@ -19,7 +19,6 @@ class clef::allocator {
       
       allocator():_bufBuf{} {}
       allocator(allocator&& other):_bufBuf{std::move(other._bufBuf)} { if (this != &other) { other._bufBuf.release(); } }
-      // inline allocator(const allocator& other);
 
       inline allocator& merge(allocator&& other);
 

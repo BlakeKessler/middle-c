@@ -84,10 +84,8 @@ uint mcsl::writef(File& file, const clef::Token& tok, char mode, FmtArgs args) {
          return file.write(EOS), 1;
       case TokenType::ESC:
          return file.write(ESCAPE_CHAR), 1;
-      case TokenType::BLOCK_DELIM: //!TODO: make this print the actual tokens instead of the string description
-         return writef(file, toString(tok.blockType()), mode, args);
-         // file.printf(mcsl::FMT("\033[35mBLOCK DELIMITER:\033[39m %s \033[3m[%s]\033[23m"), toString(tok.blockType()), toString(tok.blockDelimRole()));
-         // break;
+      case TokenType::BLOCK_DELIM:
+         return writef(file, toString(tok.blockDelimRole()), mode, args) + writef(file, ' ', 'c', {}) + writef(file, toString(tok.blockType()), mode, args);
       case TokenType::PTXT_SEG:
          switch (tok.ptxtType()) {
             case PtxtType::CHAR:

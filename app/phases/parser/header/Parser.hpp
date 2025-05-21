@@ -62,7 +62,6 @@ class clef::Parser {
       template<bool isDecl = false> index<Identifier> parseIdentifier(index<Identifier> scopeName = 0);
       index<Type> parseTypename(index<Identifier> scopeName = 0);
       index<Decl> parseLetStmt(index<Identifier> scopeName = 0);
-      // mcsl::pair<index<Stmt>,index<Variable>> parseLetStmt(index<Identifier> scopeName = 0);
       index<Variable> parseParam(index<Identifier> scopeName = 0);
       index<Variable> parseDefaultableParam(index<Identifier> scopeName = 0);
 

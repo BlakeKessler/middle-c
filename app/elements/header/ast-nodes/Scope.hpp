@@ -14,8 +14,6 @@ struct clef::Scope : public clef::StatementSequence {
       static constexpr NodeType nodeType() { return NodeType::SCOPE; }
 
       using StatementSequence::StatementSequence;
-      // Scope():StatementSequence{} {}
-      // Scope(StatementSequence& stmts):StatementSequence{stmts} {}
 };
 
 namespace mcsl {

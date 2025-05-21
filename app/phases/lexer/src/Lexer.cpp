@@ -102,7 +102,6 @@ PUSH_NUM_TOK:
             } else {
                toks.emplace_back(mcsl::str_to_uint(tokBegin, curr, radix));
             }
-            // ++curr;
             break;
 
 
@@ -488,7 +487,6 @@ PUSH_NUM_TOK:
             } else {
                toks.emplace_back(mcsl::str_to_uint(tokBegin, curr, radix));
             }
-            // ++curr;
             break;
          #pragma endregion nums
 

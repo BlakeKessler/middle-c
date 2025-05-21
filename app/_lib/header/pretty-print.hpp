@@ -63,7 +63,7 @@ constexpr const mcsl::str_slice clef::toString(const NodeType type) {
       CASE(MATCH, "MATCH");
       CASE(ASM, "ASM");
       CASE(TRY_CATCH, "TRY_CATCH");
-      CASE(FOR_LOOP_PARAMS_, "FOR_LOOP_PARAMS");
+      CASE(FOR_LOOP_PARAMS, "FOR_LOOP_PARAMS");
       CASE(FOREACH_LOOP_PARAMS, "FOREACH_LOOP_PARAMS");
       CASE(SWITCH_CASES, "SWITCH_CASES");
       CASE(MATCH_CASES, "MATCH_CASES");

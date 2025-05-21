@@ -10,7 +10,7 @@ struct clef::ForLoopParams {
       index<Expr> _cond;
       index<Expr> _inc;
    public:
-      static constexpr NodeType nodeType() { return NodeType::FOR_LOOP_PARAMS_; }
+      static constexpr NodeType nodeType() { return NodeType::FOR_LOOP_PARAMS; }
 
       ForLoopParams():_declExpr{},_cond{},_inc{} {}
       ForLoopParams(index<Expr> decl, index<Expr> cond, index<Expr> inc):_declExpr{decl},_cond{cond},_inc{inc} {}

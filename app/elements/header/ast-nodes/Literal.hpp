@@ -6,7 +6,6 @@
 #include "ast-nodes/Type.hpp"
 
 #include "str_slice.hpp"
-// #include "string.hpp"
 
 struct clef::Literal {
    private:
