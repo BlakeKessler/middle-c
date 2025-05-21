@@ -17,8 +17,6 @@ class clef::SyntaxTree {
       mcsl::dyn_arr<ObjTypeSpec> _objSpecBuf;
 
       allocator _alloc;
-
-      void __indent(mcsl::File&, uint indents) const;
    public:
       SyntaxTree():_buf{},_ifaceSpecBuf{},_nsSpecBuf{},_objSpecBuf{},_alloc{} {
          _buf.emplace_back(NodeType::ERROR);
