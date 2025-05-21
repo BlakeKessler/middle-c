@@ -355,8 +355,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
                default:
                   UNREACHABLE;
             }
-         } else {
-            charCount += file.printf(FMT(";"));
          }
       }
       return charCount;
@@ -843,7 +841,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Union> obj, char mo
    if ((mode | CASE_BIT) == 's') {
       uint charsPrinted = file.printf(FMT("union %s"), TNB_CAST(Identifier));
       if (!spec.members()) { //forward declaration
-         charsPrinted += file.printf(FMT(";"));
          return charsPrinted;
       }
 
@@ -854,7 +851,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Union> obj, char mo
       for (uint i = 0; i < span.size(); ++i) { //print members
          charsPrinted += file.printf(FMT("%S%s;"), membIndents, TNB(span[i]));
       }
-      charsPrinted += file.printf(FMT("%S};"), obj.indents);
+      charsPrinted += file.printf(FMT("%S}"), obj.indents);
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
       return file.printf(FMT("%b%b"), TNB_CAST(Identifier), TNB(spec.members()));

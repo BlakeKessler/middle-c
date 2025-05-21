@@ -151,7 +151,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion() {
 
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad UNION definition");
 
-   index<ParameterList> members = tree.make<ParameterList>(&tree.allocBuf<index<Variable>>());
+   spec.members() = tree.make<ParameterList>(&tree.allocBuf<index<Variable>>());
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       //!TODO: maybe use parseLetStmt?
       //parse member
@@ -161,7 +161,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion() {
       
       //push to members list
       index<Variable> member = tree.remake<Variable>(memberName, memberType, tree[memberName]);
-      tree[members].push_back(member);
+      tree[spec.members()].push_back(member);
    }
 
    //EOS
