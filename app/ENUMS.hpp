@@ -591,10 +591,16 @@ namespace clef {
          case KeywordID::THROW         : return OpID::THROW;
          case KeywordID::ASSERT        : return OpID::ASSERT;
          case KeywordID::DEBUG_ASSERT  : return OpID::DEBUG_ASSERT;
+         case KeywordID::ASSUME        : return OpID::ASSUME;
          case KeywordID::STATIC_ASSERT : return OpID::STATIC_ASSERT;
          case KeywordID::RETURN        : return OpID::RETURN;
 
          case KeywordID::ALIAS         : return OpID::ALIAS;
+         
+         case KeywordID::TYPEOF        : TODO;
+         case KeywordID::SIZEOF        : TODO;
+         case KeywordID::ALIGNAS       : TODO;
+         case KeywordID::ALIGNOF       : TODO;
 
          default: UNREACHABLE;
       }
