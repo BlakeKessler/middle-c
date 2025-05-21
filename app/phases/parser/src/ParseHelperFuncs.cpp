@@ -82,6 +82,24 @@ clef::index<clef::Scope> clef::Parser::parseProcedure() {
 clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName) {
    index<astNode> name = +parseIdentifier(scopeName);
    tree[name].upCast(NodeType::TYPE);
+
+   //pointers and references
+   while (true) {
+      QualMask ptrquals = parseQuals();
+      FundTypeID id;
+      if (tryConsumeOperator(OpID::DEREF)) { //pointer
+         id = FundTypeID::PTR;
+      } else if (tryConsumeOperator(OpID::REFERENCE)) { //reference
+         id = FundTypeID::REF;
+      } else { //neither -> break
+         if (+ptrquals) { //trailing qualifiers
+            logError(ErrCode::BAD_IDEN, "type qualifiers must precede the type name");
+         }
+         break;
+      }
+      name = +tree.remake<SpecList>((index<Type>)name, tree[(index<Type>)name]);
+      name = +tree.make<FundType>(id, (index<SpecList>)name, ptrquals);
+   }
    return +name;
 }
 

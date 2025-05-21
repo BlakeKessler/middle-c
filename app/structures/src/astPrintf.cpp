@@ -678,6 +678,16 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
 }
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Type> obj, char mode, FmtArgs fmt) {
+   using namespace clef;
+   if ((mode | CASE_BIT) == 's') {
+      if (!obj) {
+         return 0;
+      }
+      const Type& type = *obj;
+      if (type.fundTypeID() != FundTypeID::NULL) {
+         return writef(file, TNB_CAST(FundType), mode, fmt);
+      }
+   }
    return writef(file, TNB_CAST(Identifier), mode, fmt);
 }
 
@@ -762,11 +772,20 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::SpecList> obj, char
       return 0;
    }
    const SpecList& list = *obj;
-   if ((mode | CASE_BIT) == 's' || (mode | CASE_BIT) == 'b') {
-      if (list.isDecl()) {
-         return writef(file, TNB_CAST(ParamList), mode, fmt);
-      } else {
-         return writef(file, TNB_CAST(ArgList), mode, fmt);
+   using enum NodeType;
+   if ((mode | CASE_BIT) == 's') {
+      switch (list.specType()) {
+         case PARAM_LIST: return writef(file, TNB_CAST(ParamList), mode, fmt);
+         case   ARG_LIST: return writef(file, TNB_CAST(ArgList), mode, fmt);
+         case       TYPE: return writef(file, TNB_CAST(Type), mode, fmt);
+         default: UNREACHABLE;
+      }
+   } else if((mode | CASE_BIT) == 'b') {
+      switch (list.specType()) {
+         case PARAM_LIST: return file.printf(FMT("%b%b"), +list.specType(), TNB_CAST(ParamList));
+         case   ARG_LIST: return file.printf(FMT("%b%b"), +list.specType(), TNB_CAST(ArgList));
+         case       TYPE: return file.printf(FMT("%b%b"), +list.specType(), TNB_CAST(Type));
+         default: UNREACHABLE;
       }
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<SpecList>"), mode);
@@ -940,7 +959,19 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::FuncSig> obj, char 
 }
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::FundType> obj, char mode, FmtArgs fmt) {
-   return writef(file, TNB_CAST(Type), mode, fmt);
+   using namespace clef;
+   if ((mode | mcsl::CASE_BIT) == 's') {
+      if (!obj) {
+         return 0;
+      }
+      const FundType& type = *obj;
+      if (type.id() == FundTypeID::PTR) {
+         return file.printf(FMT("%s% s*"), TNB(type.specializer()), type.quals());
+      } else if (type.id() == FundTypeID::REF) {
+         return file.printf(FMT("%s% s&"), TNB(type.specializer()), type.quals());
+      }
+   }
+   return writef(file, TNB_CAST(Identifier), mode, fmt);
 }
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::GenericType> obj, char mode, FmtArgs fmt) {
    return writef(file, TNB_CAST(Type), mode, fmt);
@@ -979,11 +1010,12 @@ uint mcsl::writef(mcsl::File& file, clef::QualMask quals, char mode, FmtArgs fmt
    switch (mode | mcsl::CASE_BIT) {
       case 's': {
          uint charsPrinted = 0;
+         const str_slice fmtstr = FMT(fmt.padForPosSign ? " %s" : "%s ");
          for (uint16 bit = 1; +quals && bit; bit <<= 1) {
             QualMask qualbit = quals & (QualMask)bit;
             if (+qualbit) {
                quals &= ~qualbit;
-               charsPrinted += file.printf(FMT("%s "), toString(qualbit));
+               charsPrinted += file.printf(fmtstr, toString(qualbit));
             }
          }
          return charsPrinted;

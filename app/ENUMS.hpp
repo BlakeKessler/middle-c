@@ -742,6 +742,10 @@ namespace clef {
       FLOAT64,
       FLOAT128,
       FLOAT256,
+      
+
+      PTR,
+      REF,
 
 
       ENUM,

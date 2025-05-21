@@ -522,6 +522,10 @@ constexpr const mcsl::str_slice clef::toString(const FundTypeID type) {
       CASE(FLOAT64, "FLOAT64");
       CASE(FLOAT128, "FLOAT128");
       CASE(FLOAT256, "FLOAT256");
+
+      
+      CASE(PTR, "POINTER");
+      CASE(REF, "REFERENCE");
       
 
       CASE(ENUM, "ENUM");

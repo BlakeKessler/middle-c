@@ -23,10 +23,10 @@ struct clef::Identifier {
    public:
       static constexpr NodeType nodeType() { return NodeType::IDEN; }
 
-      Identifier(const mcsl::str_slice name = {}, index<Identifier> scopeName = {}, index<SpecList> specializer = {}, QualMask quals = {}):_name_buf{name.begin()},_name_size{name.size()},_scopeName{scopeName},_specializer{specializer},_keywordID{KeywordID::_NOT_A_KEYWORD},_quals{quals} {}
-      Identifier(const KeywordID id, index<SpecList> specializer = {}, QualMask quals = {}):_name_buf{},_name_size{},_scopeName{},_specializer{specializer},_keywordID{id},_quals{quals} {}
+      Identifier(const mcsl::str_slice name = {}, index<Identifier> scopeName = {}, index<SpecList> specializer = {}, QualMask quals = {}):_name_buf{name.begin()},_name_size{name.size()},_scopeName{scopeName},_specializer{specializer},_keywordID{KeywordID::_NOT_A_KEYWORD},_id{},_quals{quals} {}
+      Identifier(const KeywordID id, index<SpecList> specializer = {}, QualMask quals = {}):_name_buf{},_name_size{},_scopeName{},_specializer{specializer},_keywordID{id},_id{},_quals{quals} {}
 
-      Identifier(const Identifier& other):_name_buf{other._name_buf},_name_size{other._name_size},_scopeName{other._scopeName},_specializer{other._specializer},_keywordID{other._keywordID},_quals{other._quals} {}
+      Identifier(const Identifier& other):_name_buf{other._name_buf},_name_size{other._name_size},_scopeName{other._scopeName},_specializer{other._specializer},_keywordID{other._keywordID},_id{other._id},_quals{other._quals} {}
       Identifier& operator=(const Identifier& other) { new (this) Identifier{other}; return self; }
 
       index<SpecList>& specializer() { return _specializer; }
@@ -36,6 +36,7 @@ struct clef::Identifier {
 
       const mcsl::str_slice name() const { return mcsl::str_slice::make(_name_buf, _name_size); } //unqualified name
       KeywordID keywordID() const { return _keywordID; }
+      FundTypeID fundTypeID() const { return _id; }
 
       QualMask& quals() { return _quals; }
       QualMask quals() const { return _quals; }

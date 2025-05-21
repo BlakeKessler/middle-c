@@ -15,6 +15,7 @@ struct clef::FundamentalType : public clef::Type {
       FundamentalType():Type{} {}
       FundamentalType(FundTypeID id):Type{(bool)id ? toString(id) : mcsl::str_slice{}} { _id = id; }
       FundamentalType(FundTypeID id, const Type& name):Type{name} { _id = id; }
+      FundamentalType(FundTypeID id, index<SpecList> spec, QualMask quals):Type{(bool)id ? toString(id) : mcsl::str_slice{}, {}, spec, quals} { _id = id; }
 
       FundTypeID& id() { return _id; }
       FundTypeID id() const { return _id; }
