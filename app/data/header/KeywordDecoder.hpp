@@ -75,6 +75,7 @@ class clef::KeywordDecoder {
          {"public", KeywordID::PUBLIC},
          {"private", KeywordID::PRIVATE},
          {"protected", KeywordID::PROTECTED},
+         {"static", KeywordID::STATIC},
          {"cast", KeywordID::CAST},
          {"up_cast", KeywordID::UP_CAST},
          {"dyn_cast", KeywordID::DYN_CAST},
