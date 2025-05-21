@@ -696,9 +696,13 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Variable> obj, char
    }
    const Variable& var = *obj;
    if ((mode | CASE_BIT) == 's') {
-      return file.printf(FMT("%s %s"), TNB(var.type()), TNB_CAST(Identifier));
+      if (var.val()) {
+         return file.printf(FMT("%s %s = %s"), TNB(var.type()), TNB_CAST(Identifier), TNB(var.val()));
+      } else {
+         return file.printf(FMT("%s %s"), TNB(var.type()), TNB_CAST(Identifier));
+      }
    } else if ((mode | CASE_BIT) == 'b') {
-      return file.printf(FMT("%b%b"), TNB(var.type()), TNB_CAST(Identifier));
+      return file.printf(FMT("%b%b%b"), TNB(var.type()), TNB_CAST(Identifier), TNB(var.val()));
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Variable>"), mode);
    }
