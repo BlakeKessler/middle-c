@@ -59,7 +59,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseClass() {
          KW_CASE(NAMESPACE, parseNamespace);
          #undef KW_CASE
          case KeywordID::FUNC: ++tokIt; {auto tmp = parseFunction(); tree[(index<Identifier>)tmp].addQuals(scope); (isStatic ? spec.staticFuncs() : spec.methods()).push_back(tmp);} break;
-         case KeywordID::LET : ++tokIt; {auto tmp = parseLetStmt(); tree[(index<Identifier>)(tree[tmp].type())].addQuals(scope); (isStatic ? spec.staticVars() : spec.members()).push_back(tmp);} break;
+         case KeywordID::LET : ++tokIt; {auto tmp = parseLetStmt(); tree[(index<Identifier>)(tree[tmp].name())].addQuals(scope); (isStatic ? spec.staticVars() : spec.members()).push_back(tmp);} break;
          default: logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
       }
    }
@@ -121,6 +121,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
       bool isStatic = tryConsumeKeyword(KeywordID::STATIC);
       consumeKeyword(KeywordID::FUNC, "INTERFACE can only contain functions");
       index<Function> func = parseFunction();
+      tree[func].addQuals(scope);
       if (isStatic) {
          spec.staticFuncs().push_back(func);
       } else {
