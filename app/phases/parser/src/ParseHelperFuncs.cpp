@@ -82,10 +82,6 @@ clef::index<clef::Scope> clef::Parser::parseProcedure() {
 clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName) {
    index<astNode> name = +parseIdentifier(scopeName);
    tree[name].upCast(NodeType::TYPE);
-   while (tokIt->type() == TokenType::OP && +(tokIt->op().props() & OpProps::TYPE_MOD)) {
-      TODO;
-      ++tokIt;
-   }
    return +name;
 }
 
@@ -129,7 +125,6 @@ clef::index<clef::Variable> clef::Parser::parseParam(index<Identifier> scopeName
       index<ParamList> params = parseParamList(BlockType::CALL);
       
       consumeOperator(OpID::ARROW, "FUNC without trailing return type");
-      // TypeQualMask returnTypeQuals = parseQuals();
       index<Type> returnType = parseTypename();
 
       index<FuncSig> sig = tree.make<FuncSig>(returnType, params);

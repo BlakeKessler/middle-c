@@ -18,9 +18,8 @@ namespace clef {
    constexpr const mcsl::str_slice toString(const BlockDelimRole);
    constexpr const mcsl::str_slice toString(const PtxtType);
    constexpr const mcsl::str_slice toString(const LitType);
-   // constexpr const mcsl::str_slice toString(const TypeQualMask);
-   // constexpr const mcsl::str_slice toString(const SymbolProp);
    constexpr const mcsl::str_slice toString(const FundTypeID);
+   constexpr const mcsl::str_slice toString(const QualMask);
 };
 
 
@@ -354,6 +353,8 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(PRIVATE, "private");
       CASE(PROTECTED, "protected");
 
+      CASE(STATIC, "static");
+
       CASE(CAST, "cast");
       CASE(UP_CAST, "up_cast");
       CASE(DYN_CAST, "dyn_cast");
@@ -395,7 +396,7 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(STATIC_ASSERT, "static_assert");
       CASE(DEBUG_ASSERT, "debug_assert");
       CASE(ASSUME, "assume");
-      
+
       CASE(LET, "let");
       CASE(ALIAS, "using");
       CASE(ASM, "asm");
@@ -530,6 +531,32 @@ constexpr const mcsl::str_slice clef::toString(const FundTypeID type) {
       CASE(INTERFACE, "INTERFACE");
       CASE(STRUCT, "STRUCT");
       CASE(CLASS, "CLASS");
+   }
+   UNREACHABLE;
+}
+
+constexpr const mcsl::str_slice clef::toString(const QualMask quals) {
+   using enum QualMask;
+   switch (quals) {
+      CASE(CONST, "const");
+      CASE(CONSTEXPR, "constexpr");
+      CASE(IMMEDIATE, "immediate");
+      CASE(VIEW, "view");
+      CASE(NON_OWNING, "notown");
+      CASE(MUTABLE, "mutable");
+      CASE(VOLATILE, "volatile");
+      CASE(ATOMIC, "atomic");
+      CASE(EXTERN, "extern");
+      CASE(INLINE, "inline");
+      CASE(NOEXCEPT, "noexcept");
+      CASE(VIRTUAL, "virtual");
+      CASE(OVERRIDE, "override");
+
+      CASE(PUBLIC, "public");
+      CASE(PRIVATE, "private");
+      CASE(PROTECTED, "protected");
+
+      default: TODO;
    }
    UNREACHABLE;
 }

@@ -653,13 +653,13 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
       if (+iden.keywordID()) { //keyword
          debug_assert(!iden.scopeName());
          if (isCast(iden.keywordID())) {
-            return file.printf(FMT("%s<:%s:>"), toString(iden.keywordID()), TNB(iden.specializer()));
+            return file.printf(FMT("%s%s<:%s:>"), iden.quals(), toString(iden.keywordID()), TNB(iden.specializer()));
          }
          debug_assert(!iden.specializer());
-         return file.printf(FMT("%s"), toString(iden.keywordID()));
+         return file.printf(FMT("%s%s"), iden.quals(), toString(iden.keywordID()));
       }
 
-      uint charsPrinted = 0;
+      uint charsPrinted = file.printf(FMT("%s"), iden.quals());
       if (iden.scopeName()) {
          charsPrinted += file.printf(FMT("%s::"), TNB(iden.scopeName()));
       }
@@ -670,7 +670,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
       }
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
-      return writef(file, TNB_CAST(StmtSeq), mode, fmt);
+      return file.printf(FMT("%b%b%b%b%b"), iden.name(), TNB(iden.specializer()), +iden.keywordID(), TNB(iden.scopeName()), +iden.quals());
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Scope>"), mode);
    }
@@ -973,5 +973,26 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::MatchCases> obj, ch
 #undef TNB_AST
 #undef TNB_INDENT
 #undef TNB
+
+uint mcsl::writef(mcsl::File& file, clef::QualMask quals, char mode, FmtArgs fmt) {
+   using namespace clef;
+   switch (mode | mcsl::CASE_BIT) {
+      case 's': {
+         uint charsPrinted = 0;
+         for (uint16 bit = 1; +quals && bit; bit <<= 1) {
+            QualMask qualbit = quals & (QualMask)bit;
+            if (+qualbit) {
+               quals &= ~qualbit;
+               charsPrinted += file.printf(FMT("%s "), toString(qualbit));
+            }
+         }
+         return charsPrinted;
+      }
+      case 'b': {
+         return mcsl::writef(file, +quals, mode, fmt);
+      }
+      default: UNREACHABLE;
+   }
+}
 
 #endif //CLEF_AST_PRINTF_CPP

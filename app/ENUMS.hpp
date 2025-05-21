@@ -482,6 +482,8 @@ namespace clef {
       __FIRST_QUAL = CONST,
       __LAST_QUAL = PROTECTED,
 
+      STATIC,
+
       CAST,
       UP_CAST,
       DYN_CAST,

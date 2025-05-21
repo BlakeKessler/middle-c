@@ -330,9 +330,14 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
 }
 
 template<bool isDecl> clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(index<Identifier> scopeName) {
+   QualMask quals = QualMask::_no_quals;
+   while (tokIt->type() == TokenType::KEYWORD && isQualifier(tokIt->keywordID())) {
+      quals |= toQual(tokIt->keywordID());
+      ++tokIt;
+   }
    //handle keywords
    if (tokIt->type() == TokenType::KEYWORD) {
-      index<Identifier> keyword = tree.make<Identifier>(tokIt->keywordID());
+      index<Identifier> keyword = tree.make<Identifier>(tokIt->keywordID(), index<SpecList>{}, quals);
       ++tokIt;
       if (tryConsumeOperator(OpID::SCOPE_RESOLUTION)) {
          logError(ErrCode::BAD_KEYWORD, "keywords may not name scopes");
@@ -359,6 +364,7 @@ template<bool isDecl> clef::index<clef::Identifier> clef::Parser::tryParseIdenti
       if (tokIt->type() == TokenType::KEYWORD) { logError(ErrCode::BAD_IDEN, "keywords may not name or be members of scopes"); }
       else if (tokIt->type() != TokenType::IDEN) { logError(ErrCode::BAD_IDEN, "only identifiers may name or be members of scopes (%u)", +tokIt->type()); }
    } while (true);
+   tree[name].setQualMask(quals);
    
    return name;
 }
@@ -506,7 +512,6 @@ clef::index<clef::Function> clef::Parser::parseFunction() {
 
    //return type
    consumeOperator(OpID::ARROW, "FUNC without trailing return type");
-   // TypeQualMask returnTypeQuals = parseQuals();
    index<Type> returnType = parseTypename();
 
    //make signature

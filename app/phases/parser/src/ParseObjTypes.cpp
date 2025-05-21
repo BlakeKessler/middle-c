@@ -27,19 +27,22 @@ clef::index<clef::TypeDecl> clef::Parser::parseClass() {
    //definition
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad CLASS definition");
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
+      bool isStatic = tryConsumeKeyword(KeywordID::STATIC);
       if (tokIt->type() != TokenType::KEYWORD) {
          logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
       }
       switch (tokIt->keywordID()) {
-         case KeywordID::CLASS    : ++tokIt; {auto tmp = parseClass(); spec.memberTypes().push_back(tmp);} break;
-         case KeywordID::STRUCT   : ++tokIt; {auto tmp = parseStruct(); spec.memberTypes().push_back(tmp);} break;
-         case KeywordID::INTERFACE: ++tokIt; {auto tmp = parseInterface(); spec.memberTypes().push_back(tmp);} break;
-         case KeywordID::UNION    : ++tokIt; {auto tmp = parseUnion(); spec.memberTypes().push_back(tmp);} break;
-         case KeywordID::ENUM     : ++tokIt; {auto tmp = parseEnum(); spec.memberTypes().push_back(tmp);} break;
-         case KeywordID::MASK     : ++tokIt; {auto tmp = parseMask(); spec.memberTypes().push_back(tmp);} break;
-         case KeywordID::NAMESPACE: ++tokIt; {auto tmp = parseNamespace(); spec.memberTypes().push_back(tmp);} break;
-         case KeywordID::FUNC     : ++tokIt; {auto tmp = parseFunction(); spec.methods().push_back(tmp);} break; //!TODO: does not account for static functions
-         case KeywordID::LET      : ++tokIt; {auto tmp = parseLetStmt(); spec.members().push_back(tmp);} break; //!TODO: does not account for static members
+         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: ++tokIt; if (isStatic) { logError(ErrCode::BAD_KEYWORD, "cannot qualify a " #kw " as static"); } { auto tmp = parsingFunc(); spec.memberTypes().push_back(tmp); } break
+         KW_CASE(CLASS, parseClass);
+         KW_CASE(STRUCT, parseStruct);
+         KW_CASE(INTERFACE, parseInterface);
+         KW_CASE(UNION, parseUnion);
+         KW_CASE(ENUM, parseEnum);
+         KW_CASE(MASK, parseMask);
+         KW_CASE(NAMESPACE, parseNamespace);
+         #undef KW_CASE
+         case KeywordID::FUNC: ++tokIt; {auto tmp = parseFunction(); (isStatic ? spec.staticFuncs() : spec.methods()).push_back(tmp);} break;
+         case KeywordID::LET : ++tokIt; {auto tmp = parseLetStmt(); (isStatic ? spec.staticVars() : spec.members()).push_back(tmp);} break;
          default: logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
       }
    }
@@ -82,14 +85,14 @@ clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
    //definition
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad INTERFACE definition");
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
-      // TypeQualMask quals = parseQuals();
+      bool isStatic = tryConsumeKeyword(KeywordID::STATIC);
       consumeKeyword(KeywordID::FUNC, "INTERFACE can only contain functions");
       index<Function> func = parseFunction();
-      // if (+(quals & TypeQualMask::STATIC)) {
-      //    spec.staticFuncs().push_back(func);
-      // } else {
+      if (isStatic) {
+         spec.staticFuncs().push_back(func);
+      } else {
          spec.methods().push_back(func);
-      // }
+      }
    }
 
    //EOS
@@ -215,7 +218,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace() {
          case KeywordID::ENUM     : ++tokIt; {auto tmp = parseEnum(); spec.types().push_back(tmp);} break;
          case KeywordID::MASK     : ++tokIt; {auto tmp = parseMask(); spec.types().push_back(tmp);} break;
          case KeywordID::NAMESPACE: ++tokIt; {auto tmp = parseNamespace(); spec.types().push_back(tmp);} break;
-         case KeywordID::FUNC     : ++tokIt; {auto tmp = parseFunction(); spec.funcs().push_back(tmp);} break; //!NOTE: does not account for static functions
+         case KeywordID::FUNC     : ++tokIt; {auto tmp = parseFunction(); spec.funcs().push_back(tmp);} break;
          case KeywordID::LET      : ++tokIt; {auto tmp = parseLetStmt(); spec.vars().push_back(tmp);} break;
          default: logError(ErrCode::BAD_STMT, "invalid statement in NAMESPACE definition");
       }
