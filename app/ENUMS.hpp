@@ -565,7 +565,8 @@ namespace clef {
          constexpr bool isASCII(const KeywordID id) noexcept { return id == KeywordID::CHAR; }
          constexpr bool isUnicode(const KeywordID id) noexcept { return !isASCII(id) && isText(id); }
    constexpr bool isObjectType(const KeywordID id) noexcept { return __BETWEEN(OBJ_TYPE); }
-   constexpr bool isQualifier(const KeywordID id) noexcept { return __BETWEEN(TYPE_QUAL); }
+   constexpr bool isTypeQualifier(const KeywordID id) noexcept { return __BETWEEN(TYPE_QUAL); }
+   constexpr bool isQualifier(const KeywordID id) noexcept { return __BETWEEN(QUAL); }
    constexpr bool isCast(const KeywordID id) noexcept { return __BETWEEN(CAST); }
    constexpr bool isControlFlow(const KeywordID id) noexcept { return __BETWEEN(CONTROL_FLOW); }
    constexpr bool isUnspec(const KeywordID id) noexcept { return __BETWEEN(UNSPEC); }
@@ -786,7 +787,7 @@ namespace clef {
    
    constexpr QualMask toQual(KeywordID kw) {
       //check range
-      if (kw < KeywordID::__FIRST_QUAL || kw > KeywordID::__LAST_QUAL) {
+      if (!isQualifier(kw)) {
          return QualMask::_no_quals;
       }
       //apply identity
