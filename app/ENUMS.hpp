@@ -290,7 +290,7 @@ namespace clef {
       MAKE_TYPE,
 
       //aliases
-      LABEL_DELIM = INLINE_IF,
+      LABEL_DELIM = INLINE_ELSE,
       EACH_OF = LABEL_DELIM,
       EXTENDS = LABEL_DELIM,
       ADDRESS_OF = BIT_AND,
@@ -742,7 +742,7 @@ namespace clef {
       FLOAT64,
       FLOAT128,
       FLOAT256,
-      
+
 
       PTR,
       REF,
