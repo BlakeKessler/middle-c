@@ -26,13 +26,30 @@ clef::index<clef::TypeDecl> clef::Parser::parseClass() {
 
    //definition
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad CLASS definition");
+   QualMask scope = QualMask::PRIVATE;
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
+      if (tryConsumeKeyword(KeywordID::PUBLIC)) {
+         scope = QualMask::PUBLIC;
+         consumeOperator(OpID::LABEL_DELIM, "invalid PUBLIC label");
+         continue;
+      }
+      if (tryConsumeKeyword(KeywordID::PRIVATE)) {
+         scope = QualMask::PRIVATE;
+         consumeOperator(OpID::LABEL_DELIM, "invalid PRIVATE label");
+         continue;
+      }
+      if (tryConsumeKeyword(KeywordID::PROTECTED)) {
+         scope = QualMask::PROTECTED;
+         consumeOperator(OpID::LABEL_DELIM, "invalid PROTECTED label");
+         continue;
+      }
+
       bool isStatic = tryConsumeKeyword(KeywordID::STATIC);
       if (tokIt->type() != TokenType::KEYWORD) {
          logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
       }
       switch (tokIt->keywordID()) {
-         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: ++tokIt; if (isStatic) { logError(ErrCode::BAD_KEYWORD, "cannot qualify a " #kw " as static"); } { auto tmp = parsingFunc(); spec.memberTypes().push_back(tmp); } break
+         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: ++tokIt; if (isStatic) { logError(ErrCode::BAD_KEYWORD, "cannot qualify a " #kw " as static"); } { auto tmp = parsingFunc(); tree[(index<Identifier>)tmp].addQuals(scope); spec.memberTypes().push_back(tmp); } break
          KW_CASE(CLASS, parseClass);
          KW_CASE(STRUCT, parseStruct);
          KW_CASE(INTERFACE, parseInterface);
@@ -41,8 +58,8 @@ clef::index<clef::TypeDecl> clef::Parser::parseClass() {
          KW_CASE(MASK, parseMask);
          KW_CASE(NAMESPACE, parseNamespace);
          #undef KW_CASE
-         case KeywordID::FUNC: ++tokIt; {auto tmp = parseFunction(); (isStatic ? spec.staticFuncs() : spec.methods()).push_back(tmp);} break;
-         case KeywordID::LET : ++tokIt; {auto tmp = parseLetStmt(); (isStatic ? spec.staticVars() : spec.members()).push_back(tmp);} break;
+         case KeywordID::FUNC: ++tokIt; {auto tmp = parseFunction(); tree[(index<Identifier>)tmp].addQuals(scope); (isStatic ? spec.staticFuncs() : spec.methods()).push_back(tmp);} break;
+         case KeywordID::LET : ++tokIt; {auto tmp = parseLetStmt(); tree[(index<Identifier>)(tree[tmp].type())].addQuals(scope); (isStatic ? spec.staticVars() : spec.members()).push_back(tmp);} break;
          default: logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
       }
    }
