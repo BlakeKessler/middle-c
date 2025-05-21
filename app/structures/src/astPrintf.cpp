@@ -338,8 +338,17 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
                   charCount += file.printf(FMT(" {%s%S};"), TNB_INDENT(decl.nsSpec()), obj.indents);
                   break;
 
-               case NodeType::PARAM_LIST:
-                  TODO;
+               case NodeType::PARAM_LIST: {
+                  const ParamList& list = obj.tree[decl.otherSpec()];
+                  indenter indents = obj.indents + 1;
+                  charCount += file.printf(FMT(" {"));
+                  for (uint i = 0; i < list.size(); ++i) {
+                     charCount += file.printf(FMT("%S%s;"), indents, astTNB{obj.tree, list[i], indents});
+                     // charCount += file.printf(FMT("%S%s;"), indents, astTNB{obj.tree, (clef::index<Identifier>)list[i], indents});
+                  }
+                  charCount += file.printf(FMT("%S}"), obj.indents);
+                  break;
+               }
 
                case NodeType::FUNC:
                   UNREACHABLE;
@@ -364,7 +373,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
             charCount += file.printf(FMT("%b"), TNB_INDENT(decl.nsSpec()));
             break;
          case NodeType::PARAM_LIST:
-            TODO;
+            charCount += file.printf(FMT("%b"), TNB_INDENT(decl.otherSpec()));
          default:
             UNREACHABLE;
       }
