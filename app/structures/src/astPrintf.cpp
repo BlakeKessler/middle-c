@@ -231,7 +231,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Switch> obj, char m
    }
    const Switch& switchstmt = *obj;
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      return file.printf(FMT("switch (%s) %s"), TNB(switchstmt.condition()), TNB(switchstmt.cases()));
+      return file.printf(FMT("switch (%s) {%s%S}"), TNB(switchstmt.condition()), TNB_INDENT(switchstmt.cases()), obj.indents);
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       return file.printf(FMT("%b%b"), TNB(switchstmt.condition()), TNB(switchstmt.cases()));
    } else {
@@ -991,7 +991,43 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Namespace> obj, cha
 }
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::SwitchCases> obj, char mode, FmtArgs fmt) {
-   TODO;
+   using namespace clef;
+   if (!obj) {
+      return 0;
+   }
+
+   uint charsPrinted = 0;
+   
+   const SwitchCases& cases = *obj;
+   const Scope& scope = obj.tree[cases.procedure()];
+   auto caseBuf = cases.span();
+   if ((mode | CASE_BIT) == 's') {
+      auto scopeBuf = scope.span();
+      indenter procIndents = obj.indents + 1;
+      uint currCase = 0;
+      for (uint i = 0; i < scopeBuf.size(); ++i) {
+         if (caseBuf[currCase].second == scopeBuf[i]) {
+            if (caseBuf[currCase].first) {
+               charsPrinted += file.printf(FMT("%Scase %s:"), obj.indents, TNB(caseBuf[currCase].first));
+            } else {
+               charsPrinted += file.printf(FMT("%Sdefault:"), obj.indents, TNB(caseBuf[currCase].first));
+            }
+            ++currCase;
+         }
+         charsPrinted += file.printf(FMT("%S%s"), procIndents, TNB(scopeBuf[i]));
+      }
+      return charsPrinted;
+   } else if ((mode | CASE_BIT) == 'b') {
+      charsPrinted += file.printf(FMT("%b"), caseBuf.size());
+      for (uint i = 0; i < caseBuf.size(); ++i) {
+         charsPrinted += file.printf(FMT("%b%b"), TNB(caseBuf[i].first), TNB(caseBuf[i].second));
+      }
+      charsPrinted += file.printf(FMT("%b"), scope);
+      return charsPrinted;
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<SwitchCases>"), mode);
+   }
+   UNREACHABLE;
 }
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::MatchCases> obj, char mode, FmtArgs fmt) {
    TODO;
