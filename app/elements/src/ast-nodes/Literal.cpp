@@ -18,6 +18,7 @@ mcsl::File& mcsl::write(mcsl::File& file, const clef::Literal& obj) {
       case LitType::SINT: file.printf(mcsl::FMT("%i"), (slong)obj); break;
       case LitType::FLOAT: file.printf(mcsl::FMT("%f"), (flong)obj); break;
 
+      case LitType::BOOL: file.printf(mcsl::FMT("%s"), (bool)obj); break;
       case LitType::CHAR: file.printf(mcsl::FMT("%c"), (char)obj); break;
       case LitType::STRING: [[fallthrough]];
       case LitType::INTERP_STR: [[fallthrough]];
