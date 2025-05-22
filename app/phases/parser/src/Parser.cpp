@@ -423,7 +423,7 @@ clef::index<clef::If> clef::Parser::parseIf() {
    //ELSE
    consumeKeyword(KeywordID::ELSE, "IF statement without EOS token");
    switch (tokIt->type()) {
-      case TokenType::OP: { //basic ELSE
+      case TokenType::BLOCK_DELIM: { //basic ELSE
          consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad ELSE block");
          index<Scope> elseProc = parseProcedure();
          //EOS
