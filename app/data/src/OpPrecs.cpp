@@ -8,7 +8,7 @@
 #pragma GCC diagnostic ignored "-Wunused-value"
 template <mcsl::is_t<clef::OpData>... Argv_t> constexpr clef::OpPrecs::OpPrecs(const Argv_t... initList):
    _precs{} {
-      ((_precs[+initList.opID()][makeFlags(initList.props())] = initList.precedence()), ...);
+      ((_precs[+initList.opID()][makeFlags(initList.props())] = mcsl::pair{initList.precedence(), (bool)(initList.props() & OpProps::IS_LEFT_ASSOC)}), ...);
 }
 #pragma GCC diagnostic pop
 

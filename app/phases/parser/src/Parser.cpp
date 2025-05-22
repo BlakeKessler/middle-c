@@ -300,12 +300,19 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             }
             if (prevTokIsOperand) { //binary or postfix unary
                OpData op = tokIt->op();
-               while (operatorStack.size() && operatorStack.back().precedence() >= op.precedence()) { //!TODO: associativity
-                  eval();
+               while (operatorStack.size() && (
+                  operatorStack.back().precedence() > op.precedence() || (
+                     (+(op.props() & OpProps::IS_LEFT_ASSOC)) &&
+                     operatorStack.back().precedence() == op.precedence()))) {
+                        eval();
                }
                op.removeProps(OpProps::PREFIX);
                debug_assert(+op.props());
                operatorStack.push_back(op);
+               if (op.opID() == OpID::INLINE_ELSE && operatorStack.back().opID() != OpID::INLINE_IF) { //label name or case expression
+                  debug_assert(+(op.props() & OpProps::CAN_BE_POSTFIX));
+                  goto END_OF_EXPR;
+               }
             } else { //prefix unary
                OpData op = tokIt->op();
                op.removeProps(OpProps::POSTFIX | OpProps::INFIX_LEFT | OpProps::INFIX_RIGHT);
@@ -458,7 +465,9 @@ clef::index<clef::Switch> clef::Parser::parseSwitch() {
 
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       if (tryConsumeKeyword(KeywordID::CASE)) { //CASE
-         index<Expr> caseExpr = parseExpr();
+         // index<Expr> caseExpr = parseExpr();
+         index<Expr> caseExpr = toExpr(+parseIdentifier()); //!TODO: change this back
+
          consumeOperator(OpID::LABEL_DELIM, "bad CASE in SWITCH statement");
          
          index<Stmt> firstStmt = parseStmt(); //!TODO: handle code in the form of `case expr1: case expr2: stmt;`
