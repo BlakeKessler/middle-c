@@ -14,6 +14,7 @@ struct clef::Literal {
          ulong _uintLit;
          slong _sintLit;
          flong _floatLit;
+         bool _boolLit;
          char _charLit;
          mcsl::str_slice _strLit;
          mcsl::str_slice _interpLit;
@@ -30,6 +31,7 @@ struct clef::Literal {
       template<mcsl::uint_t  uint_t > Literal(const  uint_t i):_uintLit{i}, _type{LitType::UINT}  {}
       template<mcsl::sint_t  sint_t > Literal(const  sint_t i):_sintLit{i}, _type{LitType::SINT}  {}
       template<mcsl::float_t float_t> Literal(const float_t i):_floatLit{i},_type{LitType::FLOAT} {}
+      Literal(const bool b):_boolLit{b},_type{LitType::BOOL} {}
       Literal(mcsl::str_slice str):_strLit{str},_type{LitType::STRING} {}
       Literal(mcsl::str_slice str, const LitType type):_strLit{str},_type{type} {
          //check type
@@ -56,10 +58,11 @@ struct clef::Literal {
       #pragma region cast
       operator ulong()        const { if (_type == LitType::UINT)   { return _uintLit;   } else { throwCastErr(LitType::UINT);   } }
       operator slong()        const { if (_type == LitType::SINT)   { return _sintLit;   } else { throwCastErr(LitType::SINT);   } }
-      operator flong()       const { if (_type == LitType::FLOAT)  { return _floatLit;  } else { throwCastErr(LitType::FLOAT);  } }
+      operator flong()        const { if (_type == LitType::FLOAT)  { return _floatLit;  } else { throwCastErr(LitType::FLOAT);  } }
+      operator bool()         const { if (_type == LitType::BOOL)   { return _boolLit;   } else { throwCastErr(LitType::BOOL);   } }
       operator char()         const { if (_type == LitType::CHAR)   { return _charLit;   } else { throwCastErr(LitType::CHAR);   } }
       operator mcsl::str_slice&()      { if (_type == LitType::STRING) { return _strLit;    } else { throwCastErr(LitType::STRING); } }
-      operator const mcsl::str_slice&() const { if (_type == LitType::STRING) { return _strLit;    } else { throwCastErr(LitType::STRING); } }
+      operator const mcsl::str_slice() const { if (_type == LitType::STRING) { return _strLit;    } else { throwCastErr(LitType::STRING); } }
       // operator mcsl::format() const { if (_type == LitType::FORMAT) { return _formatLit; } else { throwCastErr(LitType::FORMAT); } }
       // operator mcsl::regex()  const { if (_type == LitType::REGEX)  { return _regexLit;  } else { throwCastErr(LitType::REGEX);  } }
       operator index<Type>() { if(_type == LitType::TYPEID) { return _typeid; } else { throwCastErr(LitType::TYPEID); }}
@@ -76,6 +79,7 @@ struct clef::Literal {
             case LitType::UINT      : return   _uintLit == other._uintLit;
             case LitType::SINT      : return   _sintLit == other._sintLit;
             case LitType::FLOAT     : return  _floatLit == other._floatLit;
+            case LitType::BOOL      : return   _boolLit == other._boolLit;
             case LitType::CHAR      : return   _charLit == other._charLit;
             case LitType::STRING    : return    _strLit == other._strLit;
             case LitType::INTERP_STR: return _interpLit == other._interpLit;

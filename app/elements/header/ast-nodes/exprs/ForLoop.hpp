@@ -10,6 +10,7 @@ struct clef::ForLoop : public clef::Statement {
    
    public:
       static constexpr NodeType nodeType() { return NodeType::FOR_LOOP; }
+      static constexpr OpID pseudoOpID() { return OpID::FOR; }
 
       ForLoop():Statement{} {}
       ForLoop(index<ForLoopParams> params, index<Scope> procedure):Statement{OpID::FOR,NodeType::FOR_LOOP_PARAMS,NodeType::SCOPE,params,procedure} {}

@@ -10,6 +10,7 @@ struct clef::DoWhileLoop : public clef::Statement {
    
    public:
       static constexpr NodeType nodeType() { return NodeType::DO_WHILE_LOOP; }
+      static constexpr OpID pseudoOpID() { return OpID::DO_WHILE; }
 
       DoWhileLoop():Statement{} {}
       DoWhileLoop(index<Expr> condition, index<Scope> procedure):Statement{OpID::DO_WHILE,NodeType::EXPR,NodeType::SCOPE,condition,procedure} {}

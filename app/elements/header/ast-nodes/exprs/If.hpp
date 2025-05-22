@@ -10,6 +10,7 @@ struct clef::If : public clef::Statement {
 
    public:
       static constexpr NodeType nodeType() { return NodeType::IF; }
+      static constexpr OpID pseudoOpID() { return OpID::IF; }
 
       If():Statement{} {}
       If(index<Expr> condition, index<Scope> procedure, index<If> elseStmt = {}):Statement{

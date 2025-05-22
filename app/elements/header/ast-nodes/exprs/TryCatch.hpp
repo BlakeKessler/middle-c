@@ -11,6 +11,7 @@ struct clef::TryCatch : public clef::Statement {
 
    public:
       static constexpr NodeType nodeType() { return NodeType::TRY_CATCH; }
+      static constexpr OpID pseudoOpID() { return OpID::TRY_CATCH; }
       TryCatch():Statement{} {}
       TryCatch(index<Scope> procedure, index<Variable> err, index<Scope> errHandler):
          Statement{OpID::TRY_CATCH,NodeType::SCOPE,NodeType::VAR,NodeType::SCOPE,procedure,err,errHandler} {}

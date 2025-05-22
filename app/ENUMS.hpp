@@ -693,6 +693,7 @@ namespace clef {
       SINT,
       FLOAT,
 
+      BOOL,
       CHAR,
       STRING,
       INTERP_STR,

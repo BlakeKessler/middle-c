@@ -15,6 +15,7 @@ struct clef::TypeDeclaration : public clef::Statement {
    
    public:
       static constexpr NodeType nodeType() { return NodeType::MAKE_TYPE; }
+      static constexpr OpID pseudoOpID() { return OpID::MAKE_TYPE; }
 
       TypeDeclaration():Statement{} {}
       TypeDeclaration(index<FundType> objType, index<Identifier> name):Statement{OpID::MAKE_TYPE,objType,name} {}

@@ -10,6 +10,7 @@ struct clef::ForeachLoop : public clef::Statement {
    
    public:
       static constexpr NodeType nodeType() { return NodeType::FOREACH_LOOP; }
+      static constexpr OpID pseudoOpID() { return OpID::FOREACH; }
 
       ForeachLoop():Statement{} {}
       ForeachLoop(index<ForeachLoopParams> params, index<Scope> procedure):Statement{OpID::FOREACH,NodeType::FOREACH_LOOP_PARAMS,NodeType::SCOPE,params,procedure} {}

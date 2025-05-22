@@ -10,6 +10,7 @@ struct clef::WhileLoop : public clef::Statement {
    
    public:
       static constexpr NodeType nodeType() { return NodeType::WHILE_LOOP; }
+      static constexpr OpID pseudoOpID() { return OpID::WHILE; }
 
       WhileLoop():Statement{} {}
       WhileLoop(index<Expr> condition, index<Scope> procedure):Statement{OpID::WHILE,NodeType::EXPR,NodeType::SCOPE,condition,procedure} {}

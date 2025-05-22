@@ -10,6 +10,7 @@ struct clef::Asm : public clef::Statement {
 
    public:
       static constexpr NodeType nodeType() { return NodeType::ASM; }
+      static constexpr OpID pseudoOpID() { return OpID::ASM; }
       //qualifiers - encode in operator?
       //instructions - encode as string literal?
       //vars

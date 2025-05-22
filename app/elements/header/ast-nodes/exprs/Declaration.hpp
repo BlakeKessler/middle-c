@@ -11,6 +11,7 @@ struct clef::Declaration : public clef::Expression {
    
    public:
       static constexpr NodeType nodeType() { return NodeType::DECL; }
+      static constexpr OpID pseudoOpID() { return OpID::LET; }
 
       Declaration():Expression{} {}
       Declaration(index<Type> type, index<Identifier> name):Expression{OpID::LET,type,name} {}

@@ -10,6 +10,7 @@ struct clef::Match : public clef::Statement {
 
    public:
       static constexpr NodeType nodeType() { return NodeType::MATCH; }
+      static constexpr OpID pseudoOpID() { return OpID::MATCH; }
 
       Match():Statement{} {}
       Match(index<Expr> cond, index<MatchCases> cases):Statement{OpID::SWITCH,NodeType::EXPR,NodeType::MATCH_CASES,cond,cases} {}

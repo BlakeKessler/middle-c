@@ -476,6 +476,7 @@ constexpr const mcsl::str_slice clef::toString(const LitType type) {
       CASE(SINT, "SIGNED_INT");
       CASE(FLOAT, "FLOATING_POINT");
 
+      CASE(BOOL, "BOOLEAN");
       CASE(CHAR, "CHARACTER");
       CASE(STRING, "STRING");
       CASE(INTERP_STR, "INTERPOLATED_STRING");
