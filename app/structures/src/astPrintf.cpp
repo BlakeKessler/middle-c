@@ -346,8 +346,17 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
                   indenter indents = obj.indents + 1;
                   charCount += file.printf(FMT(" {"));
                   for (uint i = 0; i < list.size(); ++i) {
-                     charCount += file.printf(FMT("%S%s"), indents, astTNB{obj.tree, list[i], indents});
-                     // charCount += file.printf(FMT("%S%s"), indents, astTNB{obj.tree, (clef::index<Identifier>)list[i], indents});
+                     if (obj.tree[decl.objType()].fundTypeID() == FundTypeID::UNION) {
+                        charCount += file.printf(FMT("%S%s;"), indents, astTNB{obj.tree, list[i], indents});
+                     } else {
+                        debug_assert(obj.tree[decl.objType()].fundTypeID() == FundTypeID::ENUM || obj.tree[decl.objType()].fundTypeID() == FundTypeID::MASK);
+                        charCount += file.printf(FMT("%S%s"), indents, astTNB{obj.tree, (clef::index<Identifier>)list[i], indents});
+                        if (obj.tree[list[i]].val()) {
+                           charCount += file.printf(FMT(" = %s,"), astTNB{obj.tree, obj.tree[list[i]].val(), indents});
+                        } else {
+                           charCount += file.printf(FMT(","));
+                        }
+                     }
                   }
                   charCount += file.printf(FMT("%S}"), obj.indents);
                   break;
@@ -440,7 +449,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
             return file.printf(FMT("%s"), TNB_AST(expr.lhs()));
 
          case ESCAPE: return file.printf(FMT("\\"));
-         case EOS   : return file.printf(FMT(";"));
+         case EOS   : UNREACHABLE; return file.printf(FMT(";"));
 
          case STRING       : UNREACHABLE;
          case CHAR         : UNREACHABLE;
@@ -879,7 +888,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Enum> obj, char mod
          charsPrinted += file.printf(FMT(" : %s"), TNB(spec.baseType()));
       }
       if (!spec.enumerators()) { //forward declaration
-         charsPrinted += file.printf(FMT(";"));
          return charsPrinted;
       }
 
@@ -895,7 +903,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Enum> obj, char mod
             charsPrinted += file.printf(FMT(","));
          }
       }
-      charsPrinted += file.printf(FMT("%S};"), obj.indents);
+      charsPrinted += file.printf(FMT("%S}"), obj.indents);
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
       return file.printf(FMT("%b%b%b"), TNB_CAST(Identifier), TNB(spec.baseType()), TNB(spec.enumerators()));
@@ -917,7 +925,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Mask> obj, char mod
          charsPrinted += file.printf(FMT(" : %s"), TNB(spec.baseType()));
       }
       if (!spec.enumerators()) { //forward declaration
-         charsPrinted += file.printf(FMT(";"));
          return charsPrinted;
       }
 
@@ -933,7 +940,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Mask> obj, char mod
             charsPrinted += file.printf(FMT(","));
          }
       }
-      charsPrinted += file.printf(FMT("%S};"), obj.indents);
+      charsPrinted += file.printf(FMT("%S}"), obj.indents);
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
       return file.printf(FMT("%b%b%b"), TNB_CAST(Identifier), TNB(spec.baseType()), TNB(spec.enumerators()));
