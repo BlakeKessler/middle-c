@@ -430,12 +430,12 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
       if (canDownCastTo(NodeType::EXPR, expr.lhsType())) {
          const clef::Expr& lhs = obj.tree[(clef::index<Expr>)expr.lhs()];
          auto [prec, isLeftAssoc] = PRECS(lhs.opID(), lhs.lhs(), lhs.rhs());
-         lhsNeedsParens = prec && (selfPrec > prec || (selfPrec == prec && !isLeftAssoc));
+         lhsNeedsParens = prec && (selfPrec > prec || (!isLeftAssoc && selfPrec == prec));
       }
       if (canDownCastTo(NodeType::EXPR, expr.rhsType())) {
          const clef::Expr& rhs = obj.tree[(clef::index<Expr>)expr.rhs()];
          auto [prec, isLeftAssoc] = PRECS(rhs.opID(), rhs.lhs(), rhs.rhs());
-         rhsNeedsParens = prec && (selfPrec > prec || (selfPrec == prec && isLeftAssoc));
+         rhsNeedsParens = prec && (selfPrec > prec || (isLeftAssoc && selfPrec == prec));
       }
       if (canDownCastTo(NodeType::EXPR, expr.extraType())) {
          const clef::Expr& extra = obj.tree[(clef::index<Expr>)expr.extra()];
@@ -516,7 +516,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          
          case ADD: BIN_OR_UN("+");
          case SUB: BIN_OR_UN("-");
-         case MUL: BIN_OR_UN("*")
+         case MUL: BIN_OR_UN("*");
          case DIV: return BIN(" / ");
          case MOD: return BIN(" %% ");
          case EXP: return BIN(" ^^ ");
