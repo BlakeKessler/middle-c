@@ -429,7 +429,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
       bool rhsNeedsParens = false;
       bool extraNeedsParens = false;
       auto [selfPrec, selfIsLeftAssoc] = PRECS(expr.opID(), expr.lhs(), expr.rhs());
-      //!TODO: associativity
       if (canDownCastTo(NodeType::EXPR, expr.lhsType())) {
          const clef::Expr& lhs = obj.tree[(clef::index<Expr>)expr.lhs()];
          auto [prec, isLeftAssoc] = PRECS(lhs.opID(), lhs.lhs(), lhs.rhs());
