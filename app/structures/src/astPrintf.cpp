@@ -555,10 +555,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
 
          case COALESCE: return BIN(" ?? "); //null coalescing
 
-         // case INLINE_IF  : UNREACHABLE; //ternary operator opener
-         // case INLINE_ELSE: UNREACHABLE; //ternary operator closer
-         case INLINE_IF  : return BIN(" ? "); //ternary operator opener
-         case INLINE_ELSE: return BIN(" : "); //ternary operator closer
+         case INLINE_IF  : UNREACHABLE; //ternary operator opener
+         case LABEL_DELIM: return file.printf(FMT("%s:"), TNB_AST(expr.lhs())); //ternary operator closer
 
          case ASSIGN: return BIN(" = ");
          // case CONST_ASSIGN: return BIN(" := ");

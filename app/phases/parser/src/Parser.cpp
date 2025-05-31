@@ -213,24 +213,20 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
 
       index<astNode> rhs = operandStack.pop_back();
       index<astNode> lhs;
-      if (isBinary(op)) { //!NOTE: PRIORITIZES BINARY OVER POSTFIX-UNARY
+      if (op.opID() == OpID::TERNARY_INVOKE) {
+         if (operandStack.size() < 2) {
+            logError(ErrCode::BAD_EXPR, "bad ternary conditional expression");
+         }
+         lhs = operandStack.pop_back();
+         index<astNode> cond = operandStack.pop_back();
+         operandStack.push_back(+tree.make<Expr>(Expr::makeTernary(tree, cond, lhs, rhs)));
+      }
+      else if (isBinary(op)) { //!NOTE: PRIORITIZES BINARY OVER POSTFIX-UNARY
          if (!operandStack.size()) { logError(ErrCode::BAD_EXPR, "bad expression (missing LHS on stack)"); }
          lhs = operandStack.pop_back();
          operandStack.push_back(+tree.makeExpr(op.opID(), lhs, rhs));
       } else {
-         if (op.opID() == OpID::INLINE_ELSE) {
-            if (operatorStack.size() && operatorStack.back().opID() == OpID::INLINE_IF) {
-               if (operandStack.size() < 2) {
-                  logError(ErrCode::BAD_EXPR, "bad ternary conditional expression");
-               }
-               lhs = operandStack.pop_back();
-               index<astNode> cond = operandStack.pop_back();
-               operandStack.push_back(+tree.make<Expr>(Expr::makeTernary(tree, cond, lhs, rhs)));
-            } else {
-               TODO;
-            }
-         }
-         else if (+(op & OpProps::CAN_BE_POSTFIX)) {
+         if (+(op & OpProps::CAN_BE_POSTFIX)) {
             operandStack.push_back(+tree.makeExpr(op.opID(), rhs));
          } else {
             debug_assert(+(op & OpProps::CAN_BE_PREFIX));
@@ -321,12 +317,11 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
                goto END_OF_EXPR;
             }
             else if (tokIt->opID() == OpID::INLINE_IF) {
-               operatorStack.push_back(tokIt->op());
                ++tokIt;
+               operatorStack.emplace_back(FMT(""), OpID::TERNARY_INVOKE, OpProps::NULL, (ubyte)0, TokenType::OP);
                index<Expr> trueVal = parseExpr();
                operandStack.push_back(+trueVal);
                consumeOperator(OpID::INLINE_ELSE, "bad ternary conditional expression");
-               operatorStack.push_back((tokIt-1)->op());
                prevTokIsOperand = false;
                goto PARSE_EXPR_CONTINUE;
             }
