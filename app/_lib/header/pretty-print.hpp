@@ -241,6 +241,10 @@ constexpr const mcsl::str_slice clef::toString(const OpID op) {
 
       CASE(LET, "LET");
       CASE(MAKE_TYPE, "MAKE_TYPE");
+
+      CASE(PREPROC_IMPORT, "PREPROCESSOR_IMPORT");
+      CASE(PREPROC_LINK, "PREPROCESSOR_LINK");
+      CASE(PREPROC_LOAD_BYTES, "PREPROCESSOR_LOAD_BYTES");
    }
    UNREACHABLE;
 }

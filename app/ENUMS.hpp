@@ -35,6 +35,8 @@ namespace clef {
       UNCLOSED_BLOCK,
       BAD_FUNC,
       BAD_DECL,
+
+      BAD_PREPROC,
       //ast/ast node errors
       BAD_LIT_CAST,
       BAD_NODE_CAST,
@@ -274,9 +276,13 @@ namespace clef {
 
       ALIAS,
 
-      //other pseudo-operators
       LET,
       MAKE_TYPE,
+
+      //preprocessor directive operators
+      PREPROC_IMPORT,
+      PREPROC_LINK,
+      PREPROC_LOAD_BYTES,
 
       //aliases
       LABEL_DELIM = INLINE_ELSE,
@@ -294,6 +300,9 @@ namespace clef {
 
       //helpers
       __FIRST_PSEUDO_OP = FOR,
+      __LAST_PSEUDO_OP = PREPROC_LOAD_BYTES,
+      __FIRST_PREPROC = PREPROC_IMPORT,
+      __LAST_PREPROC = PREPROC_LOAD_BYTES,
       __FIRST_LOOP = FOR,
       __LAST_LOOP = DO_WHILE,
    };
@@ -318,6 +327,8 @@ namespace clef {
    constexpr bool isMatch(const OpID op) { return op == OpID::MATCH; }
 
    constexpr bool isStringLike(const OpID op) { return op == OpID::STRING || op == OpID::CHAR; }
+
+   constexpr bool isPreproc(const OpID op) { return op >= OpID::__FIRST_PREPROC && op <= OpID::__LAST_PREPROC; }
 
    //operator properties bitmask
    enum class [[clang::flag_enum]] OpProps : uint8 {

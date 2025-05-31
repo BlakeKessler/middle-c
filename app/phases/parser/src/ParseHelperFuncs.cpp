@@ -209,7 +209,52 @@ template clef::index<clef::SpecList> clef::Parser::parseSpecList<false>(const Bl
 
 
 clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
-   TODO;
+   if (tokIt->type() != TokenType::IDEN) {
+      logError(ErrCode::BAD_PREPROC, "invalid directive");
+   }
+
+   index<Expr> stmt;
+   if (tokIt->name() == FMT("import")) {
+      ++tokIt;
+      if (tokIt->type() != TokenType::PTXT_SEG || !isString(tokIt->ptxtType())) {
+         logError(ErrCode::BAD_PREPROC, "invalid `import` directive");
+      }
+      const mcsl::str_slice path = tokIt++->unprocessedStrVal();
+      index<Literal> pathLit = tree.make<Literal>(path);
+      consumeEOS("missing EOS token");
+
+      stmt = tree.makeExpr(OpID::PREPROC_IMPORT, +pathLit, 0);
+   }
+   else if (tokIt->name() == FMT("link")) {
+      ++tokIt;
+      if (tokIt->type() != TokenType::PTXT_SEG || !isString(tokIt->ptxtType())) {
+         logError(ErrCode::BAD_PREPROC, "invalid `link` directive");
+      }
+      const mcsl::str_slice path = tokIt++->unprocessedStrVal();
+      index<Literal> pathLit = tree.make<Literal>(path);
+      consumeEOS("missing EOS token");
+
+
+      stmt = tree.makeExpr(OpID::PREPROC_LINK, +pathLit, 0);
+   }
+   else if (tokIt->name() == FMT("load_bytes")) {
+      ++tokIt;
+      index<Identifier> name = parseIdentifier();
+      if (tokIt->type() != TokenType::PTXT_SEG || !isString(tokIt->ptxtType())) {
+         logError(ErrCode::BAD_PREPROC, "invalid `load_bytes` directive");
+      }
+      // const mcsl::str_slice path = tokIt++->strVal();
+      const mcsl::str_slice path = tokIt++->unprocessedStrVal();
+      index<Literal> pathLit = tree.make<Literal>(path);
+      consumeEOS("missing EOS token");
+
+      stmt = tree.makeExpr(OpID::PREPROC_LOAD_BYTES, +name, +pathLit);
+   } else {
+      logError(ErrCode::BAD_PREPROC, "unrecognized directive");
+   }
+
+   tree[(index<astNode>)stmt].upCast(NodeType::STMT);
+   return +stmt;
 }
 clef::index<clef::Expr> clef::Parser::parseCast(KeywordID castID) {
    debug_assert(isCast(castID));

@@ -613,6 +613,10 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
             } else {
                return file.printf(FMT("using %s"), TNB_AST(expr.lhs()));
             }
+
+         case PREPROC_IMPORT    : return file.printf(FMT("#import %s"), TNB_AST(expr.lhs()));
+         case PREPROC_LINK      : return file.printf(FMT("#link %s"), TNB_AST(expr.lhs()));
+         case PREPROC_LOAD_BYTES: return file.printf(FMT("#load_bytes %s %s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
       }
    } else if ((mode | CASE_BIT) == 'b') {
       switch (expr.opID()) {
