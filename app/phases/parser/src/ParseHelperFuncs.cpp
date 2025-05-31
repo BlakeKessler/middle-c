@@ -223,18 +223,18 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
       ++tokIt;
       op = OpID::PREPROC_LINK;
    }
-   else if (tokIt->name() == FMT("load_bytes")) {
+   else if (tokIt->name() == FMT("embed")) {
       ++tokIt;
-      op = OpID::PREPROC_LOAD_BYTES;
+      op = OpID::PREPROC_EMBED;
       name = parseIdentifier();
    } else {
       logError(ErrCode::BAD_PREPROC, "unrecognized directive");
       op = OpID::NULL;
    }
 
-   //get path
+   //get path //!TODO: standard library paths
    if (tokIt->type() != TokenType::PTXT_SEG || !isString(tokIt->ptxtType())) {
-      logError(ErrCode::BAD_PREPROC, "invalid `import` directive");
+      logError(ErrCode::BAD_PREPROC, "invalid `%s` directive", toString(op));
    }
    const mcsl::str_slice path = tokIt++->unprocessedStrVal();
    index<Literal> pathLit = tree.make<Literal>(path);

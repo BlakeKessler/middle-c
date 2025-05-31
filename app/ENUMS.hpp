@@ -282,7 +282,7 @@ namespace clef {
       //preprocessor directive operators
       PREPROC_IMPORT,
       PREPROC_LINK,
-      PREPROC_LOAD_BYTES,
+      PREPROC_EMBED,
 
       //aliases
       LABEL_DELIM = INLINE_ELSE,
@@ -300,9 +300,9 @@ namespace clef {
 
       //helpers
       __FIRST_PSEUDO_OP = FOR,
-      __LAST_PSEUDO_OP = PREPROC_LOAD_BYTES,
+      __LAST_PSEUDO_OP = PREPROC_EMBED,
       __FIRST_PREPROC = PREPROC_IMPORT,
-      __LAST_PREPROC = PREPROC_LOAD_BYTES,
+      __LAST_PREPROC = PREPROC_EMBED,
       __FIRST_LOOP = FOR,
       __LAST_LOOP = DO_WHILE,
    };

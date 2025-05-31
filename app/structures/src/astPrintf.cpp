@@ -616,7 +616,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
 
          case PREPROC_IMPORT    : return file.printf(FMT("#import %s"), TNB_AST(expr.rhs()));
          case PREPROC_LINK      : return file.printf(FMT("#link %s"), TNB_AST(expr.rhs()));
-         case PREPROC_LOAD_BYTES: return file.printf(FMT("#load_bytes %s %s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
+         case PREPROC_EMBED: return file.printf(FMT("#embed %s %s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
       }
    } else if ((mode | CASE_BIT) == 'b') {
       switch (expr.opID()) {
