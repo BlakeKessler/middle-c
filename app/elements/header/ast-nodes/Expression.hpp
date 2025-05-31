@@ -54,6 +54,8 @@ struct clef::Expression {
       template<operand_t lhs_t, operand_t rhs_t>Expression(KeywordID oplikeKeyword, index<lhs_t> lhs, index<rhs_t> rhs):Expression{toOpID(oplikeKeyword), lhs, rhs} {}
       Expression(KeywordID funclikeKeyword, index<ArgList> args):Expression{toOpID(funclikeKeyword), NodeType::ARG_LIST, +args} {}
 
+      static Expr makeTernary(SyntaxTree& tree, index<astNode> cond, index<astNode> ifExpr, index<astNode> elseExpr);
+
       index<Literal> value() const; //evaluate expression
       
       OpID opID() const { return _op; }

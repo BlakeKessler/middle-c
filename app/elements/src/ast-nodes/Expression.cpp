@@ -3,6 +3,7 @@
 
 #include "ast-nodes/Expression.hpp"
 #include "astNode.hpp"
+#include "SyntaxTree.hpp"
 #include "pretty-print.hpp"
 #include "io.hpp"
 
@@ -14,6 +15,15 @@ clef::Expression::Expression(OpID op, index<Type> type, index<ArgList> ctorArgs)
    _lhs{type},_rhs{ctorArgs},_extra{} {
       debug_assert(op == OpID::CALL_INVOKE || op == OpID::LIST_INVOKE);
 }
+
+clef::Expr clef::Expr::makeTernary(SyntaxTree& tree, index<astNode> cond, index<astNode> ifExpr, index<astNode> elseExpr) {
+   return Expression{
+      OpID::TERNARY_INVOKE,
+      tree[cond].nodeType(), tree[ifExpr].nodeType(), tree[elseExpr].nodeType(),
+      +cond, +ifExpr, +elseExpr
+   };
+}
+
 
 mcsl::File& mcsl::write(File& file, const clef::Expr& expr) {
    using namespace clef;

@@ -74,6 +74,7 @@ class clef::SyntaxTree {
       index<Expr> makeExpr(const OpID, index<astNode>);
       index<Expr> makeExpr(const OpID, index<astNode>, index<astNode>);
 
+      index<Expr> remakeTernary(index<astNode> cond, index<Expr> vals);
 
       template<typename T> mcsl::dyn_arr<T>& allocBuf() { return _alloc.at(_alloc.alloc<T>()); }
       index<InterfaceSpec> allocInterfaceSpec() { return _ifaceSpecBuf.emplace_back() - _ifaceSpecBuf.begin(); }

@@ -41,6 +41,7 @@ class clef::Parser {
       //parsing functions
       index<Expr> parseExpr(index<astNode> initOperand = 0);
       index<Expr> parseExprNoPrimaryComma(index<astNode> initOperand = 0); //expression that cannot have the comma operator as its principal connective
+      index<Stmt> parseStmtImpl();
       index<Stmt> parseStmt();
       index<Stmt> parsePreprocStmt();
       index<Scope> parseProcedure();

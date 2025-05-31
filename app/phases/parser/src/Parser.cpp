@@ -14,8 +14,14 @@ void clef::Parser::parse(const SourceTokens& src, SyntaxTree& tree) {
    }
    // return parser.tree;
 }
-
 clef::index<clef::Stmt> clef::Parser::parseStmt() {
+   clef::index<clef::Stmt> tmp = parseStmtImpl();
+   if (tryConsumeOperator(OpID::COMMA)) {
+      logError(ErrCode::BAD_EXPR, "`;,` is illegal");
+   }
+   return tmp;
+}
+clef::index<clef::Stmt> clef::Parser::parseStmtImpl() {
 START_PARSE_STMT:
    switch (tokIt->type()) {
       case TokenType::NONE        : UNREACHABLE;
@@ -156,6 +162,9 @@ START_PARSE_STMT:
          }
       case TokenType::IDEN        : {
          index<Expr> stmtContents = parseExpr();
+         if (tryConsumeOperator(OpID::LABEL_DELIM)) { //label
+            return tree.make<Stmt>(OpID::LABEL_DELIM, stmtContents);
+         }
          consumeEOS("invalid statement");
          tree[(index<astNode>)stmtContents].upCast(NodeType::STMT);
          return (index<Stmt>)stmtContents;
@@ -201,6 +210,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
    auto eval = [&]() { //evaluate the subexpression on the top of the stacks
       OpData op = operatorStack.pop_back();
       if (!operandStack.size()) { logError(ErrCode::BAD_EXPR, "bad expression (missing RHS on stack)"); }
+
       index<astNode> rhs = operandStack.pop_back();
       index<astNode> lhs;
       if (isBinary(op)) { //!NOTE: PRIORITIZES BINARY OVER POSTFIX-UNARY
@@ -208,10 +218,22 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
          lhs = operandStack.pop_back();
          operandStack.push_back(+tree.makeExpr(op.opID(), lhs, rhs));
       } else {
-         if (+(op & OpProps::POSTFIX)) {
+         if (op.opID() == OpID::INLINE_ELSE) {
+            if (operatorStack.size() && operatorStack.back().opID() == OpID::INLINE_IF) {
+               if (operandStack.size() < 2) {
+                  logError(ErrCode::BAD_EXPR, "bad ternary conditional expression");
+               }
+               lhs = operandStack.pop_back();
+               index<astNode> cond = operandStack.pop_back();
+               operandStack.push_back(+tree.make<Expr>(Expr::makeTernary(tree, cond, lhs, rhs)));
+            } else {
+               TODO;
+            }
+         }
+         else if (+(op & OpProps::CAN_BE_POSTFIX)) {
             operandStack.push_back(+tree.makeExpr(op.opID(), rhs));
          } else {
-            debug_assert(+(op & OpProps::PREFIX));
+            debug_assert(+(op & OpProps::CAN_BE_PREFIX));
             operandStack.push_back(+tree.makeExpr(op.opID(), 0, rhs));
          }
       }
@@ -295,10 +317,20 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
 
          case TokenType::EOS: goto END_OF_EXPR;
          case TokenType::OP:
-            if (tokIt->opID() == OpID::COMMA) {
+            if (tokIt->opID() == OpID::COMMA || tokIt->opID() == OpID::INLINE_ELSE) {
                goto END_OF_EXPR;
             }
-            if (prevTokIsOperand) { //binary or postfix unary
+            else if (tokIt->opID() == OpID::INLINE_IF) {
+               operatorStack.push_back(tokIt->op());
+               ++tokIt;
+               index<Expr> trueVal = parseExpr();
+               operandStack.push_back(+trueVal);
+               consumeOperator(OpID::INLINE_ELSE, "bad ternary conditional expression");
+               operatorStack.push_back((tokIt-1)->op());
+               prevTokIsOperand = false;
+               goto PARSE_EXPR_CONTINUE;
+            }
+            else if (prevTokIsOperand) { //binary or postfix unary
                OpData op = tokIt->op();
                while (operatorStack.size() && (
                   operatorStack.back().precedence() > op.precedence() || (
@@ -309,10 +341,6 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
                op.removeProps(OpProps::PREFIX);
                debug_assert(+op.props());
                operatorStack.push_back(op);
-               if (op.opID() == OpID::INLINE_ELSE && operatorStack.back().opID() != OpID::INLINE_IF) { //label name or case expression
-                  debug_assert(+(op.props() & OpProps::CAN_BE_POSTFIX));
-                  goto END_OF_EXPR;
-               }
             } else { //prefix unary
                OpData op = tokIt->op();
                op.removeProps(OpProps::POSTFIX | OpProps::INFIX_LEFT | OpProps::INFIX_RIGHT);
@@ -465,8 +493,7 @@ clef::index<clef::Switch> clef::Parser::parseSwitch() {
 
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       if (tryConsumeKeyword(KeywordID::CASE)) { //CASE
-         // index<Expr> caseExpr = parseExpr();
-         index<Expr> caseExpr = toExpr(+parseIdentifier()); //!TODO: change this back
+         index<Expr> caseExpr = parseExpr();
 
          consumeOperator(OpID::LABEL_DELIM, "bad CASE in SWITCH statement");
          

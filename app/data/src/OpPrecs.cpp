@@ -87,7 +87,7 @@ constexpr clef::OpPrecs clef::GetAllOpPrecsData() {
 
       _(lit("??"),  Op::COALESCE,          Prop::INFIX_RIGHT, --prec, Type::OP          ), //null coalescing
       _(lit("?"),   Op::INLINE_IF,         Prop::INFIX_RIGHT,   prec, Type::OP          ), //inline if
-      _(lit(":"),   Op::INLINE_ELSE,       Prop::INFIX_RIGHT,   prec, Type::OP          ), //inline else
+      _(lit(":"),   Op::INLINE_ELSE,       Prop::POSTFIX,       prec, Type::OP          ), //inline else
       _(lit("="),   Op::ASSIGN,            Prop::INFIX_RIGHT,   prec, Type::OP          ), //direct assignment
       _(lit("+="),  Op::ADD_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (add)
       _(lit("-="),  Op::SUB_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (sub)

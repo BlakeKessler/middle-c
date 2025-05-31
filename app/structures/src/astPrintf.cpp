@@ -401,6 +401,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Asm> obj, char mode
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Stmt> obj, char mode, FmtArgs fmt) {
    if ((mode | CASE_BIT) == 's') {
+      if (obj->opID() == clef::OpID::LABEL_DELIM && !obj->rhs() && !obj->extra()) { //special case for labels
+         return file.printf(FMT("%s"), TNB_CAST(Expr));
+      }
       return file.printf(FMT("%s;"), TNB_CAST(Expr));
    } else if ((mode | CASE_BIT) == 'b') {
       return writef(file, TNB_CAST(Expr), mode, fmt);
@@ -483,9 +486,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
 
          case INTERP_STR_INVOKE: TODO;
          case TERNARY_INVOKE   :
-            return SUBEXPR(lhs, TNB_CAST2(Expr, expr.lhs()),, " ? ")
-                 + SUBEXPR(rhs, TNB_CAST2(Expr, expr.rhs()),, " : ")
-                 + SUBEXPR(extra, TNB_CAST2(Expr, expr.extra()),,);
+            return SUBEXPR(lhs, TNB_AST(expr.lhs()),, " ? ")
+                 + SUBEXPR(rhs, TNB_AST(expr.rhs()),, " : ")
+                 + SUBEXPR(extra, TNB_AST(expr.extra()),,);
 
          case PREPROCESSOR: TODO;
 
@@ -552,8 +555,10 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
 
          case COALESCE: return BIN(" ?? "); //null coalescing
 
-         case INLINE_IF  : UNREACHABLE; //ternary operator opener
-         case INLINE_ELSE: UNREACHABLE; //ternary operator closer
+         // case INLINE_IF  : UNREACHABLE; //ternary operator opener
+         // case INLINE_ELSE: UNREACHABLE; //ternary operator closer
+         case INLINE_IF  : return BIN(" ? "); //ternary operator opener
+         case INLINE_ELSE: return BIN(" : "); //ternary operator closer
 
          case ASSIGN: return BIN(" = ");
          // case CONST_ASSIGN: return BIN(" := ");
