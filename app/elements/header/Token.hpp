@@ -9,7 +9,7 @@
 #include "str_slice.hpp"
 #include "pair.hpp"
 
-struct clef::Token {
+struct [[clang::trivial_abi]] clef::Token {
    private:
       union {
          const mcsl::str_slice _name; //identifier
@@ -39,6 +39,8 @@ struct clef::Token {
       Token(const char c):_charVal{c},_ptxtType{PtxtType::CHAR},_type{TokenType::PTXT_SEG} {}
       Token(const TokenType type):_type{type} { debug_assert(_type == TokenType::PREPROC_INIT || _type == TokenType::PREPROC_EOS || _type == TokenType::EOS || _type == TokenType::ESC); } //intended for PREPROC_INIT, PREPROC_EOS, EOS, ESC only
 
+      Token(const Token& other) { mcsl::memcpy((ubyte*)this, (ubyte*)&other, sizeof(Token)); }
+      Token& operator=(const Token& other) { mcsl::memcpy((ubyte*)this, (ubyte*)&other, sizeof(Token)); return self; }
 
       //getters
       TokenType type() const { return _type; }

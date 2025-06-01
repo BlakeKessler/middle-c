@@ -16,7 +16,7 @@ int main(const int argc, char** argv) {
    mcsl::printf(BIG_HEADER);
    for (int i = 1; i < argc; ++i) {
       //read and tokenize file
-      clef::SourceTokens tokens = clef::Lexer::LexFile(argv[i]);
+      clef::Lexer tokens = clef::Lexer::fromFile(argv[i]);
 
       //abstract syntax tree
       clef::SyntaxTree tree{};

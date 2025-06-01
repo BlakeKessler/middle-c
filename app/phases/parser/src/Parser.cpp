@@ -5,10 +5,10 @@
 
 #include "dyn_arr.hpp"
 
-void clef::Parser::parse(const SourceTokens& src, SyntaxTree& tree) {
+void clef::Parser::parse(Lexer& src, SyntaxTree& tree) {
    Parser parser{src, tree};
    index<StmtSeq> global = parser.tree.make<StmtSeq>(&tree.allocBuf<index<Stmt>>());
-   while (parser.tokIt < parser.endtok) {
+   while (!src.done()) {
       index<Stmt> stmt = parser.parseStmt();
       tree[global].push_back(stmt);
    }
@@ -23,19 +23,19 @@ clef::index<clef::Stmt> clef::Parser::parseStmt() {
 }
 clef::index<clef::Stmt> clef::Parser::parseStmtImpl() {
 START_PARSE_STMT:
-   switch (tokIt->type()) {
+   switch (currTok.type()) {
       case TokenType::NONE        : UNREACHABLE;
       
       case TokenType::KEYWORD     :
-         switch (tokIt->keywordID()) {
+         switch (currTok.keywordID()) {
             case KeywordID::VOID    : [[fallthrough]];
             case KeywordID::AUTO    : [[fallthrough]];
             default:
-               debug_assert(isType(tokIt->keywordID()));
+               debug_assert(isType(currTok.keywordID()));
                logError(ErrCode::BAD_KEYWORD, "floating typename (declarations must use the `let` keyword)");
                break;
             case KeywordID::LET     : {
-               ++tokIt;
+               getNextToken();
                index<Decl> tmp = parseLetStmt();
                tree[(index<astNode>)(+tmp)].anyCast(NodeType::STMT);
                return +tmp;
@@ -48,35 +48,35 @@ START_PARSE_STMT:
             case KeywordID::FALSE   :
                goto STMT_STARTS_WITH_VALUE;
 
-            case KeywordID::ASM           : ++tokIt; return parseASM(); break;
+            case KeywordID::ASM           : getNextToken(); return parseASM(); break;
             
-            case KeywordID::CLASS         : ++tokIt; { return parseClass(); }
-            case KeywordID::STRUCT        : ++tokIt; { return parseStruct(); }
-            case KeywordID::INTERFACE     : ++tokIt; { return parseInterface(); }
-            case KeywordID::UNION         : ++tokIt; { return parseUnion(); }
-            case KeywordID::ENUM          : ++tokIt; { return parseEnum(); }
-            case KeywordID::MASK          : ++tokIt; { return parseMask(); }
-            case KeywordID::NAMESPACE     : ++tokIt; { return parseNamespace(); }
-            case KeywordID::FUNC          : ++tokIt; { auto tmp = parseFunction(); return tree.make<TypeDecl>(tree[tmp].signature(), tmp, tmp); }
-            case KeywordID::MACRO         : ++tokIt; { auto tmp = parseMacro(); return tree.make<TypeDecl>(tree[tmp].signature(), tmp, tmp); }
+            case KeywordID::CLASS         : getNextToken(); { return parseClass(); }
+            case KeywordID::STRUCT        : getNextToken(); { return parseStruct(); }
+            case KeywordID::INTERFACE     : getNextToken(); { return parseInterface(); }
+            case KeywordID::UNION         : getNextToken(); { return parseUnion(); }
+            case KeywordID::ENUM          : getNextToken(); { return parseEnum(); }
+            case KeywordID::MASK          : getNextToken(); { return parseMask(); }
+            case KeywordID::NAMESPACE     : getNextToken(); { return parseNamespace(); }
+            case KeywordID::FUNC          : getNextToken(); { auto tmp = parseFunction(); return tree.make<TypeDecl>(tree[tmp].signature(), tmp, tmp); }
+            case KeywordID::MACRO         : getNextToken(); { auto tmp = parseMacro(); return tree.make<TypeDecl>(tree[tmp].signature(), tmp, tmp); }
 
             
-            case KeywordID::IF            : ++tokIt; return parseIf(); break;
+            case KeywordID::IF            : getNextToken(); return parseIf(); break;
             case KeywordID::ELSE          : logError(ErrCode::BAD_KEYWORD, "floating ELSE");
 
-            case KeywordID::FOR           : ++tokIt; return parseForLoop(); break;
-            case KeywordID::FOREACH       : ++tokIt; return parseForeachLoop(); break;
-            case KeywordID::WHILE         : ++tokIt; return parseWhileLoop(); break;
-            case KeywordID::DO            : ++tokIt; return parseDoWhileLoop(); break;
+            case KeywordID::FOR           : getNextToken(); return parseForLoop(); break;
+            case KeywordID::FOREACH       : getNextToken(); return parseForeachLoop(); break;
+            case KeywordID::WHILE         : getNextToken(); return parseWhileLoop(); break;
+            case KeywordID::DO            : getNextToken(); return parseDoWhileLoop(); break;
 
-            case KeywordID::SWITCH        : ++tokIt; return parseSwitch(); break;
-            case KeywordID::MATCH         : ++tokIt; return parseMatch(); break;
+            case KeywordID::SWITCH        : getNextToken(); return parseSwitch(); break;
+            case KeywordID::MATCH         : getNextToken(); return parseMatch(); break;
             
             case KeywordID::CASE          : logError(ErrCode::BAD_KEYWORD, "floating CASE");
             case KeywordID::DEFAULT       : logError(ErrCode::BAD_KEYWORD, "floating DEFAULT");
 
             case KeywordID::GOTO          : {
-               ++tokIt;
+               getNextToken();
                //goto case
                if (tryConsumeKeyword(KeywordID::CASE)) {
                   index<Expr> caseExpr = parseExpr();
@@ -95,51 +95,51 @@ START_PARSE_STMT:
                return tree.make<Stmt>(OpID::GOTO, label);
             }
 
-            case KeywordID::TRY           : ++tokIt; return parseTryCatch(); break;
+            case KeywordID::TRY           : getNextToken(); return parseTryCatch(); break;
             case KeywordID::CATCH         : logError(ErrCode::BAD_KEYWORD, "floating CATCH");
 
             case KeywordID::BREAK         :
-               ++tokIt;
+               getNextToken();
                consumeEOS("bad BREAK");
                return tree.make<Stmt>(KeywordID::BREAK);
             case KeywordID::CONTINUE      :
-               ++tokIt;
+               getNextToken();
                consumeEOS("bad CONTINUE");
                return tree.make<Stmt>(KeywordID::CONTINUE);
 
             case KeywordID::THROW         : {
-               ++tokIt;
+               getNextToken();
                index<Expr> expr = parseExpr();
                consumeEOS("bad THROW statement");
                return tree.make<Stmt>(KeywordID::THROW, expr);
             }
             case KeywordID::ASSERT        : {
-               ++tokIt;
+               getNextToken();
                index<Expr> expr = parseExpr();
                consumeEOS("bad ASSERT statement");
                return tree.make<Stmt>(KeywordID::ASSERT, expr);
             }
             case KeywordID::DEBUG_ASSERT  : {
-               ++tokIt;
+               getNextToken();
                index<Expr> expr = parseExpr();
                consumeEOS("bad DEBUG_ASSERT statement");
                return tree.make<Stmt>(KeywordID::DEBUG_ASSERT, expr);
             }
             case KeywordID::STATIC_ASSERT : {
-               ++tokIt;
+               getNextToken();
                index<Expr> expr = parseExpr();
                consumeEOS("bad STATIC_ASSERT statement");
                return tree.make<Stmt>(KeywordID::STATIC_ASSERT, expr);
             }
             case KeywordID::RETURN        : {
-               ++tokIt;
+               getNextToken();
                index<Expr> expr = parseExpr();
                consumeEOS("bad RETURN statement");
                return tree.make<Stmt>(KeywordID::RETURN, expr);
             }
 
             case KeywordID::ALIAS         : {
-               ++tokIt;
+               getNextToken();
                index<Identifier> alias = parseIdentifier();
                consumeOperator(OpID::ASSIGN, "alias definitions must use the assignment operator (and cannot be forward-declared)");
                index<Expr> valExpr = parseExpr();
@@ -153,7 +153,8 @@ START_PARSE_STMT:
             case KeywordID::DYN_CAST      : [[fallthrough]];
             case KeywordID::BIT_CAST      : [[fallthrough]];
             case KeywordID::CONST_CAST    : {
-               index<Expr> stmtContents = parseCast(tokIt++->keywordID());
+               index<Expr> stmtContents = parseCast(currTok.keywordID());
+               getNextToken();
                consumeEOS("bad cast statement");
                tree.getNode(stmtContents).upCast(NodeType::STMT);
                return (index<Stmt>)stmtContents;
@@ -182,10 +183,10 @@ START_PARSE_STMT:
          return (index<Stmt>)stmtContents;
       }
 
-      case TokenType::PREPROC_INIT: ++tokIt; return parsePreprocStmt();
-      case TokenType::PREPROC_EOS : ++tokIt; goto START_PARSE_STMT;
-      case TokenType::EOS         : ++tokIt; return tree.make<Stmt>();
-      case TokenType::ESC         : ++tokIt += 2; goto START_PARSE_STMT;
+      case TokenType::PREPROC_INIT: getNextToken(); return parsePreprocStmt();
+      case TokenType::PREPROC_EOS : getNextToken(); goto START_PARSE_STMT;
+      case TokenType::EOS         : getNextToken(); return tree.make<Stmt>();
+      case TokenType::ESC         : UNREACHABLE;
 
       default: UNREACHABLE;
    }
@@ -236,42 +237,42 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
       }
    };
 
-   while (tokIt < endtok) {
-      switch (tokIt->type()) {
+   while (!src.done()) {
+      switch (currTok.type()) {
          case TokenType::NONE: UNREACHABLE;
          case TokenType::__OPLIKE: UNREACHABLE;
 
-         case TokenType::PREPROC_EOS: ++tokIt; goto PARSE_EXPR_CONTINUE;
-         case TokenType::ESC: tokIt += 2; goto PARSE_EXPR_CONTINUE;
+         case TokenType::PREPROC_EOS: getNextToken(); goto PARSE_EXPR_CONTINUE;
+         case TokenType::ESC: UNREACHABLE;
          
          case TokenType::KEYWORD:{
-            const KeywordID kw = tokIt->keywordID();
+            const KeywordID kw = currTok.keywordID();
             if (kw == KeywordID::FUNC) {
-               ++tokIt;
+               getNextToken();
                operandStack.push_back(+parseFunction());
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
             else if (kw == KeywordID::LET) {
-               ++tokIt;
+               getNextToken();
                operandStack.push_back(+parseLetStmt());
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
             else if (isValue(kw)) {
                operandStack.push_back(tree.getValueKeyword(kw));
-               ++tokIt;
+               getNextToken();
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
             else if (isCast(kw)) {
-               ++tokIt;
+               getNextToken();
                operandStack.push_back(+parseCast(kw));
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
             else if (isC_FunctionLike(kw)) {
-               ++tokIt;
+               getNextToken();
                consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "bad function-like keyword use");
                index<ArgList> argList = parseArgList(BlockType::CALL);
                operandStack.push_back(+tree.make<Expr>(kw, argList));
@@ -280,7 +281,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             }
             else if (isType(kw)) {
                operandStack.push_back(+tree.getFundType(kw));
-               ++tokIt;
+               getNextToken();
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
@@ -291,35 +292,39 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
          case TokenType::MACRO_INVOKE: TODO;
          case TokenType::IDEN: operandStack.push_back(+parseIdentifier()); prevTokIsOperand = true; goto PARSE_EXPR_CONTINUE;
          case TokenType::INT_NUM:
-            operandStack.push_back(+tree.make<Literal>(tokIt++->intVal()));
+            operandStack.push_back(+tree.make<Literal>(currTok.intVal()));
+            getNextToken();
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
          case TokenType::REAL_NUM:
-            operandStack.push_back(+tree.make<Literal>(tokIt++->realVal()));
+            operandStack.push_back(+tree.make<Literal>(currTok.realVal()));
+            getNextToken();
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
          case TokenType::PTXT_SEG:
             prevTokIsOperand = true;
-            switch (tokIt->ptxtType()) {
+            switch (currTok.ptxtType()) {
                case PtxtType::CHAR:
-                  operandStack.push_back(+tree.make<Literal>(tokIt++->charVal()));
+                  operandStack.push_back(+tree.make<Literal>(currTok.charVal()));
+                  getNextToken();
                   goto PARSE_EXPR_CONTINUE;
                case PtxtType::UNPROCESSED_STR:
-                  operandStack.push_back(+tree.make<Literal>(tokIt++->unprocessedStrVal()));
+                  operandStack.push_back(+tree.make<Literal>(currTok.unprocessedStrVal()));
+                  getNextToken();
                   goto PARSE_EXPR_CONTINUE;
 
-               default: logError(ErrCode::PARSER_NOT_IMPLEMENTED, "cannot currently parse this plaintext segment type (%u)", +tokIt->ptxtType());
+               default: logError(ErrCode::PARSER_NOT_IMPLEMENTED, "cannot currently parse this plaintext segment type (%u)", +currTok.ptxtType());
                //!TODO: support other types of plaintext literal
             }
             UNREACHABLE;
 
          case TokenType::EOS: goto END_OF_EXPR;
          case TokenType::OP:
-            if (tokIt->opID() == OpID::COMMA || tokIt->opID() == OpID::INLINE_ELSE) {
+            if (currTok.opID() == OpID::COMMA || currTok.opID() == OpID::INLINE_ELSE) {
                goto END_OF_EXPR;
             }
-            else if (tokIt->opID() == OpID::INLINE_IF) {
-               ++tokIt;
+            else if (currTok.opID() == OpID::INLINE_IF) {
+               getNextToken();
                operatorStack.emplace_back(FMT(""), OpID::TERNARY_INVOKE, OpProps::NULL, (ubyte)0, TokenType::OP);
                index<Expr> trueVal = parseExpr();
                operandStack.push_back(+trueVal);
@@ -328,7 +333,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
                goto PARSE_EXPR_CONTINUE;
             }
             else if (prevTokIsOperand) { //binary or postfix unary
-               OpData op = tokIt->op();
+               OpData op = currTok.op();
                while (operatorStack.size() && (
                   operatorStack.back().precedence() > op.precedence() || (
                      (+(op.props() & OpProps::IS_LEFT_ASSOC)) &&
@@ -339,19 +344,19 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
                debug_assert(+op.props());
                operatorStack.push_back(op);
             } else { //prefix unary
-               OpData op = tokIt->op();
+               OpData op = currTok.op();
                op.removeProps(OpProps::POSTFIX | OpProps::INFIX_LEFT | OpProps::INFIX_RIGHT);
                debug_assert(+(op.props() & OpProps::PREFIX));
                operatorStack.push_back(op);
             }
             prevTokIsOperand = false;
-            ++tokIt;
+            getNextToken();
             goto PARSE_EXPR_CONTINUE;
          case TokenType::BLOCK_DELIM: {
-            BlockType blockType = tokIt->blockType();
-            BlockDelimRole role = tokIt->blockDelimRole();
+            BlockType blockType = currTok.blockType();
+            BlockDelimRole role = currTok.blockDelimRole();
             if (!isOpener(role)) { goto END_OF_EXPR; }
-            ++tokIt;
+            getNextToken();
             if (prevTokIsOperand) { //function call, initializer list, subscript, or specializer
                debug_assert(operandStack.size());
                index<ArgList> args = parseArgList(blockType);
@@ -383,9 +388,9 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
 
 clef::QualMask clef::Parser::parseQuals() {
    QualMask quals = QualMask::_no_quals;
-   while (tokIt->type() == TokenType::KEYWORD && isQualifier(tokIt->keywordID())) {
-      quals |= toQual(tokIt->keywordID());
-      ++tokIt;
+   while (currTok.type() == TokenType::KEYWORD && isQualifier(currTok.keywordID())) {
+      quals |= toQual(currTok.keywordID());
+      getNextToken();
    }
    return quals;
 }
@@ -393,9 +398,9 @@ clef::QualMask clef::Parser::parseQuals() {
 template<bool isDecl> clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(index<Identifier> scopeName) {
    QualMask quals = parseQuals();
    //handle keywords
-   if (tokIt->type() == TokenType::KEYWORD) {
-      index<Identifier> keyword = tree.make<Identifier>(tokIt->keywordID(), index<SpecList>{}, quals);
-      ++tokIt;
+   if (currTok.type() == TokenType::KEYWORD) {
+      index<Identifier> keyword = tree.make<Identifier>(currTok.keywordID(), index<SpecList>{}, quals);
+      getNextToken();
       if (tryConsumeOperator(OpID::SCOPE_RESOLUTION)) {
          logError(ErrCode::BAD_KEYWORD, "keywords may not name scopes");
       }
@@ -403,13 +408,13 @@ template<bool isDecl> clef::index<clef::Identifier> clef::Parser::tryParseIdenti
    }
 
    //handle other identifiers
-   if (tokIt->type() != TokenType::IDEN) { return 0; }
+   if (currTok.type() != TokenType::IDEN) { return 0; }
 
    index<Identifier> name = scopeName;
 
    do {
-      name = tree.make<Identifier>(tokIt->name(), name);
-      ++tokIt;
+      name = tree.make<Identifier>(currTok.name(), name);
+      getNextToken();
 
       if (tryConsumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::OPEN)) {
          index<SpecList> specializer = parseSpecList<isDecl>(BlockType::SPECIALIZER);
@@ -418,8 +423,8 @@ template<bool isDecl> clef::index<clef::Identifier> clef::Parser::tryParseIdenti
 
       if (!tryConsumeOperator(OpID::SCOPE_RESOLUTION)) { break; }
 
-      if (tokIt->type() == TokenType::KEYWORD) { logError(ErrCode::BAD_IDEN, "keywords may not name or be members of scopes"); }
-      else if (tokIt->type() != TokenType::IDEN) { logError(ErrCode::BAD_IDEN, "only identifiers may name or be members of scopes (%u)", +tokIt->type()); }
+      if (currTok.type() == TokenType::KEYWORD) { logError(ErrCode::BAD_IDEN, "keywords may not name or be members of scopes"); }
+      else if (currTok.type() != TokenType::IDEN) { logError(ErrCode::BAD_IDEN, "only identifiers may name or be members of scopes (%u)", +currTok.type()); }
    } while (true);
    tree[name].setQualMask(quals);
    
@@ -454,7 +459,7 @@ clef::index<clef::If> clef::Parser::parseIf() {
 
    //ELSE
    consumeKeyword(KeywordID::ELSE, "IF statement without EOS token");
-   switch (tokIt->type()) {
+   switch (currTok.type()) {
       case TokenType::BLOCK_DELIM: { //basic ELSE
          consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad ELSE block");
          index<Scope> elseProc = parseProcedure();

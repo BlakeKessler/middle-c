@@ -5,6 +5,7 @@
 #include "CLEF.hpp"
 #include "SourceTokens.hpp"
 #include "SyntaxTree.hpp"
+#include "Lexer.hpp"
 
 #include "OperatorData.hpp"
 #include "KeywordData.hpp"
@@ -15,9 +16,8 @@ class clef::Parser {
    private:
       //data members
       SyntaxTree& tree;
-      const SourceTokens& src;
-      const Token* tokIt;
-      const Token* endtok;
+      Lexer& src;
+      Token currTok;
 
       ErrCode _errno;
 
@@ -93,11 +93,14 @@ class clef::Parser {
       //error logging
       void logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, auto&&... args);
       
+      //get next token
+      void getNextToken() { currTok = src.nextToken(); }
+
       //constructors
-      Parser(const SourceTokens& s, SyntaxTree& t):tree{t},src{s},tokIt{s.begin()},endtok{s.end()},_errno{} {}
+      Parser(Lexer& s, SyntaxTree& t):tree{t},src{s},currTok{src.nextToken()},_errno{} {}
    public:
       //parse tokenized source code
-      static void parse(const SourceTokens& src, SyntaxTree& tree);
+      static void parse(Lexer& src, SyntaxTree& tree);
 };
 
 
@@ -106,7 +109,7 @@ class clef::Parser {
 #pragma GCC diagnostic ignored "-Wformat-security"
 void clef::Parser::logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, auto&&... args) {
    _errno = code;
-   mcsl::write(mcsl::stderr, *tokIt);
+   mcsl::write(mcsl::stderr, currTok);
    mcsl::write(mcsl::stderr, tree);
    clef::throwError(code, mcsl::FMT(formatStr), std::forward<decltype(args)>(args)...);
 }

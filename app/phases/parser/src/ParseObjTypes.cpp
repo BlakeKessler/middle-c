@@ -45,11 +45,11 @@ clef::index<clef::TypeDecl> clef::Parser::parseClass() {
       }
 
       bool isStatic = tryConsumeKeyword(KeywordID::STATIC);
-      if (tokIt->type() != TokenType::KEYWORD) {
+      if (currTok.type() != TokenType::KEYWORD) {
          logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
       }
-      switch (tokIt->keywordID()) {
-         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: ++tokIt; if (isStatic) { logError(ErrCode::BAD_KEYWORD, "cannot qualify a " #kw " as static"); } { auto tmp = parsingFunc(); tree[(index<Identifier>)tmp].addQuals(scope); spec.memberTypes().push_back(tmp); } break
+      switch (currTok.keywordID()) {
+         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: getNextToken(); if (isStatic) { logError(ErrCode::BAD_KEYWORD, "cannot qualify a " #kw " as static"); } { auto tmp = parsingFunc(); tree[(index<Identifier>)tmp].addQuals(scope); spec.memberTypes().push_back(tmp); } break
          KW_CASE(CLASS, parseClass);
          KW_CASE(STRUCT, parseStruct);
          KW_CASE(INTERFACE, parseInterface);
@@ -58,8 +58,8 @@ clef::index<clef::TypeDecl> clef::Parser::parseClass() {
          KW_CASE(MASK, parseMask);
          KW_CASE(NAMESPACE, parseNamespace);
          #undef KW_CASE
-         case KeywordID::FUNC: ++tokIt; {auto tmp = parseFunction(); tree[(index<Identifier>)tmp].addQuals(scope); (isStatic ? spec.staticFuncs() : spec.methods()).push_back(tmp);} break;
-         case KeywordID::LET : ++tokIt; {auto tmp = parseLetStmt(); tree[(index<Identifier>)(tree[tmp].name())].addQuals(scope); (isStatic ? spec.staticVars() : spec.members()).push_back(tmp);} break;
+         case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(); tree[(index<Identifier>)tmp].addQuals(scope); (isStatic ? spec.staticFuncs() : spec.methods()).push_back(tmp);} break;
+         case KeywordID::LET : getNextToken(); {auto tmp = parseLetStmt(); tree[(index<Identifier>)(tree[tmp].name())].addQuals(scope); (isStatic ? spec.staticVars() : spec.members()).push_back(tmp);} break;
          default: logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
       }
    }
@@ -241,19 +241,19 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace() {
    //definition
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad CLASS definition");
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
-      if (tokIt->type() != TokenType::KEYWORD) {
+      if (currTok.type() != TokenType::KEYWORD) {
          logError(ErrCode::BAD_STMT, "invalid statement in NAMESPACE definition");
       }
-      switch (tokIt->keywordID()) {
-         case KeywordID::CLASS    : ++tokIt; {auto tmp = parseClass(); spec.types().push_back(tmp);} break;
-         case KeywordID::STRUCT   : ++tokIt; {auto tmp = parseStruct(); spec.types().push_back(tmp);} break;
-         case KeywordID::INTERFACE: ++tokIt; {auto tmp = parseInterface(); spec.types().push_back(tmp);} break;
-         case KeywordID::UNION    : ++tokIt; {auto tmp = parseUnion(); spec.types().push_back(tmp);} break;
-         case KeywordID::ENUM     : ++tokIt; {auto tmp = parseEnum(); spec.types().push_back(tmp);} break;
-         case KeywordID::MASK     : ++tokIt; {auto tmp = parseMask(); spec.types().push_back(tmp);} break;
-         case KeywordID::NAMESPACE: ++tokIt; {auto tmp = parseNamespace(); spec.types().push_back(tmp);} break;
-         case KeywordID::FUNC     : ++tokIt; {auto tmp = parseFunction(); spec.funcs().push_back(tmp);} break;
-         case KeywordID::LET      : ++tokIt; {auto tmp = parseLetStmt(); spec.vars().push_back(tmp);} break;
+      switch (currTok.keywordID()) {
+         case KeywordID::CLASS    : getNextToken(); {auto tmp = parseClass(); spec.types().push_back(tmp);} break;
+         case KeywordID::STRUCT   : getNextToken(); {auto tmp = parseStruct(); spec.types().push_back(tmp);} break;
+         case KeywordID::INTERFACE: getNextToken(); {auto tmp = parseInterface(); spec.types().push_back(tmp);} break;
+         case KeywordID::UNION    : getNextToken(); {auto tmp = parseUnion(); spec.types().push_back(tmp);} break;
+         case KeywordID::ENUM     : getNextToken(); {auto tmp = parseEnum(); spec.types().push_back(tmp);} break;
+         case KeywordID::MASK     : getNextToken(); {auto tmp = parseMask(); spec.types().push_back(tmp);} break;
+         case KeywordID::NAMESPACE: getNextToken(); {auto tmp = parseNamespace(); spec.types().push_back(tmp);} break;
+         case KeywordID::FUNC     : getNextToken(); {auto tmp = parseFunction(); spec.funcs().push_back(tmp);} break;
+         case KeywordID::LET      : getNextToken(); {auto tmp = parseLetStmt(); spec.vars().push_back(tmp);} break;
          default: logError(ErrCode::BAD_STMT, "invalid statement in NAMESPACE definition");
       }
    }

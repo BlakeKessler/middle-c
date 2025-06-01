@@ -10,25 +10,25 @@
    logError(ErrCode::MISSING_KEYWORD, errStr);
 }
 /*inline*/ bool clef::Parser::tryConsumeKeyword(const KeywordID keywordID) {
-   if (tokIt->type() != TokenType::KEYWORD || tokIt->keywordID() != keywordID) {
+   if (currTok.type() != TokenType::KEYWORD || currTok.keywordID() != keywordID) {
       return false;
    }
-   ++tokIt;
+   getNextToken();
    return true;
 }
 
 /*inline*/ bool clef::Parser::consumeOperator(const OpID id, const char* errStr) {
-   if (tokIt->type() != TokenType::OP || tokIt->opID() != id) {
+   if (currTok.type() != TokenType::OP || currTok.opID() != id) {
       logError(ErrCode::MISSING_OPERATOR, errStr);
    }
-   ++tokIt;
+   getNextToken();
    return true;
 }
 /*inline*/ bool clef::Parser::tryConsumeOperator(const OpID id) {
-   if (tokIt->type() != TokenType::OP || tokIt->opID() != id) {
+   if (currTok.type() != TokenType::OP || currTok.opID() != id) {
       return false;
    }
-   ++tokIt;
+   getNextToken();
    return true;
 }
 
@@ -39,8 +39,8 @@
    logError(ErrCode::MISSING_EOS, errStr);
 }
 /*inline*/ bool clef::Parser::tryConsumeEOS() {
-   if (tokIt->type() == TokenType::EOS) {
-      ++tokIt;
+   if (currTok.type() == TokenType::EOS) {
+      getNextToken();
       return true;
    }
    return false;
@@ -53,9 +53,9 @@
    logError(ErrCode::BAD_BLOCK_DELIM, errStr);
 }
 /*inline*/ bool clef::Parser::tryConsumeBlockDelim(BlockType type, BlockDelimRole role) {
-   if (tokIt->type() == TokenType::BLOCK_DELIM) {
-      if (tokIt->blockType() == type && tokIt->blockDelimRole() == role) {
-         ++tokIt;
+   if (currTok.type() == TokenType::BLOCK_DELIM) {
+      if (currTok.blockType() == type && currTok.blockDelimRole() == role) {
+         getNextToken();
          return true;
       }
    }
@@ -66,7 +66,7 @@
 clef::index<clef::Scope> clef::Parser::parseProcedure() {
    index<Scope> scope = tree.make<Scope>(&tree.allocBuf<index<Stmt>>());
 
-   while (tokIt < endtok) {
+   while (!src.done()) {
       if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
          return scope;
       }
@@ -210,21 +210,21 @@ template clef::index<clef::SpecList> clef::Parser::parseSpecList<false>(const Bl
 
 clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
    //deduce directive
-   if (tokIt->type() != TokenType::IDEN) {
+   if (currTok.type() != TokenType::IDEN) {
       logError(ErrCode::BAD_PREPROC, "invalid directive");
    }
    OpID op;
    index<Identifier> name = 0;
-   if (tokIt->name() == FMT("import")) {
-      ++tokIt;
+   if (currTok.name() == FMT("import")) {
+      getNextToken();
       op = OpID::PREPROC_IMPORT;
    }
-   else if (tokIt->name() == FMT("link")) {
-      ++tokIt;
+   else if (currTok.name() == FMT("link")) {
+      getNextToken();
       op = OpID::PREPROC_LINK;
    }
-   else if (tokIt->name() == FMT("embed")) {
-      ++tokIt;
+   else if (currTok.name() == FMT("embed")) {
+      getNextToken();
       op = OpID::PREPROC_EMBED;
       name = parseIdentifier();
    } else {
@@ -233,10 +233,11 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
    }
 
    //get path //!TODO: standard library paths
-   if (tokIt->type() != TokenType::PTXT_SEG || !isString(tokIt->ptxtType())) {
+   if (currTok.type() != TokenType::PTXT_SEG || !isString(currTok.ptxtType())) {
       logError(ErrCode::BAD_PREPROC, "invalid `%s` directive", toString(op));
    }
-   const mcsl::str_slice path = tokIt++->unprocessedStrVal();
+   const mcsl::str_slice path = currTok.unprocessedStrVal();
+   getNextToken();
    index<Literal> pathLit = tree.make<Literal>(path);
    consumeEOS("missing EOS token");
 
