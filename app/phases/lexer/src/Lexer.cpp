@@ -12,249 +12,210 @@
 #include "unreachable.hpp"
 
 //!creates a SourceTokens from results of file reader
-clef::SourceTokens clef::Lexer::LexSource(Source&& src) {
-   SourceTokens tokens(std::move(src));
-   auto& toks = tokens.tokens();
-
-   char* const begin = tokens.source().buf().begin();
-   char* const end = tokens.source().buf().end();
-   char* curr = begin;
-   char* tokBegin;
-
+clef::Token clef::Lexer::nextToken() {
+RESTART:
+   if (curr >= end) { [[unlikely]];
+      return {};
+   }
    uint radix;
    bool isReal;
-   bool lexingPreprocStmt = false;
 
-   while (curr < end) {
-      //reset data
-      tokBegin = curr;
+   //process token
+   tokBegin = curr;
+   switch (*curr) {
+      //!NUMBERS
+      case '0':
+         isReal = false;
+         //check for radix specifier
+         if (++curr >= end) { radix = 10; goto PUSH_NUM_TOK; }
+         switch (*curr) {
+            default:
+               radix = 10;
+               --curr;
+               goto PROCESS_NUM;
 
-      //process token
-      switch (*curr) {
-         //!NUMBERS
-         case '0':
-            isReal = false;
-            //check for radix specifier
-            if (++curr >= end) { radix = 10; goto PUSH_NUM_TOK; }
-            switch (*curr) {
-               default:
-                  radix = 10;
-                  --curr;
-                  goto PROCESS_NUM;
+            case 'b': case 'B': radix = 2;  break;
+            case 'o': case 'O': radix = 8;  break;
+            case 'd': case 'D': radix = 10; break;
+            case 'x': case 'X': radix = 16; break;
+         }
+         if (++curr >= end || !mcsl::is_digit(*curr, radix)) {
+            throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix specifier must be followed by digits"));
+         }
+         goto PROCESS_NUM;
 
-               case 'b': case 'B': radix = 2;  break;
-               case 'o': case 'O': radix = 8;  break;
-               case 'd': case 'D': radix = 10; break;
-               case 'x': case 'X': radix = 16; break;
-            }
-            if (++curr >= end || !mcsl::is_digit(*curr, radix)) {
-               throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix specifier must be followed by digits"));
-            }
-            goto PROCESS_NUM;
-
-         //!NUMBERS
-         case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-            //setup
-            radix = 10;
-            isReal = false;
+      //!NUMBERS
+      case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+         //setup
+         radix = 10;
+         isReal = false;
 PROCESS_NUM:
-            //integer part
+         //integer part
+         do {
+            if (++curr >= end) { goto PUSH_NUM_TOK; }
+         } while (mcsl::is_digit(*curr, radix));
+
+         //radix point
+         if (*curr == RADIX_POINT) {
+            isReal = true;
+            //check first digit
+            if (++curr >= end || !mcsl::is_digit(*curr, radix)) {
+               throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix point must be followed by digits"));
+            }
+            //skip following digits
             do {
                if (++curr >= end) { goto PUSH_NUM_TOK; }
             } while (mcsl::is_digit(*curr, radix));
 
-            //radix point
-            if (*curr == RADIX_POINT) {
-               isReal = true;
-               //check first digit
-               if (++curr >= end || !mcsl::is_digit(*curr, radix)) {
-                  throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix point must be followed by digits"));
-               }
-               //skip following digits
-               do {
-                  if (++curr >= end) { goto PUSH_NUM_TOK; }
-               } while (mcsl::is_digit(*curr, radix));
-
-            }
-            //radix separator
-            if (curr + 2 < end && curr[0] == '~' && curr[1] == '^') {
-               isReal = true;
-               curr += 2;
-               if (curr >= end) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }
-               //skip sign if present
-               if (*curr == '-' || *curr == '+') { if (++curr >= end) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }}
-               //check first digit
-               if (!mcsl::is_digit(*curr, radix)) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }
-               //skip following digits
-               do {
-                  if (++curr >= end) { goto PUSH_NUM_TOK; }
-               } while (mcsl::is_digit(*curr, radix));
-            }
+         }
+         //radix separator
+         if (curr + 2 < end && curr[0] == '~' && curr[1] == '^') {
+            isReal = true;
+            curr += 2;
+            if (curr >= end) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }
+            //skip sign if present
+            if (*curr == '-' || *curr == '+') { if (++curr >= end) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }}
+            //check first digit
+            if (!mcsl::is_digit(*curr, radix)) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }
+            //skip following digits
+            do {
+               if (++curr >= end) { goto PUSH_NUM_TOK; }
+            } while (mcsl::is_digit(*curr, radix));
+         }
 
 PUSH_NUM_TOK:
-            if (curr < end && mcsl::is_letter(*curr)) {
-               throwError(ErrCode::BAD_LITERAL, mcsl::FMT("identifier may not start with digit, and numeric literal must not be directly followed by identifier without separating whitespace"));
-            }
+         if (curr < end && mcsl::is_letter(*curr)) {
+            throwError(ErrCode::BAD_LITERAL, mcsl::FMT("identifier may not start with digit, and numeric literal must not be directly followed by identifier without separating whitespace"));
+         }
 
-            //convert to number and push token to stream
-            if (isReal) {
-               toks.emplace_back(mcsl::str_to_real(tokBegin, curr, radix));
-            } else {
-               toks.emplace_back(mcsl::str_to_uint(tokBegin, curr, radix));
-            }
-            break;
+         //convert to number and push token to stream
+         if (isReal) {
+            return {mcsl::str_to_real(tokBegin, curr, radix)};
+         } else {
+            return {mcsl::str_to_uint(tokBegin, curr, radix)};
+         }
+      UNREACHABLE;
 
-
-         //IDENTIFIERS
-         case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'X': case 'o': case 'G': case 'H': case 'I': case 'J': case 'K': case 'L': case 'M': case 'N': case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V': case 'W': case 'Y': case 'Z':
-         case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'x': case 'O': case 'g': case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'y': case 'z':
-         case '_': {
-            bool isMacroInvoke = false;
-            while (++curr < end) {
-               if (mcsl::is_digit(*curr, 36) || *curr == '_') {
-                  continue;
-               }
-               if (*curr == '!') {
-                  ++curr;
-                  isMacroInvoke = true;
-                  break;
-               }
-               break;
-            }
-            mcsl::str_slice name{tokBegin,curr};
-            KeywordID id = decodeKeyword(name);
-            if (+id) {
-               toks.emplace_back(id);
-            } else {
-               toks.emplace_back(name, isMacroInvoke);
-            }
-         } break;
-
-
-         //EOS
-         case EOS:
-            toks.emplace_back(TokenType::EOS);
+      //IDENTIFIERS
+      case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'X': case 'o': case 'G': case 'H': case 'I': case 'J': case 'K': case 'L': case 'M': case 'N': case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V': case 'W': case 'Y': case 'Z':
+      case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'x': case 'O': case 'g': case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'y': case 'z':
+      case '_': {
+         bool isMacroInvoke = false;
+         while (++curr < end && (mcsl::is_digit(*curr, 36) || *curr == '_')) {}
+         if (curr < end && *curr == '!') {
             ++curr;
-            break;
-
-         //ESCAPE CHAR
-         case ESCAPE_CHAR:
-            // toks.emplace_back(TokenType::ESC);
-            curr += 2;
-            break;
-
-         //PREPROCESSOR
-         case PREPROC_INIT:
-            lexingPreprocStmt = true;
-            toks.emplace_back(TokenType::PREPROC_INIT);
-            ++curr;
-            break;
-         //NEWLINE
-         case '\n':
-            if (lexingPreprocStmt) {
-               toks.emplace_back(TokenType::PREPROC_EOS);
-               lexingPreprocStmt = false;
-            }
-            [[fallthrough]];
-         //OTHER WHITESPACE
-         case  ' ': case '\t': case '\v': case '\f': case '\r':
-            ++curr;
-            break;
-         
-         //OPERATORS
-         case '!': case '$': case '%': case '&': case '+': case ',': case '-': case '.': case '=': case '?': case '@': case '^': case '|': case '~': case '(': case ')': case '[': case ']': case '{': case '}': case '*': case '/': case '<': case '>': case ':': {
-            OpData op = OPERATORS[mcsl::str_slice{curr, end}];
-            debug_assert(op);
-            curr += op.size();
-            switch (op.tokType()) {
-               case TokenType::OP: toks.emplace_back(op); break;
-               case TokenType::BLOCK_DELIM:
-                  switch (op.opID()) {
-                     case OpID::CALL_INVOKE: toks.emplace_back(BlockType::CALL, BlockDelimRole::OPEN); toks.emplace_back(BlockType::CALL, BlockDelimRole::CLOSE); break;
-                     case OpID::CALL_OPEN  : toks.emplace_back(BlockType::CALL, BlockDelimRole::OPEN); break;
-                     case OpID::CALL_CLOSE : toks.emplace_back(BlockType::CALL, BlockDelimRole::CLOSE); break;
-
-                     case OpID::SUBSCRIPT_INVOKE: toks.emplace_back(BlockType::SUBSCRIPT, BlockDelimRole::OPEN); toks.emplace_back(BlockType::SUBSCRIPT, BlockDelimRole::CLOSE); break;
-                     case OpID::SUBSCRIPT_OPEN  : toks.emplace_back(BlockType::SUBSCRIPT, BlockDelimRole::OPEN); break;
-                     case OpID::SUBSCRIPT_CLOSE : toks.emplace_back(BlockType::SUBSCRIPT, BlockDelimRole::CLOSE); break;
-                     
-                     case OpID::LIST_INVOKE: toks.emplace_back(BlockType::INIT_LIST, BlockDelimRole::OPEN); toks.emplace_back(BlockType::INIT_LIST, BlockDelimRole::CLOSE); break;
-                     case OpID::LIST_OPEN  : toks.emplace_back(BlockType::INIT_LIST, BlockDelimRole::OPEN); break;
-                     case OpID::LIST_CLOSE : toks.emplace_back(BlockType::INIT_LIST, BlockDelimRole::CLOSE); break;
-
-                     case OpID::SPECIALIZER_INVOKE: toks.emplace_back(BlockType::SPECIALIZER, BlockDelimRole::OPEN); toks.emplace_back(BlockType::SPECIALIZER, BlockDelimRole::CLOSE); break;
-                     case OpID::SPECIALIZER_OPEN  : toks.emplace_back(BlockType::SPECIALIZER, BlockDelimRole::OPEN); break;
-                     case OpID::SPECIALIZER_CLOSE : toks.emplace_back(BlockType::SPECIALIZER, BlockDelimRole::CLOSE); break;
-
-                     case OpID::LINE_CMNT:
-                        while (curr < end) {
-                           if (*curr == '\n') { ++curr; break; }
-                           if (*curr == '\\') { ++curr; }
-                           ++curr;
-                        }
-                        break;
-
-                     default: UNREACHABLE;
-                  }
-                  break;
-               case TokenType::PTXT_SEG: //comments (strings and chars handled separately)
-                  switch (op.opID()) {
-                     case OpID::BLOCK_CMNT: break;
-                     case OpID::BLOCK_CMNT_OPEN: 
-                        do {
-                           if (curr >= end) { throwError(ErrCode::BAD_CMNT, mcsl::FMT("unclosed block comment")); }
-                           OpData tmp = OPERATORS[mcsl::str_slice{curr,end}];
-                           if (tmp == OpID::BLOCK_CMNT_CLOSE) { curr += tmp.size(); break; }
-                           ++curr;
-                        } while (true);
-                        break;
-                     case OpID::BLOCK_CMNT_CLOSE: throwError(ErrCode::BAD_CMNT, mcsl::FMT("floating block comment closing delimiter"));
-
-                     case OpID::LINE_CMNT:
-                        while (curr < end) {
-                           if (*curr == '\n') { ++curr; break; }
-                           if (*curr == '\\') { ++curr; }
-                           ++curr;
-                        }
-                        break;
-
-                     default: UNREACHABLE;
-                  }
-                  break;
-
-               default: UNREACHABLE;
-            }
-
-         } break;
-
-         //CHARS
-         case CHAR_DELIM:
-            lexChar(curr, end, toks);
-            break;
-
-         //STRINGS
-         case STR_DELIM:
-            lexStr(curr, end, tokBegin, toks);
-            break;
-
-         //INTERPOLATED STRINGS
-         case INTERP_STR_DELIM:
-            lexInterpStr(curr, end, tokBegin, toks);
-            break;
-         
-         //UNPRINTABLE CHAR (illegal)
-         default:
-            debug_assert(*curr < 32 || *curr > 126);
-            throwError(ErrCode::LEXER_UNSPEC, mcsl::FMT("invalid character (%u)"), *curr);
+            isMacroInvoke = true;
+         }
+         mcsl::str_slice name{tokBegin,curr};
+         KeywordID id = decodeKeyword(name);
+         if (+id) {
+            return {id};
+         } else {
+            return {name, isMacroInvoke};
+         }
       }
+      UNREACHABLE;
+
+
+      //EOS
+      case EOS:
+         ++curr;
+         return {TokenType::EOS};
+
+      //ESCAPE CHAR
+      case ESCAPE_CHAR:
+         curr += 2;
+         goto RESTART;
+
+      //PREPROCESSOR
+      case PREPROC_INIT:
+         ++curr;
+         return {TokenType::PREPROC_INIT};
+      //WHITESPACE
+      case  ' ': case '\t': case '\n': case '\v': case '\f': case '\r':
+         ++curr;
+         goto RESTART;
+      
+      //OPERATORS
+      case '!': case '$': case '%': case '&': case '+': case ',': case '-': case '.': case '=': case '?': case '@': case '^': case '|': case '~': case '(': case ')': case '[': case ']': case '{': case '}': case '*': case '/': case '<': case '>': case ':': {
+         OpData op = OPERATORS[mcsl::str_slice{curr, end}];
+         debug_assert(op);
+         curr += op.size();
+         switch (op.tokType()) {
+            case TokenType::OP: return {op};
+            case TokenType::BLOCK_DELIM:
+               switch (op.opID()) {
+                  case OpID::CALL_INVOKE: UNREACHABLE;
+                  case OpID::CALL_OPEN  : return {BlockType::CALL, BlockDelimRole::OPEN};
+                  case OpID::CALL_CLOSE : return {BlockType::CALL, BlockDelimRole::CLOSE};
+
+                  case OpID::SUBSCRIPT_INVOKE: UNREACHABLE;
+                  case OpID::SUBSCRIPT_OPEN  : return {BlockType::SUBSCRIPT, BlockDelimRole::OPEN};
+                  case OpID::SUBSCRIPT_CLOSE : return {BlockType::SUBSCRIPT, BlockDelimRole::CLOSE};
+                  
+                  case OpID::LIST_INVOKE: UNREACHABLE;
+                  case OpID::LIST_OPEN  : return {BlockType::INIT_LIST, BlockDelimRole::OPEN};
+                  case OpID::LIST_CLOSE : return {BlockType::INIT_LIST, BlockDelimRole::CLOSE};
+
+                  case OpID::SPECIALIZER_INVOKE: UNREACHABLE;
+                  case OpID::SPECIALIZER_OPEN  : return {BlockType::SPECIALIZER, BlockDelimRole::OPEN};
+                  case OpID::SPECIALIZER_CLOSE : return {BlockType::SPECIALIZER, BlockDelimRole::CLOSE};
+
+
+                  case OpID::BLOCK_CMNT: UNREACHABLE;
+                  case OpID::BLOCK_CMNT_OPEN: 
+                     do {
+                        if (curr >= end) { throwError(ErrCode::BAD_CMNT, mcsl::FMT("unclosed block comment")); }
+                        OpData tmp = OPERATORS[mcsl::str_slice{curr,end}];
+                        if (tmp == OpID::BLOCK_CMNT_CLOSE) { curr += tmp.size(); break; }
+                        ++curr;
+                     } while (true);
+                     goto RESTART;
+                  case OpID::BLOCK_CMNT_CLOSE: throwError(ErrCode::BAD_CMNT, mcsl::FMT("floating block comment closing delimiter"));
+
+                  case OpID::LINE_CMNT:
+                     while (curr < end) {
+                        if (*curr == '\n') { ++curr; break; }
+                        if (*curr == '\\') { ++curr; }
+                        ++curr;
+                     }
+                     goto RESTART;
+
+                  default: UNREACHABLE;
+               }
+               UNREACHABLE;
+
+            case TokenType::PTXT_SEG: UNREACHABLE;
+
+            default: UNREACHABLE;
+         }
+
+      } break;
+
+      //CHARS
+      case CHAR_DELIM:
+         return lexChar();
+
+      //STRINGS
+      case STR_DELIM:
+         return lexStr();
+
+      //INTERPOLATED STRINGS
+      case INTERP_STR_DELIM:
+         return lexInterpStr();
+      
+      //UNPRINTABLE CHAR (illegal)
+      default:
+         debug_assert(*curr < 32 || *curr > 126);
+         throwError(ErrCode::LEXER_UNSPEC, mcsl::FMT("invalid character (%u)"), *curr);
    }
 
-   return tokens;
+   UNREACHABLE;
 }
 
 //!lex a character literal
 //!NOTE: CURRENTLY ONLY SUPPORTS ASCII CHARACTER LITERALS
-char clef::Lexer::parseChar(char*& curr, char* const end) {
+char clef::Lexer::parseChar() {
    char ch;
    if (*curr >= 32 && *curr <= 126) {
       if (*curr == ESCAPE_CHAR) {
@@ -362,15 +323,14 @@ char clef::Lexer::parseChar(char*& curr, char* const end) {
    return ch;
 }
 
-bool clef::Lexer::lexChar(char*& curr, char* const end, mcsl::dyn_arr<Token>& toks) {
+clef::Token clef::Lexer::lexChar() {
    ++curr; //skip opening quote
-   const char tmp = parseChar(curr, end);
+   const char tmp = parseChar();
    if (curr >= end || *curr != CHAR_DELIM) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("character literal may only contain a single character/escape sequence")); }
    ++curr; //skip closing quote
-   toks.emplace_back(tmp);
-   return true;
+   return {tmp};
 }
-bool clef::Lexer::lexStr(char*& curr, char* const end, char* const tokBegin, mcsl::dyn_arr<Token>& toks) {
+clef::Token clef::Lexer::lexStr() {
    while (++curr < end && *curr != STR_DELIM) {
       if (*curr == ESCAPE_CHAR) {
          ++curr;
@@ -380,259 +340,13 @@ bool clef::Lexer::lexStr(char*& curr, char* const end, char* const tokBegin, mcs
       throwError(ErrCode::BAD_LITERAL, mcsl::FMT("unclosed string literal"));
    }
    ++curr;
-   toks.emplace_back(mcsl::str_slice{tokBegin+1,curr-1}, PtxtType::UNPROCESSED_STR);
-   return true;
+   return {mcsl::str_slice{tokBegin+1,curr-1}, PtxtType::UNPROCESSED_STR};
 }
-bool clef::Lexer::lexInterpStr(char*& curr, char* const end, char* const tokBegin, mcsl::dyn_arr<Token>& toks) {
-   while (++curr < end && *curr != INTERP_STR_DELIM) {
-   if (*curr == ESCAPE_CHAR) {
-      ++curr;
-      continue;
-   }
-   if (*curr == PLACEHOLDER_INIT) {
-      ++curr;
-      if (curr < end) {
-         if (*curr == PLACEHOLDER_OPEN) {
-            debug_assert((OPERATORS[mcsl::str_slice::make((&PLACEHOLDER_INIT), 1)] == OpID::LIST_OPEN));
-            while (++curr < end && *curr != PLACEHOLDER_CLOSE) {
-               lexExpr(curr, end, toks);
-            }
-            if (curr >= end) {
-               throwError(ErrCode::BAD_LITERAL, mcsl::FMT("unclosed interpolated string literal"));
-            }
-         }
-      }
-   }
-   }
-   if (curr >= end || *curr != INTERP_STR_DELIM) {
-      throwError(ErrCode::BAD_LITERAL, mcsl::FMT("unclosed interpolated string literal"));
-   }
-   ++curr;
-   toks.emplace_back(mcsl::str_slice{tokBegin+1,curr-1}, PtxtType::UNPROCESSED_STR);
-   return true;
+clef::Token clef::Lexer::lexInterpStr() {
+   TODO;
 }
-
-bool clef::Lexer::lexExpr(char*& curr, char* const end, mcsl::dyn_arr<Token>& toks) {
-   char* tokBegin;
-   uint radix;
-   bool isReal;
-   bool lexingPreprocStmt = false;
-
-   uint curlyCount = 1;
-
-   while (curr < end) {
-      //reset data
-      tokBegin = curr;
-
-      //process token
-      switch (*curr) {
-         //!NUMBERS
-         #pragma region nums
-         case '0':
-            isReal = false;
-            //check for radix specifier
-            if (++curr >= end) { radix = 10; goto PUSH_NUM_TOK; }
-            switch (*curr) {
-               default:
-                  radix = 10;
-                  if (!mcsl::is_digit(*curr, radix)) { goto PUSH_NUM_TOK; }
-                  goto PROCESS_NUM;
-
-               case 'b': case 'B': radix = 2;  break;
-               case 'o': case 'O': radix = 8;  break;
-               case 'd': case 'D': radix = 10; break;
-               case 'x': case 'X': radix = 16; break;
-            }
-            if (++curr >= end || !mcsl::is_digit(*curr, radix)) {
-               throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix specifier must be followed by digits"));
-            }
-            goto PROCESS_NUM;
-
-         //!NUMBERS
-         case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-            //setup
-            radix = 10;
-            isReal = false;
-            PROCESS_NUM:
-            //integer part
-            do {
-               if (++curr >= end) { goto PUSH_NUM_TOK; }
-            } while (mcsl::is_digit(*curr, radix));
-
-            //radix point
-            if (*curr == RADIX_POINT) {
-               isReal = true;
-               //check first digit
-               if (++curr >= end || !mcsl::is_digit(*curr, radix)) {
-                  throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix point must be followed by digits"));
-               }
-               //skip following digits
-               do {
-                  if (++curr >= end) { goto PUSH_NUM_TOK; }
-               } while (mcsl::is_digit(*curr, radix));
-
-            }
-            //radix separator
-            if (curr + 2 < end && curr[0] == '~' && curr[1] == '^') {
-               isReal = true;
-               curr += 2;
-               if (curr >= end) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }
-               //skip sign if present
-               if (*curr == '-' || *curr == '+') { if (++curr >= end) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }}
-               //check first digit
-               if (!mcsl::is_digit(*curr, radix)) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }
-               //skip following digits
-               do {
-                  if (++curr >= end) { goto PUSH_NUM_TOK; }
-               } while (mcsl::is_digit(*curr, radix));
-            }
-
-PUSH_NUM_TOK:
-            if (curr < end && mcsl::is_letter(*curr)) {
-               throwError(ErrCode::BAD_LITERAL, mcsl::FMT("identifier may not start with digit, and numeric literal must not be directly followed by identifier without separating whitespace"));
-            }
-
-            //convert to number and push token to stream
-            if (isReal) {
-               toks.emplace_back(mcsl::str_to_real(tokBegin, curr, radix));
-            } else {
-               toks.emplace_back(mcsl::str_to_uint(tokBegin, curr, radix));
-            }
-            break;
-         #pragma endregion nums
-
-
-         //IDENTIFIERS
-         case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'X': case 'o': case 'G': case 'H': case 'I': case 'J': case 'K': case 'L': case 'M': case 'N': case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V': case 'W': case 'Y': case 'Z':
-         case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'x': case 'O': case 'g': case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'y': case 'z':
-         case '_': {
-            while (++curr < end && (mcsl::is_digit(*curr, 36) || *curr == '_')) {}
-            mcsl::str_slice name{tokBegin,curr};
-            KeywordID id = decodeKeyword(name);
-            if (+id) {
-               toks.emplace_back(id);
-            } else {
-               toks.emplace_back(name);
-            }
-         } break;
-
-
-         #pragma region misc
-         //EOS
-         case EOS:
-            toks.emplace_back(TokenType::EOS);
-            ++curr;
-            break;
-
-         //ESCAPE CHAR
-         case ESCAPE_CHAR:
-            // toks.emplace_back(TokenType::ESC);
-            curr += 2;
-            break;
-
-         //PREPROCESSOR
-         case PREPROC_INIT:
-            lexingPreprocStmt = true;
-            toks.emplace_back(TokenType::PREPROC_INIT);
-            ++curr;
-            break;
-         //NEWLINE
-         case '\n':
-            if (lexingPreprocStmt) {
-               toks.emplace_back(TokenType::PREPROC_EOS);
-               lexingPreprocStmt = false;
-            }
-            [[fallthrough]];
-         //OTHER WHITESPACE
-         case  ' ': case '\t': case '\v': case '\f': case '\r':
-            ++curr;
-            break;
-         
-         #pragma endregion misc
-         
-         //OPERATORS
-         case '!': case '$': case '%': case '&': case '+': case ',': case '-': case '.': case '=': case '?': case '@': case '^': case '|': case '~': case '(': case ')': case '[': case ']': case '{': case '}': case '*': case '/': case '<': case '>': case ':': {
-            OpData op = OPERATORS[mcsl::str_slice{curr, end}];
-            debug_assert(op);
-            curr += op.size();
-            switch (op.tokType()) {
-               case TokenType::OP: toks.emplace_back(op); break;
-               case TokenType::BLOCK_DELIM:
-                  switch (op.opID()) {
-                     case OpID::CALL_INVOKE: toks.emplace_back(BlockType::CALL, BlockDelimRole::OPEN); toks.emplace_back(BlockType::CALL, BlockDelimRole::CLOSE); break;
-                     case OpID::CALL_OPEN  : toks.emplace_back(BlockType::CALL, BlockDelimRole::OPEN); break;
-                     case OpID::CALL_CLOSE : toks.emplace_back(BlockType::CALL, BlockDelimRole::CLOSE); break;
-
-                     case OpID::SUBSCRIPT_INVOKE: toks.emplace_back(BlockType::SUBSCRIPT, BlockDelimRole::OPEN); toks.emplace_back(BlockType::SUBSCRIPT, BlockDelimRole::CLOSE); break;
-                     case OpID::SUBSCRIPT_OPEN  : toks.emplace_back(BlockType::SUBSCRIPT, BlockDelimRole::OPEN); break;
-                     case OpID::SUBSCRIPT_CLOSE : toks.emplace_back(BlockType::SUBSCRIPT, BlockDelimRole::CLOSE); break;
-                     
-                     case OpID::LIST_INVOKE: toks.emplace_back(BlockType::INIT_LIST, BlockDelimRole::OPEN); toks.emplace_back(BlockType::INIT_LIST, BlockDelimRole::CLOSE); break;
-                     case OpID::LIST_OPEN  : ++curlyCount; toks.emplace_back(BlockType::INIT_LIST, BlockDelimRole::OPEN); break;
-                     case OpID::LIST_CLOSE :
-                        if (--curlyCount == 0) { return true; }
-                        toks.emplace_back(BlockType::INIT_LIST, BlockDelimRole::CLOSE);
-                        break;
-
-                     case OpID::SPECIALIZER_INVOKE: toks.emplace_back(BlockType::SPECIALIZER, BlockDelimRole::OPEN); toks.emplace_back(BlockType::SPECIALIZER, BlockDelimRole::CLOSE); break;
-                     case OpID::SPECIALIZER_OPEN  : toks.emplace_back(BlockType::SPECIALIZER, BlockDelimRole::OPEN); break;
-                     case OpID::SPECIALIZER_CLOSE : toks.emplace_back(BlockType::SPECIALIZER, BlockDelimRole::CLOSE); break;
-
-                     default: UNREACHABLE;
-                  }
-                  break;
-               case TokenType::PTXT_SEG: //comments (strings and chars handled separately)
-                  switch (op.opID()) {
-                     case OpID::BLOCK_CMNT: break;
-                     case OpID::BLOCK_CMNT_OPEN: 
-                        do {
-                           if (curr >= end) { throwError(ErrCode::BAD_CMNT, mcsl::FMT("unclosed block comment")); }
-                           OpData tmp = OPERATORS[mcsl::str_slice{curr,end}];
-                           if (tmp == OpID::BLOCK_CMNT_CLOSE) { curr += tmp.size(); break; }
-                           ++curr;
-                        } while (true);
-                        break;
-                     case OpID::BLOCK_CMNT_CLOSE: throwError(ErrCode::BAD_CMNT, mcsl::FMT("floating block comment closing delimiter"));
-
-                     case OpID::LINE_CMNT:
-                        while (curr < end) {
-                           if (*curr == '\n') { ++curr; break; }
-                           if (*curr == '\\') { ++curr; }
-                           ++curr;
-                        }
-                        break;
-
-                     default: UNREACHABLE;
-                  }
-                  break;
-
-               default: UNREACHABLE;
-            }
-
-         } break;
-
-         //CHARS
-         case CHAR_DELIM:
-            lexChar(curr, end, toks);
-            break;
-
-         //STRINGS
-         case STR_DELIM:
-            lexStr(curr, end, tokBegin, toks);
-            break;
-
-         //INTERPOLATED STRINGS
-         case INTERP_STR_DELIM:
-            lexInterpStr(curr, end, tokBegin, toks);
-            break;
-         
-         //UNPRINTABLE CHAR (illegal)
-         default:
-            debug_assert(*curr < 32 || *curr > 126);
-            throwError(ErrCode::LEXER_UNSPEC, mcsl::FMT("invalid character (%u)"), *curr);
-      }
-   }
-   return true;
+clef::Token clef::Lexer::lexExpr() {
+   TODO;
 }
 
 #endif //LEXER_CPP

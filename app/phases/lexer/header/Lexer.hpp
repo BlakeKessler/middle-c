@@ -5,17 +5,28 @@
 #include "SourceTokens.hpp"
 
 class clef::Lexer {
+   private:
+      Source src;
+
+      char* const begin;
+      char* const end;
+      char* curr;
+      char* tokBegin;
+
    protected:
-      static bool lexChar(char*& curr, char* const end, mcsl::dyn_arr<clef::Token>& toks);
-      static bool lexStr(char*& curr, char* const end, char* const tokBegin, mcsl::dyn_arr<clef::Token>& toks);
-      static bool lexInterpStr(char*& curr, char* const end, char* const tokBegin, mcsl::dyn_arr<clef::Token>& toks);
-      static bool lexExpr(char*& curr, char* const end, mcsl::dyn_arr<clef::Token>& toks);
+      char parseChar();
+
+      Token lexChar();
+      Token lexStr();
+      Token lexInterpStr();
+      Token lexExpr();
+      Token lexFunclikeMacroArgs();
    public:
-      static SourceTokens LexSource(Source&& src);
-      static inline SourceTokens LexFile(const char* path) { return LexSource(Source::readFile(path)); }
+      Lexer(Source&& s):src{std::move(s)}, begin{src.buf().begin()}, end{src.buf().end()}, curr{begin}, tokBegin{curr} {}
+      static Lexer fromFile(const char* path) { return Lexer(Source::readFile(path)); }
 
-
-      static char parseChar(char*& curr, char* const end);
+      bool done() const { return curr < end; }
+      Token nextToken();
 };
 
 #endif //LEXER_HPP
