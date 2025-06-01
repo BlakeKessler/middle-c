@@ -25,7 +25,7 @@ class clef::Lexer {
       Lexer(Source&& s):src{std::move(s)}, begin{src.buf().begin()}, end{src.buf().end()}, curr{begin}, tokBegin{curr} {}
       static Lexer fromFile(const char* path) { return Lexer(Source::readFile(path)); }
 
-      bool done() const { return curr < end; }
+      bool done() const { return curr >= end; }
       Token nextToken();
 };
 
