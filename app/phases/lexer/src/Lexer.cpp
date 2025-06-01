@@ -109,13 +109,24 @@ PUSH_NUM_TOK:
          case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'X': case 'o': case 'G': case 'H': case 'I': case 'J': case 'K': case 'L': case 'M': case 'N': case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V': case 'W': case 'Y': case 'Z':
          case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'x': case 'O': case 'g': case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'y': case 'z':
          case '_': {
-            while (++curr < end && (mcsl::is_digit(*curr, 36) || *curr == '_')) {}
+            bool isMacroInvoke = false;
+            while (++curr < end) {
+               if (mcsl::is_digit(*curr, 36) || *curr == '_') {
+                  continue;
+               }
+               if (*curr == '!') {
+                  ++curr;
+                  isMacroInvoke = true;
+                  break;
+               }
+               break;
+            }
             mcsl::str_slice name{tokBegin,curr};
             KeywordID id = decodeKeyword(name);
             if (+id) {
                toks.emplace_back(id);
             } else {
-               toks.emplace_back(name);
+               toks.emplace_back(name, isMacroInvoke);
             }
          } break;
 

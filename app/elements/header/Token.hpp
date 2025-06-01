@@ -33,6 +33,7 @@ struct clef::Token {
       //constructors
       Token():_type{TokenType::NONE} {}
       Token(const mcsl::str_slice name):_name{name},_type{TokenType::IDEN} {}
+      Token(const mcsl::str_slice name, bool isMacro):_name{name},_type{isMacro ? TokenType::MACRO_INVOKE : TokenType::IDEN} {}
       Token(const KeywordID id):_keyword{id},_type{+id ? TokenType::KEYWORD : TokenType::IDEN} {}
       Token(const ulong val):_intVal{val},_type{TokenType::INT_NUM} {}
       Token(const flong val):_realVal{val},_type{TokenType::REAL_NUM} {}

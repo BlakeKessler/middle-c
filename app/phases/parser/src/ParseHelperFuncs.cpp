@@ -265,6 +265,7 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
       case Identifier::nodeType():
       case Variable::nodeType():
       case Function::nodeType():
+      case Macro::nodeType():
       case Type::nodeType():
       case VariadicParameter::nodeType():
       case FundamentalType::nodeType():

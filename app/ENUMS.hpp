@@ -51,6 +51,7 @@ namespace clef {
       IDEN,
          VAR,
          FUNC,
+         MACRO,
          TYPE,
             VAR_PARAM,
             FUND_TYPE,
@@ -116,6 +117,7 @@ namespace clef {
       NONE = 0,
       
       IDEN,
+      MACRO_INVOKE,
       KEYWORD,
       INT_NUM,
       REAL_NUM,
@@ -455,9 +457,10 @@ namespace clef {
       MASK,
       NAMESPACE,
       FUNC,
+      MACRO,
 
       __FIRST_OBJ_TYPE = CLASS,
-      __LAST_OBJ_TYPE = FUNC,
+      __LAST_OBJ_TYPE = MACRO,
 
       CONST,
       CONSTEXPR,

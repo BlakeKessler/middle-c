@@ -58,6 +58,7 @@ START_PARSE_STMT:
             case KeywordID::MASK          : ++tokIt; { return parseMask(); }
             case KeywordID::NAMESPACE     : ++tokIt; { return parseNamespace(); }
             case KeywordID::FUNC          : ++tokIt; { auto tmp = parseFunction(); return tree.make<TypeDecl>(tree[tmp].signature(), tmp, tmp); }
+            case KeywordID::MACRO         : ++tokIt; { auto tmp = parseMacro(); return tree.make<TypeDecl>(tree[tmp].signature(), tmp, tmp); }
 
             
             case KeywordID::IF            : ++tokIt; return parseIf(); break;
@@ -287,6 +288,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             logError(ErrCode::BAD_KEYWORD, "bad keyword in expression");
          }
 
+         case TokenType::MACRO_INVOKE: TODO;
          case TokenType::IDEN: operandStack.push_back(+parseIdentifier()); prevTokIsOperand = true; goto PARSE_EXPR_CONTINUE;
          case TokenType::INT_NUM:
             operandStack.push_back(+tree.make<Literal>(tokIt++->intVal()));
@@ -593,6 +595,43 @@ clef::index<clef::Function> clef::Parser::parseFunction() {
       return tree.remake<Function>(name, sig, procedure, tree[name]);
    } else {
       return tree.make<Function>(sig, procedure);
+   }
+}
+clef::index<clef::Macro> clef::Parser::parseMacro() {
+   index<Identifier> name = tryParseIdentifier<true>();
+   
+   //params
+   consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FUNC without parameters");
+   index<ParamList> params = parseParamList(BlockType::CALL);
+   
+
+   //return type
+   consumeOperator(OpID::ARROW, "FUNC without trailing return type");
+   index<Type> returnType = parseTypename();
+
+   //make signature
+   index<FuncSig> sig = tree.make<FuncSig>(returnType, params);
+
+   if (tryConsumeEOS()) { //forward declaration
+      if (name) {
+         return tree.remake<Macro>(name, sig, tree[name]);
+      } else {
+         return tree.make<Macro>(sig);
+      }
+   }
+
+   //definition
+   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad FUNC definition");
+   index<Scope> procedure = parseProcedure();
+
+   //EOS
+   consumeEOS("FUNC without EOS");
+
+   //return
+   if (name) {
+      return tree.remake<Macro>(name, sig, procedure, tree[name]);
+   } else {
+      return tree.make<Macro>(sig, procedure);
    }
 }
 

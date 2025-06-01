@@ -78,6 +78,7 @@ class clef::Parser {
       index<TryCatch> parseTryCatch();
 
       index<Function> parseFunction();
+      index<Macro> parseMacro();
       index<Asm> parseASM();
       
       index<TypeDecl> parseClass();

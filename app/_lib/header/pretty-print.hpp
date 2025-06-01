@@ -37,6 +37,7 @@ constexpr const mcsl::str_slice clef::toString(const NodeType type) {
       CASE(IDEN, "IDENTIFIER");
       CASE(VAR, "VARIABLE");
       CASE(FUNC, "FUNCTION");
+      CASE(MACRO, "MACRO");
       CASE(TYPE, "TYPE");
       CASE(VAR_PARAM, "VARIADIC_PARAM");
       CASE(FUND_TYPE, "FUNDEMENTAL_TYPE");
@@ -85,6 +86,7 @@ constexpr const mcsl::str_slice clef::toString(const TokenType type) {
       CASE(NONE, "none");
 
       CASE(IDEN, "IDENTIFIER");
+      CASE(MACRO_INVOKE, "MACRO_INVOKE");
       CASE(KEYWORD, "KEYWORD");
       CASE(INT_NUM, "INTEGER");
       CASE(REAL_NUM, "REAL_NUMBER");
@@ -336,6 +338,7 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(MASK, "mask");
       CASE(NAMESPACE, "namespace");
       CASE(FUNC, "func");
+      CASE(MACRO, "macro");
 
 
       

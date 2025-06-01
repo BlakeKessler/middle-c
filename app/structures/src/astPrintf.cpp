@@ -304,12 +304,15 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
       uint charCount;
       if (decl.spec() && decl.specType() == NodeType::FUNC) {
          charCount = file.printf(FMT("%s"), TNB_CAST2(Function, decl.funcSpec()));
+      } else if (decl.spec() && decl.specType() == NodeType::MACRO) {
+         charCount = file.printf(FMT("%s"), TNB_CAST2(Macro, decl.macroSpec()));
       } else {
          charCount = file.printf(FMT("%s %s"), TNB(decl.objType()), TNB(decl.name()));
       
          if (decl.spec()) {
             switch (decl.specType()) {
-               case NodeType::FUNC: UNREACHABLE; //handled above
+               case NodeType::FUNC : UNREACHABLE; //handled above
+               case NodeType::MACRO: UNREACHABLE; //handled above
 
                case NodeType::OBJ_TYPE_SPEC: {
                   auto parentTypes = obj.tree[decl.objSpec()].inheritedTypes().span();
@@ -737,6 +740,21 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Function> obj, char
       return file.printf(FMT("%b%b%b"), TNB_CAST(Identifier), TNB(func.signature()), TNB(func.procedure()));
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Function>"), mode);
+   }
+   UNREACHABLE;
+}
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Macro> obj, char mode, FmtArgs fmt) {
+   using namespace clef;
+   if (!obj) {
+      return 0;
+   }
+   const Macro& macro = *obj;
+   if ((mode | CASE_BIT) == 's') {
+      return file.printf(FMT("macro %s%s %s"), TNB_CAST(Identifier), TNB(macro.signature()), TNB(macro.procedure()));
+   } else if ((mode | CASE_BIT) == 'b') {
+      return file.printf(FMT("%b%b%b"), TNB_CAST(Identifier), TNB(macro.signature()), TNB(macro.procedure()));
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Macro>"), mode);
    }
    UNREACHABLE;
 }

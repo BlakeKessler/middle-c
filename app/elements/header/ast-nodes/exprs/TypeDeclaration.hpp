@@ -23,6 +23,7 @@ struct clef::TypeDeclaration : public clef::Statement {
       TypeDeclaration(index<FundType> objType, index<Identifier> name, index<InterfaceSpec> spec):Statement{OpID::MAKE_TYPE,objType,name,spec} {}
       TypeDeclaration(index<FundType> objType, index<Identifier> name, index<NamespaceSpec> spec):Statement{OpID::MAKE_TYPE,objType,name,spec} {}
       TypeDeclaration(index<FundType> objType, index<Identifier> name, index<Function> spec):Statement{OpID::MAKE_TYPE,objType,name,spec} {}
+      TypeDeclaration(index<FundType> objType, index<Identifier> name, index<Macro> spec):Statement{OpID::MAKE_TYPE,objType,name,spec} {}
       TypeDeclaration(index<FundType> objType, index<Identifier> name, index<ParameterList> spec):Statement{OpID::MAKE_TYPE,objType,name,spec} {}
 
 
@@ -41,6 +42,8 @@ struct clef::TypeDeclaration : public clef::Statement {
       index<const NamespaceSpec> nsSpec() const { return _extra; }
       index<Function>& funcSpec() { return reinterpret_cast<index<Function>&>(_extra); }
       index<const Function> funcSpec() const { return _extra; }
+      index<Macro>& macroSpec() { return reinterpret_cast<index<Macro>&>(_extra); }
+      index<const Macro> macroSpec() const { return _extra; }
       index<ParameterList>& otherSpec() { return reinterpret_cast<index<ParameterList>&>(_extra); }
       index<const ParameterList> otherSpec() const { return _extra; }
 };

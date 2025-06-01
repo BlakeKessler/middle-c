@@ -98,6 +98,7 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
       case Identifier::nodeType():
       case Variable::nodeType():
       case Function::nodeType():
+      case Macro::nodeType():
       case Type::nodeType():
       case VariadicParameter::nodeType():
       case FundamentalType::nodeType():

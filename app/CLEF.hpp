@@ -27,6 +27,7 @@ namespace clef {
       struct Identifier;
          struct Variable;
          struct Function;
+         struct Macro;
          struct Type;
             struct VariadicParameter; using VariadicParam = VariadicParameter;
             struct FundamentalType; using FundType = FundamentalType;
@@ -68,7 +69,7 @@ namespace clef {
       template<typename T> concept pseudoNode_t = requires { {T::nodeType()} -> mcsl::same_t<NodeType>; };
       template<typename T> concept pseudoNode_ptr_t = mcsl::ptr_t<T> && pseudoNode_t<mcsl::remove_ptr<T>>;
       template<typename T> concept operand_t = mcsl::is_t<T, clef::Identifier> || mcsl::is_t<T,Expression>;
-      #define CLEF_ALL_FUND_AST_NODE_T Expression, Function, Literal, Scope, Type, ForLoopParams, ForeachLoopParams, Identifier, Statement, Variable
+      #define CLEF_ALL_FUND_AST_NODE_T Expression, Function, Macro, Literal, Scope, Type, ForLoopParams, ForeachLoopParams, Identifier, Statement, Variable
       #define CLEF_ALL_EXPR_AST_NODE_T Declaration, TypeDecl, If, ForLoop, ForeachLoop, WhileLoop, DoWhileLoop, Switch, Match, TryCatch, Asm
       #define CLEF_ALL_NODE_LIST_AST_NODE_T ArgumentList, MatchCases, ParameterList, SpecializerList, StatementSequence, SwitchCases
       #define CLEF_ALL_TYPE_AST_NODE_T Class, Enum, Mask, FunctionSignature, FundamentalType, GenericType, Interface, Namespace, Struct, Union, VariadicParameter

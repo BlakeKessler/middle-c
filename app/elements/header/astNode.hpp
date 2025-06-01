@@ -6,6 +6,7 @@
 
 #include "ast-nodes/Expression.hpp"
 #include "ast-nodes/Function.hpp"
+#include "ast-nodes/Macro.hpp"
 #include "ast-nodes/Literal.hpp"
 #include "ast-nodes/Scope.hpp"
 #include "ast-nodes/Type.hpp"
@@ -50,7 +51,7 @@
 
 #include "MAP_MACRO.h"
 #define CLEF_ALL_AST_NODE_UNION_MEMBS \
-   _identifier, _variable, _function, _type, _variadicParameter, _fundamentalType, _functionSignature, _enum,                   \
+   _identifier, _variable, _function, _macro, _type, _variadicParameter, _fundamentalType, _functionSignature, _enum,                   \
    _mask, _union, _namespace, _interface, _struct, _class, _genericType, _scope, _literal, _expression, _declaration, _typeDecl,\
    _forLoop, _foreachLoop, _whileLoop, _doWhileLoop, _if, _switch, _match, _tryCatch, _asm, _forLoopParams,                     \
    _foreachLoopParams, _switchCases, _matchCases, _statement, _statementSequence, _argumentList, _parameterList, _specializerList
@@ -61,6 +62,7 @@ struct clef::astNode {
          Identifier _identifier;
          Variable _variable;
          Function _function;
+         Macro _macro;
          Type _type;
          VariadicParameter _variadicParameter;
          FundamentalType _fundamentalType;

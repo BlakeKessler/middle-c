@@ -59,6 +59,7 @@ class clef::KeywordDecoder {
          {"mask", KeywordID::MASK},
          {"namespace", KeywordID::NAMESPACE},
          {"func", KeywordID::FUNC},
+         {"macro", KeywordID::MACRO},
          {"const", KeywordID::CONST},
          {"constexpr", KeywordID::CONSTEXPR},
          {"immediate", KeywordID::IMMEDIATE},
