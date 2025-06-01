@@ -11,11 +11,7 @@ class clef::Source {
    private:
       mcsl::string _buf;
       mcsl::array<mcsl::str_slice> _lines;
-
-      static constexpr const mcsl::raw_str _nameof = "Source";
    public:
-      static constexpr const auto& nameof() { return _nameof; }
-
       Source():_buf(),_lines() {}
       Source(Source&& other):_buf(std::move(other._buf)),_lines(std::move(other._lines)) { if (this != &other) { other.release(); } }
       Source(mcsl::string&& buf,mcsl::array<mcsl::str_slice>&& lines):_buf(std::move(buf)),_lines(std::move(lines)) { buf.release(); lines.release(); }

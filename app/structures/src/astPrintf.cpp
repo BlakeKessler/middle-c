@@ -7,6 +7,9 @@
 #include "OperatorData.hpp"
 #include "io.hpp"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 uint mcsl::writef(File& file, const clef::SyntaxTree& tree, char mode, FmtArgs args) {
    assume((mode | CASE_BIT) == 's');
    return writef(file, clef::astTNB<clef::astNode>{tree, 1, 0}, mode, args) + (file.write('\n'), 1);
@@ -1095,5 +1098,7 @@ uint mcsl::writef(mcsl::File& file, clef::QualMask quals, char mode, FmtArgs fmt
       default: UNREACHABLE;
    }
 }
+
+#pragma GCC diagnostic pop
 
 #endif //CLEF_AST_PRINTF_CPP

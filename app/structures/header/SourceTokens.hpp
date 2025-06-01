@@ -15,11 +15,7 @@ class clef::SourceTokens {
 
       mcsl::dyn_arr<Token> _tokens;
       mcsl::dyn_arr<char> _strLitBuf;
-
-      static constexpr const mcsl::raw_str _nameof = "SourceTokens";
    public:
-      static constexpr const auto& nameof() { return _nameof; }
-
       //constructors
       SourceTokens():_src{},_tokens{},_strLitBuf{} {}
       SourceTokens(Source&& src):_src{std::move(src)},_tokens{},_strLitBuf{} {}

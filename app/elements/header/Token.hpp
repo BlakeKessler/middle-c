@@ -25,11 +25,7 @@ struct clef::Token {
          PtxtType _ptxtType;
       };
       TokenType _type;
-
-      static constexpr const mcsl::raw_str _nameof = "Token";
    public:
-      static constexpr const auto& nameof() { return _nameof; }
-
       //constructors
       Token():_type{TokenType::NONE} {}
       Token(const mcsl::str_slice name):_name{name},_type{TokenType::IDEN} {}

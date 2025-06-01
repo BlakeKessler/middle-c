@@ -95,11 +95,7 @@ class clef::Parser {
       
       //constructors
       Parser(const SourceTokens& s, SyntaxTree& t):tree{t},src{s},tokIt{s.begin()},endtok{s.end()},_errno{} {}
-      
-      static constexpr const mcsl::raw_str _nameof = "Parser";
    public:
-      static constexpr const auto& nameof() { return _nameof; }
-
       //parse tokenized source code
       static void parse(const SourceTokens& src, SyntaxTree& tree);
 };

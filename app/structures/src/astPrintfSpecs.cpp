@@ -6,6 +6,9 @@
 #include "pretty-print.hpp"
 #include "io.hpp"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #define TNB(expr) clef::astTNB{obj.tree, expr, obj.indents}
 #define TNB_INDENT(expr) clef::astTNB{obj.tree, expr, obj.indents + 1}
 #define TNB_AST(expr) TNB((clef::index<const clef::astNode>)expr)
@@ -115,5 +118,7 @@ uint mcsl::writef(File& file, const clef::astTNB<clef::NamespaceSpec> obj, char 
 #undef TNB_AST
 #undef TNB_INDENT
 #undef TNB
+
+#pragma GCC diagnostic pop
 
 #endif //CLEF_AST_PRINTF_SPECS_CPP
