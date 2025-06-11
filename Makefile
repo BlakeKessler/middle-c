@@ -14,7 +14,7 @@ ALL_OBJ_FILES := $(ALL_SRC_FILES:%.cpp=_build/%.o)
 
 #compiler
 COMPILER := clang++ -std=c++23
-FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name -Wno-gcc-compat -Wno-trigraphs -Wno-pessimizing-move
+FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name -Wno-gcc-compat -Wno-trigraphs -Wno-pessimizing-move -Wno-dtor-name
 # FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name -Wno-gcc-compat -Wno-trigraphs -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
 # COMPILER := g++ -std=c++23
 # FLAGS := -g -Wall -Wextra -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -Wno-trigraphs -Wno-attributes -Wno-parentheses -Wno-class-memaccess -Wno-pessimizing-move
@@ -65,3 +65,12 @@ StrToNum: _build/test/src/TestStrToNum.mk test/src/TestStrToNum.cpp | $(ALL_OBJ_
 .PHONY: Printf
 Printf: _build/test/src/TestPrintf.mk test/src/TestPrintf.cpp | $(ALL_OBJ_FILES) setup
 	$(COMPILE) test/src/TestPrintf.cpp $(shell find _build -name *.o) -o _build/out/$@.out
+.PHONY: List
+List: _build/test/src/TestList.mk test/src/TestList.cpp | $(ALL_OBJ_FILES) setup
+	$(COMPILE) test/src/TestList.cpp $(shell find _build -name *.o) -o _build/out/$@.out
+.PHONY: Set
+Set: _build/test/src/TestSet.mk test/src/TestSet.cpp | $(ALL_OBJ_FILES) setup
+	$(COMPILE) test/src/TestSet.cpp $(shell find _build -name *.o) -o _build/out/$@.out
+.PHONY: Map
+Map: _build/test/src/TestMap.mk test/src/TestMap.cpp | $(ALL_OBJ_FILES) setup
+	$(COMPILE) test/src/TestMap.cpp $(shell find _build -name *.o) -o _build/out/$@.out
