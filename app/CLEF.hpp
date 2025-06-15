@@ -78,12 +78,11 @@ namespace clef {
    class InterfaceSpec;
    class NamespaceSpec;
    #define CLEF_ALL_PSEUDO_NODE_T ObjTypeSpec, InterfaceSpec, NamespaceSpec
-   struct Symbol;
 
    //containers for atomic compilation elements
    class Source;
    class SourceTokens;
-   class SymbolTable;
+   class SymbolNode;
    class SyntaxTree;
       template<typename T> struct astTNB; //astTreeNodeBundle
       struct indenter;

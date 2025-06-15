@@ -156,4 +156,37 @@ clef::index<clef::Expr> clef::SyntaxTree::remakeTernary(index<astNode> cond, ind
    return remake<Expr>(vals, Expr::makeTernary(self, cond, +self[vals].lhs(), +self[vals].rhs()));
 }
 
+clef::SymbolNode* clef::SyntaxTree::findSymbol(const mcsl::str_slice name, SymbolNode* parentScope) {
+   if (parentScope == nullptr) { parentScope = &_globalScope; }
+   if (SymbolNode** entry = parentScope->find(name)) {
+      return *entry;
+   }
+   return nullptr;
+}
+clef::SymbolNode* clef::SyntaxTree::registerSymbol(const mcsl::str_slice name, SymbolNode* parentScope) {
+   if (parentScope == nullptr) {
+      parentScope = &_globalScope;
+   }
+   SymbolNode& table = *parentScope;
+   if (SymbolNode** entry = table.find(name)) {
+      return *entry;
+   }
+   SymbolNode* entry = _symbolBuf.emplace_back(name, parentScope);
+   table[name] = entry;
+   return entry;
+}
+clef::SymbolNode* clef::SyntaxTree::registerAlias(SymbolNode* alias, SymbolNode* target) {
+   debug_assert(alias);
+   debug_assert(target);
+
+   if (*alias) { //prevent illegal redeclarations from causing memory leaks
+      throwError(ErrCode::BAD_IDEN, FMT("identifier `%s` redefined as alias"), alias->name());
+      //!TODO: maybe just return a nullptr and let the parser handle it
+   }
+
+   (*alias->parentScope())[alias->name()] = target;
+   std::destroy_at(alias);
+   return target;
+}
+
 #endif //SYNTAX_TREE_CPP

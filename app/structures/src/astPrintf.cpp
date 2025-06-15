@@ -693,7 +693,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
       if (iden.scopeName()) {
          charsPrinted += file.printf(FMT("%s::"), TNB(iden.scopeName()));
       }
-      debug_assert(iden.name().size() || !iden.name().data());
+      debug_assert(iden.name().begin() && iden.name().size());
       charsPrinted += file.printf(FMT("%s"), iden.name());
       if (iden.specializer()) {
          charsPrinted += file.printf(FMT("<:%s:>"), TNB(iden.specializer()));

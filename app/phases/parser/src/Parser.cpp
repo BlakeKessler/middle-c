@@ -411,9 +411,11 @@ template<bool isDecl> clef::index<clef::Identifier> clef::Parser::tryParseIdenti
    if (currTok.type() != TokenType::IDEN) { return 0; }
 
    index<Identifier> name = scopeName;
+   SymbolNode* symbol = nullptr;
 
    do {
-      name = tree.make<Identifier>(currTok.name(), name);
+      symbol = tree.registerSymbol(currTok.name(), symbol); //add symbol to symbol table
+      name = tree.make<Identifier>(symbol, name); //create AST node for symbol
       getNextToken();
 
       if (tryConsumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::OPEN)) {

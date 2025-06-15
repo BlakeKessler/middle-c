@@ -3,9 +3,11 @@
 
 #include "CLEF.hpp"
 #include "astNode.hpp"
+#include "SymbolNode.hpp"
 #include "allocator.hpp"
 
 #include "dyn_arr.hpp"
+#include "arr_list.hpp"
 
 class clef::SyntaxTree {
    private:
@@ -15,9 +17,12 @@ class clef::SyntaxTree {
       mcsl::dyn_arr<NamespaceSpec> _nsSpecBuf;
       mcsl::dyn_arr<ObjTypeSpec> _objSpecBuf;
 
+      SymbolNode _globalScope;
+      mcsl::arr_list<SymbolNode> _symbolBuf;
+
       allocator _alloc;
    public:
-      SyntaxTree():_buf{},_ifaceSpecBuf{},_nsSpecBuf{},_objSpecBuf{},_alloc{} {
+      SyntaxTree():_buf{},_ifaceSpecBuf{},_nsSpecBuf{},_objSpecBuf{},_globalScope{},_symbolBuf{},_alloc{} {
          _buf.emplace_back(NodeType::ERROR);
          _ifaceSpecBuf.emplace_back();
          _nsSpecBuf.emplace_back();
@@ -28,6 +33,8 @@ class clef::SyntaxTree {
          _ifaceSpecBuf{std::move(other._ifaceSpecBuf)},
          _nsSpecBuf{std::move(other._nsSpecBuf)},
          _objSpecBuf{std::move(other._objSpecBuf)},
+         _globalScope{std::move(other._globalScope)},
+         _symbolBuf{std::move(other._symbolBuf)},
          _alloc{std::move(other._alloc)} {
             if (this != &other) {
                other.release();
@@ -43,6 +50,10 @@ class clef::SyntaxTree {
 
       void printf(mcsl::File&) const;
       void print(mcsl::File&) const;
+
+      SymbolNode* findSymbol(const mcsl::str_slice name, SymbolNode* scope = {}); //return null if it isn't in the symbol table yet
+      SymbolNode* registerSymbol(const mcsl::str_slice name, SymbolNode* scope = {}); //add to the table if it isn't in the symbol table yet
+      SymbolNode* registerAlias(SymbolNode* alias, SymbolNode* target);
 
       uint nodeCount() const { return _buf.size(); }
       astNode& getNode(const uint i) { assume(i); return _buf[i]; }
