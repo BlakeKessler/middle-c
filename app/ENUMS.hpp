@@ -43,6 +43,28 @@ namespace clef {
    };
    constexpr auto      operator+(const ErrCode t) noexcept { return std::to_underlying(t); }
    
+   //!enum of symbol type codes
+   enum class SymbolType : uint8 {
+      NULL = 0,
+
+      VAR,
+      FUNC,
+      
+      __TYPE_BIT = 8_m,
+         FUND_TYPE,
+         CLASS,
+         STRUCT,
+         INTERFACE,
+         UNION,
+         ENUM,
+         ENUM_UNION,
+         MASK,
+         NAMESPACE,
+         MACRO,
+   };
+   constexpr auto operator+(const SymbolType t) noexcept { return std::to_underlying(t); }
+   constexpr bool isType(SymbolType t) noexcept { return +t & +SymbolType::__TYPE_BIT; }
+
    //!enum of AST node type codes
    enum class NodeType : uint8 {
       ERROR = 0xFF,  //CLEF INTERNAL ERROR

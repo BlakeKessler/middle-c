@@ -80,13 +80,20 @@ clef::index<clef::Scope> clef::Parser::parseProcedure() {
 
 
 clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName) {
-   index<astNode> name = +parseIdentifier(scopeName);
+   index<Identifier> nameIden = parseIdentifier(scopeName);
+   SymbolNode* symbol = tree[nameIden].symbol();
+   if (!symbol || !isType(symbol->symbolType())) {
+      logError(ErrCode::BAD_IDEN, "`%s` does not name a type", symbol && symbol->name().size() ? symbol->name() : FMT("(anonymous)"));
+   }
+   index<astNode> name = +nameIden;
    tree[name].upCast(NodeType::TYPE);
 
    //pointers and references
-   while (true) {
-      QualMask ptrquals = parseQuals();
-      FundTypeID id;
+   mcsl::pair<QualMask, FundTypeID> qualTypePair;
+   #define ptrquals qualTypePair.first
+   #define id qualTypePair.second
+   auto qualsAndMods = [&]() -> bool {
+      ptrquals = parseQuals();
       if (tryConsumeOperator(OpID::DEREF)) { //pointer
          id = FundTypeID::PTR;
       } else if (tryConsumeOperator(OpID::REFERENCE)) { //reference
@@ -94,12 +101,22 @@ clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName)
       } else { //neither -> break
          if (+ptrquals) { //trailing qualifiers
             logError(ErrCode::BAD_IDEN, "type qualifiers must precede the type name");
+            return true;
          }
-         break;
       }
-      name = +tree.remake<SpecList>((index<Type>)name, tree[(index<Type>)name]);
-      name = +tree.make<FundType>(id, (index<SpecList>)name, ptrquals);
+      return false;
+   };
+   if (qualsAndMods()) {
+      TypeDef* ptrType = tree.registerPointerType(symbol, tree[nameIden].quals());
+      auto& ptrTypesArr = ptrType->_pointerTypes;
+      do {
+         ptrTypesArr.push_back(qualTypePair);
+      } while (qualsAndMods());
+      
+      TODO;
    }
+   #undef id
+   #undef ptrquals
    return +name;
 }
 

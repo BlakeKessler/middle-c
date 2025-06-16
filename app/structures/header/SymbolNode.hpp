@@ -13,13 +13,22 @@ class clef::SymbolNode : private mcsl::map<mcsl::str_slice, SymbolNode*> {
       friend class SyntaxTree;
       
       mcsl::str_slice _name;
-      index<astNode> _decl;
-      index<astNode> _def;
-      mcsl::dyn_arr<mcsl::pair<mcsl::str_slice, SymbolNode*>> _aliases; //pair of name and parent scope
+      mcsl::dyn_arr<mcsl::pair<mcsl::str_slice, SymbolNode*>> _aliases; //pair of name and parent scope //!TODO: maybe make this a map
       SymbolNode* _parentScope;
+      SymbolType _symbolType;
+      union {
+         TypeDef* _typeid;
+         index<Variable> _var;
+         struct {
+            TypeDef* retType;
+            index<FuncSig> params;
+            index<Scope> def;
+         } _func;
+         ubyte _asBytes[sizeof(_func)];
+      };
    public:
-      SymbolNode():_name{},_decl{},_def{},_aliases{},_parentScope{} {}
-      SymbolNode(const mcsl::str_slice name, SymbolNode* parentScope):Base_t(),_name(name),_decl{},_def{},_aliases{},_parentScope{parentScope} {}
+      SymbolNode():_name{},_aliases{},_parentScope{},_asBytes{} {}
+      SymbolNode(const mcsl::str_slice name, SymbolNode* parentScope):Base_t(),_name(name),_aliases{},_parentScope{parentScope},_asBytes{} {}
 
       operator bool() const; //if anything has been done with the node
 
@@ -29,6 +38,10 @@ class clef::SymbolNode : private mcsl::map<mcsl::str_slice, SymbolNode*> {
 
       const mcsl::str_slice name() const { return _name; }
       SymbolNode* parentScope() { return _parentScope; }
+      const SymbolNode* parentScope() const { return _parentScope; }
+
+      SymbolType& symbolType() { return _symbolType; }
+      SymbolType symbolType() const { return _symbolType; }
 };
 
 #endif //SYMBOL_NODE_HPP

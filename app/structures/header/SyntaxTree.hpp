@@ -4,6 +4,7 @@
 #include "CLEF.hpp"
 #include "astNode.hpp"
 #include "SymbolNode.hpp"
+#include "TypeDef.hpp"
 #include "allocator.hpp"
 
 #include "dyn_arr.hpp"
@@ -19,14 +20,18 @@ class clef::SyntaxTree {
 
       SymbolNode _globalScope;
       mcsl::arr_list<SymbolNode> _symbolBuf;
+      mcsl::arr_list<TypeDef> _typeTable;
 
       allocator _alloc;
+
+      void initTypeTable();
    public:
       SyntaxTree():_buf{},_ifaceSpecBuf{},_nsSpecBuf{},_objSpecBuf{},_globalScope{},_symbolBuf{},_alloc{} {
          _buf.emplace_back(NodeType::ERROR);
          _ifaceSpecBuf.emplace_back();
          _nsSpecBuf.emplace_back();
          _objSpecBuf.emplace_back();
+         initTypeTable();
       }
       SyntaxTree(SyntaxTree&& other):
          _buf{std::move(other._buf)},
@@ -35,6 +40,7 @@ class clef::SyntaxTree {
          _objSpecBuf{std::move(other._objSpecBuf)},
          _globalScope{std::move(other._globalScope)},
          _symbolBuf{std::move(other._symbolBuf)},
+         _typeTable{std::move(other._typeTable)},
          _alloc{std::move(other._alloc)} {
             if (this != &other) {
                other.release();
@@ -54,6 +60,8 @@ class clef::SyntaxTree {
       SymbolNode* findSymbol(const mcsl::str_slice name, SymbolNode* scope = {}); //return null if it isn't in the symbol table yet
       SymbolNode* registerSymbol(const mcsl::str_slice name, SymbolNode* scope = {}); //add to the table if it isn't in the symbol table yet
       SymbolNode* registerAlias(SymbolNode* alias, SymbolNode* target);
+      TypeDef* registerType(SymbolNode* name, FundTypeID metatype);
+      TypeDef* registerPointerType(SymbolNode* targetType, QualMask targetTypeQuals);
 
       uint nodeCount() const { return _buf.size(); }
       astNode& getNode(const uint i) { assume(i); return _buf[i]; }

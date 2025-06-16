@@ -78,6 +78,7 @@ namespace clef {
    class InterfaceSpec;
    class NamespaceSpec;
    #define CLEF_ALL_PSEUDO_NODE_T ObjTypeSpec, InterfaceSpec, NamespaceSpec
+   class TypeDef;
 
    //containers for atomic compilation elements
    class Source;
