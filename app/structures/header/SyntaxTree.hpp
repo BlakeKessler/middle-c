@@ -61,7 +61,7 @@ class clef::SyntaxTree {
       SymbolNode* registerSymbol(const mcsl::str_slice name, SymbolNode* scope = {}); //add to the table if it isn't in the symbol table yet
       SymbolNode* registerAlias(SymbolNode* alias, SymbolNode* target);
       TypeDef* registerType(SymbolNode* name, FundTypeID metatype);
-      TypeDef* registerPointerType(SymbolNode* targetType, QualMask targetTypeQuals);
+      TypeDef* makeIndirType(index<Identifier> targetNode, IndirTable::Entry firstEntry);
 
       uint nodeCount() const { return _buf.size(); }
       astNode& getNode(const uint i) { assume(i); return _buf[i]; }

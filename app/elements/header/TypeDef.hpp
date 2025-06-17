@@ -2,6 +2,7 @@
 #define TYPE_DEF_HPP
 
 #include "CLEF.hpp"
+#include "IndirTable.hpp"
 
 #include "dyn_arr.hpp"
 
@@ -22,25 +23,16 @@ class clef::TypeDef {
          struct { //pointers and references
             SymbolNode* _pointedToType;
             QualMask _pttQuals;
-            mcsl::dyn_arr<mcsl::pair<QualMask, FundTypeID>> _pointerTypes;
+            IndirTable _indirTable;
          };
-      };
-
-      struct PointerTypesHash {
-         using is_transparent = void;
-         static ulong operator()(mcsl::arr_span<mcsl::pair<QualMask, FundTypeID>> arr) {
-            return std::hash<mcsl::str_slice>()(mcsl::str_slice{(char*)arr.begin(), (uint)(arr.size() * sizeof(arr[0]))});
-            //!TODO: make sure padding bytes are always the same
-            //!TODO: maybe use mcsl::arr_span<uint> instead of mcsl::str_slice
-         }
-         static ulong operator()(mcsl::dyn_arr<mcsl::pair<QualMask, FundTypeID>> arr) {
-            return operator()(arr.span());
-         }
       };
 
       friend class SyntaxTree;
    public:
       ~TypeDef() { TODO; }
+
+      IndirTable& indirTable() { assume(_metatype == FundTypeID::PTR || _metatype == FundTypeID::REF); return _indirTable; }
+      const IndirTable& indirTable() const { assume(_metatype == FundTypeID::PTR || _metatype == FundTypeID::REF); return _indirTable; }
 };
 
 /* |===============|

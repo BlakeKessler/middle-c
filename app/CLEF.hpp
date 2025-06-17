@@ -84,6 +84,7 @@ namespace clef {
    class Source;
    class SourceTokens;
    class SymbolNode;
+   class IndirTable;
    class SyntaxTree;
       template<typename T> struct astTNB; //astTreeNodeBundle
       struct indenter;

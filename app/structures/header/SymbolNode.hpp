@@ -17,9 +17,9 @@ class clef::SymbolNode : private mcsl::map<mcsl::str_slice, SymbolNode*> {
       SymbolNode* _parentScope;
       SymbolType _symbolType;
       union {
-         TypeDef* _typeid;
-         index<Variable> _var;
-         struct {
+         TypeDef* _typeid; //isType(_symbolType)
+         index<Variable> _var; //_symbolType == VAR
+         struct { //_symbolType == FUNC
             TypeDef* retType;
             index<FuncSig> params;
             index<Scope> def;
@@ -42,6 +42,9 @@ class clef::SymbolNode : private mcsl::map<mcsl::str_slice, SymbolNode*> {
 
       SymbolType& symbolType() { return _symbolType; }
       SymbolType symbolType() const { return _symbolType; }
+
+      TypeDef* typeId() { assume(isType(_symbolType)); return _typeid; }
+      const TypeDef* typeId() const { assume(isType(_symbolType)); return _typeid; }
 };
 
 #endif //SYMBOL_NODE_HPP

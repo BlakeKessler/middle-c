@@ -81,42 +81,47 @@ clef::index<clef::Scope> clef::Parser::parseProcedure() {
 
 clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName) {
    index<Identifier> nameIden = parseIdentifier(scopeName);
-   SymbolNode* symbol = tree[nameIden].symbol();
-   if (!symbol || !isType(symbol->symbolType())) {
+   if (SymbolNode* symbol = tree[nameIden].symbol(); !symbol || !isType(symbol->symbolType())) {
       logError(ErrCode::BAD_IDEN, "`%s` does not name a type", symbol && symbol->name().size() ? symbol->name() : FMT("(anonymous)"));
    }
    index<astNode> name = +nameIden;
    tree[name].upCast(NodeType::TYPE);
 
    //pointers and references
-   mcsl::pair<QualMask, FundTypeID> qualTypePair;
-   #define ptrquals qualTypePair.first
-   #define id qualTypePair.second
+   IndirTable::Entry entry;
+   QualMask ptrquals;
    auto qualsAndMods = [&]() -> bool {
+      new (&entry) IndirTable::Entry();
       ptrquals = parseQuals();
-      if (tryConsumeOperator(OpID::DEREF)) { //pointer
-         id = FundTypeID::PTR;
+      if (entry.setQuals(ptrquals)) {
+         logError(ErrCode::BAD_IDEN, "illegal qualifiers for typename");
+      }
+      if (tryConsumeOperator(OpID::RAW_PTR)) { //pointer
+         entry._isPtr = true;
+         return true;
       } else if (tryConsumeOperator(OpID::REFERENCE)) { //reference
-         id = FundTypeID::REF;
-      } else { //neither -> break
-         if (+ptrquals) { //trailing qualifiers
-            logError(ErrCode::BAD_IDEN, "type qualifiers must precede the type name");
-            return true;
-         }
+         entry._isPtr = false;
+         return true;
+      }
+      //neither -> break
+      if (+ptrquals) { //trailing qualifiers (error)
+         logError(ErrCode::BAD_IDEN, "type qualifiers must precede the type name");
       }
       return false;
    };
    if (qualsAndMods()) {
-      TypeDef* ptrType = tree.registerPointerType(symbol, tree[nameIden].quals());
-      auto& ptrTypesArr = ptrType->_pointerTypes;
-      do {
-         ptrTypesArr.push_back(qualTypePair);
-      } while (qualsAndMods());
-      
-      TODO;
+      tree[nameIden].setQualMask(ptrquals);
+      TypeDef* typeDef = tree.makeIndirType(nameIden, entry);
+      IndirTable& indirTable = typeDef->indirTable();
+      indirTable.append(entry);
+      while (qualsAndMods()) {
+         if (+(ptrquals & QualMask::VIEW)) {
+            indirTable.appendView(entry);
+         } else {
+            indirTable.append(entry);
+         }
+      }
    }
-   #undef id
-   #undef ptrquals
    return +name;
 }
 
