@@ -5,41 +5,58 @@
 #include "IndirTable.hpp"
 
 #include "dyn_arr.hpp"
+#include "set.hpp"
+#include "map.hpp"
 
 class clef::TypeDef {
+   public:
+      enum MetaType : uint8 {
+         FUND_TYPE,
+         INDIR,
+         COMPOSITE,
+         FUNC_SIG
+      };
    private:
-      FundTypeID _metatype;
+      MetaType _metatype;
       union {
-         struct { //object types //!TODO: maybe replace the dyn_arrs with sets
-            mcsl::dyn_arr<SymbolNode*> _templateParams;
-            mcsl::dyn_arr<SymbolNode*> _parentTypes;
-            mcsl::dyn_arr<SymbolNode*> _impledInterfaces;
-            mcsl::dyn_arr<SymbolNode*> _dataMembers;
-            mcsl::dyn_arr<SymbolNode*> _methods;
-            mcsl::dyn_arr<SymbolNode*> _staticMembers;
-            mcsl::dyn_arr<SymbolNode*> _staticFuncs;
-            mcsl::dyn_arr<SymbolNode*> _subtypes;
-         };
-         struct { //pointers and references
-            SymbolNode* _pointedToType;
-            QualMask _pttQuals;
-            IndirTable _indirTable;
-         };
+         struct {
+            FundTypeID id;
+         } _fund;
+         struct {
+            TypeDef* pointee;
+            QualMask pointeeQuals;
+            IndirTable table;
+         } _indir;
+         struct {
+            mcsl::set<TypeDef*> tpltParams;
+            mcsl::set<TypeDef*> parentTypes;
+            mcsl::set<TypeDef*> impls; //implemented interafaces
+            mcsl::set<TypeDef*> dataMembs;
+            mcsl::set<TypeDef*> methods;
+            mcsl::map<OpID, TypeDef*> ops;
+            mcsl::set<TypeDef*> staticMembs;
+            mcsl::set<TypeDef*> staticFuncs;
+            mcsl::set<TypeDef*> subtypes;
+         } _composite;
+         struct {
+            TypeDef* retType;
+            mcsl::dyn_arr<TypeDef*> params;
+         } _funcSig;
       };
 
       friend class SyntaxTree;
    public:
+      TypeDef(MetaType);
+      TypeDef(FundTypeID);
       ~TypeDef() { TODO; }
 
-      IndirTable& indirTable() { assume(_metatype == FundTypeID::PTR || _metatype == FundTypeID::REF); return _indirTable; }
-      const IndirTable& indirTable() const { assume(_metatype == FundTypeID::PTR || _metatype == FundTypeID::REF); return _indirTable; }
+      IndirTable& indirTable() { assume(_metatype == INDIR); return _indir.table; }
+      const IndirTable& indirTable() const { assume(_metatype == INDIR); return _indir.table; }
 };
 
 /* |===============|
  * | SPECIAL CASES |
  * |===============|
- * _metatype == PTR -> pointer to _parentTypes[0]
- * _metatype == REF -> reference to _parentTypes[0]
  * _metatype == ENUM -> enumerators in _staticMembers
  * _metatype == MASK -> enumerators in _staticMembers
  * _metatype == UNION -> union members in _dataMembers

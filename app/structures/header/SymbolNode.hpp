@@ -16,19 +16,14 @@ class clef::SymbolNode : private mcsl::map<mcsl::str_slice, SymbolNode*> {
       mcsl::dyn_arr<mcsl::pair<mcsl::str_slice, SymbolNode*>> _aliases; //pair of name and parent scope //!TODO: maybe make this a map
       SymbolNode* _parentScope;
       SymbolType _symbolType;
-      union {
-         TypeDef* _typeid; //isType(_symbolType)
-         index<Variable> _var; //_symbolType == VAR
-         struct { //_symbolType == FUNC
-            TypeDef* retType;
-            index<FuncSig> params;
-            index<Scope> def;
-         } _func;
-         ubyte _asBytes[sizeof(_func)];
-      };
+
+      TypeDef* _type; //defintion if _symbolType == TYPE, type if _symbolType == VAR
+      mcsl::dyn_arr<mcsl::pair<TypeDef*, index<Scope>>> _overloads; //signature, definition
+
+      void __checkRep() { debug_assert(_symbolType == SymbolType::FUNC || !_overloads.size()); }
    public:
-      SymbolNode():_name{},_aliases{},_parentScope{},_asBytes{} {}
-      SymbolNode(const mcsl::str_slice name, SymbolNode* parentScope):Base_t(),_name(name),_aliases{},_parentScope{parentScope},_asBytes{} {}
+      SymbolNode():_name{},_aliases{},_parentScope{},_type{},_overloads{} {}
+      SymbolNode(const mcsl::str_slice name, SymbolNode* parentScope):Base_t(),_name(name),_aliases{},_parentScope{parentScope},_type{},_overloads{} {}
 
       operator bool() const; //if anything has been done with the node
 
@@ -42,9 +37,6 @@ class clef::SymbolNode : private mcsl::map<mcsl::str_slice, SymbolNode*> {
 
       SymbolType& symbolType() { return _symbolType; }
       SymbolType symbolType() const { return _symbolType; }
-
-      TypeDef* typeId() { assume(isType(_symbolType)); return _typeid; }
-      const TypeDef* typeId() const { assume(isType(_symbolType)); return _typeid; }
 };
 
 #endif //SYMBOL_NODE_HPP

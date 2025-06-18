@@ -25,13 +25,15 @@ class clef::SyntaxTree {
       allocator _alloc;
 
       void initTypeTable();
+      void initGlobalScope();
    public:
-      SyntaxTree():_buf{},_ifaceSpecBuf{},_nsSpecBuf{},_objSpecBuf{},_globalScope{},_symbolBuf{},_alloc{} {
+      SyntaxTree():_buf{},_ifaceSpecBuf{},_nsSpecBuf{},_objSpecBuf{},_globalScope{},_symbolBuf{},_typeTable{},_alloc{} {
          _buf.emplace_back(NodeType::ERROR);
          _ifaceSpecBuf.emplace_back();
          _nsSpecBuf.emplace_back();
          _objSpecBuf.emplace_back();
          initTypeTable();
+         initGlobalScope();
       }
       SyntaxTree(SyntaxTree&& other):
          _buf{std::move(other._buf)},
