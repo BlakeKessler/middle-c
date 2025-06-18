@@ -58,27 +58,25 @@ bool clef::IndirTable::operator==(const IndirTable& other) const {
 
 void clef::IndirTable::append(Entry entry) {
    debug_assert(_size);
-   if (Entry& back = self[_size - 1]; entry.isSame(back)) {
+   if (Entry& back = self[_size - 1]; entry.isSame(back) && back._rle != Entry::MAX_TOTAL_REPEATS) {
       ++back._rle;
    } else {
-      debug_assert(!entry._rle);
-      entry._rle = 1;
+      debug_assert(entry._rle == Entry::ONE_TOTAL_REPEAT);
       __push_back(entry);
    }
 }
 void clef::IndirTable::appendView(Entry entry) {
    debug_assert(_size);
    Entry& back = self[_size - 1];
-   if (!back._isConst) {
-      if (back._rle == 1) {
-         back._isConst = true;
-      } else {
+   if (!back.isConst()) {
+      if (back._rle != Entry::ONE_TOTAL_REPEAT) {
          --back._rle;
-         debug_assert(+back._rle);
          Entry newBack = back;
          newBack._isConst = true;
-         newBack._rle = 1;
+         newBack._rle = Entry::ONE_TOTAL_REPEAT;
          __push_back(newBack);
+      } else {
+         back._isConst = true;
       }
    }
    append(entry);
@@ -105,7 +103,7 @@ bool clef::IndirTable::Entry::setQuals(QualMask quals) {
    return !+(quals & badMask);
 }
 bool clef::IndirTable::Entry::isSame(const Entry other) const {
-   constexpr Entry mask(true, true, true, true);
+   constexpr Entry mask(__all_bits_set, true, true, true);
    return (_data ^ other._data) & mask._data;
 }
 

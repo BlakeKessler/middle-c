@@ -8,28 +8,54 @@ class clef::IndirTable {
    public:
       struct Entry {
          public:
+            enum Type : uint8 {
+               PTR   = 0,
+               REF   = 1,
+               SLICE = 2,
+               ARR   = 3,
+
+               __all_bits_set = 3
+            };
             union {
                uint8 _data;
                struct {
-                  bool _isPtr   : 1;
+                  Type _type    : 2;
                   bool _isConst : 1;
                   bool _isVol   : 1;
                   bool _isAtom  : 1;
-                  uint8 _rle    : 4;
+                  uint8 _rle    : 3;
                };
             };
+            //!NOTE: non-const array literal is meaningless
+            //!TODO: isArr() && _isConst -> has an RLE byte?
+            static constexpr uint8 ONE_TOTAL_REPEAT = 0;
+            static constexpr uint8 MAX_TOTAL_REPEATS = 0b111;
          private:
             constexpr Entry(uint8 data):_data{data} {}
          public:
             constexpr Entry():_data() {}
-            constexpr Entry(bool isptr, bool isconst, bool isvol, bool isatom):_isPtr{isptr},_isConst{isconst},_isVol{isvol},_isAtom{isatom},_rle{0} {}
-            bool isRef() const { return !_isPtr; }
+            constexpr Entry(Type type, bool isconst, bool isvol, bool isatom):_type{type},_isConst{isconst},_isVol{isvol},_isAtom{isatom},_rle{ONE_TOTAL_REPEAT} {}
+            
+            Type    type() const { return _type; }
+            bool   isPtr() const { return _type == PTR;   }
+            bool   isRef() const { return _type == REF;   }
+            bool isSlice() const { return _type == SLICE; }
+            bool   isArr() const { return _type == ARR;   }
+
+            bool isConst() const { return _isConst && !isArr(); }
+
+            uint8 extraRepeats() const { debug_assert(!isArr()); return _rle; }
+            uint8 totalRunLength() const { debug_assert(!isArr()); return _rle + 1; }
+            uint8 arrSizeBytes() const { debug_assert(isArr()); return _rle + 1; }
 
             bool setQuals(QualMask quals); //returns whether illegal modifiers are included
 
             operator bool() const { return _data; }
             bool operator==(const Entry other) const { return _data == other._data; }
             bool isSame(const Entry other) const;
+         private:
+            static uint64 readArrExtent(Entry* addr, ubyte byteC);
+            static uint64 readArrExtent(Entry* addr1, Entry* addr2, ubyte byteC1, ubyte byteC2);
       };
       static_assert(sizeof(Entry) == sizeof(uint8));
    private:
