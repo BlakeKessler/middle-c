@@ -316,6 +316,7 @@ namespace clef {
       REFERENCE = ADDRESS_OF,
       RAW_PTR = MUL,
       DEREF = RAW_PTR,
+      SLICE = SUBSCRIPT_INVOKE,
       VARIADIC_PARAM = SPREAD,
       ARROW = PTR_MEMBER_ACCESS,
       UNARY_PLUS = ADD,
