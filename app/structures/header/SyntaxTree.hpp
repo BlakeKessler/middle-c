@@ -4,7 +4,7 @@
 #include "CLEF.hpp"
 #include "astNode.hpp"
 #include "SymbolNode.hpp"
-#include "TypeDef.hpp"
+#include "TypeSpec.hpp"
 #include "allocator.hpp"
 
 #include "dyn_arr.hpp"
@@ -20,7 +20,7 @@ class clef::SyntaxTree {
 
       SymbolNode _globalScope;
       mcsl::arr_list<SymbolNode> _symbolBuf;
-      mcsl::arr_list<TypeDef> _typeTable;
+      mcsl::arr_list<TypeSpec> _typeTable;
 
       allocator _alloc;
 
@@ -62,8 +62,8 @@ class clef::SyntaxTree {
       SymbolNode* findSymbol(const mcsl::str_slice name, SymbolNode* scope = {}); //return null if it isn't in the symbol table yet
       SymbolNode* registerSymbol(const mcsl::str_slice name, SymbolNode* scope = {}); //add to the table if it isn't in the symbol table yet
       SymbolNode* registerAlias(SymbolNode* alias, SymbolNode* target);
-      TypeDef* registerType(SymbolNode* name, FundTypeID metatype);
-      TypeDef* makeIndirType(index<Identifier> targetNode, IndirTable::Entry firstEntry);
+      TypeSpec* registerType(SymbolNode* name, FundTypeID metatype);
+      TypeSpec* makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable::Entry firstEntry);
 
       uint nodeCount() const { return _buf.size(); }
       astNode& getNode(const uint i) { assume(i); return _buf[i]; }

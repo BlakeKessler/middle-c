@@ -189,4 +189,12 @@ clef::SymbolNode* clef::SyntaxTree::registerAlias(SymbolNode* alias, SymbolNode*
    return target;
 }
 
+clef::TypeSpec* clef::SyntaxTree::makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable::Entry firstEntry) {
+   TypeSpec* spec = _typeTable.push_back(TypeSpec::makeIndir(pointee, quals, firstEntry));
+   SymbolNode* symbol = _symbolBuf.push_back(SymbolNode::makeIndir(self[targetNode].symbol(), spec));
+   self[targetNode].symbol() = symbol;
+
+   return spec;
+}
+
 #endif //SYNTAX_TREE_CPP

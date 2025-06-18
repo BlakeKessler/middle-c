@@ -17,13 +17,19 @@ class clef::SymbolNode : private mcsl::map<mcsl::str_slice, SymbolNode*> {
       SymbolNode* _parentScope;
       SymbolType _symbolType;
 
-      TypeDef* _type; //defintion if _symbolType == TYPE, type if _symbolType == VAR
-      mcsl::dyn_arr<mcsl::pair<TypeDef*, index<Scope>>> _overloads; //signature, definition
+      TypeSpec* _type; //defintion if _symbolType == TYPE, type if _symbolType == VAR
+      mcsl::dyn_arr<mcsl::pair<TypeSpec*, index<Scope>>> _overloads; //signature, definition
 
       void __checkRep() { debug_assert(_symbolType == SymbolType::FUNC || !_overloads.size()); }
    public:
       SymbolNode():_name{},_aliases{},_parentScope{},_type{},_overloads{} {}
       SymbolNode(const mcsl::str_slice name, SymbolNode* parentScope):Base_t(),_name(name),_aliases{},_parentScope{parentScope},_type{},_overloads{} {}
+      SymbolNode(const SymbolNode&);
+      SymbolNode(SymbolNode&&);
+      static SymbolNode makeIndir(SymbolNode* pointee, TypeSpec* spec);
+
+      SymbolNode& operator=(const SymbolNode& other) { return *new (this) SymbolNode(other); }
+      SymbolNode& operator=(SymbolNode&& other) { return *new (this) SymbolNode(other); }
 
       operator bool() const; //if anything has been done with the node
 
@@ -37,6 +43,9 @@ class clef::SymbolNode : private mcsl::map<mcsl::str_slice, SymbolNode*> {
 
       SymbolType& symbolType() { return _symbolType; }
       SymbolType symbolType() const { return _symbolType; }
+
+      TypeSpec* type() { return _type; }
+      const TypeSpec* type() const { return _type; }
 };
 
 #endif //SYMBOL_NODE_HPP

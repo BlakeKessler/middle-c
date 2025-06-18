@@ -80,12 +80,12 @@ clef::index<clef::Scope> clef::Parser::parseProcedure() {
 
 
 clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName) {
-   index<Identifier> nameIden = parseIdentifier(scopeName);
-   if (SymbolNode* symbol = tree[nameIden].symbol(); !symbol || !isType(symbol->symbolType())) {
+   index<Identifier> name = parseIdentifier(scopeName);
+   Identifier& iden = tree[name];
+   if (SymbolNode* symbol = iden.symbol(); !symbol || !isType(symbol->symbolType())) {
       logError(ErrCode::BAD_IDEN, "`%s` does not name a type", symbol && symbol->name().size() ? symbol->name() : FMT("(anonymous)"));
    }
-   index<astNode> name = +nameIden;
-   tree[name].upCast(NodeType::TYPE);
+   tree[(index<astNode>)name].upCast(NodeType::TYPE);
 
    //pointers and references
    IndirTable::Entry entry;
@@ -117,10 +117,9 @@ clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName)
       return false;
    };
    if (qualsAndMods()) {
-      tree[nameIden].setQualMask(ptrquals);
-      TypeDef* typeDef = tree.makeIndirType(nameIden, entry);
+      iden.setQualMask(ptrquals);
+      TypeSpec* typeDef = tree.makeIndirType(name, iden.symbol()->type(), iden.quals(), entry);
       IndirTable& indirTable = typeDef->indirTable();
-      indirTable.append(entry);
       while (qualsAndMods()) {
          if (+(ptrquals & QualMask::VIEW)) {
             indirTable.appendView(entry);

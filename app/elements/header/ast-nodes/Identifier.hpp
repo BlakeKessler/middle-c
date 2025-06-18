@@ -36,7 +36,8 @@ struct clef::Identifier {
       index<const Identifier> scopeName() const { return _scopeName; }
 
       const mcsl::str_slice name() const { return _name->name(); } //unqualified name
-      SymbolNode* symbol() { return _name; }
+      SymbolNode*& symbol() { return _name; }
+      const SymbolNode* symbol() const { return _name; }
       KeywordID keywordID() const { return _keywordID; }
       FundTypeID fundTypeID() const { return _id; }
 
