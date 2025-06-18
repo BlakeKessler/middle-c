@@ -64,11 +64,15 @@ class clef::TypeSpec {
 
       ~TypeSpec();
 
+      MetaType metaType() const { return _metatype; }
+
       TypeSpec& operator=(const TypeSpec& other) { return *new (this) TypeSpec(other); }
       TypeSpec& operator=(TypeSpec&& other) { return *new (this) TypeSpec(other); }
 
       IndirTable& indirTable() { assume(_metatype == INDIR); return _indir.table; }
       const IndirTable& indirTable() const { assume(_metatype == INDIR); return _indir.table; }
+      TypeSpec* pointee() { assume(_metatype == INDIR); return _indir.pointee; }
+      const TypeSpec* pointee() const { assume(_metatype == INDIR); return _indir.pointee; }
 };
 
 /* |===============|

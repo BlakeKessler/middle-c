@@ -45,7 +45,7 @@ namespace clef {
    
    //!enum of symbol type codes
    enum class SymbolType : uint8 {
-      NULL = 0,
+      null = 0,
 
       VAR,
       FUNC,
@@ -61,6 +61,8 @@ namespace clef {
          MASK,
          NAMESPACE,
          MACRO,
+
+         INDIR,
    };
    constexpr auto operator+(const SymbolType t) noexcept { return std::to_underlying(t); }
    constexpr bool isType(SymbolType t) noexcept { return +t & +SymbolType::__TYPE_BIT; }
@@ -163,7 +165,7 @@ namespace clef {
       constexpr bool isNumber(const TokenType t) { return t == TokenType::INT_NUM || t == TokenType::REAL_NUM; }
    #pragma region ops
    enum class OpID : uint8 {
-      NULL = 0, //not an operator or no-op
+      NULL = 0, //nop or not an operator
 
       ESCAPE, //escape character
       EOS,
@@ -357,7 +359,7 @@ namespace clef {
 
    //operator properties bitmask
    enum class [[clang::flag_enum]] OpProps : uint8 {
-      NULL = 0,
+      null = 0,
 
       TYPE_MOD       = 1_m,
       OPEN_DELIM     = 2_m,
@@ -383,13 +385,13 @@ namespace clef {
    constexpr OpProps operator|(const OpProps lhs, const OpProps rhs) noexcept { return (OpProps)((+lhs) | (+rhs)); }
    constexpr bool isBinary(const OpProps x) { return +(x & OpProps::CAN_BE_BINARY); }
    constexpr OpProps makeOpProps(const bool canBePostfix, const bool canBePrefix, const bool canBeBinary, const bool canBeTypeMod, const bool canBeOpen, const bool canBeClose, const bool isLeftAssoc) {
-      OpProps post  = canBePostfix ? OpProps::CAN_BE_POSTFIX : OpProps::NULL;
-      OpProps pre   = canBePrefix  ? OpProps::CAN_BE_PREFIX  : OpProps::NULL;
-      OpProps bin   = canBeBinary  ? OpProps::CAN_BE_BINARY  : OpProps::NULL;
-      OpProps mod   = canBeTypeMod ? OpProps::TYPE_MOD       : OpProps::NULL;
-      OpProps open  = canBeOpen    ? OpProps::OPEN_DELIM     : OpProps::NULL;
-      OpProps close = canBeClose   ? OpProps::CLOSE_DELIM    : OpProps::NULL;
-      OpProps left  = (isLeftAssoc && canBeBinary) ? OpProps::IS_LEFT_ASSOC : OpProps::NULL;
+      OpProps post  = canBePostfix ? OpProps::CAN_BE_POSTFIX : OpProps::null;
+      OpProps pre   = canBePrefix  ? OpProps::CAN_BE_PREFIX  : OpProps::null;
+      OpProps bin   = canBeBinary  ? OpProps::CAN_BE_BINARY  : OpProps::null;
+      OpProps mod   = canBeTypeMod ? OpProps::TYPE_MOD       : OpProps::null;
+      OpProps open  = canBeOpen    ? OpProps::OPEN_DELIM     : OpProps::null;
+      OpProps close = canBeClose   ? OpProps::CLOSE_DELIM    : OpProps::null;
+      OpProps left  = (isLeftAssoc && canBeBinary) ? OpProps::IS_LEFT_ASSOC : OpProps::null;
       return post | pre | bin | mod | open | close | left;
    }
    #pragma endregion ops
@@ -683,7 +685,7 @@ namespace clef {
    //block delimiter token role
    //!NOTE: could merge into BlockType, but that would not provide any performance advantages because significantly more bytes are going to be used for other Token types anyway
    enum class BlockDelimRole : uint8 {
-      NULL = 0,
+      null = 0,
       OPEN = 1_m,
       CLOSE = 2_m,
       BOTH = OPEN | CLOSE,
@@ -694,7 +696,7 @@ namespace clef {
 
    //plaintext segment type
    enum class PtxtType : uint8 {
-      NULL = 0,
+      null = 0,
 
       CHAR = 1,
       WCHAR,   //!TODO: currently unsupported
@@ -743,7 +745,7 @@ namespace clef {
 
 
    enum class FundTypeID : uint8 {
-      NULL,
+      null,
       FUNCTION_SIGNATURE,
       
       VOID,

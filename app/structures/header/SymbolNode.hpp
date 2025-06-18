@@ -20,16 +20,22 @@ class clef::SymbolNode : private mcsl::map<mcsl::str_slice, SymbolNode*> {
       TypeSpec* _type; //defintion if _symbolType == TYPE, type if _symbolType == VAR
       mcsl::dyn_arr<mcsl::pair<TypeSpec*, index<Scope>>> _overloads; //signature, definition
 
-      void __checkRep() { debug_assert(_symbolType == SymbolType::FUNC || !_overloads.size()); }
+      void __checkRep();
+
+      SymbolNode(mcsl::str_slice, decltype(_aliases), SymbolNode*, SymbolType, TypeSpec*, decltype(_overloads));
    public:
-      SymbolNode():_name{},_aliases{},_parentScope{},_type{},_overloads{} {}
-      SymbolNode(const mcsl::str_slice name, SymbolNode* parentScope):Base_t(),_name(name),_aliases{},_parentScope{parentScope},_type{},_overloads{} {}
+      SymbolNode();
+      SymbolNode(const mcsl::str_slice name, SymbolNode* parentScope);
       SymbolNode(const SymbolNode&);
       SymbolNode(SymbolNode&&);
       static SymbolNode makeIndir(SymbolNode* pointee, TypeSpec* spec);
 
+      void release();
+
       SymbolNode& operator=(const SymbolNode& other) { return *new (this) SymbolNode(other); }
       SymbolNode& operator=(SymbolNode&& other) { return *new (this) SymbolNode(other); }
+
+      void setSymbolType(SymbolType);
 
       operator bool() const; //if anything has been done with the node
 
@@ -47,5 +53,11 @@ class clef::SymbolNode : private mcsl::map<mcsl::str_slice, SymbolNode*> {
       TypeSpec* type() { return _type; }
       const TypeSpec* type() const { return _type; }
 };
+
+/* |===============|
+ * | SPECIAL CASES |
+ * |===============|
+ * _symbolType == INDIR -> pointee type in _parentScope
+ */
 
 #endif //SYMBOL_NODE_HPP

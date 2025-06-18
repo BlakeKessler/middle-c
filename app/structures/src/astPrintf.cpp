@@ -675,7 +675,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
    }
    const Identifier& iden = *obj;
    if ((mode | CASE_BIT) == 's') {
-      if (iden.fundTypeID() != FundTypeID::NULL) {
+      if (iden.fundTypeID() != FundTypeID::null) {
          return writef(file, TNB_CAST(FundType), mode, fmt);
       }
       if (+iden.keywordID()) { //keyword

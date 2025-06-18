@@ -325,7 +325,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             }
             else if (currTok.opID() == OpID::INLINE_IF) {
                getNextToken();
-               operatorStack.emplace_back(FMT(""), OpID::TERNARY_INVOKE, OpProps::NULL, (ubyte)0, TokenType::OP);
+               operatorStack.emplace_back(FMT(""), OpID::TERNARY_INVOKE, OpProps::null, (ubyte)0, TokenType::OP);
                index<Expr> trueVal = parseExpr();
                operandStack.push_back(+trueVal);
                consumeOperator(OpID::INLINE_ELSE, "bad ternary conditional expression");

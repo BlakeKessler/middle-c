@@ -254,7 +254,7 @@ constexpr const mcsl::str_slice clef::toString(const OpID op) {
 constexpr const mcsl::str_slice clef::toString(const OpProps props) {
    using enum OpProps;
    switch (props) {
-      CASE(NULL, "null");
+      CASE(null, "null");
 
       CASE(POSTFIX, "POSTFIX");
       CASE(PREFIX, "PREFIX");
@@ -436,7 +436,7 @@ constexpr const mcsl::str_slice clef::toString(const BlockType type) {
 constexpr const mcsl::str_slice clef::toString(const BlockDelimRole role) {
    using enum BlockDelimRole;
    switch (role) {
-      CASE(NULL, "null");
+      CASE(null, "null");
       CASE(OPEN, "OPEN");
       CASE(CLOSE, "CLOSE");
       CASE(BOTH, "BOTH");
@@ -447,7 +447,7 @@ constexpr const mcsl::str_slice clef::toString(const BlockDelimRole role) {
 constexpr const mcsl::str_slice clef::toString(const PtxtType type) {
    using enum PtxtType;
    switch (type) {
-      CASE(NULL, "NULL");
+      CASE(null, "NULL");
 
       CASE(CHAR, "CHAR");
       CASE(WCHAR, "WCHAR");
@@ -498,7 +498,7 @@ constexpr const mcsl::str_slice clef::toString(const LitType type) {
 constexpr const mcsl::str_slice clef::toString(const FundTypeID type) {
    using enum FundTypeID;
    switch (type) {
-      CASE(NULL, "\033[31mNULL TYPE\033[39m");
+      CASE(null, "\033[31mNULL TYPE\033[39m");
       CASE(FUNCTION_SIGNATURE, "FUNCTION_SIGNATURE");
 
       CASE(VOID, "void");
