@@ -97,10 +97,17 @@ clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName)
          logError(ErrCode::BAD_IDEN, "illegal qualifiers for typename");
       }
       if (tryConsumeOperator(OpID::RAW_PTR)) { //pointer
-         entry._isPtr = true;
+         entry._type = IndirTable::Entry::PTR;
          return true;
       } else if (tryConsumeOperator(OpID::REFERENCE)) { //reference
-         entry._isPtr = false;
+         entry._type = IndirTable::Entry::REF;
+         return true;
+      } else if (tryConsumeOperator(OpID::SLICE)) { //slice
+         entry._type = IndirTable::Entry::SLICE;
+         return true;
+      } else if (TODO, false) { //array literal
+         entry._type = IndirTable::Entry::ARR;
+         TODO;
          return true;
       }
       //neither -> break
