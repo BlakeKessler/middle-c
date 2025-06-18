@@ -4,8 +4,7 @@
 #include "SymbolNode.hpp"
 
 clef::SymbolNode::operator bool() const {
-   static_assert(sizeof(_asBytes) == sizeof(uoverlong));
-   return _aliases.size() || *((uoverlong*)_asBytes);
+   return _type || _overloads.size() || _symbolType != SymbolType::NULL || _aliases.size();
 }
 
 #endif //SYMBOL_NODE_CPP
