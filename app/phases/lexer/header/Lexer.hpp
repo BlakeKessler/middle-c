@@ -13,6 +13,8 @@ class clef::Lexer {
       char* curr;
       char* tokBegin;
 
+      uint lineIndex; //current line number (0-indexed)
+
    protected:
       char parseChar();
 
@@ -22,11 +24,13 @@ class clef::Lexer {
       Token lexExpr();
       Token lexFunclikeMacroArgs();
    public:
-      Lexer(Source&& s):src{std::move(s)}, begin{src.buf().begin()}, end{src.buf().end()}, curr{begin}, tokBegin{curr} {}
+      Lexer(Source&& s):src{std::move(s)}, begin{src.buf().begin()}, end{src.buf().end()}, curr{begin}, tokBegin{curr}, lineIndex(0) {}
       static Lexer fromFile(const char* path) { return Lexer(Source::readFile(path)); }
 
       bool done() const { return curr >= end; }
       Token nextToken();
+      mcsl::str_slice currLine();
+      uint lineNum() { return lineIndex + 1; }
 };
 
 #endif //LEXER_HPP

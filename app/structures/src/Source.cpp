@@ -38,7 +38,7 @@ clef::Source clef::Source::readFile(const char* path) {
    }
 
    //return
-   return Source(std::move(_buf),std::move(_lines));
+   return Source(std::move(_buf),std::move(_lines), mcsl::str_slice::make_from_cstr(path));
 }
 
 #endif //SOURCE_CPP

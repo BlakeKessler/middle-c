@@ -132,7 +132,9 @@ PUSH_NUM_TOK:
          ++curr;
          return {TokenType::PREPROC_INIT};
       //WHITESPACE
-      case  ' ': case '\t': case '\n': case '\v': case '\f': case '\r':
+      case '\n':
+         ++lineIndex;
+      case  ' ': case '\t': case '\v': case '\f': case '\r':
          ++curr;
          goto RESTART;
       
@@ -175,7 +177,7 @@ PUSH_NUM_TOK:
 
                   case OpID::LINE_CMNT:
                      while (curr < end) {
-                        if (*curr == '\n') { ++curr; break; }
+                        if (*curr == '\n') { ++lineIndex; ++curr; break; }
                         if (*curr == '\\') { ++curr; }
                         ++curr;
                      }
@@ -347,6 +349,13 @@ clef::Token clef::Lexer::lexInterpStr() {
 }
 clef::Token clef::Lexer::lexExpr() {
    TODO;
+}
+
+mcsl::str_slice clef::Lexer::currLine() {
+   mcsl::str_slice line = src.line(lineIndex);
+   debug_assert(curr >= line.begin());
+   debug_assert(curr < line.end());
+   return line;
 }
 
 #endif //LEXER_CPP
