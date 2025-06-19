@@ -158,8 +158,8 @@ clef::index<clef::Expr> clef::SyntaxTree::remakeTernary(index<astNode> cond, ind
 
 clef::SymbolNode* clef::SyntaxTree::findSymbol(const mcsl::str_slice name, SymbolNode* parentScope) {
    if (parentScope == nullptr) { parentScope = &_globalScope; }
-   if (SymbolNode** entry = parentScope->find(name)) {
-      return *entry;
+   if (SymbolNode* entry = parentScope->get(name)) {
+      return entry;
    }
    return nullptr;
 }
@@ -168,10 +168,11 @@ clef::SymbolNode* clef::SyntaxTree::registerSymbol(const mcsl::str_slice name, S
       parentScope = &_globalScope;
    }
    SymbolNode& table = *parentScope;
-   if (SymbolNode** entry = table.find(name)) {
-      return *entry;
+   if (SymbolNode* entry = table.get(name)) {
+      return entry;
    }
    SymbolNode* entry = _symbolBuf.emplace_back(name, parentScope, nullptr, SymbolType::null);
+   debug_assert(entry);
    table[name] = entry;
    return entry;
 }

@@ -7,11 +7,10 @@
 #include "dyn_arr.hpp"
 #include "str_slice.hpp"
 
-class clef::SymbolNode : private mcsl::map<mcsl::str_slice, SymbolNode*> {
+class clef::SymbolNode {
    private:
-      using Base_t = mcsl::map<mcsl::str_slice, SymbolNode*>;
-      friend class SyntaxTree;
-      
+      mcsl::map<mcsl::str_slice, SymbolNode*> _childSymbols;
+
       mcsl::str_slice _name;
       mcsl::dyn_arr<mcsl::pair<mcsl::str_slice, SymbolNode*>> _aliases; //pair of name and parent scope //!TODO: maybe make this a map
       SymbolNode* _parentScope;
@@ -39,9 +38,11 @@ class clef::SymbolNode : private mcsl::map<mcsl::str_slice, SymbolNode*> {
 
       operator bool() const; //if anything has been done with the node
 
+      SymbolNode** find(mcsl::str_slice name);
       SymbolNode* get(mcsl::str_slice name); //single-token identifier
       SymbolNode* qualifiedGet(mcsl::str_slice name); //full identifier string
       SymbolNode* qualifiedGet(mcsl::arr_span<mcsl::str_slice> name); //array of single-token identifiers making up the full identifier
+      SymbolNode*& operator[](mcsl::str_slice name);
 
       const mcsl::str_slice name() const { return _name; }
       SymbolNode* parentScope() { return _parentScope; }
