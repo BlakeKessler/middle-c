@@ -32,7 +32,7 @@ class clef::Lexer {
       Token nextToken();
       mcsl::str_slice currLine();
       uint lineNum() { return lineIndex + 1; }
-      mcsl::str_slice prevTokStr() { return prevTok; }
+      mcsl::str_slice prevTokStr() { return {tokBegin, curr}; }
       const mcsl::str_slice path() const { return src.path(); }
 };
 

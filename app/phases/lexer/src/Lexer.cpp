@@ -13,7 +13,6 @@
 
 //!creates a SourceTokens from results of file reader
 clef::Token clef::Lexer::nextToken() {
-   #define return prevTok = {tokBegin, curr}; return
 RESTART:
    if (curr >= end) { [[unlikely]];
       return {};
@@ -197,18 +196,15 @@ PUSH_NUM_TOK:
 
       //CHARS
       case CHAR_DELIM:
-         Token tok = lexChar();
-         return tok;
+         return lexChar();
 
       //STRINGS
       case STR_DELIM:
-         Token tok = lexStr();
-         return tok;
+         return lexStr();
 
       //INTERPOLATED STRINGS
       case INTERP_STR_DELIM:
-         Token tok = lexInterpStr();
-         return tok;
+         return lexInterpStr();
       
       //UNPRINTABLE CHAR (illegal)
       default:
@@ -217,7 +213,6 @@ PUSH_NUM_TOK:
    }
 
    UNREACHABLE;
-   #undef return
 }
 
 //!lex a character literal
