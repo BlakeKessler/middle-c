@@ -13,13 +13,13 @@ clef::SymbolNode::SymbolNode():
    _overloads{} {
 
 }
-clef::SymbolNode::SymbolNode(const mcsl::str_slice name, SymbolNode* parentScope):
+clef::SymbolNode::SymbolNode(const mcsl::str_slice name, SymbolNode* parentScope, TypeSpec* typespec, SymbolType symbType):
    Base_t(),
    _name(name),
    _aliases{},
    _parentScope{parentScope},
-   _symbolType{SymbolType::null},
-   _type{},
+   _symbolType{symbType},
+   _type{typespec},
    _overloads{} {
 
 }

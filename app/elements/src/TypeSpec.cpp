@@ -3,6 +3,12 @@
 
 #include "TypeSpec.hpp"
 
+clef::TypeSpec::TypeSpec(FundTypeID id):
+   _metatype{FUND_TYPE},
+   _fund{.id = id} {
+
+}
+
 clef::TypeSpec::~TypeSpec() {
    switch (_metatype) {
       case FUND_TYPE:

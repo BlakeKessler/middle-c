@@ -72,6 +72,7 @@ class clef::IndirTable {
          public:
             constexpr EntryBlock(const EntryBlock& other):_data(other._data) {}
             constexpr EntryBlock(Entry first):_data{} { _elems[0] = first; }
+            EntryBlock& operator=(const EntryBlock& other) { return *new (this) EntryBlock(other); }
 
             Entry& operator[](ubyte i) { return _elems[i]; }
             Entry operator[](ubyte i) const { return _elems[i]; }

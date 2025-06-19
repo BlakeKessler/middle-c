@@ -25,7 +25,7 @@ class clef::SymbolNode : private mcsl::map<mcsl::str_slice, SymbolNode*> {
       SymbolNode(mcsl::str_slice, decltype(_aliases), SymbolNode*, SymbolType, TypeSpec*, decltype(_overloads));
    public:
       SymbolNode();
-      SymbolNode(const mcsl::str_slice name, SymbolNode* parentScope);
+      SymbolNode(const mcsl::str_slice name, SymbolNode* parentScope, TypeSpec* typespec, SymbolType symbType);
       SymbolNode(const SymbolNode&);
       SymbolNode(SymbolNode&&);
       static SymbolNode makeIndir(SymbolNode* pointee, TypeSpec* spec);

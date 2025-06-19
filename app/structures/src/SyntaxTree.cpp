@@ -171,7 +171,7 @@ clef::SymbolNode* clef::SyntaxTree::registerSymbol(const mcsl::str_slice name, S
    if (SymbolNode** entry = table.find(name)) {
       return *entry;
    }
-   SymbolNode* entry = _symbolBuf.emplace_back(name, parentScope);
+   SymbolNode* entry = _symbolBuf.emplace_back(name, parentScope, nullptr, SymbolType::null);
    table[name] = entry;
    return entry;
 }
