@@ -94,6 +94,11 @@ class clef::IndirTable {
       IndirTable(const IndirTable&);
       IndirTable(IndirTable&&);
 
+      IndirTable& operator=(const IndirTable&);
+      IndirTable& operator=(IndirTable&&);
+
+      void release();
+
       Entry& operator[](uint64 i);
       Entry operator[](uint64 i) const;
 

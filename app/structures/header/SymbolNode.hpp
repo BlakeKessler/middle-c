@@ -33,7 +33,7 @@ class clef::SymbolNode : private mcsl::map<mcsl::str_slice, SymbolNode*> {
       void release();
 
       SymbolNode& operator=(const SymbolNode& other) { return *new (this) SymbolNode(other); }
-      SymbolNode& operator=(SymbolNode&& other) { return *new (this) SymbolNode(other); }
+      SymbolNode& operator=(SymbolNode&& other) { return *new (this) SymbolNode(std::move(other)); }
 
       void setSymbolType(SymbolType);
 

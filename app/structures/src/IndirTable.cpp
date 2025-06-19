@@ -3,6 +3,32 @@
 
 #include "IndirTable.hpp"
 
+clef::IndirTable::IndirTable(const IndirTable& other): 
+   _size(other._size),
+   _block0(other._block0),
+   _otherBlocks(other._otherBlocks) {
+
+}
+clef::IndirTable::IndirTable(IndirTable&& other): 
+   _size(other._size),
+   _block0(other._block0),
+   _otherBlocks(std::move(other._otherBlocks)) {
+      if (this != &other) {
+         other.release();
+      }
+}
+
+clef::IndirTable& clef::IndirTable::operator=(const IndirTable& other) {
+   return *new (this) IndirTable(other);
+}
+clef::IndirTable& clef::IndirTable::operator=(IndirTable&& other) {
+   return *new (this) IndirTable(std::move(other));
+}
+
+void clef::IndirTable::release() {
+   _otherBlocks.release();
+}
+
 clef::IndirTable::Entry& clef::IndirTable::operator[](uint64 i) {
    assume(i < _size);
    if (i < 8) {

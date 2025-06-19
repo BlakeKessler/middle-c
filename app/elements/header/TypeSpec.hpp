@@ -28,15 +28,15 @@ class clef::TypeSpec {
             IndirTable table;
          } _indir;
          struct {
-            mcsl::set<TypeSpec*> tpltParams;
-            mcsl::set<TypeSpec*> parentTypes;
-            mcsl::set<TypeSpec*> impls; //implemented interafaces
-            mcsl::set<TypeSpec*> dataMembs;
-            mcsl::set<TypeSpec*> methods;
-            mcsl::map<OpID, TypeSpec*> ops;
-            mcsl::set<TypeSpec*> staticMembs;
-            mcsl::set<TypeSpec*> staticFuncs;
-            mcsl::set<TypeSpec*> subtypes;
+            mcsl::dyn_arr<SymbolNode*> tpltParams;
+            mcsl::set<SymbolNode*> parentTypes;
+            mcsl::set<SymbolNode*> impls; //implemented interafaces
+            mcsl::dyn_arr<SymbolNode*> dataMembs;
+            mcsl::set<SymbolNode*> methods;
+            mcsl::map<OpID, SymbolNode*> ops;
+            mcsl::set<SymbolNode*> staticMembs;
+            mcsl::set<SymbolNode*> staticFuncs;
+            mcsl::set<SymbolNode*> subtypes;
          } _composite;
          struct {
             TypeSpec* retType;
@@ -67,7 +67,7 @@ class clef::TypeSpec {
       MetaType metaType() const { return _metatype; }
 
       TypeSpec& operator=(const TypeSpec& other) { return *new (this) TypeSpec(other); }
-      TypeSpec& operator=(TypeSpec&& other) { return *new (this) TypeSpec(other); }
+      TypeSpec& operator=(TypeSpec&& other) { return *new (this) TypeSpec(std::move(other)); }
 
       IndirTable& indirTable() { assume(_metatype == INDIR); return _indir.table; }
       const IndirTable& indirTable() const { assume(_metatype == INDIR); return _indir.table; }
