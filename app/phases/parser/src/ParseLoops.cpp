@@ -34,7 +34,7 @@ clef::index<clef::ForeachLoop> clef::Parser::parseForeachLoop() {
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FOREACH loop without opening parens for condition");
 
    //iterator declaration
-   index<Variable> decl = parseParam();
+   index<Decl> decl = parseParam();
 
    //IN operator
    consumeOperator(OpID::LABEL_DELIM, "bad FOREACH params");
