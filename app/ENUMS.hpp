@@ -35,6 +35,7 @@ namespace clef {
       UNCLOSED_BLOCK,
       BAD_FUNC,
       BAD_DECL,
+      BAD_TYPE_DECL,
 
       BAD_PREPROC,
       //ast/ast node errors

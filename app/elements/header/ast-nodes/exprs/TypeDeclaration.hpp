@@ -13,11 +13,14 @@ struct clef::TypeDeclaration : public clef::Statement {
       static constexpr OpID pseudoOpID() { return OpID::MAKE_TYPE; }
 
       TypeDeclaration():Statement{} {}
-      TypeDeclaration(index<Identifier> name):Statement{OpID::MAKE_TYPE,name} {}
+      TypeDeclaration(index<Identifier> name):Statement{OpID::MAKE_TYPE,name} {} //forward declaration
+      TypeDeclaration(index<Identifier> name, index<Identifier> decl):Statement{OpID::MAKE_TYPE,name, decl} {}
 
 
       index<Identifier>& name() { return reinterpret_cast<index<Identifier>&>(_lhs); }
       index<const Identifier> name() const { return _lhs; }
+      index<Identifier>& decl() { return reinterpret_cast<index<Identifier>&>(_rhs); }
+      index<const Identifier> decl() const { return _rhs; }
 };
 
 namespace mcsl {

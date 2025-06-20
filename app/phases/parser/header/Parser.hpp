@@ -78,6 +78,9 @@ class clef::Parser {
       index<Identifier> parseMacro();
       index<Asm> parseASM();
       
+   private:
+      index<TypeDecl> __parseObjTypeImpl(SymbolType symbolType, const mcsl::str_slice metatypeName);
+   public:
       index<TypeDecl> parseClass();
       index<TypeDecl> parseStruct();
       index<TypeDecl> parseInterface();

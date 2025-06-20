@@ -3,31 +3,32 @@
 
 #include "Parser.hpp"
 
-//!HACK: clef::Parser::parseStruct temporarily relies on this function
-clef::index<clef::TypeDecl> clef::Parser::parseClass() {
-   index<Identifier> name = parseIdentifier(SymbolType::CLASS, nullptr);
+clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType symbolType, const mcsl::str_slice metatypeName) {
+   index<Identifier> name = parseIdentifier(symbolType, nullptr);
    
    if (tryConsumeEOS()) { //forward declaration
-      TODO;
-      index<Class> classptr = tree.remake<Class>(name, tree[(index<Type>)name]);
-      return tree.make<TypeDecl>(tree.getFundType(KeywordID::CLASS), classptr);
+      return tree.make<TypeDecl>(name);
    }
    
-   index<ObjTypeSpec> specIndex = tree.allocObjTypeSpec();
-   ObjTypeSpec& spec = tree[specIndex];
-   index<Class> classptr = tree.remake<Class>(name, specIndex, tree[(index<Type>)name]);
+   SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
+   TypeSpec* spec = symbol->type();      debug_assert(spec);
+   if (spec->metaType() != TypeSpec::COMPOSITE) {
+      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of %s `%s`", metatypeName, *symbol);
+   }
 
-   //inheritance (including implemented interfaces)
+   //implemented interfaces
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
       do {
          TODO;
-         index<Type> parentType = parseTypename();
-         spec.inheritedTypes().push_back(parentType);
+         index<Identifier> parentType = parseTypename(SymbolType::INTERFACE, false);
+         if (!spec->composite().impls.insert(tree[parentType].symbol())) {
+            logError(ErrCode::BAD_TYPE_DECL, "%s `%s` already implements interface `%s`", metatypeName, *tree[parentType].symbol());
+         }
       } while (tryConsumeOperator(OpID::COMMA));
    }
 
    //definition
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad CLASS definition");
+   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad object type definition");
    QualMask scope = QualMask::PRIVATE;
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       if (tryConsumeKeyword(KeywordID::PUBLIC)) {
@@ -48,10 +49,10 @@ clef::index<clef::TypeDecl> clef::Parser::parseClass() {
 
       bool isStatic = tryConsumeKeyword(KeywordID::STATIC);
       if (currTok.type() != TokenType::KEYWORD) {
-         logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
+         logError(ErrCode::BAD_STMT, "invalid statement in %s definition", metatypeName);
       }
       switch (currTok.keywordID()) {
-         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: getNextToken(); if (isStatic) { logError(ErrCode::BAD_KEYWORD, "cannot qualify a " #kw " as static"); } { auto tmp = parsingFunc(); tree[(index<Identifier>)tmp].addQuals(scope); spec.memberTypes().push_back(tmp); } break
+         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: getNextToken(); if (isStatic) { logError(ErrCode::BAD_KEYWORD, "cannot qualify a " #kw " as static"); } { auto tmp = parsingFunc(); tree[(index<Identifier>)tmp].addQuals(scope); spec->composite().subtypes.insert(tree[tree[tmp].name()].symbol()); } break
          KW_CASE(CLASS, parseClass);
          KW_CASE(STRUCT, parseStruct);
          KW_CASE(INTERFACE, parseInterface);
@@ -60,25 +61,24 @@ clef::index<clef::TypeDecl> clef::Parser::parseClass() {
          KW_CASE(MASK, parseMask);
          KW_CASE(NAMESPACE, parseNamespace);
          #undef KW_CASE
-         case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(); tree[(index<Identifier>)tmp].addQuals(scope); (isStatic ? spec.staticFuncs() : spec.methods()).push_back(tmp);} break;
-         case KeywordID::LET : getNextToken(); {auto tmp = parseDecl(); tree[(index<Identifier>)(tree[tmp].name())].addQuals(scope); (isStatic ? spec.staticVars() : spec.members()).push_back(tmp);} break;
+         case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(); tree[(index<Identifier>)tmp].addQuals(scope); (isStatic ? spec->composite().staticFuncs : spec->composite().methods).insert(tree[tmp].symbol());} break;
+         case KeywordID::LET : getNextToken(); {auto tmp = parseDecl(); tree[(index<Identifier>)(tree[tmp].name())].addQuals(scope); (isStatic ? spec->composite().staticMembs : spec->composite().dataMembs).push_back(tree[tree[tmp].name()].symbol());} break;
          default: logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
       }
    }
 
    //EOS
-   consumeEOS("CLASS without EOS");
+   consumeEOS("object type declaration without EOS");
 
    //return
-   return tree.make<TypeDecl>(tree.getFundType(KeywordID::CLASS), classptr, specIndex);
+   return tree.make<TypeDecl>(name, name);
 }
 
-//!HACK: temporarily assumes that the syntax and memory layout of the AST nodes for structs and classes are identical and depends on clef::Parser::parseClass()
+clef::index<clef::TypeDecl> clef::Parser::parseClass() {
+   return __parseObjTypeImpl(SymbolType::CLASS, FMT("class"));
+}
 clef::index<clef::TypeDecl> clef::Parser::parseStruct() {
-   index<TypeDecl> decl = parseClass();
-   tree[decl].objType() = tree.getFundType(KeywordID::STRUCT);
-   tree[(index<astNode>)tree[decl].name()].anyCast(NodeType::STRUCT);
-   return +decl;
+   return __parseObjTypeImpl(SymbolType::STRUCT, FMT("struct"));
 }
 
 clef::index<clef::TypeDecl> clef::Parser::parseInterface() {

@@ -29,12 +29,11 @@ class clef::TypeSpec {
          } _indir;
          struct {
             mcsl::dyn_arr<SymbolNode*> tpltParams;
-            mcsl::set<SymbolNode*> parentTypes;
             mcsl::set<SymbolNode*> impls; //implemented interafaces
             mcsl::dyn_arr<SymbolNode*> dataMembs;
             mcsl::set<SymbolNode*> methods;
             mcsl::map<OpID, SymbolNode*> ops;
-            mcsl::set<SymbolNode*> staticMembs;
+            mcsl::dyn_arr<SymbolNode*> staticMembs;
             mcsl::set<SymbolNode*> staticFuncs;
             mcsl::set<SymbolNode*> subtypes;
          } _composite;
@@ -74,6 +73,9 @@ class clef::TypeSpec {
       const IndirTable& indirTable() const { assume(_metatype == INDIR); return _indir.table; }
       TypeSpec* pointee() { assume(_metatype == INDIR); return _indir.pointee; }
       const TypeSpec* pointee() const { assume(_metatype == INDIR); return _indir.pointee; }
+
+
+      auto& composite() { return _composite; }
 };
 
 /* |===============|

@@ -31,6 +31,7 @@ const mcsl::str_slice clef::ERR_MSG_ARR[] {
    mcsl::FMT("UNCLOSED BLOCK: "),
    mcsl::FMT("BAD FUNCTION DECLARATION: "),
    mcsl::FMT("BAD DECLARATION: "),
+   mcsl::FMT("BAD TYPE DECLARATION: "),
    mcsl::FMT("BAD PREPROCESSOR STATEMENT: "),
    //ast/ast node errors
    mcsl::FMT("BAD LITERAL CAST: "),
