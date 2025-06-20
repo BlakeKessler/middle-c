@@ -51,6 +51,8 @@ class clef::SyntaxTree {
       SymbolNode* registerAlias(SymbolNode* alias, SymbolNode* target);
       TypeSpec* registerType(SymbolNode* name, FundTypeID metatype);
       TypeSpec* makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable::Entry firstEntry);
+      
+      SymbolNode* GET_BYTE_BUF_TYPE();
 
       uint nodeCount() const { return _buf.size(); }
       astNode& getNode(const uint i) { assume(i); return _buf[i]; }

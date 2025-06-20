@@ -58,7 +58,7 @@ class clef::Parser {
       QualMask parseQuals();
       index<Identifier> tryParseIdentifier(SymbolType symbolType, SymbolNode* type); //(type == nullptr) == isDecl
       index<Identifier> parseIdentifier(SymbolType symbolType, SymbolNode* type); //(type == nullptr) == isDecl
-      index<Identifier> parseTypename(bool isDecl);
+      index<Identifier> parseTypename(SymbolType symbolType, bool isDecl);
       index<Decl> parseDecl();
       index<Decl> parseParam();
       index<Decl> parseDefaultableParam();

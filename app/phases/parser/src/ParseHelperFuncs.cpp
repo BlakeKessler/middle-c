@@ -2,6 +2,7 @@
 #define PARSER_HELPERS_CPP
 
 #include "Parser.hpp"
+#include "pretty-print.hpp"
 
 /*inline*/ bool clef::Parser::consumeKeyword(const KeywordID keywordID, const char* errStr) {
    if (tryConsumeKeyword(keywordID)) {
@@ -79,13 +80,12 @@ clef::index<clef::Scope> clef::Parser::parseProcedure() {
 }
 
 
-clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName) {
-   index<Identifier> name = parseIdentifier(scopeName);
+clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType, bool isDecl) {
+   index<Identifier> name = parseIdentifier(symbolType, nullptr);
    Identifier& iden = tree[name];
    if (SymbolNode* symbol = iden.symbol(); !symbol || !isType(symbol->symbolType())) {
       logError(ErrCode::BAD_IDEN, "`%s` does not name a type", symbol && symbol->name().size() ? symbol->name() : FMT("(anonymous)"));
    }
-   tree[(index<astNode>)name].upCast(NodeType::TYPE);
 
    //pointers and references
    IndirTable::Entry entry;
@@ -131,7 +131,7 @@ clef::index<clef::Type> clef::Parser::parseTypename(index<Identifier> scopeName)
    return +name;
 }
 
-clef::index<clef::Decl> clef::Parser::parseDecl(index<Identifier> scopeName) {
+clef::index<clef::Decl> clef::Parser::parseDecl() {
    if (tryConsumeKeyword(KeywordID::FUNC)) { [[unlikely]]; //handle functions separately
       index<Function> funcptr = parseFunction();
       return tree.make<Decl>(tree[funcptr].signature(), funcptr, toExpr(+funcptr));
@@ -163,9 +163,9 @@ clef::index<clef::Decl> clef::Parser::parseDecl(index<Identifier> scopeName) {
    return tree.make<Decl>(type, varName);
 }
 
-clef::index<clef::Variable> clef::Parser::parseParam(index<Identifier> scopeName) {
+clef::index<clef::Decl> clef::Parser::parseParam() {
    if (tryConsumeKeyword(KeywordID::FUNC)) { [[unlikely]];
-      index<Identifier> name = parseIdentifier(scopeName);
+      index<Identifier> name = parseIdentifier(SymbolType::FUNC, nullptr);
       
       consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FUNC without parameters");
       index<ParamList> params = parseParamList(BlockType::CALL);
@@ -254,7 +254,7 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
    else if (currTok.name() == FMT("embed")) {
       getNextToken();
       op = OpID::PREPROC_EMBED;
-      name = parseIdentifier();
+      name = parseIdentifier(SymbolType::VAR, tree.GET_BYTE_BUF_TYPE());
    } else {
       logError(ErrCode::BAD_PREPROC, "unrecognized directive");
       op = OpID::NULL;
@@ -277,7 +277,7 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
 clef::index<clef::Expr> clef::Parser::parseCast(KeywordID castID) {
    debug_assert(isCast(castID));
    consumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::OPEN, "must specify type of cast");
-   index<SpecList> typeptr = parseSpecList(BlockType::SPECIALIZER);
+   index<ArgList> typeptr = parseArgList(BlockType::SPECIALIZER, false);
    index<Identifier> castptr = tree.make<Identifier>(castID, typeptr);
    //!TODO: validate cast specializer
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "typecasting uses function call syntax");
@@ -292,21 +292,6 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
    astNode& node = tree[index];
    switch (node.nodeType()) {
       case Identifier::nodeType():
-      case Variable::nodeType():
-      case Function::nodeType():
-      case Macro::nodeType():
-      case Type::nodeType():
-      case VariadicParameter::nodeType():
-      case FundamentalType::nodeType():
-      case FunctionSignature::nodeType():
-      case Enum::nodeType():
-      case Mask::nodeType():
-      case Union::nodeType():
-      case Namespace::nodeType():
-      case Interface::nodeType():
-      case Struct::nodeType():
-      case Class::nodeType():
-      case GenericType::nodeType():
       case Literal::nodeType():
          return tree.makeExpr(OpID::NULL, index);
 
@@ -332,12 +317,7 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
       case MatchCases::nodeType():
       case StatementSequence::nodeType():
       case ArgumentList::nodeType():
-      case ParameterList::nodeType():
-      case SpecializerList::nodeType():
       case NodeType::MAKE_TYPE:
-      case NodeType::OBJ_TYPE_SPEC:
-      case NodeType::INTERFACE_SPEC:
-      case NodeType::NAMESPACE_SPEC:
       case NodeType::NONE:
       case NodeType::ERROR:
          UNREACHABLE;
