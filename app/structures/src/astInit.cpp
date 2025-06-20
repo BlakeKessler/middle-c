@@ -2,6 +2,7 @@
 #define AST_INIT_CPP
 
 #include "SyntaxTree.hpp"
+#include "pretty-print.hpp"
 
 void clef::SyntaxTree::initTables() {
    using enum FundTypeID;

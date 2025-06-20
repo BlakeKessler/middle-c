@@ -4,7 +4,7 @@
 
 #include "CLEF.hpp"
 #include "ast-nodes/Expression.hpp"
-#include "ast-nodes/Type.hpp"
+#include "ast-nodes/Identifier.hpp"
 
 struct clef::Declaration : public clef::Expression {
    private:
@@ -14,12 +14,12 @@ struct clef::Declaration : public clef::Expression {
       static constexpr OpID pseudoOpID() { return OpID::LET; }
 
       Declaration():Expression{} {}
-      Declaration(index<Type> type, index<Identifier> name):Expression{OpID::LET,type,name} {}
-      Declaration(index<Type> type, index<Identifier> name, index<Expr> value):Expression{OpID::LET,type,name,value} {}
+      Declaration(index<Identifier> type, index<Identifier> name):Expression{OpID::LET,type,name} {}
+      Declaration(index<Identifier> type, index<Identifier> name, index<Expr> value):Expression{OpID::LET,type,name,value} {}
 
 
-      index<Type>& type() { return reinterpret_cast<index<Type>&>(_lhs); }
-      index<const Type> type() const { return _lhs; }
+      index<Identifier>& type() { return reinterpret_cast<index<Identifier>&>(_lhs); }
+      index<const Identifier> type() const { return _lhs; }
       index<Identifier>& name() { return reinterpret_cast<index<Identifier>&>(_rhs); }
       index<const Identifier> name() const { return _rhs; }
       index<Expr>& value() { return reinterpret_cast<index<Expr>&>(_extra); }

@@ -25,29 +25,13 @@ namespace clef {
    struct Token;
    struct astNode;
       struct Identifier;
-         struct Variable;
-         struct Function;
-         struct Macro;
-         struct Type;
-            struct VariadicParameter; using VariadicParam = VariadicParameter;
-            struct FundamentalType; using FundType = FundamentalType;
-            struct FunctionSignature; using FuncSig = FunctionSignature;
-            struct Enum;
-            struct Mask;
-            struct Union;
-            struct EnumUnion; //!TODO: implement enumunions
-            struct Namespace;
-            struct Interface;
-            struct Struct;
-            struct Class;
-            struct GenericType;
       struct Scope;
       struct Literal;
       struct Expression; using Expr = Expression;
          struct Declaration; using Decl = Declaration;
          struct Statement; using Stmt = Statement;
             struct TypeDeclaration; using TypeDecl = TypeDeclaration;
-         struct ForLoop;
+            struct ForLoop;
             struct ForeachLoop;
             struct WhileLoop;
             struct DoWhileLoop;
@@ -62,27 +46,17 @@ namespace clef {
       struct MatchCases;
       struct StatementSequence; using StmtSeq = StatementSequence;
       struct ArgumentList; using ArgList = ArgumentList;
-      struct ParameterList; using ParamList = ParameterList;
-      struct SpecializerList; using SpecList = SpecializerList;
-      template<typename T> concept astNode_t = requires { {T::nodeType()} -> mcsl::same_t<NodeType>; } && !requires { T::IsPseudoNode; };
+      template<typename T> concept astNode_t = requires { {T::nodeType()} -> mcsl::same_t<NodeType>; };
       template<typename T> concept astNode_ptr_t = mcsl::ptr_t<T> && astNode_t<mcsl::remove_ptr<T>>;
-      template<typename T> concept pseudoNode_t = requires { {T::nodeType()} -> mcsl::same_t<NodeType>; };
-      template<typename T> concept pseudoNode_ptr_t = mcsl::ptr_t<T> && pseudoNode_t<mcsl::remove_ptr<T>>;
-      template<typename T> concept operand_t = mcsl::is_t<T, clef::Identifier> || mcsl::is_t<T,Expression>;
-      #define CLEF_ALL_FUND_AST_NODE_T Expression, Function, Macro, Literal, Scope, Type, ForLoopParams, ForeachLoopParams, Identifier, Statement, Variable
+      template<typename T> concept operand_t = mcsl::is_t<T, clef::Identifier> || mcsl::is_t<T,Expression> || mcsl::is_t<T,Literal>;
+      #define CLEF_ALL_FUND_AST_NODE_T Expression, Literal, Scope, ForLoopParams, ForeachLoopParams, Identifier, Statement
       #define CLEF_ALL_EXPR_AST_NODE_T Declaration, TypeDecl, If, ForLoop, ForeachLoop, WhileLoop, DoWhileLoop, Switch, Match, TryCatch, Asm
-      #define CLEF_ALL_NODE_LIST_AST_NODE_T ArgumentList, MatchCases, ParameterList, SpecializerList, StatementSequence, SwitchCases
-      #define CLEF_ALL_TYPE_AST_NODE_T Class, Enum, Mask, FunctionSignature, FundamentalType, GenericType, Interface, Namespace, Struct, Union, VariadicParameter
-      #define CLEF_ALL_AST_NODE_T CLEF_ALL_FUND_AST_NODE_T, CLEF_ALL_EXPR_AST_NODE_T, CLEF_ALL_NODE_LIST_AST_NODE_T, CLEF_ALL_TYPE_AST_NODE_T
-   class ObjTypeSpec;
-   class InterfaceSpec;
-   class NamespaceSpec;
-   #define CLEF_ALL_PSEUDO_NODE_T ObjTypeSpec, InterfaceSpec, NamespaceSpec
+      #define CLEF_ALL_NODE_LIST_AST_NODE_T ArgumentList, MatchCases, StatementSequence, SwitchCases
+      #define CLEF_ALL_AST_NODE_T CLEF_ALL_FUND_AST_NODE_T, CLEF_ALL_EXPR_AST_NODE_T, CLEF_ALL_NODE_LIST_AST_NODE_T
    class TypeSpec;
 
    //containers for atomic compilation elements
    class Source;
-   class SourceTokens;
    class SymbolNode;
    class IndirTable;
    class SyntaxTree;

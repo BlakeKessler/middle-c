@@ -5,16 +5,12 @@
 #include "CLEF.hpp"
 
 #include "ast-nodes/Expression.hpp"
-#include "ast-nodes/Function.hpp"
-#include "ast-nodes/Macro.hpp"
 #include "ast-nodes/Literal.hpp"
 #include "ast-nodes/Scope.hpp"
-#include "ast-nodes/Type.hpp"
 #include "ast-nodes/ForLoopParams.hpp"
 #include "ast-nodes/ForeachLoopParams.hpp"
 #include "ast-nodes/Identifier.hpp"
 #include "ast-nodes/Statement.hpp"
-#include "ast-nodes/Variable.hpp"
 #include "ast-nodes/exprs/Declaration.hpp"
 #include "ast-nodes/exprs/TypeDeclaration.hpp"
 #include "ast-nodes/exprs/If.hpp"
@@ -28,53 +24,20 @@
 #include "ast-nodes/exprs/Asm.hpp"
 #include "ast-nodes/node-lists/ArgumentList.hpp"
 #include "ast-nodes/node-lists/MatchCases.hpp"
-#include "ast-nodes/node-lists/ParameterList.hpp"
-#include "ast-nodes/node-lists/SpecializerList.hpp"
 #include "ast-nodes/node-lists/StatementSequence.hpp"
 #include "ast-nodes/node-lists/SwitchCases.hpp"
-#include "ast-nodes/types/Class.hpp"
-#include "ast-nodes/types/Enum.hpp"
-#include "ast-nodes/types/Mask.hpp"
-#include "ast-nodes/types/FunctionSignature.hpp"
-#include "ast-nodes/types/FundamentalType.hpp"
-#include "ast-nodes/types/GenericType.hpp"
-#include "ast-nodes/types/Interface.hpp"
-#include "ast-nodes/types/Namespace.hpp"
-#include "ast-nodes/types/Struct.hpp"
-#include "ast-nodes/types/Union.hpp"
-#include "ast-nodes/types/VariadicParameter.hpp"
-
-#include "InterfaceSpec.hpp"
-#include "NamespaceSpec.hpp"
-#include "ObjTypeSpec.hpp"
 
 
 #include "MAP_MACRO.h"
 #define CLEF_ALL_AST_NODE_UNION_MEMBS \
-   _identifier, _variable, _function, _macro, _type, _variadicParameter, _fundamentalType, _functionSignature, _enum,                   \
-   _mask, _union, _namespace, _interface, _struct, _class, _genericType, _scope, _literal, _expression, _declaration, _typeDecl,\
-   _forLoop, _foreachLoop, _whileLoop, _doWhileLoop, _if, _switch, _match, _tryCatch, _asm, _forLoopParams,                     \
-   _foreachLoopParams, _switchCases, _matchCases, _statement, _statementSequence, _argumentList, _parameterList, _specializerList
+   _identifier, _scope, _literal, _expression, _declaration, _typeDecl, _forLoop, _foreachLoop,         \
+   _whileLoop, _doWhileLoop, _if, _switch, _match, _tryCatch, _asm, _forLoopParams, _foreachLoopParams, \
+   _switchCases, _matchCases, _statement, _statementSequence, _argumentList
 
 struct clef::astNode {
    private:
       union {
          Identifier _identifier;
-         Variable _variable;
-         Function _function;
-         Macro _macro;
-         Type _type;
-         VariadicParameter _variadicParameter;
-         FundamentalType _fundamentalType;
-         FunctionSignature _functionSignature;
-         Enum _enum;
-         Mask _mask;
-         Union _union;
-         Namespace _namespace;
-         Interface _interface;
-         Struct _struct;
-         Class _class;
-         GenericType _genericType;
          Scope _scope;
          Literal _literal;
          Expression _expression;
@@ -96,8 +59,6 @@ struct clef::astNode {
          Statement _statement;
          StatementSequence _statementSequence;
          ArgumentList _argumentList;
-         ParameterList _parameterList;
-         SpecializerList _specializerList;
       };
       NodeType _nodeType;
 

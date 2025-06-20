@@ -3,7 +3,6 @@
 #define LITERAL_HPP
 
 #include "CLEF.hpp"
-#include "ast-nodes/Type.hpp"
 
 #include "str_slice.hpp"
 
@@ -20,7 +19,7 @@ struct clef::Literal {
          mcsl::str_slice _interpLit;
          mcsl::str_slice _formatLit;
          mcsl::str_slice _regexLit;
-         index<Type> _typeid;
+         TypeSpec* _typeid;
       };
       LitType _type;
    public:
@@ -39,7 +38,7 @@ struct clef::Literal {
             throwError(ErrCode::BAD_LITERAL, mcsl::FMT("attempt to construct string-like Literal node with non-string-like LitType"));
          }
       }
-      Literal(index<Type> typeID):_typeid{typeID},_type{LitType::TYPEID} {}
+      Literal(TypeSpec* typeID):_typeid{typeID},_type{LitType::TYPEID} {}
 
       Literal(void* ptr):_ptrLit{ptr},_type{LitType::POINTER} {}
 
@@ -65,8 +64,8 @@ struct clef::Literal {
       operator const mcsl::str_slice() const { if (_type == LitType::STRING) { return _strLit;    } else { throwCastErr(LitType::STRING); } }
       // operator mcsl::format() const { if (_type == LitType::FORMAT) { return _formatLit; } else { throwCastErr(LitType::FORMAT); } }
       // operator mcsl::regex()  const { if (_type == LitType::REGEX)  { return _regexLit;  } else { throwCastErr(LitType::REGEX);  } }
-      operator index<Type>() { if(_type == LitType::TYPEID) { return _typeid; } else { throwCastErr(LitType::TYPEID); }}
-      operator index<const Type>() const { if(_type == LitType::TYPEID) { return _typeid; } else { throwCastErr(LitType::TYPEID); }}
+      operator TypeSpec*() { if(_type == LitType::TYPEID) { return _typeid; } else { throwCastErr(LitType::TYPEID); }}
+      operator const TypeSpec*() const { if(_type == LitType::TYPEID) { return _typeid; } else { throwCastErr(LitType::TYPEID); }}
       operator void*() { if (_type == LitType::POINTER) { return _ptrLit; } else { throwCastErr(LitType::POINTER); }}
       operator const void*() const { if (_type == LitType::POINTER) { return _ptrLit; } else { throwCastErr(LitType::POINTER); }}
       #pragma endregion cast

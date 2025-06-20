@@ -2,7 +2,10 @@
 #ifndef LEXER_HPP
 #define LEXER_HPP
 
-#include "SourceTokens.hpp"
+#include "CLEF.hpp"
+
+#include "Source.hpp"
+#include "Token.hpp"
 
 class clef::Lexer {
    private:

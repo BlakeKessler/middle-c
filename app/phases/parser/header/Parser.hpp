@@ -3,7 +3,6 @@
 #define PARSER_HPP
 
 #include "CLEF.hpp"
-#include "SourceTokens.hpp"
 #include "SyntaxTree.hpp"
 #include "Lexer.hpp"
 
@@ -20,8 +19,8 @@ class clef::Parser {
       Token currTok;
 
       //!TODO: use these
-      index<Identifier> currScopeIden;
-      SymbolNode* currScopeSymbol;
+      index<Identifier> scopeName;
+      SymbolNode* currScope;
 
       ErrCode _errno;
 
@@ -49,13 +48,7 @@ class clef::Parser {
       index<Stmt> parseStmt();
       index<Stmt> parsePreprocStmt();
       index<Scope> parseProcedure();
-      index<ArgList> parseArgList(const BlockType closer);
-      index<ParamList> parseParamList(const BlockType closer);
-      template<bool isDecl = false> index<SpecList> parseSpecList(const BlockType closer);
-      index<SpecList> parseSpecList(const BlockType closer, bool isDecl) {
-         if (isDecl) { return parseSpecList<true>(closer); }
-         else { return parseSpecList<false>(closer); }
-      }
+      index<ArgList> parseArgList(const BlockType closer, bool isDecl);
 
       index<Expr> parseCast(const KeywordID);
 
@@ -65,10 +58,10 @@ class clef::Parser {
       QualMask parseQuals();
       index<Identifier> tryParseIdentifier(SymbolType symbolType, SymbolNode* type); //(type == nullptr) == isDecl
       index<Identifier> parseIdentifier(SymbolType symbolType, SymbolNode* type); //(type == nullptr) == isDecl
-      index<Type> parseTypename(index<Identifier> scopeName = 0, bool isDecl);
-      index<Decl> parseLetStmt(index<Identifier> scopeName = 0);
-      index<Variable> parseParam(index<Identifier> scopeName = 0);
-      index<Variable> parseDefaultableParam(index<Identifier> scopeName = 0);
+      index<Identifier> parseTypename(bool isDecl);
+      index<Decl> parseDecl();
+      index<Decl> parseParam();
+      index<Decl> parseDefaultableParam();
 
       index<ForLoop> parseForLoop();
       index<ForeachLoop> parseForeachLoop();
@@ -81,8 +74,8 @@ class clef::Parser {
 
       index<TryCatch> parseTryCatch();
 
-      index<Function> parseFunction();
-      index<Macro> parseMacro();
+      index<Identifier> parseFunction();
+      index<Identifier> parseMacro();
       index<Asm> parseASM();
       
       index<TypeDecl> parseClass();

@@ -8,75 +8,6 @@
 
 #include "MAP_MACRO.h"
 
-#define ID(kw, fund) case KeywordID::kw: id = FundTypeID::fund; break
-//!TODO: support data models besides LP64
-clef::index<clef::FundType> clef::SyntaxTree::getFundType(const KeywordID keyword) {
-   FundTypeID id;
-   switch (keyword) {
-      ID(VOID, VOID);
-      ID(AUTO, AUTO);
-
-
-      ID(CHAR, CHAR);
-      ID(CHAR_UTF_8, CHAR8);
-      ID(CHAR_UTF_16, CHAR16);
-      ID(CHAR_UTF_32, CHAR32);
-
-
-      ID(BOOL, BOOL);
-      ID(UBYTE, UINT8);
-      ID(USHORT, UINT16);
-      ID(UINT, UINT32);
-      ID(ULONG, UINT64);
-      ID(UINT_PTR, UINT64);
-      ID(UWORD, UINT64);
-
-      ID(SIGN_T, SIGN_T);
-      ID(SBYTE, SINT8);
-      ID(SSHORT, SINT16);
-      ID(SINT, SINT32);
-      ID(SLONG, SINT64);
-      ID(SINT_PTR, SINT64);
-      ID(SWORD, SINT64);
-
-
-      ID(UINT_8, UINT8);
-      ID(UINT_16, UINT16);
-      ID(UINT_32, UINT32);
-      ID(UINT_64, UINT64);
-      ID(UINT_128, UINT128);
-      ID(UINT_256, UINT256);
-
-      ID(SINT_8, SINT8);
-      ID(SINT_16, SINT16);
-      ID(SINT_32, SINT32);
-      ID(SINT_64, SINT64);
-      ID(SINT_128, SINT128);
-      ID(SINT_256, SINT256);
-
-      ID(FLOAT, FLOAT32);
-
-      ID(FLOAT_16, FLOAT16);
-      ID(FLOAT_32, FLOAT32);
-      ID(FLOAT_64, FLOAT64);
-      ID(FLOAT_128, FLOAT128);
-      ID(FLOAT_256, FLOAT256);
-
-
-      ID(ENUM, ENUM);
-      ID(MASK, MASK);
-      ID(UNION, UNION);
-      ID(NAMESPACE, NAMESPACE);
-      ID(INTERFACE, INTERFACE);
-      ID(STRUCT, STRUCT);
-      ID(CLASS, CLASS);
-
-      default: UNREACHABLE;
-   }
-   return make<FundType>(id);
-}
-#undef ID
-
 clef::index<clef::astNode> clef::SyntaxTree::getValueKeyword(const KeywordID keyword) {
    switch (keyword) {
       case KeywordID::THIS    : return +make<Identifier>(KeywordID::THIS);
@@ -96,21 +27,6 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
    astNode& node = self[index];
    switch (node.nodeType()) {
       case Identifier::nodeType():
-      case Variable::nodeType():
-      case Function::nodeType():
-      case Macro::nodeType():
-      case Type::nodeType():
-      case VariadicParameter::nodeType():
-      case FundamentalType::nodeType():
-      case FunctionSignature::nodeType():
-      case Enum::nodeType():
-      case Mask::nodeType():
-      case Union::nodeType():
-      case Namespace::nodeType():
-      case Interface::nodeType():
-      case Struct::nodeType():
-      case Class::nodeType():
-      case GenericType::nodeType():
       case Literal::nodeType():
          return make<Expr>(op, node.nodeType(), index);
 
@@ -127,9 +43,6 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
       case Match::nodeType():
       case TryCatch::nodeType():
       case Asm::nodeType():
-      case ObjTypeSpec::nodeType():
-      case InterfaceSpec::nodeType():
-      case NamespaceSpec::nodeType():
          return +index;
 
 
@@ -140,8 +53,6 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
       case MatchCases::nodeType():
       case StatementSequence::nodeType():
       case ArgumentList::nodeType():
-      case ParameterList::nodeType():
-      case SpecializerList::nodeType():
       case NodeType::NONE:
       case NodeType::ERROR:
          UNREACHABLE;

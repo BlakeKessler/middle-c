@@ -11,7 +11,7 @@
 #include "str_to_num.hpp"
 #include "unreachable.hpp"
 
-//!creates a SourceTokens from results of file reader
+//!lex the next token
 clef::Token clef::Lexer::nextToken() {
 RESTART:
    if (curr >= end) { [[unlikely]];

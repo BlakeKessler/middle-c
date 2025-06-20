@@ -12,7 +12,7 @@ struct clef::Identifier {
    private:
       SymbolNode* _name;
       index<Identifier> _scopeName;
-      index<SpecList> _specializer;
+      index<ArgList> _specializer;
       KeywordID _keywordID;
    protected:
       FundTypeID _id;
@@ -24,14 +24,14 @@ struct clef::Identifier {
    public:
       static constexpr NodeType nodeType() { return NodeType::IDEN; }
 
-      Identifier(SymbolNode* name = {}, index<Identifier> scopeName = {}, index<SpecList> specializer = {}, QualMask quals = {}):_name{name},_scopeName{scopeName},_specializer{specializer},_keywordID{KeywordID::_NOT_A_KEYWORD},_id{},_quals{quals} {}
-      Identifier(const KeywordID id, index<SpecList> specializer = {}, QualMask quals = {}):_name{},_scopeName{},_specializer{specializer},_keywordID{id},_id{},_quals{quals} {}
+      Identifier(SymbolNode* name = {}, index<Identifier> scopeName = {}, index<ArgList> specializer = {}, QualMask quals = {}):_name{name},_scopeName{scopeName},_specializer{specializer},_keywordID{KeywordID::_NOT_A_KEYWORD},_id{},_quals{quals} {}
+      Identifier(const KeywordID id, index<ArgList> specializer = {}, QualMask quals = {}):_name{},_scopeName{},_specializer{specializer},_keywordID{id},_id{},_quals{quals} {}
 
       Identifier(const Identifier& other):_name{other._name},_scopeName{other._scopeName},_specializer{other._specializer},_keywordID{other._keywordID},_id{other._id},_quals{other._quals} {}
       Identifier& operator=(const Identifier& other) { new (this) Identifier{other}; return self; }
 
-      index<SpecList>& specializer() { return _specializer; }
-      index<const SpecList> specializer() const { return _specializer; }
+      index<ArgList>& specializer() { return _specializer; }
+      index<const ArgList> specializer() const { return _specializer; }
       index<Identifier>& scopeName() { return _scopeName; }
       index<const Identifier> scopeName() const { return _scopeName; }
 

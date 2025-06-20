@@ -61,7 +61,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseClass() {
          KW_CASE(NAMESPACE, parseNamespace);
          #undef KW_CASE
          case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(); tree[(index<Identifier>)tmp].addQuals(scope); (isStatic ? spec.staticFuncs() : spec.methods()).push_back(tmp);} break;
-         case KeywordID::LET : getNextToken(); {auto tmp = parseLetStmt(); tree[(index<Identifier>)(tree[tmp].name())].addQuals(scope); (isStatic ? spec.staticVars() : spec.members()).push_back(tmp);} break;
+         case KeywordID::LET : getNextToken(); {auto tmp = parseDecl(); tree[(index<Identifier>)(tree[tmp].name())].addQuals(scope); (isStatic ? spec.staticVars() : spec.members()).push_back(tmp);} break;
          default: logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
       }
    }
@@ -155,7 +155,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion() {
 
    spec.members() = tree.make<ParameterList>(&tree.allocBuf<index<Variable>>());
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
-      //!TODO: maybe use parseLetStmt?
+      //!TODO: maybe use parseDecl?
       //parse member
       index<Type> memberType = parseTypename();
       index<Identifier> memberName = parseIdentifier();
@@ -255,7 +255,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace() {
          case KeywordID::MASK     : getNextToken(); {auto tmp = parseMask(); spec.types().push_back(tmp);} break;
          case KeywordID::NAMESPACE: getNextToken(); {auto tmp = parseNamespace(); spec.types().push_back(tmp);} break;
          case KeywordID::FUNC     : getNextToken(); {auto tmp = parseFunction(); spec.funcs().push_back(tmp);} break;
-         case KeywordID::LET      : getNextToken(); {auto tmp = parseLetStmt(); spec.vars().push_back(tmp);} break;
+         case KeywordID::LET      : getNextToken(); {auto tmp = parseDecl(); spec.vars().push_back(tmp);} break;
          default: logError(ErrCode::BAD_STMT, "invalid statement in NAMESPACE definition");
       }
    }

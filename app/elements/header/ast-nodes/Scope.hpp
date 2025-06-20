@@ -9,7 +9,7 @@
 
 struct clef::Scope : public clef::StatementSequence {
    private:
-   
+      SymbolNode* _symbolNode;
    public:
       static constexpr NodeType nodeType() { return NodeType::SCOPE; }
 

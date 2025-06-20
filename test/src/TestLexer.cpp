@@ -28,11 +28,13 @@ int main(int argc, char** argv) {
 
    //tokenize
    mcsl::printf(FMT("\nLexing file.\n"));
-   clef::SourceTokens tokens = clef::Lexer::LexSource(std::move(src));
+   clef::Lexer lexer(std::move(src));
 
    //print tokens
-   mcsl::printf(FMT("\nPrinting tokens (%u tokens)\n%s"), tokens.size(), fileDelim);
-   mcsl::write(mcsl::stdout, tokens);
+   mcsl::printf(FMT("\nPrinting tokens\n%s"), fileDelim);
+   while (!lexer.done()) {
+      mcsl::printf(FMT("%s\n"), lexer.nextToken());
+   }
    mcsl::printf(FMT("%sDone printing tokens.\n"), fileDelim);
 }
 

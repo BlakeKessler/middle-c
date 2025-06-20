@@ -36,7 +36,7 @@ START_PARSE_STMT:
                break;
             case KeywordID::LET     : {
                getNextToken();
-               index<Decl> tmp = parseLetStmt();
+               index<Decl> tmp = parseDecl();
                tree[(index<astNode>)(+tmp)].anyCast(NodeType::STMT);
                return +tmp;
             } break;
@@ -255,7 +255,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             }
             else if (kw == KeywordID::LET) {
                getNextToken();
-               operandStack.push_back(+parseLetStmt());
+               operandStack.push_back(+parseDecl());
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }

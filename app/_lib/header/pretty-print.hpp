@@ -35,21 +35,6 @@ constexpr const mcsl::str_slice clef::toString(const NodeType type) {
       CASE(NONE, "none");
 
       CASE(IDEN, "IDENTIFIER");
-      CASE(VAR, "VARIABLE");
-      CASE(FUNC, "FUNCTION");
-      CASE(MACRO, "MACRO");
-      CASE(TYPE, "TYPE");
-      CASE(VAR_PARAM, "VARIADIC_PARAM");
-      CASE(FUND_TYPE, "FUNDEMENTAL_TYPE");
-      CASE(FUNC_SIG, "FUNCTION_SIGNATURE");
-      CASE(ENUM, "ENUM");
-      CASE(MASK, "MASK");
-      CASE(UNION, "UNION");
-      CASE(NAMESPACE, "NAMESPACE");
-      CASE(INTERFACE, "INTERFACE");
-      CASE(STRUCT, "STRUCT");
-      CASE(CLASS, "CLASS");
-      CASE(GENERIC, "GENERIC");
       CASE(SCOPE, "SCOPE");
       CASE(LITERAL, "LITERAL");
       CASE(EXPR, "EXPRESSION");
@@ -70,12 +55,7 @@ constexpr const mcsl::str_slice clef::toString(const NodeType type) {
       CASE(MATCH_CASES, "MATCH_CASES");
       CASE(STMT_SEQ, "STATEMENT_SEQUENCE");
       CASE(ARG_LIST, "ARGUMENT_LIST");
-      CASE(PARAM_LIST, "PARAMETER_LIST");
-      CASE(SPEC_LIST, "SPECIALIZER_LIST");
       CASE(MAKE_TYPE, "MAKE_TYPE");
-      CASE(OBJ_TYPE_SPEC, "OBJECT_TYPE_SPEC");
-      CASE(INTERFACE_SPEC, "INTERFACE_SPEC");
-      CASE(NAMESPACE_SPEC, "NAMESPACE_SPEC");
    }
    UNREACHABLE;
 }

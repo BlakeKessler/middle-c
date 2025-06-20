@@ -13,10 +13,6 @@
 class clef::SyntaxTree {
    private:
       mcsl::dyn_arr<astNode> _buf; //owning storage for member nodes
-      
-      mcsl::dyn_arr<InterfaceSpec> _ifaceSpecBuf;
-      mcsl::dyn_arr<NamespaceSpec> _nsSpecBuf;
-      mcsl::dyn_arr<ObjTypeSpec> _objSpecBuf;
 
       SymbolNode _globalScope;
       mcsl::arr_list<SymbolNode> _symbolBuf;
@@ -26,18 +22,12 @@ class clef::SyntaxTree {
 
       void initTables();
    public:
-      SyntaxTree():_buf{},_ifaceSpecBuf{},_nsSpecBuf{},_objSpecBuf{},_globalScope{},_symbolBuf{},_typeTable{},_alloc{} {
+      SyntaxTree():_buf{},_globalScope{},_symbolBuf{},_typeTable{},_alloc{} {
          _buf.emplace_back(NodeType::ERROR);
-         _ifaceSpecBuf.emplace_back();
-         _nsSpecBuf.emplace_back();
-         _objSpecBuf.emplace_back();
          initTables();
       }
       SyntaxTree(SyntaxTree&& other):
          _buf{std::move(other._buf)},
-         _ifaceSpecBuf{std::move(other._ifaceSpecBuf)},
-         _nsSpecBuf{std::move(other._nsSpecBuf)},
-         _objSpecBuf{std::move(other._objSpecBuf)},
          _globalScope{std::move(other._globalScope)},
          _symbolBuf{std::move(other._symbolBuf)},
          _typeTable{std::move(other._typeTable)},
@@ -51,7 +41,6 @@ class clef::SyntaxTree {
 
       inline void reserve(const uint nodeCount) { _buf.reserve(nodeCount); }
 
-      index<FundType> getFundType(const KeywordID fundTypeKeyword);
       index<astNode> getValueKeyword(const KeywordID valueKeyword);
 
       void printf(mcsl::File&) const;
@@ -76,13 +65,6 @@ class clef::SyntaxTree {
       const astNode* operator+(index<const astNode> i) const { return _buf + i; }
       astNode* operator+(index<astNode> i) { return _buf + i; }
 
-      const InterfaceSpec* operator+(index<const InterfaceSpec> i) const { return _ifaceSpecBuf + i; }
-      const NamespaceSpec* operator+(index<const NamespaceSpec> i) const { return _nsSpecBuf + i; }
-      const ObjTypeSpec* operator+(index<const ObjTypeSpec> i) const { return _objSpecBuf + i; }
-      InterfaceSpec* operator+(index<InterfaceSpec> i) { return _ifaceSpecBuf + i; }
-      NamespaceSpec* operator+(index<NamespaceSpec> i) { return _nsSpecBuf + i; }
-      ObjTypeSpec* operator+(index<ObjTypeSpec> i) { return _objSpecBuf + i; }
-
 
       template<astNode_ptr_t asT, astNode_ptr_t T, typename... Argv_t> asT make(Argv_t... argv) requires mcsl::valid_ctor<mcsl::remove_ptr<T>, Argv_t...>;
       template<astNode_t asT, astNode_t T = asT, typename... Argv_t> index<asT> make(Argv_t... argv) requires mcsl::valid_ctor<T, Argv_t...> { index<asT> index = _buf.size(); make<asT*,T*>(std::forward<Argv_t>(argv)...); return index; }
@@ -96,9 +78,6 @@ class clef::SyntaxTree {
       index<Expr> remakeTernary(index<astNode> cond, index<Expr> vals);
 
       template<typename T> mcsl::dyn_arr<T>& allocBuf() { return _alloc.at(_alloc.alloc<T>()); }
-      index<InterfaceSpec> allocInterfaceSpec() { return _ifaceSpecBuf.emplace_back() - _ifaceSpecBuf.begin(); }
-      index<NamespaceSpec> allocNamespaceSpec() { return _nsSpecBuf.emplace_back() - _nsSpecBuf.begin(); }
-      index<ObjTypeSpec> allocObjTypeSpec() { return _objSpecBuf.emplace_back() - _objSpecBuf.begin(); }
 };
 
 //!quick little struct to indent when printing newlines in a `printf` call
@@ -139,7 +118,6 @@ namespace mcsl {
    uint writef(File& file, const clef::SyntaxTree& tree, char mode, FmtArgs args);
    uint writef(File& file, const clef::astTNB<clef::astNode> obj, char mode, FmtArgs args);
    MCSL_MAP(__DEF_TNB_WRITEF, CLEF_ALL_AST_NODE_T)
-   MCSL_MAP(__DEF_TNB_WRITEF, CLEF_ALL_PSEUDO_NODE_T)
    uint writef(File& file, clef::QualMask, char mode, FmtArgs args);
 
    inline File& write(File& file, const clef::SyntaxTree& obj) { writef(file, obj, 's', {}); return file; }
@@ -152,9 +130,6 @@ namespace mcsl {
 
 inline void clef::SyntaxTree::release() {
    _buf.release();
-   _ifaceSpecBuf.release();
-   _nsSpecBuf.release();
-   _objSpecBuf.release();
    _alloc.release();
 }
 

@@ -73,21 +73,6 @@ namespace clef {
       NONE = 0x00,   //to-be determined
 
       IDEN,
-         VAR,
-         FUNC,
-         MACRO,
-         TYPE,
-            VAR_PARAM,
-            FUND_TYPE,
-               FUNC_SIG,
-            ENUM,
-            MASK,
-            UNION,
-            NAMESPACE,
-            INTERFACE,
-            STRUCT,
-            CLASS,
-            GENERIC,
       SCOPE,
       LITERAL,
       EXPR,
@@ -109,23 +94,10 @@ namespace clef {
       MATCH_CASES,
       STMT_SEQ,
       ARG_LIST,
-      PARAM_LIST,
-      SPEC_LIST,
-
-      //pseudo-nodes
-      OBJ_TYPE_SPEC,
-      INTERFACE_SPEC,
-      NAMESPACE_SPEC,
    };
    constexpr auto operator+(const NodeType t) noexcept { return std::to_underlying(t); }
    constexpr bool canDownCastTo(const NodeType from, const NodeType to) {
       switch (to) {
-         case NodeType::IDEN:
-            return from >= NodeType::IDEN && from <= NodeType::GENERIC;
-         case NodeType::TYPE:
-            return from >= NodeType::TYPE && from <= NodeType::GENERIC;
-         case NodeType::FUND_TYPE:
-            return from >= NodeType::FUND_TYPE && from <= NodeType::FUNC_SIG;
          case NodeType::EXPR:
             return from >= NodeType::EXPR && from <= NodeType::TRY_CATCH;
          case NodeType::STMT:
@@ -146,6 +118,7 @@ namespace clef {
       INT_NUM,
       REAL_NUM,
 
+      __OPLIKE = 0x80,
       OP = 0x81,
       PREPROC_INIT,
       PREPROC_EOS,
@@ -153,8 +126,6 @@ namespace clef {
       ESC,
       BLOCK_DELIM,
       PTXT_SEG,
-
-      __OPLIKE = 0x80,
    };
    constexpr auto      operator+(const TokenType t) noexcept { return std::to_underlying(t); }
    constexpr TokenType operator&(const TokenType lhs, const TokenType rhs) noexcept { return (TokenType)((+lhs) & (+rhs)); }
