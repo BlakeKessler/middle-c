@@ -85,9 +85,12 @@ class clef::Parser {
       index<TypeDecl> parseStruct() { return __parseObjTypeImpl(SymbolType::STRUCT, FMT("struct")); }
       index<TypeDecl> parseInterface();
       index<TypeDecl> parseUnion();
-      index<TypeDecl> parseEnum();
+   private:
+      index<TypeDecl> __parseEnumlikeImpl(SymbolType symbolType, const mcsl::str_slice metatypeName);
+   public:
+      index<TypeDecl> parseMask() { return __parseEnumlikeImpl(SymbolType::MASK, FMT("mask")); }
+      index<TypeDecl> parseEnum() { return __parseEnumlikeImpl(SymbolType::ENUM, FMT("enum")); }
       index<TypeDecl> parseEnumUnion();
-      index<TypeDecl> parseMask();
       index<TypeDecl> parseNamespace();
 
       //error logging

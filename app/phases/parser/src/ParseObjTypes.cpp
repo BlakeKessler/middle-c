@@ -4,9 +4,12 @@
 #include "Parser.hpp"
 
 clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType symbolType, const mcsl::str_slice metatypeName) {
-   index<Identifier> name = parseIdentifier(symbolType, nullptr);
+   index<Identifier> name = tryParseIdentifier(symbolType, nullptr);
    
    if (tryConsumeEOS()) { //forward declaration
+      if (!name) {
+         logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous class/struct");
+      }
       return tree.make<TypeDecl>(name);
    }
    
@@ -77,11 +80,11 @@ clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
    index<Identifier> name = parseIdentifier(SymbolType::INTERFACE, nullptr);
    
    if (tryConsumeEOS()) { //forward declaration
-      return tree.make<TypeDecl>(name, name);
+      return tree.make<TypeDecl>(name);
    }
    
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
-   TypeSpec* spec = symbol->type();          ebug_assert(spec);
+   TypeSpec* spec = symbol->type();          debug_assert(spec);
    if (spec->metaType() != TypeSpec::COMPOSITE) {
       logError(ErrCode::BAD_TYPE_DECL, "redeclaration of interface `%s`", *symbol);
    }
@@ -134,42 +137,40 @@ clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
 }
 
 clef::index<clef::TypeDecl> clef::Parser::parseUnion() {
-   index<Identifier> name = parseIdentifier<true>();
+   index<Identifier> name = tryParseIdentifier(SymbolType::UNION, nullptr);
 
    if (tryConsumeEOS()) { //forward declaration
       if (!name) {
-         logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous UNION");
+         logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous union");
       }
-      return tree.make<TypeDecl>(tree.getFundType(KeywordID::UNION), name);
+      return tree.make<TypeDecl>(name);
    }
 
-   index<Union> unionptr = tree.remake<Union>(name, tree[(index<Type>)name]);
-   Union& spec = tree[unionptr];
+   SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
+   TypeSpec* spec = symbol->type();          debug_assert(spec);
+   if (spec->metaType() != TypeSpec::COMPOSITE) {
+      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of union `%s`", *symbol);
+   }
 
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad UNION definition");
 
-   spec.members() = tree.make<ParameterList>(&tree.allocBuf<index<Variable>>());
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
-      //!TODO: maybe use parseDecl?
       //parse member
-      index<Type> memberType = parseTypename();
-      index<Identifier> memberName = parseIdentifier();
+      index<Decl> member = parseParam();
       consumeEOS("bad UNION member");
       
       //push to members list
-      index<Variable> member = tree.remake<Variable>(memberName, memberType, tree[memberName]);
-      tree[spec.members()].push_back(member);
+      spec->composite().dataMembs.push_back(tree[tree[member].name()].symbol());
    }
 
    //EOS
    consumeEOS("UNION without EOS");
 
    //return
-   return tree.make<TypeDecl>(tree.getFundType(KeywordID::UNION), unionptr, spec.members());
+   return tree.make<TypeDecl>(name, name);
 }
 
-//!HACK: clef::Parser::parseMask relies on this function - be careful changing observable behavior
-clef::index<clef::TypeDecl> clef::Parser::parseEnum() {
+clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(SymbolType symbolType, const mcsl::str_slice metatypeName) {
    index<Identifier> name = parseIdentifier<true>();
    index<Type> baseType;
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
@@ -206,14 +207,6 @@ clef::index<clef::TypeDecl> clef::Parser::parseEnum() {
 
    //return
    return tree.make<TypeDecl>(tree.getFundType(KeywordID::ENUM), enumptr, enumerators);
-}
-
-//!HACK: temporarily assumes that the syntax and memory layout of the AST nodes for masks and enums are identical and depends on clef::Parser::parseEnum()
-clef::index<clef::TypeDecl> clef::Parser::parseMask() {
-   index<TypeDecl> decl = parseEnum();
-   tree[decl].objType() = tree.getFundType(KeywordID::MASK);
-   tree[(index<astNode>)tree[decl].name()].anyCast(NodeType::MASK);
-   return +decl;
 }
 
 //!TODO: implement enumunions
