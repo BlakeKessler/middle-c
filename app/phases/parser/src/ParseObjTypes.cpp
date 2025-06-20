@@ -11,7 +11,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType sy
    }
    
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
-   TypeSpec* spec = symbol->type();      debug_assert(spec);
+   TypeSpec* spec = symbol->type();          debug_assert(spec);
    if (spec->metaType() != TypeSpec::COMPOSITE) {
       logError(ErrCode::BAD_TYPE_DECL, "redeclaration of %s `%s`", metatypeName, *symbol);
    }
@@ -19,7 +19,6 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType sy
    //implemented interfaces
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
       do {
-         TODO;
          index<Identifier> parentType = parseTypename(SymbolType::INTERFACE, false);
          if (!spec->composite().impls.insert(tree[parentType].symbol())) {
             logError(ErrCode::BAD_TYPE_DECL, "%s `%s` already implements interface `%s`", metatypeName, *tree[parentType].symbol());
@@ -28,7 +27,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType sy
    }
 
    //definition
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad object type definition");
+   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "class/struct definition");
    QualMask scope = QualMask::PRIVATE;
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       if (tryConsumeKeyword(KeywordID::PUBLIC)) {
@@ -74,30 +73,26 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType sy
    return tree.make<TypeDecl>(name, name);
 }
 
-clef::index<clef::TypeDecl> clef::Parser::parseClass() {
-   return __parseObjTypeImpl(SymbolType::CLASS, FMT("class"));
-}
-clef::index<clef::TypeDecl> clef::Parser::parseStruct() {
-   return __parseObjTypeImpl(SymbolType::STRUCT, FMT("struct"));
-}
-
 clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
-   index<Identifier> name = parseIdentifier<true>();
+   index<Identifier> name = parseIdentifier(SymbolType::INTERFACE, nullptr);
    
    if (tryConsumeEOS()) { //forward declaration
-      index<Interface> classptr = tree.remake<Interface>(name, tree[(index<Type>)name]);
-      return tree.make<TypeDecl>(tree.getFundType(KeywordID::INTERFACE), classptr);
+      return tree.make<TypeDecl>(name, name);
    }
-
-   index<InterfaceSpec> specIndex = tree.allocInterfaceSpec();
-   InterfaceSpec& spec = tree[specIndex];
-   index<Interface> ifaceptr = tree.remake<Interface>(name, specIndex, tree[(index<Type>)name]);
+   
+   SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
+   TypeSpec* spec = symbol->type();          ebug_assert(spec);
+   if (spec->metaType() != TypeSpec::COMPOSITE) {
+      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of interface `%s`", *symbol);
+   }
    
    //inheritance
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
       do {
-         index<Interface> parentType = [&](index<Type> iden){ return tree.remake<Interface>(iden, tree[iden]); }(parseTypename());
-         spec.inheritedInterfaces().push_back(parentType);
+         index<Identifier> parentType = parseTypename(SymbolType::INTERFACE, false);
+         if (!spec->composite().impls.insert(tree[parentType].symbol())) {
+            logError(ErrCode::BAD_TYPE_DECL, "interface `%s` already extends interface `%s`", *tree[parentType].symbol());
+         }
       } while (tryConsumeOperator(OpID::COMMA));
    }
 
@@ -121,13 +116,13 @@ clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
          continue;
       }
       bool isStatic = tryConsumeKeyword(KeywordID::STATIC);
-      consumeKeyword(KeywordID::FUNC, "INTERFACE can only contain functions");
-      index<Function> func = parseFunction();
+      consumeKeyword(KeywordID::FUNC, "interfaces can only contain functions and methods");
+      index<Identifier> func = parseFunction();
       tree[func].addQuals(scope);
       if (isStatic) {
-         spec.staticFuncs().push_back(func);
+         spec->composite().staticFuncs.insert(tree[func].symbol());
       } else {
-         spec.methods().push_back(func);
+         spec->composite().methods.insert(tree[func].symbol());
       }
    }
 
@@ -135,7 +130,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
    consumeEOS("INTERFACE without EOS");
 
    //return
-   return tree.make<TypeDecl>(tree.getFundType(KeywordID::INTERFACE), ifaceptr, specIndex);
+   return tree.make<TypeDecl>(name, name);
 }
 
 clef::index<clef::TypeDecl> clef::Parser::parseUnion() {
