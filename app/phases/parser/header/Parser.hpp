@@ -19,6 +19,10 @@ class clef::Parser {
       Lexer& src;
       Token currTok;
 
+      //!TODO: use these
+      index<Identifier> currScopeIden;
+      SymbolNode* currScopeSymbol;
+
       ErrCode _errno;
 
       //utils
@@ -59,9 +63,9 @@ class clef::Parser {
       void skipLineComment();
 
       QualMask parseQuals();
-      template<bool isDecl = false> index<Identifier> tryParseIdentifier(index<Identifier> scopeName = 0);
-      template<bool isDecl = false> index<Identifier> parseIdentifier(index<Identifier> scopeName = 0);
-      index<Type> parseTypename(index<Identifier> scopeName = 0);
+      index<Identifier> tryParseIdentifier(SymbolType symbolType, SymbolNode* type); //(type == nullptr) == isDecl
+      index<Identifier> parseIdentifier(SymbolType symbolType, SymbolNode* type); //(type == nullptr) == isDecl
+      index<Type> parseTypename(index<Identifier> scopeName = 0, bool isDecl);
       index<Decl> parseLetStmt(index<Identifier> scopeName = 0);
       index<Variable> parseParam(index<Identifier> scopeName = 0);
       index<Variable> parseDefaultableParam(index<Identifier> scopeName = 0);
@@ -109,9 +113,9 @@ class clef::Parser {
 #pragma GCC diagnostic ignored "-Wformat-security"
 void clef::Parser::logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, auto&&... args) {
    _errno = code;
-   mcsl::write(mcsl::stderr, currTok);
-   mcsl::write(mcsl::stderr, tree);
-   clef::throwError(code, mcsl::FMT(formatStr), std::forward<decltype(args)>(args)...);
+   // mcsl::write(mcsl::stderr, currTok);
+   // mcsl::write(mcsl::stderr, tree);
+   clef::throwError(code, src.lineNum(), src.currLine(), src.prevTokStr(), src.path(), mcsl::FMT(formatStr), std::forward<decltype(args)>(args)...);
 }
 #pragma GCC diagnostic pop
 #pragma endregion inlinesrc

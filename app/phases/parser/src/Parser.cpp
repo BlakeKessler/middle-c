@@ -50,13 +50,13 @@ START_PARSE_STMT:
 
             case KeywordID::ASM           : getNextToken(); return parseASM(); break;
             
-            case KeywordID::CLASS         : getNextToken(); { return parseClass(); }
-            case KeywordID::STRUCT        : getNextToken(); { return parseStruct(); }
-            case KeywordID::INTERFACE     : getNextToken(); { return parseInterface(); }
-            case KeywordID::UNION         : getNextToken(); { return parseUnion(); }
-            case KeywordID::ENUM          : getNextToken(); { return parseEnum(); }
-            case KeywordID::MASK          : getNextToken(); { return parseMask(); }
-            case KeywordID::NAMESPACE     : getNextToken(); { return parseNamespace(); }
+            case KeywordID::CLASS         : getNextToken(); return parseClass();
+            case KeywordID::STRUCT        : getNextToken(); return parseStruct();
+            case KeywordID::INTERFACE     : getNextToken(); return parseInterface();
+            case KeywordID::UNION         : getNextToken(); return parseUnion();
+            case KeywordID::ENUM          : getNextToken(); return parseEnum();
+            case KeywordID::MASK          : getNextToken(); return parseMask();
+            case KeywordID::NAMESPACE     : getNextToken(); return parseNamespace();
             case KeywordID::FUNC          : getNextToken(); { auto tmp = parseFunction(); return tree.make<TypeDecl>(tree[tmp].signature(), tmp, tmp); }
             case KeywordID::MACRO         : getNextToken(); { auto tmp = parseMacro(); return tree.make<TypeDecl>(tree[tmp].signature(), tmp, tmp); }
 
@@ -395,7 +395,7 @@ clef::QualMask clef::Parser::parseQuals() {
    return quals;
 }
 
-template<bool isDecl> clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(index<Identifier> scopeName) {
+clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(index<Identifier> scopeName, SymbolType symbolType, SymbolNode* type) {
    QualMask quals = parseQuals();
    //handle keywords
    if (currTok.type() == TokenType::KEYWORD) {
@@ -419,7 +419,7 @@ template<bool isDecl> clef::index<clef::Identifier> clef::Parser::tryParseIdenti
       getNextToken();
 
       if (tryConsumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::OPEN)) {
-         index<SpecList> specializer = parseSpecList<isDecl>(BlockType::SPECIALIZER);
+         index<SpecList> specializer = parseSpecList(BlockType::SPECIALIZER, type == nullptr);
          tree[name].specializer() = specializer;
       }
 
@@ -429,20 +429,18 @@ template<bool isDecl> clef::index<clef::Identifier> clef::Parser::tryParseIdenti
       else if (currTok.type() != TokenType::IDEN) { logError(ErrCode::BAD_IDEN, "only identifiers may name or be members of scopes (%u)", +currTok.type()); }
    } while (true);
    tree[name].setQualMask(quals);
+
+   TODO; //!TODO: use `symbolType` and `type`
    
    return name;
 }
-template<bool isDecl> clef::index<clef::Identifier> clef::Parser::parseIdentifier(index<Identifier> scopeName) {
-   index<Identifier> name = tryParseIdentifier<isDecl>(scopeName);
+clef::index<clef::Identifier> clef::Parser::parseIdentifier(index<Identifier> scopeName, SymbolType symbolType, SymbolNode* type) {
+   index<Identifier> name = tryParseIdentifier(scopeName, symbolType, type);
    if (!name) {
       logError(ErrCode::BAD_IDEN, "expected an identifier");
    }
    return name;
 }
-template clef::index<clef::Identifier> clef::Parser::parseIdentifier<true>(index<Identifier>);
-template clef::index<clef::Identifier> clef::Parser::parseIdentifier<false>(index<Identifier>);
-template clef::index<clef::Identifier> clef::Parser::tryParseIdentifier<true>(index<Identifier>);
-template clef::index<clef::Identifier> clef::Parser::tryParseIdentifier<false>(index<Identifier>);
 
 clef::index<clef::If> clef::Parser::parseIf() {
    //condition

@@ -5,9 +5,10 @@
 
 //!HACK: clef::Parser::parseStruct temporarily relies on this function
 clef::index<clef::TypeDecl> clef::Parser::parseClass() {
-   index<Identifier> name = parseIdentifier<true>();
+   index<Identifier> name = parseIdentifier(SymbolType::CLASS, nullptr);
    
    if (tryConsumeEOS()) { //forward declaration
+      TODO;
       index<Class> classptr = tree.remake<Class>(name, tree[(index<Type>)name]);
       return tree.make<TypeDecl>(tree.getFundType(KeywordID::CLASS), classptr);
    }
@@ -19,6 +20,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseClass() {
    //inheritance (including implemented interfaces)
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
       do {
+         TODO;
          index<Type> parentType = parseTypename();
          spec.inheritedTypes().push_back(parentType);
       } while (tryConsumeOperator(OpID::COMMA));
