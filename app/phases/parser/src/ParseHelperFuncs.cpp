@@ -133,24 +133,25 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
 
 clef::index<clef::Decl> clef::Parser::parseDecl() {
    if (tryConsumeKeyword(KeywordID::FUNC)) { [[unlikely]]; //handle functions separately
-      index<Function> funcptr = parseFunction();
-      return tree.make<Decl>(tree[funcptr].signature(), funcptr, toExpr(+funcptr));
+      TODO;
+      // index<Function> funcptr = parseFunction();
+      // return tree.make<Decl>(tree[funcptr].signature(), funcptr, toExpr(+funcptr));
    }
    
    //declaration
-   index<Type> type = parseTypename(scopeName);
-   index<Identifier> varName = parseIdentifier(scopeName);
+   index<Identifier> type = parseTypename(SymbolType::null, true);
+   index<Identifier> varName = parseIdentifier(SymbolType::VAR, tree[type].symbol());
    //definition (optional)
    index<Expr> val;
    if (tryConsumeOperator(OpID::ASSIGN)) {
       val = parseExpr();
    }
    else if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN)) {
-      index<ArgList> args = parseArgList(BlockType::INIT_LIST);
+      index<ArgList> args = parseArgList(BlockType::INIT_LIST, false);
       val = tree.make<Expr>(OpID::LIST_INVOKE, type, args);
    }
    else if (tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN)) {
-      index<ArgList> args = parseArgList(BlockType::CALL);
+      index<ArgList> args = parseArgList(BlockType::CALL, false);
       val = tree.make<Expr>(OpID::CALL_INVOKE, type, args);
    } else {
       val = 0;
@@ -165,76 +166,60 @@ clef::index<clef::Decl> clef::Parser::parseDecl() {
 
 clef::index<clef::Decl> clef::Parser::parseParam() {
    if (tryConsumeKeyword(KeywordID::FUNC)) { [[unlikely]];
-      index<Identifier> name = parseIdentifier(SymbolType::FUNC, nullptr);
+      TODO;
+      // index<Identifier> name = parseIdentifier(SymbolType::FUNC, nullptr);
       
-      consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FUNC without parameters");
-      index<ParamList> params = parseParamList(BlockType::CALL);
+      // consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FUNC without parameters");
+      // index<ArgList> params = parseArgList(BlockType::CALL, true);
       
-      consumeOperator(OpID::ARROW, "FUNC without trailing return type");
-      index<Type> returnType = parseTypename();
+      // consumeOperator(OpID::ARROW, "FUNC without trailing return type");
+      // index<Identifier> returnType = parseTypename(SymbolType::null, true);
 
-      index<FuncSig> sig = tree.make<FuncSig>(returnType, params);
-      return tree.remake<Variable>(name, sig, tree[name]);
+      // index<FuncSig> sig = tree.make<FuncSig>(returnType, params);
+      // return tree.remake<Variable>(name, sig, tree[name]);
    }
 
-   index<Type> typeName = parseTypename(scopeName);
-   index<Identifier> varName = parseIdentifier(scopeName);
-   return tree.remake<Variable>(varName, typeName, tree[varName]);
+   index<Identifier> typeName = parseTypename(SymbolType::null, true);
+   index<Identifier> varName = parseIdentifier(SymbolType::VAR, tree[typeName].symbol());
+   return tree.make<Decl>(typeName, varName);
 }
-clef::index<clef::Variable> clef::Parser::parseDefaultableParam(index<Identifier> scopeName) {
-   index<Variable> var = parseParam(scopeName);
+clef::index<clef::Decl> clef::Parser::parseDefaultableParam() {
+   index<Decl> var = parseParam();
    if (tryConsumeOperator(OpID::ASSIGN)) {
       index<Expr> val = parseExpr();
-      tree[var].val() = val;
+      tree[var].value() = val;
    }
    return var;
 }
 
-clef::index<clef::ArgList> clef::Parser::parseArgList(const BlockType closer) {
+clef::index<clef::ArgList> clef::Parser::parseArgList(const BlockType closer, bool isDecl) {
    index<ArgList> args = tree.make<ArgList>(&tree.allocBuf<index<Expr>>());
    if (tryConsumeBlockDelim(closer, BlockDelimRole::CLOSE)) {
       return args;
    }
-   do {
-      auto tmp = parseExpr();
-      tree[args].push_back(tmp);
-      if (tryConsumeOperator(OpID::COMMA)) {
-         continue;
-      }
-      consumeBlockDelim(closer, BlockDelimRole::CLOSE, "argument list must end with the correct closing delimiter");
-      break;
-   } while (true);
-   return args;
-}
-clef::index<clef::ParamList> clef::Parser::parseParamList(const BlockType closer) {
-   index<ParamList> args = tree.make<ParamList>(&tree.allocBuf<index<Variable>>());
-   if (tryConsumeBlockDelim(closer, BlockDelimRole::CLOSE)) {
-      return args;
-   }
-   do {
-      index<Variable> tmp = parseDefaultableParam();
-      tree[args].push_back(tmp);
-      if (tryConsumeOperator(OpID::COMMA)) {
-         continue;
-      }
-      consumeBlockDelim(closer, BlockDelimRole::CLOSE, "argument list must end with the correct closing delimiter");
-      break;
-   } while (true);
-   return args;
-}
-template<bool isDecl> clef::index<clef::SpecList> clef::Parser::parseSpecList(const BlockType closer) {
-   //!TODO: use GenericType?
-   if constexpr (isDecl) {
-      index<ParamList> params = parseParamList(closer);
-      return tree.remake<SpecList>(params, tree[params]);
+   if (isDecl) {
+      do {
+         auto tmp = parseDefaultableParam();
+         tree[args].push_back(tmp);
+         if (tryConsumeOperator(OpID::COMMA)) {
+            continue;
+         }
+         consumeBlockDelim(closer, BlockDelimRole::CLOSE, "argument list must end with the correct closing delimiter");
+         break;
+      } while (true);
    } else {
-      index<ArgList> args = parseArgList(closer);
-      return tree.remake<SpecList>(args, tree[args]);
+      do {
+         auto tmp = parseExpr();
+         tree[args].push_back(tmp);
+         if (tryConsumeOperator(OpID::COMMA)) {
+            continue;
+         }
+         consumeBlockDelim(closer, BlockDelimRole::CLOSE, "argument list must end with the correct closing delimiter");
+         break;
+      } while (true);
    }
+   return args;
 }
-template clef::index<clef::SpecList> clef::Parser::parseSpecList<true>(const BlockType closer);
-template clef::index<clef::SpecList> clef::Parser::parseSpecList<false>(const BlockType closer);
-
 
 clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
    //deduce directive

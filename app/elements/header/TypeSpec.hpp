@@ -19,15 +19,15 @@ class clef::TypeSpec {
    private:
       MetaType _metatype;
       union {
-         struct {
+         struct { //FUND_TYPE
             FundTypeID id;
          } _fund;
-         struct {
+         struct { //INDIR
             TypeSpec* pointee;
             QualMask pointeeQuals;
             IndirTable table;
          } _indir;
-         struct {
+         struct { //COMPOSITE
             mcsl::dyn_arr<SymbolNode*> tpltParams;
             mcsl::set<SymbolNode*> impls; //implemented interafaces
             mcsl::dyn_arr<SymbolNode*> dataMembs;
@@ -37,7 +37,7 @@ class clef::TypeSpec {
             mcsl::set<SymbolNode*> staticFuncs;
             mcsl::set<SymbolNode*> subtypes;
          } _composite;
-         struct {
+         struct { //FUNC_SIG
             TypeSpec* retType;
             mcsl::dyn_arr<TypeSpec*> params;
          } _funcSig;
