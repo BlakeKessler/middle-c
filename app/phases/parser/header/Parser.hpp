@@ -21,9 +21,9 @@ class clef::Parser {
       //!TODO: use these
       index<Identifier> scopeName;
       SymbolNode* currScope;
-      #define PUSH_SCOPE2(name) index<Identifier> __prevScope = scopeName; scopeName = name; currScope = tree[name].symbol()
+      #define PUSH_SCOPE2(name) index<Identifier> __prevScopeName = scopeName; SymbolNode* __prevScope = currScope; scopeName = name; currScope = tree[name].symbol()
       #define PUSH_SCOPE PUSH_SCOPE2(name)
-      #define POP_SCOPE scopeName = __prevScope; currScope = tree[scopeName].symbol()
+      #define POP_SCOPE scopeName = __prevScopeName; currScope = __prevScope
 
       ErrCode _errno;
 
@@ -103,7 +103,7 @@ class clef::Parser {
       void getNextToken() { currTok = src.nextToken(); }
 
       //constructors
-      Parser(Lexer& s, SyntaxTree& t):tree{t},src{s},currTok{src.nextToken()},_errno{} {}
+      Parser(Lexer& s, SyntaxTree& t):tree{t},src{s},currTok{src.nextToken()},scopeName{0},currScope{tree.globalScope()},_errno{} {}
    public:
       //parse tokenized source code
       static void parse(Lexer& src, SyntaxTree& tree);

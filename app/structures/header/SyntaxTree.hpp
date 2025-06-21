@@ -54,6 +54,8 @@ class clef::SyntaxTree {
       
       SymbolNode* GET_BYTE_BUF_TYPE();
 
+      SymbolNode* globalScope() { return &_globalScope; }
+
       uint nodeCount() const { return _buf.size(); }
       astNode& getNode(const uint i) { assume(i); return _buf[i]; }
       const astNode& getNode(const uint i) const { assume(i); return _buf[i]; }
