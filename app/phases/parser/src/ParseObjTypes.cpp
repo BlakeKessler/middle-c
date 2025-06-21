@@ -66,12 +66,12 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType sy
          #undef KW_CASE
          case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(); tree[(index<Identifier>)tmp].addQuals(scope); (isStatic ? spec->composite().staticFuncs : spec->composite().methods).insert(tree[tmp].symbol()); symbol->insert(tree[tmp].symbol());} break;
          case KeywordID::LET : getNextToken(); {auto tmp = parseDecl(); tree[(index<Identifier>)(tree[tmp].name())].addQuals(scope); (isStatic ? spec->composite().staticMembs : spec->composite().dataMembs).push_back(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol());} break;
-         default: logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
+         default: logError(ErrCode::BAD_STMT, "invalid statement in class/struct definition");
       }
    }
 
    //EOS
-   consumeEOS("object type declaration without EOS");
+   consumeEOS("class/struct declaration without EOS");
 
    //return
    POP_SCOPE;
@@ -134,7 +134,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
    }
 
    //EOS
-   consumeEOS("INTERFACE without EOS");
+   consumeEOS("interface without EOS");
 
    //return
    POP_SCOPE;
@@ -158,12 +158,12 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion() {
    }
    PUSH_SCOPE;
 
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad UNION definition");
+   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad union definition");
 
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       //parse member
       index<Decl> member = parseParam();
-      consumeEOS("bad UNION member");
+      consumeEOS("bad union member");
       
       //push to members list
       spec->composite().dataMembs.push_back(tree[tree[member].name()].symbol());
@@ -171,7 +171,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion() {
    }
 
    //EOS
-   consumeEOS("UNION without EOS");
+   consumeEOS("union without EOS");
 
    //return
    POP_SCOPE;
@@ -183,7 +183,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(SymbolType symbolT
 
    if (tryConsumeEOS()) { //forward declaration
       if (!name) {
-         logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous ENUM");
+         logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous enum/mask");
       }
       return tree.make<TypeDecl>(name);
    }
@@ -201,7 +201,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(SymbolType symbolT
    } else { baseType = 0; }
 
 
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad ENUM definition");
+   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad enum/mask definition");
    if (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       do {
          index<Identifier> enumerator = parseIdentifier(SymbolType::VAR, symbol);
@@ -218,7 +218,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(SymbolType symbolT
    }
    
    //EOS
-   consumeEOS("ENUM without EOS");
+   consumeEOS("enum/mask without EOS");
 
    //return
    POP_SCOPE;
