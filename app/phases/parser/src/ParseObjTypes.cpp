@@ -18,6 +18,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType sy
    if (spec->metaType() != TypeSpec::COMPOSITE) {
       logError(ErrCode::BAD_TYPE_DECL, "redeclaration of %s `%s`", metatypeName, *symbol);
    }
+   PUSH_SCOPE;
 
    //implemented interfaces
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
@@ -73,6 +74,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType sy
    consumeEOS("object type declaration without EOS");
 
    //return
+   POP_SCOPE;
    return tree.make<TypeDecl>(name, name);
 }
 
@@ -88,6 +90,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
    if (spec->metaType() != TypeSpec::COMPOSITE) {
       logError(ErrCode::BAD_TYPE_DECL, "redeclaration of interface `%s`", *symbol);
    }
+   PUSH_SCOPE;
    
    //inheritance
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
@@ -134,6 +137,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
    consumeEOS("INTERFACE without EOS");
 
    //return
+   POP_SCOPE;
    return tree.make<TypeDecl>(name, name);
 }
 
@@ -152,6 +156,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion() {
    if (spec->metaType() != TypeSpec::COMPOSITE) {
       logError(ErrCode::BAD_TYPE_DECL, "redeclaration of union `%s`", *symbol);
    }
+   PUSH_SCOPE;
 
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad UNION definition");
 
@@ -169,6 +174,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion() {
    consumeEOS("UNION without EOS");
 
    //return
+   POP_SCOPE;
    return tree.make<TypeDecl>(name, name);
 }
 
@@ -187,6 +193,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(SymbolType symbolT
    if (spec->metaType() != TypeSpec::COMPOSITE) {
       logError(ErrCode::BAD_TYPE_DECL, "redeclaration of %s `%s`", metatypeName, *symbol);
    }
+   PUSH_SCOPE;
 
    index<Identifier> baseType;
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
@@ -214,6 +221,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(SymbolType symbolT
    consumeEOS("ENUM without EOS");
 
    //return
+   POP_SCOPE;
    return tree.make<TypeDecl>(name, name);
 }
 
@@ -237,6 +245,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace() {
    if (spec->metaType() != TypeSpec::COMPOSITE) {
       logError(ErrCode::BAD_TYPE_DECL, "redeclaration of namespace `%s`", *symbol);
    }
+   PUSH_SCOPE;
 
    //definition
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "namespace definition");
@@ -264,6 +273,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace() {
    consumeEOS("object type declaration without EOS");
 
    //return
+   POP_SCOPE;
    return tree.make<TypeDecl>(name, name);
 }
 

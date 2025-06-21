@@ -21,6 +21,9 @@ class clef::Parser {
       //!TODO: use these
       index<Identifier> scopeName;
       SymbolNode* currScope;
+      #define PUSH_SCOPE2(name) index<Identifier> __prevScope = scopeName; scopeName = name; currScope = tree[name].symbol()
+      #define PUSH_SCOPE PUSH_SCOPE2(name)
+      #define POP_SCOPE scopeName = __prevScope; currScope = tree[scopeName].symbol()
 
       ErrCode _errno;
 
