@@ -171,33 +171,38 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion() {
 }
 
 clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(SymbolType symbolType, const mcsl::str_slice metatypeName) {
-   index<Identifier> name = parseIdentifier<true>();
-   index<Type> baseType;
-   if (tryConsumeOperator(OpID::LABEL_DELIM)) {
-      baseType = parseTypename();
-   } else { baseType = 0; }
+   index<Identifier> name = tryParseIdentifier(symbolType, nullptr);
 
    if (tryConsumeEOS()) { //forward declaration
       if (!name) {
          logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous ENUM");
       }
-      return tree.make<TypeDecl>(tree.getFundType(KeywordID::ENUM), name);
+      return tree.make<TypeDecl>(name);
    }
+
+   SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
+   TypeSpec* spec = symbol->type();          debug_assert(spec);
+   if (spec->metaType() != TypeSpec::COMPOSITE) {
+      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of %s `%s`", metatypeName, *symbol);
+   }
+
+   index<Identifier> baseType;
+   if (tryConsumeOperator(OpID::LABEL_DELIM)) {
+      baseType = parseTypename(SymbolType::FUND_TYPE, false);
+   } else { baseType = 0; }
 
 
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad ENUM definition");
-   index<ParamList> enumerators = tree.make<ParamList>(&tree.allocBuf<index<Variable>>());
-   index<Enum> enumptr = tree.remake<Enum>(name, tree[(index<Type>)name], baseType, enumerators);
    if (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       do {
-         index<Identifier> enumerator = parseIdentifier();
+         index<Identifier> enumerator = parseIdentifier(SymbolType::VAR, symbol);
          index<Expr> val;
          if (tryConsumeOperator(OpID::ASSIGN)) {
             val = parseExprNoPrimaryComma();
+            TODO;
          } else { val = 0; }
 
-         tree[enumerators].push_back(tree.remake<Variable>(enumerator, baseType, tree[enumerator], val));
-
+         spec->composite().staticMembs.push_back(tree[enumerator].symbol());
       } while (tryConsumeOperator(OpID::COMMA));
       consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE, "bad ENUM enumerator");
    }
@@ -206,7 +211,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(SymbolType symbolT
    consumeEOS("ENUM without EOS");
 
    //return
-   return tree.make<TypeDecl>(tree.getFundType(KeywordID::ENUM), enumptr, enumerators);
+   return tree.make<TypeDecl>(name, name);
 }
 
 //!TODO: implement enumunions
@@ -215,44 +220,48 @@ clef::index<clef::TypeDecl> clef::Parser::parseEnumUnion() {
 }
 
 clef::index<clef::TypeDecl> clef::Parser::parseNamespace() {
-   index<Identifier> name = parseIdentifier<true>();
+   index<Identifier> name = tryParseIdentifier(SymbolType::NAMESPACE, nullptr);
    
    if (tryConsumeEOS()) { //forward declaration
       if (!name) {
-         logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous NAMESPACE");
+         logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous namespace");
       }
-      return tree.make<TypeDecl>(tree.getFundType(KeywordID::NAMESPACE), name);
+      return tree.make<TypeDecl>(name);
    }
    
-   index<NamespaceSpec> specIndex = tree.allocNamespaceSpec();
-   NamespaceSpec& spec = tree[specIndex];
-   index<Namespace> namespaceptr = tree.remake<Namespace>(name, specIndex, tree[(index<Type>)name]);
+   SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
+   TypeSpec* spec = symbol->type();          debug_assert(spec);
+   if (spec->metaType() != TypeSpec::COMPOSITE) {
+      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of namespace `%s`", *symbol);
+   }
 
    //definition
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad CLASS definition");
+   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "class/struct definition");
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       if (currTok.type() != TokenType::KEYWORD) {
-         logError(ErrCode::BAD_STMT, "invalid statement in NAMESPACE definition");
+         logError(ErrCode::BAD_STMT, "invalid statement in namespace definition");
       }
       switch (currTok.keywordID()) {
-         case KeywordID::CLASS    : getNextToken(); {auto tmp = parseClass(); spec.types().push_back(tmp);} break;
-         case KeywordID::STRUCT   : getNextToken(); {auto tmp = parseStruct(); spec.types().push_back(tmp);} break;
-         case KeywordID::INTERFACE: getNextToken(); {auto tmp = parseInterface(); spec.types().push_back(tmp);} break;
-         case KeywordID::UNION    : getNextToken(); {auto tmp = parseUnion(); spec.types().push_back(tmp);} break;
-         case KeywordID::ENUM     : getNextToken(); {auto tmp = parseEnum(); spec.types().push_back(tmp);} break;
-         case KeywordID::MASK     : getNextToken(); {auto tmp = parseMask(); spec.types().push_back(tmp);} break;
-         case KeywordID::NAMESPACE: getNextToken(); {auto tmp = parseNamespace(); spec.types().push_back(tmp);} break;
-         case KeywordID::FUNC     : getNextToken(); {auto tmp = parseFunction(); spec.funcs().push_back(tmp);} break;
-         case KeywordID::LET      : getNextToken(); {auto tmp = parseDecl(); spec.vars().push_back(tmp);} break;
-         default: logError(ErrCode::BAD_STMT, "invalid statement in NAMESPACE definition");
+         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: getNextToken(); { auto tmp = parsingFunc(); spec->composite().subtypes.insert(tree[tree[tmp].name()].symbol()); } break
+         KW_CASE(CLASS, parseClass);
+         KW_CASE(STRUCT, parseStruct);
+         KW_CASE(INTERFACE, parseInterface);
+         KW_CASE(UNION, parseUnion);
+         KW_CASE(ENUM, parseEnum);
+         KW_CASE(MASK, parseMask);
+         KW_CASE(NAMESPACE, parseNamespace);
+         #undef KW_CASE
+         case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(); spec->composite().staticFuncs.insert(tree[tmp].symbol());} break;
+         case KeywordID::LET : getNextToken(); {auto tmp = parseDecl(); spec->composite().staticMembs.push_back(tree[tree[tmp].name()].symbol());} break;
+         default: logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
       }
    }
 
    //EOS
-   consumeEOS("NAMESPACE without EOS");
+   consumeEOS("object type declaration without EOS");
 
    //return
-   return tree.make<TypeDecl>(tree.getFundType(KeywordID::NAMESPACE), namespaceptr, specIndex);
+   return tree.make<TypeDecl>(name, name);
 }
 
 #endif
