@@ -50,6 +50,8 @@ namespace clef {
 
       VAR,
       FUNC,
+
+      LABEL,
       
       __TYPE_BIT = 8_m,
          FUND_TYPE,

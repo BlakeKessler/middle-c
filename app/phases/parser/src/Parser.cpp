@@ -57,8 +57,8 @@ START_PARSE_STMT:
             case KeywordID::ENUM          : getNextToken(); return parseEnum();
             case KeywordID::MASK          : getNextToken(); return parseMask();
             case KeywordID::NAMESPACE     : getNextToken(); return parseNamespace();
-            case KeywordID::FUNC          : getNextToken(); { auto tmp = parseFunction(); return tree.make<TypeDecl>(tree[tmp].signature(), tmp, tmp); }
-            case KeywordID::MACRO         : getNextToken(); { auto tmp = parseMacro(); return tree.make<TypeDecl>(tree[tmp].signature(), tmp, tmp); }
+            case KeywordID::FUNC          : getNextToken(); TODO; //{ auto tmp = parseFunction(); return tree.make<TypeDecl>(tree[tmp].signature(), tmp, tmp); }
+            case KeywordID::MACRO         : getNextToken(); TODO; //{ auto tmp = parseMacro(); return tree.make<TypeDecl>(tree[tmp].signature(), tmp, tmp); }
 
             
             case KeywordID::IF            : getNextToken(); return parseIf(); break;
@@ -89,7 +89,7 @@ START_PARSE_STMT:
                   return tree.make<Stmt>(OpID::GOTO_CASE);
                }
                //goto
-               index<Identifier> label = parseIdentifier();
+               index<Identifier> label = parseIdentifier(SymbolType::LABEL, nullptr);
                if (tree[label].scopeName()) { logError(ErrCode::BAD_IDEN, "label may not be scoped"); }
                consumeEOS("bad GOTO statement (missing EOS)");
                return tree.make<Stmt>(OpID::GOTO, label);
@@ -140,8 +140,9 @@ START_PARSE_STMT:
 
             case KeywordID::ALIAS         : {
                getNextToken();
-               index<Identifier> alias = parseIdentifier();
+               index<Identifier> alias = parseIdentifier(SymbolType::null, nullptr);
                consumeOperator(OpID::ASSIGN, "alias definitions must use the assignment operator (and cannot be forward-declared)");
+               TODO;
                index<Expr> valExpr = parseExpr();
                return tree.make<Stmt>(KeywordID::ALIAS, alias, valExpr);
             }
@@ -274,13 +275,14 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             else if (isC_FunctionLike(kw)) {
                getNextToken();
                consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "bad function-like keyword use");
-               index<ArgList> argList = parseArgList(BlockType::CALL);
+               index<ArgList> argList = parseArgList(BlockType::CALL, false);
                operandStack.push_back(+tree.make<Expr>(kw, argList));
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
             else if (isType(kw)) {
-               operandStack.push_back(+tree.getFundType(kw));
+               TODO;
+               // operandStack.push_back(+tree.getFundType(kw));
                getNextToken();
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
@@ -290,7 +292,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
          }
 
          case TokenType::MACRO_INVOKE: TODO;
-         case TokenType::IDEN: operandStack.push_back(+parseIdentifier()); prevTokIsOperand = true; goto PARSE_EXPR_CONTINUE;
+         case TokenType::IDEN: operandStack.push_back(+parseIdentifier(SymbolType::null, nullptr)); prevTokIsOperand = true; goto PARSE_EXPR_CONTINUE;
          case TokenType::INT_NUM:
             operandStack.push_back(+tree.make<Literal>(currTok.intVal()));
             getNextToken();
@@ -359,10 +361,10 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             getNextToken();
             if (prevTokIsOperand) { //function call, initializer list, subscript, or specializer
                debug_assert(operandStack.size());
-               index<ArgList> args = parseArgList(blockType);
+               index<ArgList> args = parseArgList(blockType, false);
                operandStack.push_back(+tree.makeExpr(getInvoker(blockType),operandStack.pop_back(),(index<astNode>)args));
             } else if (blockType == BlockType::INIT_LIST) { //tuple
-               operandStack.push_back(+parseArgList(blockType));
+               operandStack.push_back(+parseArgList(blockType, false));
             } else { //block subexpression
                operandStack.push_back(+parseExpr());
                consumeBlockDelim(blockType, BlockDelimRole::CLOSE, "bad block subexpression");
@@ -395,11 +397,11 @@ clef::QualMask clef::Parser::parseQuals() {
    return quals;
 }
 
-clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(index<Identifier> scopeName, SymbolType symbolType, SymbolNode* type) {
+clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbolType, SymbolNode* type) {
    QualMask quals = parseQuals();
    //handle keywords
    if (currTok.type() == TokenType::KEYWORD) {
-      index<Identifier> keyword = tree.make<Identifier>(currTok.keywordID(), index<SpecList>{}, quals);
+      index<Identifier> keyword = tree.make<Identifier>(currTok.keywordID(), index<ArgList>{}, quals);
       getNextToken();
       if (tryConsumeOperator(OpID::SCOPE_RESOLUTION)) {
          logError(ErrCode::BAD_KEYWORD, "keywords may not name scopes");
@@ -419,7 +421,7 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(index<Identifier>
       getNextToken();
 
       if (tryConsumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::OPEN)) {
-         index<SpecList> specializer = parseSpecList(BlockType::SPECIALIZER, type == nullptr);
+         index<ArgList> specializer = parseArgList(BlockType::SPECIALIZER, type == nullptr);
          tree[name].specializer() = specializer;
       }
 
@@ -434,8 +436,8 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(index<Identifier>
    
    return name;
 }
-clef::index<clef::Identifier> clef::Parser::parseIdentifier(index<Identifier> scopeName, SymbolType symbolType, SymbolNode* type) {
-   index<Identifier> name = tryParseIdentifier(scopeName, symbolType, type);
+clef::index<clef::Identifier> clef::Parser::parseIdentifier(SymbolType symbolType, SymbolNode* type) {
+   index<Identifier> name = tryParseIdentifier(symbolType, type);
    if (!name) {
       logError(ErrCode::BAD_IDEN, "expected an identifier");
    }
@@ -559,85 +561,79 @@ clef::index<clef::TryCatch> clef::Parser::parseTryCatch() {
    index<Scope> procedure = parseProcedure();
    consumeKeyword(KeywordID::CATCH, "TRY block without CATCH block");
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "CATCH block without opening parens");
-   index<Variable> err = parseParam();
+   index<Decl> err = parseParam();
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "CATCH block without closing parens");
    index<Scope> handler = parseProcedure();
    return tree.make<TryCatch>(procedure, err, handler);
 }
 
-clef::index<clef::Function> clef::Parser::parseFunction() {
-   index<Identifier> name = tryParseIdentifier<true>();
+clef::index<clef::Identifier> clef::Parser::parseFunction() {
+   TODO;
+   // index<Identifier> name = tryParseIdentifier<true>();
    
-   //params
-   consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FUNC without parameters");
-   index<ParamList> params = parseParamList(BlockType::CALL);
+   // //params
+   // consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FUNC without parameters");
+   // index<ParamList> params = parseParamList(BlockType::CALL);
    
 
-   //return type
-   consumeOperator(OpID::ARROW, "FUNC without trailing return type");
-   index<Type> returnType = parseTypename();
+   // //return type
+   // consumeOperator(OpID::ARROW, "FUNC without trailing return type");
+   // index<Type> returnType = parseTypename();
 
-   //make signature
-   index<FuncSig> sig = tree.make<FuncSig>(returnType, params);
+   // //make signature
+   // index<FuncSig> sig = tree.make<FuncSig>(returnType, params);
 
-   if (tryConsumeEOS()) { //forward declaration
-      if (name) {
-         return tree.remake<Function>(name, sig, tree[name]);
-      } else {
-         return tree.make<Function>(sig);
-      }
-   }
+   // if (tryConsumeEOS()) { //forward declaration
+   //    if (name) {
+   //       return tree.remake<Function>(name, sig, tree[name]);
+   //    } else {
+   //       return tree.make<Function>(sig);
+   //    }
+   // }
 
-   //definition
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad FUNC definition");
-   index<Scope> procedure = parseProcedure();
+   // //definition
+   // consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad FUNC definition");
+   // index<Scope> procedure = parseProcedure();
 
-   //EOS
-   consumeEOS("FUNC without EOS");
+   // //EOS
+   // consumeEOS("FUNC without EOS");
 
-   //return
-   if (name) {
-      return tree.remake<Function>(name, sig, procedure, tree[name]);
-   } else {
-      return tree.make<Function>(sig, procedure);
-   }
+   // //return
+   // if (name) {
+   //    return tree.remake<Function>(name, sig, procedure, tree[name]);
+   // } else {
+   //    return tree.make<Function>(sig, procedure);
+   // }
 }
-clef::index<clef::Macro> clef::Parser::parseMacro() {
-   index<Identifier> name = tryParseIdentifier<true>();
+clef::index<clef::Identifier> clef::Parser::parseMacro() {
+   TODO;
+   // index<Identifier> name = tryParseIdentifier<true>();
    
-   //params
-   consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FUNC without parameters");
-   index<ParamList> params = parseParamList(BlockType::CALL);
-   
+   // //params
+   // consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FUNC without parameters");
+   // index<ParamList> params = parseParamList(BlockType::CALL);
 
-   //return type
-   consumeOperator(OpID::ARROW, "FUNC without trailing return type");
-   index<Type> returnType = parseTypename();
+   // if (tryConsumeEOS()) { //forward declaration
+   //    if (name) {
+   //       return tree.remake<Macro>(name, sig, tree[name]);
+   //    } else {
+   //       return tree.make<Macro>(sig);
+   //    }
+   // }
 
-   //make signature
-   index<FuncSig> sig = tree.make<FuncSig>(returnType, params);
+   // //definition
+   // consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad FUNC definition");
+   // index<Scope> procedure = parseProcedure();
 
-   if (tryConsumeEOS()) { //forward declaration
-      if (name) {
-         return tree.remake<Macro>(name, sig, tree[name]);
-      } else {
-         return tree.make<Macro>(sig);
-      }
-   }
+   // //EOS
+   // consumeEOS("macro without EOS");
 
-   //definition
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad FUNC definition");
-   index<Scope> procedure = parseProcedure();
-
-   //EOS
-   consumeEOS("FUNC without EOS");
-
-   //return
-   if (name) {
-      return tree.remake<Macro>(name, sig, procedure, tree[name]);
-   } else {
-      return tree.make<Macro>(sig, procedure);
-   }
+   // //return
+   // if (name) {
+   //    return tree.remake<Macro>(name, sig, procedure, tree[name]);
+   // } else {
+   //    return tree.make<Macro>(sig, procedure);
+   // }
 }
 
 //!TODO: implement parseASM

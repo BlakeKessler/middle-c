@@ -7,9 +7,9 @@
 #include "pretty-print.hpp"
 #include "io.hpp"
 
-clef::Expression::Expression(OpID op, index<Type> type, index<ArgList> ctorArgs):
+clef::Expression::Expression(OpID op, index<Identifier> type, index<ArgList> ctorArgs):
    _op{op},
-   _lhsType{NodeType::TYPE},
+   _lhsType{NodeType::IDEN},
    _rhsType{NodeType::ARG_LIST},
    _extraType{NodeType::NONE},
    _lhs{type},_rhs{ctorArgs},_extra{} {

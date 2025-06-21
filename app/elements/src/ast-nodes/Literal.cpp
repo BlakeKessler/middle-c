@@ -25,7 +25,7 @@ mcsl::File& mcsl::write(mcsl::File& file, const clef::Literal& obj) {
       case LitType::FORMAT: [[fallthrough]];
       case LitType::REGEX: file.printf(mcsl::FMT("%s"), (const str_slice&)obj); break;
 
-      case LitType::TYPEID: file.printf(mcsl::FMT("%u"), (clef::index<const Type>)obj); break;
+      case LitType::TYPEID: TODO; //file.printf(mcsl::FMT("%u"), (clef::index<const Type>)obj); break;
    }
    return file;
 }

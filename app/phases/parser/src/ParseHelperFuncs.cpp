@@ -81,6 +81,9 @@ clef::index<clef::Scope> clef::Parser::parseProcedure() {
 
 
 clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType, bool isDecl) {
+   if (isDecl) {
+      TODO;
+   }
    index<Identifier> name = parseIdentifier(symbolType, nullptr);
    Identifier& iden = tree[name];
    if (SymbolNode* symbol = iden.symbol(); !symbol || !isType(symbol->symbolType())) {
@@ -239,7 +242,10 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
    else if (currTok.name() == FMT("embed")) {
       getNextToken();
       op = OpID::PREPROC_EMBED;
-      name = parseIdentifier(SymbolType::VAR, tree.GET_BYTE_BUF_TYPE());
+      SymbolNode* byteType = tree.globalScope()->get(toString(KeywordID::UBYTE));
+      index<Identifier> byteSpan = tree.make<Identifier>(KeywordID::UBYTE);
+      tree.makeIndirType(byteSpan, byteType->type(), QualMask::CONST, IndirTable::Entry(IndirTable::Entry::SLICE, true, false, false));
+      name = parseIdentifier(SymbolType::VAR, tree[byteSpan].symbol());
    } else {
       logError(ErrCode::BAD_PREPROC, "unrecognized directive");
       op = OpID::NULL;

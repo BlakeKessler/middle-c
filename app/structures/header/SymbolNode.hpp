@@ -45,6 +45,11 @@ class clef::SymbolNode {
       SymbolNode*& operator[](mcsl::str_slice name);
       void insert(SymbolNode*);
 
+      auto begin() { return _childSymbols.begin(); }
+      auto begin() const { return _childSymbols.begin(); }
+      auto end() { return _childSymbols.end(); }
+      auto end() const { return _childSymbols.end(); }
+
       const mcsl::str_slice name() const { return _name; }
       SymbolNode* parentScope() { return _parentScope; }
       const SymbolNode* parentScope() const { return _parentScope; }

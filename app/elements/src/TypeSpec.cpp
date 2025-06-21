@@ -20,7 +20,6 @@ clef::TypeSpec::~TypeSpec() {
 
       case COMPOSITE:
          std::destroy_at(&_composite.tpltParams);
-         std::destroy_at(&_composite.parentTypes);
          std::destroy_at(&_composite.impls);
          std::destroy_at(&_composite.dataMembs);
          std::destroy_at(&_composite.methods);
@@ -57,7 +56,6 @@ clef::TypeSpec::TypeSpec(const TypeSpec& other):
          case COMPOSITE:
             #define __curr _composite
             __cpy(tpltParams);
-            __cpy(parentTypes);
             __cpy(impls);
             __cpy(dataMembs);
             __cpy(methods);

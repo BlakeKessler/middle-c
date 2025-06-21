@@ -112,5 +112,8 @@ clef::SymbolNode*& clef::SymbolNode::operator[](mcsl::str_slice name) {
    }
    return _childSymbols[name];
 }
+void clef::SymbolNode::insert(SymbolNode* symbol) {
+   operator[](symbol->name()) = symbol;
+}
 
 #endif //SYMBOL_NODE_CPP
