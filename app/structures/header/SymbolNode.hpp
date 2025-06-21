@@ -43,6 +43,7 @@ class clef::SymbolNode {
       SymbolNode* qualifiedGet(mcsl::str_slice name); //full identifier string
       SymbolNode* qualifiedGet(mcsl::arr_span<mcsl::str_slice> name); //array of single-token identifiers making up the full identifier
       SymbolNode*& operator[](mcsl::str_slice name);
+      void insert(SymbolNode*);
 
       const mcsl::str_slice name() const { return _name; }
       SymbolNode* parentScope() { return _parentScope; }

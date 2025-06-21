@@ -54,7 +54,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType sy
          logError(ErrCode::BAD_STMT, "invalid statement in %s definition", metatypeName);
       }
       switch (currTok.keywordID()) {
-         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: getNextToken(); if (isStatic) { logError(ErrCode::BAD_KEYWORD, "cannot qualify a " #kw " as static"); } { auto tmp = parsingFunc(); tree[(index<Identifier>)tmp].addQuals(scope); spec->composite().subtypes.insert(tree[tree[tmp].name()].symbol()); } break
+         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: getNextToken(); if (isStatic) { logError(ErrCode::BAD_KEYWORD, "cannot qualify a " #kw " as static"); } { auto tmp = parsingFunc(); tree[(index<Identifier>)tmp].addQuals(scope); spec->composite().subtypes.insert(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol()); } break
          KW_CASE(CLASS, parseClass);
          KW_CASE(STRUCT, parseStruct);
          KW_CASE(INTERFACE, parseInterface);
@@ -63,8 +63,8 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType sy
          KW_CASE(MASK, parseMask);
          KW_CASE(NAMESPACE, parseNamespace);
          #undef KW_CASE
-         case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(); tree[(index<Identifier>)tmp].addQuals(scope); (isStatic ? spec->composite().staticFuncs : spec->composite().methods).insert(tree[tmp].symbol());} break;
-         case KeywordID::LET : getNextToken(); {auto tmp = parseDecl(); tree[(index<Identifier>)(tree[tmp].name())].addQuals(scope); (isStatic ? spec->composite().staticMembs : spec->composite().dataMembs).push_back(tree[tree[tmp].name()].symbol());} break;
+         case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(); tree[(index<Identifier>)tmp].addQuals(scope); (isStatic ? spec->composite().staticFuncs : spec->composite().methods).insert(tree[tmp].symbol()); symbol->insert(tree[tmp].symbol());} break;
+         case KeywordID::LET : getNextToken(); {auto tmp = parseDecl(); tree[(index<Identifier>)(tree[tmp].name())].addQuals(scope); (isStatic ? spec->composite().staticMembs : spec->composite().dataMembs).push_back(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol());} break;
          default: logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
       }
    }
@@ -127,6 +127,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
       } else {
          spec->composite().methods.insert(tree[func].symbol());
       }
+      symbol->insert(tree[func].symbol());
    }
 
    //EOS
@@ -161,6 +162,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion() {
       
       //push to members list
       spec->composite().dataMembs.push_back(tree[tree[member].name()].symbol());
+      symbol->insert(tree[tree[member].name()].symbol());
    }
 
    //EOS
@@ -203,6 +205,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(SymbolType symbolT
          } else { val = 0; }
 
          spec->composite().staticMembs.push_back(tree[enumerator].symbol());
+         symbol->insert(tree[enumerator].symbol());
       } while (tryConsumeOperator(OpID::COMMA));
       consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE, "bad ENUM enumerator");
    }
@@ -236,13 +239,13 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace() {
    }
 
    //definition
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "class/struct definition");
+   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "namespace definition");
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       if (currTok.type() != TokenType::KEYWORD) {
          logError(ErrCode::BAD_STMT, "invalid statement in namespace definition");
       }
       switch (currTok.keywordID()) {
-         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: getNextToken(); { auto tmp = parsingFunc(); spec->composite().subtypes.insert(tree[tree[tmp].name()].symbol()); } break
+         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: getNextToken(); { auto tmp = parsingFunc(); spec->composite().subtypes.insert(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol()); } break
          KW_CASE(CLASS, parseClass);
          KW_CASE(STRUCT, parseStruct);
          KW_CASE(INTERFACE, parseInterface);
@@ -251,9 +254,9 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace() {
          KW_CASE(MASK, parseMask);
          KW_CASE(NAMESPACE, parseNamespace);
          #undef KW_CASE
-         case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(); spec->composite().staticFuncs.insert(tree[tmp].symbol());} break;
-         case KeywordID::LET : getNextToken(); {auto tmp = parseDecl(); spec->composite().staticMembs.push_back(tree[tree[tmp].name()].symbol());} break;
-         default: logError(ErrCode::BAD_STMT, "invalid statement in CLASS definition");
+         case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(); spec->composite().staticFuncs.insert(tree[tmp].symbol()); symbol->insert(tree[tmp].symbol());} break;
+         case KeywordID::LET : getNextToken(); {auto tmp = parseDecl(); spec->composite().staticMembs.push_back(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol());} break;
+         default: logError(ErrCode::BAD_STMT, "invalid statement in namespace definition");
       }
    }
 
