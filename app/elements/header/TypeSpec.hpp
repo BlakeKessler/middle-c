@@ -76,6 +76,7 @@ class clef::TypeSpec {
 
 
       auto& composite() { return _composite; }
+      auto& funcSig() { return _funcSig; }
 };
 
 /* |===============|

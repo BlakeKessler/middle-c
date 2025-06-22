@@ -12,6 +12,8 @@
 #include "ast-nodes/Identifier.hpp"
 #include "ast-nodes/Statement.hpp"
 #include "ast-nodes/exprs/Declaration.hpp"
+#include "ast-nodes/exprs/FunctionDefinition.hpp"
+#include "ast-nodes/exprs/MacroDefinition.hpp"
 #include "ast-nodes/exprs/TypeDeclaration.hpp"
 #include "ast-nodes/exprs/If.hpp"
 #include "ast-nodes/exprs/ForLoop.hpp"
@@ -30,9 +32,10 @@
 
 #include "MAP_MACRO.h"
 #define CLEF_ALL_AST_NODE_UNION_MEMBS \
-   _identifier, _scope, _literal, _expression, _declaration, _typeDecl, _forLoop, _foreachLoop,         \
-   _whileLoop, _doWhileLoop, _if, _switch, _match, _tryCatch, _asm, _forLoopParams, _foreachLoopParams, \
-   _switchCases, _matchCases, _statement, _statementSequence, _argumentList
+   _identifier, _scope, _literal, _expression, _declaration, _typeDecl, _funcDef, _macroDef, \
+   _forLoop, _foreachLoop, _whileLoop, _doWhileLoop, _if, _switch, _match, _tryCatch, _asm,  \
+   _forLoopParams, _foreachLoopParams, _switchCases, _matchCases, _statement,                \
+   _statementSequence, _argumentList
 
 struct clef::astNode {
    private:
@@ -42,6 +45,8 @@ struct clef::astNode {
          Literal _literal;
          Expression _expression;
          Declaration _declaration;
+         FunctionDefinition _funcDef;
+         MacroDefinition _macroDef;
          TypeDeclaration _typeDecl;
          ForLoop _forLoop;
          ForeachLoop _foreachLoop;

@@ -49,7 +49,9 @@ class clef::SyntaxTree {
       SymbolNode* findSymbol(const mcsl::str_slice name, SymbolNode* scope = {}); //return null if it isn't in the symbol table yet
       SymbolNode* registerSymbol(const mcsl::str_slice name, SymbolNode* scope = {}); //add to the table if it isn't in the symbol table yet
       SymbolNode* registerAlias(SymbolNode* alias, SymbolNode* target);
-      TypeSpec* registerType(SymbolNode* name, FundTypeID metatype);
+      TypeSpec* registerType(SymbolNode* name, TypeSpec::MetaType metatype);
+      uint freeTypesAfter(TypeSpec*); //inclusive
+      uint popNodesAfter(index<astNode>); //inclusive
       TypeSpec* makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable::Entry firstEntry);
 
       SymbolNode* globalScope() { return &_globalScope; }
@@ -80,6 +82,7 @@ class clef::SyntaxTree {
       index<Expr> remakeTernary(index<astNode> cond, index<Expr> vals);
 
       template<typename T> mcsl::dyn_arr<T>& allocBuf() { return _alloc.at(_alloc.alloc<T>()); }
+      template<typename T> void freeBuf(mcsl::dyn_arr<T>&);
 };
 
 //!quick little struct to indent when printing newlines in a `printf` call

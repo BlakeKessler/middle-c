@@ -29,6 +29,8 @@ namespace clef {
       struct Literal;
       struct Expression; using Expr = Expression;
          struct Declaration; using Decl = Declaration;
+         struct FunctionDefinition; using FuncDef = FunctionDefinition;
+         struct MacroDefinition; using MacroDef = MacroDefinition;
          struct Statement; using Stmt = Statement;
             struct TypeDeclaration; using TypeDecl = TypeDeclaration;
             struct ForLoop;
@@ -50,7 +52,7 @@ namespace clef {
       template<typename T> concept astNode_ptr_t = mcsl::ptr_t<T> && astNode_t<mcsl::remove_ptr<T>>;
       template<typename T> concept operand_t = mcsl::is_t<T, clef::Identifier> || mcsl::is_t<T,Expression> || mcsl::is_t<T,Literal>;
       #define CLEF_ALL_FUND_AST_NODE_T Expression, Literal, Scope, ForLoopParams, ForeachLoopParams, Identifier, Statement
-      #define CLEF_ALL_EXPR_AST_NODE_T Declaration, TypeDecl, If, ForLoop, ForeachLoop, WhileLoop, DoWhileLoop, Switch, Match, TryCatch, Asm
+      #define CLEF_ALL_EXPR_AST_NODE_T Declaration, FuncDef, MacroDef, TypeDecl, If, ForLoop, ForeachLoop, WhileLoop, DoWhileLoop, Switch, Match, TryCatch, Asm
       #define CLEF_ALL_NODE_LIST_AST_NODE_T ArgumentList, MatchCases, StatementSequence, SwitchCases
       #define CLEF_ALL_AST_NODE_T CLEF_ALL_FUND_AST_NODE_T, CLEF_ALL_EXPR_AST_NODE_T, CLEF_ALL_NODE_LIST_AST_NODE_T
    class TypeSpec;

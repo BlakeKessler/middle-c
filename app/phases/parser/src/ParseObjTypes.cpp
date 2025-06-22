@@ -64,7 +64,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType sy
          KW_CASE(MASK, parseMask);
          KW_CASE(NAMESPACE, parseNamespace);
          #undef KW_CASE
-         case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(); tree[(index<Identifier>)tmp].addQuals(scope); (isStatic ? spec->composite().staticFuncs : spec->composite().methods).insert(tree[tmp].symbol()); symbol->insert(tree[tmp].symbol());} break;
+         case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(); tree[tree[tmp].name()].addQuals(scope); (isStatic ? spec->composite().staticFuncs : spec->composite().methods).insert(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol());} break;
          case KeywordID::LET : getNextToken(); {auto tmp = parseDecl(); tree[(index<Identifier>)(tree[tmp].name())].addQuals(scope); (isStatic ? spec->composite().staticMembs : spec->composite().dataMembs).push_back(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol());} break;
          default: logError(ErrCode::BAD_STMT, "invalid statement in class/struct definition");
       }
@@ -123,7 +123,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
       }
       bool isStatic = tryConsumeKeyword(KeywordID::STATIC);
       consumeKeyword(KeywordID::FUNC, "interfaces can only contain functions and methods");
-      index<Identifier> func = parseFunction();
+      index<Identifier> func = tree[parseFunction()].name();
       tree[func].addQuals(scope);
       if (isStatic) {
          spec->composite().staticFuncs.insert(tree[func].symbol());
@@ -263,7 +263,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace() {
          KW_CASE(MASK, parseMask);
          KW_CASE(NAMESPACE, parseNamespace);
          #undef KW_CASE
-         case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(); spec->composite().staticFuncs.insert(tree[tmp].symbol()); symbol->insert(tree[tmp].symbol());} break;
+         case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(); spec->composite().staticFuncs.insert(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol());} break;
          case KeywordID::LET : getNextToken(); {auto tmp = parseDecl(); spec->composite().staticMembs.push_back(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol());} break;
          default: logError(ErrCode::BAD_STMT, "invalid statement in namespace definition");
       }

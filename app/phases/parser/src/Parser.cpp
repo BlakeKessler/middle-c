@@ -567,45 +567,36 @@ clef::index<clef::TryCatch> clef::Parser::parseTryCatch() {
    return tree.make<TryCatch>(procedure, err, handler);
 }
 
-clef::index<clef::Identifier> clef::Parser::parseFunction() {
-   TODO;
-   // index<Identifier> name = tryParseIdentifier<true>();
-   
-   // //params
-   // consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FUNC without parameters");
-   // index<ParamList> params = parseParamList(BlockType::CALL);
-   
+clef::index<clef::FuncDef> clef::Parser::parseFunction() {
+   index<Identifier> name = parseIdentifier(SymbolType::FUNC, nullptr);
 
-   // //return type
-   // consumeOperator(OpID::ARROW, "FUNC without trailing return type");
-   // index<Type> returnType = parseTypename();
+   SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
+   PUSH_SCOPE;
 
-   // //make signature
-   // index<FuncSig> sig = tree.make<FuncSig>(returnType, params);
+   auto [overloadIndex, params] = parseFuncSig(symbol);
 
-   // if (tryConsumeEOS()) { //forward declaration
-   //    if (name) {
-   //       return tree.remake<Function>(name, sig, tree[name]);
-   //    } else {
-   //       return tree.make<Function>(sig);
-   //    }
-   // }
+   if (tryConsumeEOS()) { //forward declaration
+      tree.freeBuf(*params);
+      return tree.make<FuncDef>(name, overloadIndex, index<ArgList>{});
+   }
 
-   // //definition
-   // consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad FUNC definition");
-   // index<Scope> procedure = parseProcedure();
+   //definition
+   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad FUNC definition");
+   index<Scope> procedure = parseProcedure();
 
-   // //EOS
-   // consumeEOS("FUNC without EOS");
+   //EOS
+   consumeEOS("function definition without EOS");
 
-   // //return
-   // if (name) {
-   //    return tree.remake<Function>(name, sig, procedure, tree[name]);
-   // } else {
-   //    return tree.make<Function>(sig, procedure);
-   // }
+   //make definition
+   index<ArgList> paramNode = tree.make<ArgList>(params);
+   index<FuncDef> def = tree.make<FuncDef>(name, overloadIndex, paramNode, procedure);
+   symbol->defineOverload(overloadIndex, def);
+
+   //return
+   POP_SCOPE;
+   return def;
 }
-clef::index<clef::Identifier> clef::Parser::parseMacro() {
+clef::index<clef::MacroDef> clef::Parser::parseMacro() {
    TODO;
    // index<Identifier> name = tryParseIdentifier<true>();
    
@@ -634,6 +625,35 @@ clef::index<clef::Identifier> clef::Parser::parseMacro() {
    // } else {
    //    return tree.make<Macro>(sig, procedure);
    // }
+}
+
+mcsl::pair<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*> clef::Parser::parseFuncSig(SymbolNode* target) {
+   TypeSpec* overload = tree.registerType(nullptr, TypeSpec::FUNC_SIG);
+   
+   //parameters
+   mcsl::dyn_arr<index<Expr>>& params = tree.allocBuf<index<Expr>>();
+   consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "function parameters must be enclosed by parentheses");
+   if (!tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE)) {
+      do {
+         index<Decl> param = parseDefaultableParam();
+         overload->funcSig().params.push_back(tree[tree[param].type()].symbol()->type());
+         params.push_back(param);
+      } while (tryConsumeOperator(OpID::COMMA));
+      consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "missing closing parentheses in function signature");
+   }
+   //return type
+   consumeOperator(OpID::ARROW, "func without trailing return type");
+   index<Identifier> retType = parseTypename(SymbolType::null, false);
+   overload->funcSig().retType = tree[retType].symbol()->type();
+
+   //push to overload table
+   auto [overloadIndex, isNew] = target->registerOverload(overload);
+   if (!isNew) {
+      tree.freeTypesAfter(overload);
+      tree.freeBuf(params);
+   }
+   //return
+   return {overloadIndex, &params};
 }
 
 //!TODO: implement parseASM

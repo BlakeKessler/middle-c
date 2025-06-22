@@ -52,6 +52,7 @@ class clef::Parser {
       index<Stmt> parsePreprocStmt();
       index<Scope> parseProcedure();
       index<ArgList> parseArgList(const BlockType closer, bool isDecl);
+      index<ArgList> parseSpecList(index<Identifier> target, bool isDecl);
 
       index<Expr> parseCast(const KeywordID);
 
@@ -77,8 +78,9 @@ class clef::Parser {
 
       index<TryCatch> parseTryCatch();
 
-      index<Identifier> parseFunction();
-      index<Identifier> parseMacro();
+      index<FuncDef> parseFunction(); //function, signature
+      index<MacroDef> parseMacro(); //macro, signature
+      mcsl::pair<index<void>, mcsl::dyn_arr<index<Expr>>*> parseFuncSig(SymbolNode* target);
       index<Asm> parseASM();
       
    private:

@@ -538,10 +538,13 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
             } else {
                return file.printf(FMT("using %s"), TNB_AST(expr.lhs()));
             }
+         
+         case DEF_FUNC_PARAMS   : return writef(file, TNB_CAST(FuncDef), mode, fmt);
+         case DEF_MACRO_PARAMS  : return writef(file, TNB_CAST(MacroDef), mode, fmt);
 
          case PREPROC_IMPORT    : return file.printf(FMT("#import %s"), TNB_AST(expr.rhs()));
          case PREPROC_LINK      : return file.printf(FMT("#link %s"), TNB_AST(expr.rhs()));
-         case PREPROC_EMBED: return file.printf(FMT("#embed %s %s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
+         case PREPROC_EMBED     : return file.printf(FMT("#embed %s %s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
       }
    } else if ((mode | CASE_BIT) == 'b') {
       switch (expr.opID()) {
@@ -556,14 +559,17 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          CASE(TryCatch);
          CASE(Asm);
          CASE(Decl);
+         CASE(FuncDef);
+         CASE(MacroDef);
          CASE(TypeDecl);
          #undef CASE
 
          default:
-            return file.printf(FMT("%b%b%b%b%b%b"),
+            return file.printf(FMT("%b%b%b%b%b%b%b%b"),
                +expr.lhsType(), TNB_AST(expr.lhs()),
                +expr.rhsType(), TNB_AST(expr.rhs()),
-               +expr.extraType(), TNB_AST(expr.extra())
+               +expr.extraType(), TNB_AST(expr.extra()),
+               +expr.extraType2(), TNB_AST(expr.extra2())
             );
       }
    }

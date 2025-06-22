@@ -10,6 +10,7 @@
 class clef::SymbolNode {
    private:
       mcsl::map<mcsl::str_slice, SymbolNode*> _childSymbols;
+      //!TODO: anonymous children
 
       mcsl::str_slice _name;
       mcsl::dyn_arr<mcsl::pair<mcsl::str_slice, SymbolNode*>> _aliases; //pair of name and parent scope //!TODO: maybe make this a map
@@ -17,7 +18,7 @@ class clef::SymbolNode {
       SymbolType _symbolType;
 
       TypeSpec* _type; //defintion if _symbolType == TYPE, type if _symbolType == VAR
-      mcsl::dyn_arr<mcsl::pair<TypeSpec*, index<Scope>>> _overloads; //signature, definition
+      mcsl::dyn_arr<mcsl::pair<TypeSpec*, index<FuncDef>>> _overloads; //signature, definition
 
       void __checkRep();
 
@@ -59,6 +60,10 @@ class clef::SymbolNode {
 
       TypeSpec* type() { return _type; }
       const TypeSpec* type() const { return _type; }
+
+      mcsl::pair<index<void>, bool> registerOverload(TypeSpec* signature); //index, isNew
+      index<FuncDef> defineOverload(index<void> i, index<FuncDef> procedure); //returns previous definition
+      auto& getOverload(uint i) { return _overloads[i]; }
 };
 
 /* |===============|

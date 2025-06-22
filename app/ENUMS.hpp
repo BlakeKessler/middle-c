@@ -81,6 +81,8 @@ namespace clef {
       EXPR,
          STMT,
             DECL,
+            FUNC_DEF,
+            MACRO_DEF,
             MAKE_TYPE,
             FOR_LOOP,
             FOREACH_LOOP,
@@ -278,6 +280,9 @@ namespace clef {
 
       LET,
       MAKE_TYPE,
+
+      DEF_FUNC_PARAMS,
+      DEF_MACRO_PARAMS,
 
       //preprocessor directive operators
       PREPROC_IMPORT,

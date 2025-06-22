@@ -22,8 +22,8 @@ struct clef::If : public clef::Statement {
       index<const Expr> condition() const { return _lhs; }
       index<Scope>& procedure() { return reinterpret_cast<index<Scope>&>(_rhs);}
       index<const Scope> procedure() const { return _rhs;}
-      index<If>& elseStmt() { return reinterpret_cast<index<If>&>(_extra);}
-      index<const If> elseStmt() const { return _extra;}
+      index<If>& elseStmt() { return reinterpret_cast<index<If>&>(_extras[0]);}
+      index<const If> elseStmt() const { return _extras[0];}
 };
 
 namespace mcsl {

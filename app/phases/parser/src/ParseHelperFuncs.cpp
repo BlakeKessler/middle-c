@@ -288,6 +288,8 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
 
       case Expression::nodeType():
       case Declaration::nodeType():
+      case FunctionDefinition::nodeType():
+      case MacroDefinition::nodeType():
       case Statement::nodeType():
       case ForLoop::nodeType():
       case ForeachLoop::nodeType():

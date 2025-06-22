@@ -40,6 +40,8 @@ constexpr const mcsl::str_slice clef::toString(const NodeType type) {
       CASE(EXPR, "EXPRESSION");
       CASE(STMT, "STATEMENT");
       CASE(DECL, "DECLARATION");
+      CASE(FUNC_DEF, "FUNCTION_DEFINITION");
+      CASE(MACRO_DEF, "MACRO_DEFINITION");
       CASE(FOR_LOOP, "FOR_LOOP");
       CASE(FOREACH_LOOP, "FOREACH_LOOP");
       CASE(WHILE_LOOP, "WHILE_LOOP");
@@ -223,6 +225,9 @@ constexpr const mcsl::str_slice clef::toString(const OpID op) {
 
       CASE(LET, "LET");
       CASE(MAKE_TYPE, "MAKE_TYPE");
+
+      CASE(DEF_FUNC_PARAMS, "DEF_FUNC_PARAMS");
+      CASE(DEF_MACRO_PARAMS, "DEF_MACRO_PARAMS");
 
       CASE(PREPROC_IMPORT, "PREPROCESSOR_IMPORT");
       CASE(PREPROC_LINK, "PREPROCESSOR_LINK");

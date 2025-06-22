@@ -18,10 +18,10 @@ struct clef::TryCatch : public clef::Statement {
 
       index<Scope>& procedure() { return reinterpret_cast<index<Scope>&>(_lhs); }
       index<Decl>& err() { return reinterpret_cast<index<Decl>&>(_rhs); }
-      index<Scope>& errHandler() { return reinterpret_cast<index<Scope>&>(_extra); }
+      index<Scope>& errHandler() { return reinterpret_cast<index<Scope>&>(_extras[0]); }
       index<const Scope> procedure() const { return _lhs; }
       index<const Decl> err() const { return _rhs; }
-      index<const Scope> errHandler() const { return _extra; }
+      index<const Scope> errHandler() const { return _extras[0]; }
 };
 
 namespace mcsl {

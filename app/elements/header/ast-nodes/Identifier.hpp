@@ -14,9 +14,10 @@ struct clef::Identifier {
       index<Identifier> _scopeName;
       index<ArgList> _specializer;
       KeywordID _keywordID;
-   protected:
       FundTypeID _id;
       QualMask _quals;
+   protected:
+      uint _pad;
 
    protected:
       void __printName(mcsl::File& file) const;

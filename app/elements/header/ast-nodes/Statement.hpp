@@ -12,6 +12,7 @@ struct clef::Statement : public clef::Expression {
       static constexpr NodeType nodeType() { return NodeType::STMT; }
 
       using Expression::Expression;
+      Statement(const Expr& other):Expr(other) {}
 };
 
 #endif //STATEMENT_HPP

@@ -32,6 +32,8 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
 
       case Expression::nodeType():
       case Declaration::nodeType():
+      case FunctionDefinition::nodeType():
+      case MacroDefinition::nodeType():
       case TypeDeclaration::nodeType():
       case Statement::nodeType():
       case ForLoop::nodeType():
