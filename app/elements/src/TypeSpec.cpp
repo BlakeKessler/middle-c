@@ -3,6 +3,22 @@
 
 #include "TypeSpec.hpp"
 
+clef::TypeSpec::TypeSpec(MetaType metatype):_metatype{metatype} {
+   switch (metatype) {
+      case FUND_TYPE:
+         _fund = decltype(_fund){};
+         break;
+      case INDIR:
+         UNREACHABLE;
+         break;
+      case COMPOSITE:
+         _composite = decltype(_composite){};
+         break;
+      case FUNC_SIG:
+         _funcSig = decltype(_funcSig){};
+         break;
+   }
+}
 clef::TypeSpec::TypeSpec(FundTypeID id):
    _metatype{FUND_TYPE},
    _fund{.id = id} {

@@ -35,7 +35,8 @@ class clef::SymbolNode {
       SymbolNode& operator=(const SymbolNode& other) { return *new (this) SymbolNode(other); }
       SymbolNode& operator=(SymbolNode&& other) { return *new (this) SymbolNode(std::move(other)); }
 
-      void setSymbolType(SymbolType);
+      void setSymbolType(SymbolType symbolType) { _symbolType = symbolType; }
+      void setType(TypeSpec* type) { _type = type;}
 
       operator bool() const; //if anything has been done with the node
 

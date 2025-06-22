@@ -413,7 +413,7 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
    if (currTok.type() != TokenType::IDEN) { return 0; }
 
    index<Identifier> name = scopeName;
-   SymbolNode* symbol = nullptr;
+   SymbolNode* symbol = currScope;
 
    do {
       symbol = tree.registerSymbol(currTok.name(), symbol); //add symbol to symbol table
@@ -431,8 +431,6 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
       else if (currTok.type() != TokenType::IDEN) { logError(ErrCode::BAD_IDEN, "only identifiers may name or be members of scopes (%u)", +currTok.type()); }
    } while (true);
    tree[name].setQualMask(quals);
-
-   TODO; //!TODO: use `symbolType` and `type`
    
    return name;
 }
@@ -649,7 +647,7 @@ mcsl::pair<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*> clef::Par
    //push to overload table
    auto [overloadIndex, isNew] = target->registerOverload(overload);
    if (!isNew) {
-      tree.freeTypesAfter(overload);
+      std::destroy_at(overload);
       tree.freeBuf(params);
    }
    //return

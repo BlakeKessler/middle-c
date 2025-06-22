@@ -103,6 +103,15 @@ clef::SymbolNode* clef::SyntaxTree::registerAlias(SymbolNode* alias, SymbolNode*
    return target;
 }
 
+clef::TypeSpec* clef::SyntaxTree::registerType(SymbolNode* name, TypeSpec::MetaType metatype) {
+   debug_assert(!name || !name->type());
+   TypeSpec* spec = _typeTable.emplace_back(metatype);
+   if (name) {
+      name->setType(spec);
+   }
+   return spec;
+}
+
 clef::TypeSpec* clef::SyntaxTree::makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable::Entry firstEntry) {
    TypeSpec* spec = _typeTable.push_back(TypeSpec::makeIndir(pointee, quals, firstEntry));
    SymbolNode* symbol = _symbolBuf.push_back(SymbolNode::makeIndir(self[targetNode].symbol(), spec));

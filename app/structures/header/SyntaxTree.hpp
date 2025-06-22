@@ -50,8 +50,8 @@ class clef::SyntaxTree {
       SymbolNode* registerSymbol(const mcsl::str_slice name, SymbolNode* scope = {}); //add to the table if it isn't in the symbol table yet
       SymbolNode* registerAlias(SymbolNode* alias, SymbolNode* target);
       TypeSpec* registerType(SymbolNode* name, TypeSpec::MetaType metatype);
-      uint freeTypesAfter(TypeSpec*); //inclusive
-      uint popNodesAfter(index<astNode>); //inclusive
+      // uint freeTypesAfter(TypeSpec*); //inclusive
+      // uint popNodesAfter(index<astNode>); //inclusive
       TypeSpec* makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable::Entry firstEntry);
 
       SymbolNode* globalScope() { return &_globalScope; }

@@ -57,6 +57,7 @@ class clef::TypeSpec {
    public:
       TypeSpec(const TypeSpec&);
       TypeSpec(TypeSpec&&);
+      TypeSpec(MetaType);
       TypeSpec(FundTypeID);
       static TypeSpec makeIndir(TypeSpec* pointee, QualMask quals, IndirTable::Entry firstEntry) {
          return TypeSpec{pointee,quals,firstEntry};
