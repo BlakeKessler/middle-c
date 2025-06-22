@@ -39,7 +39,7 @@ namespace clef {
    const mcsl::str_slice beforeTok = mcsl::str_slice::make(line.begin(), tok.begin());
    const mcsl::str_slice afterTok = mcsl::str_slice::make(tok.end(), line.end());
    
-   mcsl::err_printf(mcsl::FMT("\033[1m%s:%u:%u: \033[31mERROR:\033[39m "), path, lineNum, beforeTok.size());
+   mcsl::err_printf(mcsl::FMT("\033[1m%s:%u:%u: \033[31mERROR:\033[39m "), path, lineNum, beforeTok.size() + 1);
    mcsl::err_printf(formatStr, args...);
    mcsl::err_printf(mcsl::FMT(" [%s, %u]\033[22m\n"), ERR_MSG_ARR[+code], +code);
    uint spaces = mcsl::err_printf(mcsl::FMT("    %u "), lineNum);
