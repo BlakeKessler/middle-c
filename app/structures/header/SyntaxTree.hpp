@@ -82,7 +82,7 @@ class clef::SyntaxTree {
       index<Expr> remakeTernary(index<astNode> cond, index<Expr> vals);
 
       template<typename T> mcsl::dyn_arr<T>& allocBuf() { return _alloc.at(_alloc.alloc<T>()); }
-      template<typename T> void freeBuf(mcsl::dyn_arr<T>&);
+      template<typename T> void freeBuf(mcsl::dyn_arr<T>& buf) { _alloc.freeBuf(buf); }
 };
 
 //!quick little struct to indent when printing newlines in a `printf` call

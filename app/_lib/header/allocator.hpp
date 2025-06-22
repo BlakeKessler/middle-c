@@ -30,6 +30,13 @@ class clef::allocator {
       template<typename T> index<T> alloc();
       template<typename T> index<T> emplaceBuf(mcsl::is_t<T> auto... initList);
       template<typename T> index<T> takeOwnershipOf(mcsl::dyn_arr<T>&& buf);
+
+      template<typename T> void freeBuf(mcsl::dyn_arr<T>& buf) {
+         std::destroy_at(&buf);
+         if ((void*)&buf == (void*)&_bufBuf.back()) {
+            _bufBuf.pop_back();
+         }
+      }
 };
 
 #include "../src/allocator.cpp"

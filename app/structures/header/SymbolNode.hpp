@@ -62,7 +62,7 @@ class clef::SymbolNode {
       const TypeSpec* type() const { return _type; }
 
       mcsl::pair<index<void>, bool> registerOverload(TypeSpec* signature); //index, isNew
-      index<FuncDef> defineOverload(index<void> i, index<FuncDef> procedure); //returns previous definition
+      index<FuncDef> defineOverload(index<void> i, index<FuncDef> def); //returns previous definition
       auto& getOverload(uint i) { return _overloads[i]; }
 };
 
