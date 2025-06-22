@@ -116,4 +116,20 @@ void clef::SymbolNode::insert(SymbolNode* symbol) {
    operator[](symbol->name()) = symbol;
 }
 
+mcsl::pair<clef::index<void>, bool> clef::SymbolNode::registerOverload(TypeSpec* signature) {
+   for (uint i = 0; i < _overloads.size(); ++i) {
+      if (*_overloads[i].first == *signature) {
+         return {i, false};
+      }
+   }
+   mcsl::pair<index<void>, bool> ret = {_overloads.size(), true};
+   _overloads.emplace_back(signature, 0);
+   return ret;
+}
+clef::index<clef::FuncDef> clef::SymbolNode::defineOverload(index<void> i, index<FuncDef> def) {
+   index<FuncDef> tmp = _overloads[i].second;
+   _overloads[i].second = def;
+   return tmp;
+}
+
 #endif //SYMBOL_NODE_CPP

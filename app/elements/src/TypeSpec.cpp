@@ -76,4 +76,31 @@ clef::TypeSpec::TypeSpec(const TypeSpec& other):
       #undef __cpy
 }
 
+bool clef::TypeSpec::operator==(const TypeSpec& other) const {
+   if (this == &other) {
+      return true;
+   }
+   switch (_metatype) {
+      case FUND_TYPE:
+         return _fund.id == other._fund.id;
+      case INDIR:
+         TODO;
+      case COMPOSITE:
+         TODO;
+      case FUNC_SIG:
+         if (_funcSig.retType != other._funcSig.retType) {
+            return false;
+         }
+         if (_funcSig.params.size() != other._funcSig.params.size()) {
+            return false;
+         }
+         for (uint i = 0; i < _funcSig.params.size(); ++i) {
+            if (*_funcSig.params[i] != *other._funcSig.params[i]) {
+               return false;
+            }
+         }
+         return true;
+   }
+}
+
 #endif //TYPE_SPEC_CPP
