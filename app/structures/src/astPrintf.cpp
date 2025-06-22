@@ -663,6 +663,13 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
 //    UNREACHABLE;
 // }
 
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::FuncDef> obj, char mode, FmtArgs fmt) {
+   TODO;
+}
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::MacroDef> obj, char mode, FmtArgs fmt) {
+   TODO;
+}
+
 #pragma region lists
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ArgList> obj, char mode, FmtArgs fmt) {

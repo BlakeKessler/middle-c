@@ -30,7 +30,7 @@ struct clef::MacroDefinition : public clef::Expression {
 };
 
 namespace mcsl {
-   File& write(File&, const clef::FuncDef&);
+   File& write(File&, const clef::MacroDef&);
 };
 
 #endif //MACRO_DECL_HPP
