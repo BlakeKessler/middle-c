@@ -2,6 +2,7 @@
 #define TYPE_SPEC_CPP
 
 #include "TypeSpec.hpp"
+#include "SymbolNode.hpp"
 
 clef::TypeSpec::TypeSpec(MetaType metatype):_metatype{metatype} {
    switch (metatype) {
@@ -102,7 +103,50 @@ bool clef::TypeSpec::operator==(const TypeSpec& other) const {
       case INDIR:
          TODO;
       case COMPOSITE:
-         TODO;
+         #define __checkSize(entry) if (_composite.entry.size() != other._composite.entry.size()) { return false; }
+         __checkSize(tpltParams);
+         __checkSize(impls);
+         __checkSize(dataMembs);
+         __checkSize(methods);
+         __checkSize(ops);
+         __checkSize(staticMembs);
+         __checkSize(staticFuncs);
+         __checkSize(subtypes);
+         #undef __checkSize
+
+         #define __checkArr(field) \
+            for (uint i = 0; i < _composite.field.size(); ++i) { \
+               if (_composite.field[i] != other._composite.field[i] && _composite.field[i]->type() != other._composite.field[i]->type() && *_composite.field[i]->type() != *other._composite.field[i]->type()) { \
+                  return false; \
+               } \
+            }
+         __checkArr(tpltParams);
+         __checkArr(dataMembs);
+         __checkArr(staticMembs);
+         #undef __checkArr
+
+         #define __checkSet(field) \
+            for (SymbolNode* node : _composite.field) { \
+               if (!other._composite.field.contains(node)) { \
+                  return false; \
+               } \
+            }
+         __checkSet(impls);
+         __checkSet(methods);
+         __checkSet(staticFuncs);
+         __checkSet(subtypes);
+         #undef __checkSet
+         
+         #define __checkMap(field) \
+            for (auto [op, def] : _composite.field) { \
+               if (!other._composite.field.contains(op) || other._composite.field[op] != def) { \
+                  return false; \
+               } \
+            }
+         __checkMap(ops);
+         #undef __checkMap
+
+         return true;
       case FUNC_SIG:
          if (_funcSig.retType != other._funcSig.retType) {
             return false;
