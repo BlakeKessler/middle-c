@@ -21,7 +21,8 @@ class clef::Parser {
       //!TODO: use these
       index<Identifier> scopeName;
       SymbolNode* currScope;
-      #define PUSH_SCOPE2(name, symbol) index<Identifier> __prevScopeName = scopeName; SymbolNode* __prevScope = currScope; scopeName = name; currScope = symbol
+      #define SAVE_SCOPE index<Identifier> __prevScopeName = scopeName; SymbolNode* __prevScope = currScope
+      #define PUSH_SCOPE2(name, symbol) SAVE_SCOPE; scopeName = name; currScope = symbol
       #define PUSH_SCOPE PUSH_SCOPE2(name, symbol)
       #define POP_SCOPE scopeName = __prevScopeName; currScope = __prevScope
 

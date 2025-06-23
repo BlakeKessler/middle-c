@@ -120,13 +120,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::If> obj, char mode,
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
       if (!ifstmt.condition()) { //else
          debug_assert(!ifstmt.elseStmt());
-         return file.printf(FMT("%s"), TNB(ifstmt.procedure()));
+         return file.printf(FMT(" else %s"), TNB(ifstmt.procedure()));
       }
-      if (ifstmt.elseStmt()) { //if with else
-         return file.printf(FMT("if (%s) %s else %s"), TNB(ifstmt.condition()), TNB(ifstmt.procedure()), TNB(ifstmt.elseStmt()));
-      } else { //if without else
-         return file.printf(FMT("if (%s) %s"), TNB(ifstmt.condition()), TNB(ifstmt.procedure()));
-      }
+      return file.printf(FMT(fmt.altMode ? " else if (%s) %s%#s" : "if (%s) %s%#s"), TNB(ifstmt.condition()), TNB(ifstmt.procedure()), TNB(ifstmt.elseStmt()));
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       return file.printf(FMT("%b%b%b"), TNB(ifstmt.condition()), TNB(ifstmt.procedure()), TNB(ifstmt.elseStmt()));
    } else {
@@ -283,11 +279,16 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Decl> obj, char mod
    }
    const Decl& decl = *obj;
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      if (decl.value()) {
-         return file.printf(FMT("let %s %s = %s"), TNB(decl.type()), TNB(decl.name()), TNB_AST(decl.value()));
-      } else {
-         return file.printf(FMT("let %s %s"), TNB(decl.type()), TNB(decl.name()));
+      uint charsPrinted = 0;
+      if (!fmt.altMode) {
+         charsPrinted += file.printf(FMT("let "));
       }
+      if (decl.value()) {
+         charsPrinted += file.printf(FMT("%s% s = %s"), TNB(decl.type()), TNB(decl.name()), TNB(decl.value()));
+      } else {
+         charsPrinted += file.printf(FMT("%s% s"), TNB(decl.type()), TNB(decl.name()));
+      }
+      return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       return file.printf(FMT("%b%b%b"), TNB(decl.type()), TNB(decl.name()), TNB_AST(decl.value()));
    } else {
@@ -396,7 +397,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case LIST_INVOKE: //curly brackets
             return file.printf(FMT("%s{%s}"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
          case SPECIALIZER_INVOKE: //triangle brackets
-            return file.printf(FMT("%s<:%s:>"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
+            return file.printf(FMT("%s<:%#s:>"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
 
          case CALL_OPEN        : UNREACHABLE;
          case CALL_CLOSE       : UNREACHABLE;
@@ -611,28 +612,34 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
    }
    const Identifier& iden = *obj;
    if ((mode | CASE_BIT) == 's') {
+      uint charsPrinted = 0;
+      if (fmt.padForPosSign) {
+         charsPrinted += file.printf(FMT(" "));
+      }
       if (iden.fundTypeID() != FundTypeID::null) {
-         return file.printf(FMT("%s%s"), iden.quals(), toString(iden.fundTypeID()));
+         charsPrinted += file.printf(FMT("%s%s"), iden.quals(), toString(iden.fundTypeID()));
+         return charsPrinted;
       }
       if (+iden.keywordID()) { //keyword
          debug_assert(!iden.scopeName());
          if (isCast(iden.keywordID())) {
             debug_assert(iden.quals() == QualMask::_no_quals);
-            return file.printf(FMT("%s<:%s:>"), toString(iden.keywordID()), TNB(iden.specializer()));
+            charsPrinted += file.printf(FMT("%s<:%#s:>"), toString(iden.keywordID()), TNB(iden.specializer()));
          } else {
             debug_assert(!iden.specializer());
-            return file.printf(FMT("%s%s"), iden.quals(), toString(iden.keywordID()));
+            charsPrinted += file.printf(FMT("%s%s"), iden.quals(), toString(iden.keywordID()));
          }
+         return charsPrinted;
       }
 
-      uint charsPrinted = file.printf(FMT("%s"), iden.quals());
+      charsPrinted += file.printf(FMT("%s"), iden.quals());
       if (iden.scopeName()) {
          charsPrinted += file.printf(FMT("%s::"), TNB(iden.scopeName()));
       }
       debug_assert(iden.name().begin() && iden.name().size());
       charsPrinted += file.printf(FMT("%s"), iden.name());
       if (iden.specializer()) {
-         charsPrinted += file.printf(FMT("<:%s:>"), TNB(iden.specializer()));
+         charsPrinted += file.printf(FMT("<:%#s:>"), TNB(iden.specializer()));
       }
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
@@ -650,7 +657,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::FuncDef> obj, char 
    }
    const FuncDef& funcDef = *obj;
    if ((mode | CASE_BIT) == 's') {
-      return file.printf(FMT("func %s(%s) -> %s% s"), TNB(funcDef.name()), TNB(funcDef.params()), TNB(obj.tree[funcDef.params()].extra()), TNB(funcDef.procedure()));
+      return file.printf(FMT("func %s(%#s) -> %#s% s"), TNB(funcDef.name()), TNB(funcDef.params()), TNB(obj.tree[funcDef.params()].extra()), TNB(funcDef.procedure()));
    } else if ((mode | CASE_BIT) == 'b') {
       TODO;
    } else {
@@ -674,7 +681,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ArgList> obj, char 
       uint charsPrinted = 0;
       for (uint i = 0; i < span.size();) {
          charsPrinted += writef(file, TNB(span[i]), mode, fmt);
-         if (++i < span.size() && (mode | CASE_BIT) == 's' && !fmt.altMode) {
+         if (++i < span.size() && (mode | CASE_BIT) == 's') {
             charsPrinted += writef(file, FMT(", "), mode, fmt);
          }
       }
@@ -763,7 +770,16 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
 
    const TypeSpec& spec = *obj;
    if ((mode | CASE_BIT) == 's') {
-      TODO;
+      switch (spec.metaType()) {
+         case TypeSpec::FUND_TYPE:
+            return file.printf(toString(spec.fund().id));
+         case TypeSpec::INDIR:
+            TODO;
+         case TypeSpec::COMPOSITE:
+            TODO;
+         case TypeSpec::FUNC_SIG:
+            TODO;
+      }
    } else if ((mode | CASE_BIT) == 'b') {
       TODO;
    } else {

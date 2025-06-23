@@ -36,6 +36,7 @@ class clef::TypeSpec {
             mcsl::dyn_arr<SymbolNode*> staticMembs;
             mcsl::set<SymbolNode*> staticFuncs;
             mcsl::set<SymbolNode*> subtypes;
+            //!TODO: SymbolNode* canonName;
          } _composite;
          struct { //FUNC_SIG
             TypeSpec* retType;
@@ -76,8 +77,13 @@ class clef::TypeSpec {
       const TypeSpec* pointee() const { assume(_metatype == INDIR); return _indir.pointee; }
 
 
+      auto& fund() { return _fund; }
       auto& composite() { return _composite; }
       auto& funcSig() { return _funcSig; }
+
+      const auto& fund() const { return _fund; }
+      const auto& composite() const { return _composite; }
+      const auto& funcSig() const { return _funcSig; }
 
       bool operator==(const TypeSpec& other) const;
 };

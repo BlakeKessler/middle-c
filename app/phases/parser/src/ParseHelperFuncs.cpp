@@ -185,7 +185,7 @@ clef::index<clef::Decl> clef::Parser::parseParam() {
    }
 
    index<Identifier> typeName = parseTypename(SymbolType::null, true);
-   index<Identifier> varName = parseIdentifier(SymbolType::VAR, tree[typeName].symbol());
+   index<Identifier> varName = tryParseIdentifier(SymbolType::VAR, tree[typeName].symbol());
    return tree.make<Decl>(typeName, varName);
 }
 clef::index<clef::Decl> clef::Parser::parseDefaultableParam() {

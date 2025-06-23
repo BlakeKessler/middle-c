@@ -121,7 +121,7 @@ template<typename T> struct clef::astTNB {
 
    operator bool() const { return i; }
 };
-//!astTreeNodeBundle - for printf
+//!astTreeTypespecBundle - for printf
 struct clef::astTTsB {
    const SyntaxTree& tree;
    const TypeSpec* ptr;
@@ -132,6 +132,20 @@ struct clef::astTTsB {
    const TypeSpec& get() const { return *ptr; }
    const TypeSpec& operator*() const { return *ptr; }
    const TypeSpec* operator->() const { return ptr; }
+
+   operator bool() const { return ptr; }
+};
+//!astTreeSymbolBundle - for printf
+struct clef::astTSB {
+   const SyntaxTree& tree;
+   const SymbolNode* ptr;
+   indenter indents = 0;
+
+   astTSB(const SyntaxTree& t, const SymbolNode* p, indenter ind = 0):tree{t}, ptr{p}, indents{ind} {}
+
+   const SymbolNode& get() const { return *ptr; }
+   const SymbolNode& operator*() const { return *ptr; }
+   const SymbolNode* operator->() const { return ptr; }
 
    operator bool() const { return ptr; }
 };

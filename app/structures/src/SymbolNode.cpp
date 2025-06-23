@@ -88,12 +88,15 @@ clef::SymbolNode::operator bool() const {
    return _overloads.size() || _aliases.size() || _symbolType != SymbolType::null;
 }
 
-clef::SymbolNode** clef::SymbolNode::find(mcsl::str_slice name) {
-   if (SymbolNode** node = _childSymbols.find(name); node) { return node; }
+clef::SymbolNode** clef::SymbolNode::find(mcsl::str_slice name) { //!TODO: should probably be searching only parents and anonymous children
+   if (SymbolNode** node = _childSymbols.find(name); node) {
+      return node;
+   }
    
    if (_parentScope) {
-      SymbolNode** node = _parentScope->find(name);
-      if (node) { return node; }
+      if (SymbolNode** node = _parentScope->find(name); node) {
+         return node;
+      }
    }
 
    return nullptr;
@@ -106,8 +109,7 @@ clef::SymbolNode* clef::SymbolNode::get(mcsl::str_slice name) {
    return nullptr;
 }
 clef::SymbolNode*& clef::SymbolNode::operator[](mcsl::str_slice name) {
-   SymbolNode** node = find(name);
-   if (node) {
+   if (SymbolNode** node = find(name); node) {
       return *node;
    }
    return _childSymbols[name];
