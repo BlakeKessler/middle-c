@@ -69,6 +69,7 @@ namespace clef {
    };
    constexpr auto operator+(const SymbolType t) noexcept { return std::to_underlying(t); }
    constexpr bool isType(SymbolType t) noexcept { return +t & +SymbolType::__TYPE_BIT; }
+   constexpr bool isNonType(SymbolType t) noexcept { return t != SymbolType::null && !isType(t); }
 
    //!enum of AST node type codes
    enum class NodeType : uint8 {

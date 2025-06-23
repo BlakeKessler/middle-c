@@ -86,7 +86,7 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
    }
    index<Identifier> name = parseIdentifier(symbolType, nullptr);
    Identifier& iden = tree[name];
-   if (SymbolNode* symbol = iden.symbol(); !symbol || !(isType(symbol->symbolType()) || (symbol->symbolType() == SymbolType::null))) {
+   if (SymbolNode* symbol = iden.symbol(); !symbol || isNonType(symbol->symbolType())) {
       logError(ErrCode::BAD_IDEN, "`%s` does not name a type", symbol && symbol->name().size() ? symbol->name() : FMT("(anonymous)"));
    }
 
