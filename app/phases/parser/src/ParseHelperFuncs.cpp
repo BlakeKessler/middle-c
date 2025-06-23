@@ -93,7 +93,7 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
    //pointers and references
    IndirTable::Entry entry;
    QualMask ptrquals;
-   static const auto qualsAndMods = [&]() -> bool {
+   const auto qualsAndMods = [&]() -> bool {
       new (&entry) IndirTable::Entry();
       ptrquals = parseQuals();
       if (entry.setQuals(ptrquals)) {
@@ -108,8 +108,10 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
       } else if (tryConsumeOperator(OpID::SLICE)) { //slice
          entry._type = IndirTable::Entry::SLICE;
          return true;
-      } else if (TODO, false) { //array literal
+      } else if (tryConsumeBlockDelim(BlockType::SUBSCRIPT, BlockDelimRole::OPEN)) { //array literal
          entry._type = IndirTable::Entry::ARR;
+         index<Expr> arrSize = parseExprNoPrimaryComma();
+         consumeBlockDelim(BlockType::SUBSCRIPT, BlockDelimRole::CLOSE, "array bounds must be a single integer constant expression");
          TODO;
          return true;
       }

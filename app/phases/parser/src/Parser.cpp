@@ -210,7 +210,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
       operandStack.push_back(initOperand);
    }
 
-   static const auto eval = [&]() { //evaluate the subexpression on the top of the stacks
+   const auto eval = [&]() { //evaluate the subexpression on the top of the stacks
       OpData op = operatorStack.pop_back();
       if (!operandStack.size()) { logError(ErrCode::BAD_EXPR, "bad expression (missing RHS on stack)"); }
 

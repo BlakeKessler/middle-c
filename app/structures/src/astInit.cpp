@@ -8,7 +8,7 @@
 void clef::SyntaxTree::initTables() {
    using enum KeywordID;
 
-   static const auto init = [&](KeywordID type) {
+   const auto init = [&](KeywordID type) {
       mcsl::str_slice name = toString(type);
       TypeSpec* spec = _typeTable.emplace_back(toTypeID(type, _dataModel));
       SymbolNode* node = _symbolBuf.emplace_back(name, &_globalScope, spec, SymbolType::FUND_TYPE);
