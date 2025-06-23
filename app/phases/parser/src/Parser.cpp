@@ -412,6 +412,8 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
    //handle other identifiers
    if (currTok.type() != TokenType::IDEN) { return 0; }
 
+   SAVE_SCOPE;
+
    index<Identifier> name = scopeName;
    SymbolNode* symbol = currScope;
 
@@ -431,6 +433,8 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
    } while (true);
    tree[name].setQualMask(quals);
    
+   POP_SCOPE;
+
    return name;
 }
 clef::index<clef::Identifier> clef::Parser::parseIdentifier(SymbolType symbolType, SymbolNode* type) {
@@ -566,13 +570,14 @@ clef::index<clef::TryCatch> clef::Parser::parseTryCatch() {
 
 clef::index<clef::FuncDef> clef::Parser::parseFunction() {
    index<Identifier> name = parseIdentifier(SymbolType::FUNC, nullptr);
-
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
+   
    PUSH_SCOPE;
 
    auto [overloadIndex, params, retType] = parseFuncSig(symbol);
 
    if (tryConsumeEOS()) { //forward declaration
+      POP_SCOPE;
       return tree.make<FuncDef>(name, overloadIndex, tree.make<ArgList>(params, retType));
       // tree.freeBuf(*params);
       // return tree.make<FuncDef>(name, overloadIndex, index<ArgList>{});
@@ -596,33 +601,6 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction() {
 }
 clef::index<clef::MacroDef> clef::Parser::parseMacro() {
    TODO;
-   // index<Identifier> name = tryParseIdentifier<true>();
-   
-   // //params
-   // consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FUNC without parameters");
-   // index<ParamList> params = parseParamList(BlockType::CALL);
-
-   // if (tryConsumeEOS()) { //forward declaration
-   //    if (name) {
-   //       return tree.remake<Macro>(name, sig, tree[name]);
-   //    } else {
-   //       return tree.make<Macro>(sig);
-   //    }
-   // }
-
-   // //definition
-   // consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad FUNC definition");
-   // index<Scope> procedure = parseProcedure();
-
-   // //EOS
-   // consumeEOS("macro without EOS");
-
-   // //return
-   // if (name) {
-   //    return tree.remake<Macro>(name, sig, procedure, tree[name]);
-   // } else {
-   //    return tree.make<Macro>(sig, procedure);
-   // }
 }
 
 mcsl::tuple<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*, clef::index<clef::Identifier>> clef::Parser::parseFuncSig(SymbolNode* target) {
