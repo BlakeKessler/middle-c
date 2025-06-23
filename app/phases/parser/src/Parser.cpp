@@ -421,8 +421,7 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
       getNextToken();
 
       if (tryConsumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::OPEN)) {
-         index<ArgList> specializer = parseArgList(BlockType::SPECIALIZER, type == nullptr);
-         tree[name].specializer() = specializer;
+         index<ArgList> specializer = parseSpecList(name, type == nullptr);
       }
 
       if (!tryConsumeOperator(OpID::SCOPE_RESOLUTION)) { break; }

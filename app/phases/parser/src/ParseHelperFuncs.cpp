@@ -86,7 +86,7 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
    }
    index<Identifier> name = parseIdentifier(symbolType, nullptr);
    Identifier& iden = tree[name];
-   if (SymbolNode* symbol = iden.symbol(); !symbol || !isType(symbol->symbolType())) {
+   if (SymbolNode* symbol = iden.symbol(); !symbol || !(isType(symbol->symbolType()) || (symbol->symbolType() == SymbolType::null))) {
       logError(ErrCode::BAD_IDEN, "`%s` does not name a type", symbol && symbol->name().size() ? symbol->name() : FMT("(anonymous)"));
    }
 
@@ -204,23 +204,59 @@ clef::index<clef::ArgList> clef::Parser::parseArgList(const BlockType closer, bo
       do {
          auto tmp = parseDefaultableParam();
          tree[args].push_back(tmp);
-         if (tryConsumeOperator(OpID::COMMA)) {
-            continue;
+         if (!tryConsumeOperator(OpID::COMMA)) {
+            break;
          }
-         consumeBlockDelim(closer, BlockDelimRole::CLOSE, "argument list must end with the correct closing delimiter");
-         break;
       } while (true);
    } else {
       do {
          auto tmp = parseExpr();
          tree[args].push_back(tmp);
-         if (tryConsumeOperator(OpID::COMMA)) {
-            continue;
+         if (!tryConsumeOperator(OpID::COMMA)) {
+            break;
          }
-         consumeBlockDelim(closer, BlockDelimRole::CLOSE, "argument list must end with the correct closing delimiter");
-         break;
       } while (true);
    }
+   consumeBlockDelim(closer, BlockDelimRole::CLOSE, "argument list must end with the correct closing delimiter");
+   return args;
+}
+
+clef::index<clef::ArgList> clef::Parser::parseSpecList(index<Identifier> target, bool isDecl) {
+   index<ArgList> args = tree.make<ArgList>(&tree.allocBuf<index<Expr>>());
+   if (tryConsumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::CLOSE)) {
+      return args;
+   }
+   if (isDecl) {
+      do {
+         if (tryConsumeKeyword(KeywordID::TYPE)) {
+            index<Identifier> typeName = parseTypename(SymbolType::null, true);
+            index<TypeDecl> typeDecl;
+            if (tryConsumeOperator(OpID::ASSIGN)) {
+               index<Identifier> defaultType = parseTypename(SymbolType::null, false);
+               typeDecl = tree.make<TypeDecl>(typeName, defaultType);
+            } else {
+               typeDecl = tree.make<TypeDecl>(typeName);
+            }
+            tree[args].push_back(typeDecl);
+         } else {
+            index<Decl> param = parseDefaultableParam();
+            tree[args].push_back(param);
+         }
+         if (!tryConsumeOperator(OpID::COMMA)) {
+            break;
+         }
+      } while (true);
+   } else {
+      do {
+         index<Expr> arg = parseExpr();
+         tree[args].push_back(arg);
+         if (!tryConsumeOperator(OpID::COMMA)) {
+            break;
+         }
+      } while (true);
+   }
+         consumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::CLOSE, "argument list must end with the correct closing delimiter");
+   tree[target].specializer() = args;
    return args;
 }
 

@@ -450,7 +450,7 @@ namespace clef {
 
 
 
-
+      TYPE, //typename
 
       CLASS,
       STRUCT,
@@ -463,7 +463,7 @@ namespace clef {
       FUNC,
       MACRO,
 
-      __FIRST_OBJ_TYPE = CLASS,
+      __FIRST_OBJ_TYPE = TYPE,
       __LAST_OBJ_TYPE = MACRO,
 
       CONST,

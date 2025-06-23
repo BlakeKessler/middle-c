@@ -50,6 +50,7 @@ class clef::KeywordDecoder {
          {"float64", KeywordID::FLOAT_64},
          {"float128", KeywordID::FLOAT_128},
          {"float256", KeywordID::FLOAT_256},
+         {"type", KeywordID::TYPE},
          {"class", KeywordID::CLASS},
          {"struct", KeywordID::STRUCT},
          {"interface", KeywordID::INTERFACE},

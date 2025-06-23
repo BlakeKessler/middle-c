@@ -314,6 +314,8 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(FLOAT_256, "float256");
 
 
+      CASE(TYPE, "type");
+
       CASE(CLASS, "class");
       CASE(STRUCT, "struct");
       CASE(INTERFACE, "interface");

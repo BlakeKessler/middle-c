@@ -116,7 +116,7 @@ void clef::IndirTable::__push_back(Entry entry) {
       _block0[_size - 1] = entry;
    }
 }
-
+#include "pretty-print.hpp"
 bool clef::IndirTable::Entry::setQuals(QualMask quals) {
    using enum QualMask;
    //allowed qualifiers (besides VIEW, which is encoded in the previous entry instead of the current one)
@@ -126,7 +126,7 @@ bool clef::IndirTable::Entry::setQuals(QualMask quals) {
 
    //check for other qualifiers
    constexpr QualMask badMask = ~(CONST | VIEW | VOLATILE | ATOMIC);
-   return !+(quals & badMask);
+   return +(quals & badMask);
 }
 bool clef::IndirTable::Entry::isSame(const Entry other) const {
    constexpr Entry mask(__all_bits_set, true, true, true);
