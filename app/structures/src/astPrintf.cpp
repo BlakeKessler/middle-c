@@ -80,7 +80,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Literal> obj, char 
          case LitType::FORMAT: [[fallthrough]];
          case LitType::REGEX: return file.printf(FMT("\"%s\""), (const str_slice)lit);
 
-         case LitType::TYPEID: TODO; //return writef(file, astTNB<Type>{obj.tree, (clef::index<const Type>)lit, obj.indents}, mode, fmt);
+         case LitType::TYPEID: return file.printf(FMT("%s"), astTTsB{obj.tree, (const TypeSpec*)lit, obj.indents});
       }
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       uint charsPrinted = writef(file, +lit.type(), 'b', fmt); //write literal type
@@ -153,7 +153,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ForLoopParams> obj,
    }
    const ForLoopParams& params = *obj;
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      return file.printf(FMT("%s; %s; %s"), TNB(params.decl()), TNB(params.condition()), TNB(params.increment()));
+      return file.printf(FMT("%s;% s;% s"), TNB(params.decl()), TNB(params.condition()), TNB(params.increment()));
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       return file.printf(FMT("%b%b%b"), TNB(params.decl()), TNB(params.condition()), TNB(params.increment()));
    } else {
@@ -391,11 +391,11 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case BLOCK_CMNT_CLOSE: UNREACHABLE;
 
          case CALL_INVOKE: //parens
-            return file.printf(FMT("%s(%s)"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
+            return file.printf(FMT("%s(%#s)"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
          case SUBSCRIPT_INVOKE: //square brackets
-            return file.printf(FMT("%s[%s]"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
+            return file.printf(FMT("%s[%#s]"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
          case LIST_INVOKE: //curly brackets
-            return file.printf(FMT("%s{%s}"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
+            return file.printf(FMT("%s{%#s}"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
          case SPECIALIZER_INVOKE: //triangle brackets
             return file.printf(FMT("%s<:%#s:>"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
 
@@ -529,10 +529,10 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case CONTINUE: return file.printf(FMT("continue"));
          
          case THROW        : return file.printf(FMT("throw %s"), TNB_AST(expr.lhs()));
-         case ASSERT       : return file.printf(FMT("assert(%s)"), TNB_AST(expr.lhs()));
-         case DEBUG_ASSERT : return file.printf(FMT("debug_assert(%s)"), TNB_AST(expr.lhs()));
-         case STATIC_ASSERT: return file.printf(FMT("static_assert(%s)"), TNB_AST(expr.lhs()));
-         case ASSUME       : return file.printf(FMT("assume(%s)"), TNB_AST(expr.lhs()));
+         case ASSERT       : return file.printf(FMT("assert %s"), TNB_AST(expr.lhs()));
+         case DEBUG_ASSERT : return file.printf(FMT("debug_assert %s"), TNB_AST(expr.lhs()));
+         case STATIC_ASSERT: return file.printf(FMT("static_assert %s"), TNB_AST(expr.lhs()));
+         case ASSUME       : return file.printf(FMT("assume %s"), TNB_AST(expr.lhs()));
          case RETURN       : return file.printf(FMT("return %s"), TNB_AST(expr.lhs()));
 
          case ALIAS:
@@ -657,7 +657,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::FuncDef> obj, char 
    }
    const FuncDef& funcDef = *obj;
    if ((mode | CASE_BIT) == 's') {
-      return file.printf(FMT("func %s(%#s) -> %#s% s"), TNB(funcDef.name()), TNB(funcDef.params()), TNB(obj.tree[funcDef.params()].extra()), TNB(funcDef.procedure()));
+      return file.printf(FMT("func% s(%#s) -> %#s% s"), TNB(funcDef.name()), TNB(funcDef.params()), TNB(obj.tree[funcDef.params()].extra()), TNB(funcDef.procedure()));
    } else if ((mode | CASE_BIT) == 'b') {
       TODO;
    } else {
