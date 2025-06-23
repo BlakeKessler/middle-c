@@ -626,7 +626,7 @@ clef::index<clef::MacroDef> clef::Parser::parseMacro() {
 }
 
 mcsl::tuple<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*, clef::index<clef::Identifier>> clef::Parser::parseFuncSig(SymbolNode* target) {
-   TypeSpec* overload = tree.registerType(nullptr, TypeSpec::FUNC_SIG);
+   TypeSpec* overload = tree.registerType(nullptr, TypeSpec::FUNC_SIG, SymbolType::null);
    
    //parameters
    mcsl::dyn_arr<index<Expr>>& params = tree.allocBuf<index<Expr>>();

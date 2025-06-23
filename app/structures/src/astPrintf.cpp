@@ -303,13 +303,15 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
    }
    const TypeDecl& decl = *obj;
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      TODO;
-      // uint charCount;
-      // charCount += file.printf(FMT("%s %s"), toString(obj.tree[decl.name()].symbol()->symbolType()), TNB(decl.name()));
-      // if (decl.decl()) {
-      //    charCount += file.printf(FMT(" {\n%s}"), TNB_INDENT(*obj.tree[decl.decl()].symbol()->type()));
-      // }
-      // return charCount;
+      uint charCount = file.printf(FMT("%s %s"), toString(obj.tree[decl.name()].symbol()->symbolType()), TNB(decl.name()));
+      if (decl.decl()) {
+         if (decl.decl() == decl.name()) {
+            charCount += file.printf(FMT(" {\n%s}"), astTTsB{obj.tree, obj.tree[decl.decl()].symbol()->type(), obj.indents + 1});
+         } else {
+            charCount += file.printf(FMT(" = %s"), TNB(decl.decl()));
+         }
+      }
+      return charCount;
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       return file.printf(FMT("%b%b"), TNB(decl.name()), TNB(decl.decl()));
    } else {
@@ -641,37 +643,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
    UNREACHABLE;
 }
 
-// uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Function> obj, char mode, FmtArgs fmt) {
-//    using namespace clef;
-//    if (!obj) {
-//       return 0;
-//    }
-//    const Function& func = *obj;
-//    if ((mode | CASE_BIT) == 's') {
-//       return file.printf(FMT("func %s%s %s"), TNB_CAST(Identifier), TNB(func.signature()), TNB(func.procedure()));
-//    } else if ((mode | CASE_BIT) == 'b') {
-//       return file.printf(FMT("%b%b%b"), TNB_CAST(Identifier), TNB(func.signature()), TNB(func.procedure()));
-//    } else {
-//       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Function>"), mode);
-//    }
-//    UNREACHABLE;
-// }
-// uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Macro> obj, char mode, FmtArgs fmt) {
-//    using namespace clef;
-//    if (!obj) {
-//       return 0;
-//    }
-//    const Macro& macro = *obj;
-//    if ((mode | CASE_BIT) == 's') {
-//       return file.printf(FMT("macro %s%s %s"), TNB_CAST(Identifier), TNB(macro.signature()), TNB(macro.procedure()));
-//    } else if ((mode | CASE_BIT) == 'b') {
-//       return file.printf(FMT("%b%b%b"), TNB_CAST(Identifier), TNB(macro.signature()), TNB(macro.procedure()));
-//    } else {
-//       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Macro>"), mode);
-//    }
-//    UNREACHABLE;
-// }
-
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::FuncDef> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -783,6 +754,23 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::MatchCases> obj, ch
 }
 
 #pragma endregion lists
+
+uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs fmt) {
+   using namespace clef;
+   if (!obj) {
+      return 0;
+   }
+
+   const TypeSpec& spec = *obj;
+   if ((mode | CASE_BIT) == 's') {
+      TODO;
+   } else if ((mode | CASE_BIT) == 'b') {
+      TODO;
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTTsB"), mode);
+   }
+   UNREACHABLE;
+}
 
 #undef TNB_CAST_INDENT
 #undef TNB_CAST2

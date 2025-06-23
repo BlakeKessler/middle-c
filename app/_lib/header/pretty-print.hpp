@@ -20,6 +20,7 @@ namespace clef {
    constexpr const mcsl::str_slice toString(const LitType);
    constexpr const mcsl::str_slice toString(const FundTypeID);
    constexpr const mcsl::str_slice toString(const QualMask);
+   constexpr const mcsl::str_slice toString(const SymbolType);
 };
 
 
@@ -564,6 +565,32 @@ constexpr const mcsl::str_slice clef::toString(const QualMask quals) {
       default: TODO;
    }
    UNREACHABLE;
+}
+
+constexpr const mcsl::str_slice clef::toString(const SymbolType type) {
+   using enum SymbolType;
+   switch (type) {
+      CASE(VAR, "variable");
+      CASE(FUNC, "func");
+      CASE(MACRO, "macro");
+      
+      CASE(LABEL, "label");
+      
+      CASE(FUND_TYPE, "fundamental type");
+      CASE(CLASS, "class");
+      CASE(STRUCT, "struct");
+      CASE(INTERFACE, "interface");
+      CASE(UNION, "union");
+      CASE(ENUM, "enum");
+      CASE(ENUM_UNION, "enumunion");
+      CASE(MASK, "mask");
+      CASE(NAMESPACE, "namespace");
+      
+      CASE(INDIR, "indirect");
+
+      case __TYPE_BIT: UNREACHABLE;
+      case null: UNREACHABLE;
+   }
 }
 
 #undef CASE

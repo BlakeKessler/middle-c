@@ -50,6 +50,7 @@ namespace clef {
 
       VAR,
       FUNC,
+      MACRO,
 
       LABEL,
       
@@ -63,7 +64,6 @@ namespace clef {
          ENUM_UNION,
          MASK,
          NAMESPACE,
-         MACRO,
 
          INDIR,
    };

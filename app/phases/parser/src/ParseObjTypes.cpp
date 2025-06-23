@@ -14,7 +14,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType sy
    }
    
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
-   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE);
+   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, symbolType);
    if (spec->metaType() != TypeSpec::COMPOSITE) {
       logError(ErrCode::BAD_TYPE_DECL, "redeclaration of %s `%s`", metatypeName, *symbol);
    }
@@ -86,7 +86,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
    }
    
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
-   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE);
+   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, SymbolType::INTERFACE);
    if (spec->metaType() != TypeSpec::COMPOSITE) {
       logError(ErrCode::BAD_TYPE_DECL, "redeclaration of interface `%s`", *symbol);
    }
@@ -152,7 +152,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion() {
    }
 
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
-   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE);
+   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, SymbolType::UNION);
    if (spec->metaType() != TypeSpec::COMPOSITE) {
       logError(ErrCode::BAD_TYPE_DECL, "redeclaration of union `%s`", *symbol);
    }
@@ -189,7 +189,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(SymbolType symbolT
    }
 
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
-   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE);
+   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, symbolType);
    if (spec->metaType() != TypeSpec::COMPOSITE) {
       logError(ErrCode::BAD_TYPE_DECL, "redeclaration of %s `%s`", metatypeName, *symbol);
    }
@@ -208,7 +208,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(SymbolType symbolT
          index<Expr> val;
          if (tryConsumeOperator(OpID::ASSIGN)) {
             val = parseExprNoPrimaryComma();
-            TODO;
+            // TODO;
          } else { val = 0; }
 
          spec->composite().staticMembs.push_back(tree[enumerator].symbol());
@@ -241,7 +241,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace() {
    }
    
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
-   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE);
+   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, SymbolType::NAMESPACE);
    if (spec->metaType() != TypeSpec::COMPOSITE) {
       logError(ErrCode::BAD_TYPE_DECL, "redeclaration of namespace `%s`", *symbol);
    }

@@ -63,6 +63,7 @@ namespace clef {
    class IndirTable;
    class SyntaxTree;
       template<typename T> struct astTNB; //astTreeNodeBundle
+      struct astTTsB; //astTreeTypespecBundle
       struct indenter;
 
    //classes for phases of compilation

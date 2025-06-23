@@ -56,7 +56,7 @@ class clef::SyntaxTree {
       SymbolNode* findSymbol(const mcsl::str_slice name, SymbolNode* scope = {}); //return null if it isn't in the symbol table yet
       SymbolNode* registerSymbol(const mcsl::str_slice name, SymbolNode* scope = {}); //add to the table if it isn't in the symbol table yet
       SymbolNode* registerAlias(SymbolNode* alias, SymbolNode* target);
-      TypeSpec* registerType(SymbolNode* name, TypeSpec::MetaType metatype);
+      TypeSpec* registerType(SymbolNode* name, TypeSpec::MetaType metatype, SymbolType symbolType);
       // uint freeTypesAfter(TypeSpec*); //inclusive
       // uint popNodesAfter(index<astNode>); //inclusive
       TypeSpec* makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable::Entry firstEntry);
@@ -121,6 +121,20 @@ template<typename T> struct clef::astTNB {
 
    operator bool() const { return i; }
 };
+//!astTreeNodeBundle - for printf
+struct clef::astTTsB {
+   const SyntaxTree& tree;
+   const TypeSpec* ptr;
+   indenter indents = 0;
+
+   astTTsB(const SyntaxTree& t, const TypeSpec* p, indenter ind = 0):tree{t}, ptr{p}, indents{ind} {}
+
+   const TypeSpec& get() const { return *ptr; }
+   const TypeSpec& operator*() const { return *ptr; }
+   const TypeSpec* operator->() const { return ptr; }
+
+   operator bool() const { return ptr; }
+};
 
 #include "MAP_MACRO.h"
 #define __DEF_TNB_WRITEF(T) uint writef(File& file, const clef::astTNB<clef::T> obj, char mode, FmtArgs args);
@@ -131,6 +145,7 @@ namespace mcsl {
    uint writef(File& file, const clef::SyntaxTree& tree, char mode, FmtArgs args);
    uint writef(File& file, const clef::astTNB<clef::astNode> obj, char mode, FmtArgs args);
    MCSL_MAP(__DEF_TNB_WRITEF, CLEF_ALL_AST_NODE_T)
+   uint writef(File& file, const clef::astTTsB obj, char mode, FmtArgs args);
    uint writef(File& file, clef::QualMask, char mode, FmtArgs args);
 
    inline File& write(File& file, const clef::SyntaxTree& obj) { writef(file, obj, 's', {}); return file; }
