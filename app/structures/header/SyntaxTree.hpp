@@ -6,23 +6,28 @@
 #include "SymbolNode.hpp"
 #include "TypeSpec.hpp"
 #include "allocator.hpp"
+#include "DataModel.hpp"
 
 #include "dyn_arr.hpp"
 #include "arr_list.hpp"
+#include "map.hpp"
 
 class clef::SyntaxTree {
    private:
       mcsl::dyn_arr<astNode> _buf; //owning storage for member nodes
 
       SymbolNode _globalScope;
+      mcsl::map<KeywordID, SymbolNode*> _keywordTypes;
       mcsl::arr_list<SymbolNode> _symbolBuf;
       mcsl::arr_list<TypeSpec> _typeTable;
 
       allocator _alloc;
 
+      DataModel _dataModel;
+
       void initTables();
    public:
-      SyntaxTree():_buf{},_globalScope{},_symbolBuf{},_typeTable{},_alloc{} {
+      SyntaxTree():_buf{},_globalScope{},_symbolBuf{},_typeTable{},_alloc{},_dataModel(DataModel::LP64) {
          _buf.emplace_back(NodeType::ERROR);
          initTables();
       }
@@ -31,7 +36,8 @@ class clef::SyntaxTree {
          _globalScope{std::move(other._globalScope)},
          _symbolBuf{std::move(other._symbolBuf)},
          _typeTable{std::move(other._typeTable)},
-         _alloc{std::move(other._alloc)} {
+         _alloc{std::move(other._alloc)},
+         _dataModel(other._dataModel) {
             if (this != &other) {
                other.release();
             }
@@ -55,6 +61,7 @@ class clef::SyntaxTree {
       TypeSpec* makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable::Entry firstEntry);
 
       SymbolNode* globalScope() { return &_globalScope; }
+      SymbolNode* getFundType(KeywordID id) { return _keywordTypes[id]; }
 
       uint nodeCount() const { return _buf.size(); }
       astNode& getNode(const uint i) { assume(i); return _buf[i]; }

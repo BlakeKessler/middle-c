@@ -395,6 +395,7 @@ namespace clef {
       USHORT,
       UINT,
       ULONG,
+      UOVERLONG,
       UINT_PTR,
       UWORD,
 
@@ -411,6 +412,7 @@ namespace clef {
       SSHORT,
       SINT,
       SLONG,
+      SOVERLONG,
       SINT_PTR,
       SWORD,
 
@@ -422,10 +424,13 @@ namespace clef {
       SINT_256,
 
       FLOAT,
+      FLONG,
+      FLEXT,
 
       FLOAT_16,
       FLOAT_32,
       FLOAT_64,
+      FLOAT_80,
       FLOAT_128,
       FLOAT_256,
 
@@ -755,6 +760,7 @@ namespace clef {
       FLOAT16,
       FLOAT32,
       FLOAT64,
+      FLOAT80,
       FLOAT128,
       FLOAT256,
 

@@ -10,8 +10,8 @@
 
 clef::index<clef::astNode> clef::SyntaxTree::getValueKeyword(const KeywordID keyword) {
    switch (keyword) {
-      case KeywordID::THIS    : return +make<Identifier>(KeywordID::THIS);
-      case KeywordID::SELF    : return +make<Identifier>(KeywordID::SELF);
+      case KeywordID::THIS    : return +make<Identifier>(KeywordID::THIS, nullptr);
+      case KeywordID::SELF    : return +make<Identifier>(KeywordID::SELF, nullptr);
       case KeywordID::TRUE    : return +make<Literal>(true);
       case KeywordID::FALSE   : return +make<Literal>(false);
       case KeywordID::NULLPTR : return +make<Literal>((void*)nullptr);

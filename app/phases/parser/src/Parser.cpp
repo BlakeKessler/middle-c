@@ -210,7 +210,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
       operandStack.push_back(initOperand);
    }
 
-   auto eval = [&]() { //evaluate the subexpression on the top of the stacks
+   static const auto eval = [&]() { //evaluate the subexpression on the top of the stacks
       OpData op = operatorStack.pop_back();
       if (!operandStack.size()) { logError(ErrCode::BAD_EXPR, "bad expression (missing RHS on stack)"); }
 
@@ -401,7 +401,7 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
    QualMask quals = parseQuals();
    //handle keywords
    if (currTok.type() == TokenType::KEYWORD) {
-      index<Identifier> keyword = tree.make<Identifier>(currTok.keywordID(), index<ArgList>{}, quals);
+      index<Identifier> keyword = tree.make<Identifier>(currTok.keywordID(), tree.getFundType(currTok.keywordID()), index<ArgList>{}, quals); //!TODO: put the SymbolNode* in the Identifier
       getNextToken();
       if (tryConsumeOperator(OpID::SCOPE_RESOLUTION)) {
          logError(ErrCode::BAD_KEYWORD, "keywords may not name scopes");
@@ -421,7 +421,7 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
       getNextToken();
 
       if (tryConsumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::OPEN)) {
-         index<ArgList> specializer = parseSpecList(name, type == nullptr);
+         parseSpecList(name, type == nullptr);
       }
 
       if (!tryConsumeOperator(OpID::SCOPE_RESOLUTION)) { break; }

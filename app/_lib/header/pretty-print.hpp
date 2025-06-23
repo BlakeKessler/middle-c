@@ -283,7 +283,8 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(USHORT, "ushort");
       CASE(UINT, "uint");
       CASE(ULONG, "ulong");
-      CASE(UINT_PTR, "uintptr");
+      CASE(UOVERLONG, "uoverlong");
+      CASE(UINT_PTR, "uptr");
       CASE(UWORD, "uword");
       CASE(UINT_8, "uint8");
       CASE(UINT_16, "uint16");
@@ -297,7 +298,8 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(SSHORT, "sshort");
       CASE(SINT, "sint");
       CASE(SLONG, "slong");
-      CASE(SINT_PTR, "sintptr");
+      CASE(SOVERLONG, "soverlong");
+      CASE(SINT_PTR, "sptr");
       CASE(SWORD, "sword");
       CASE(SINT_8, "sint8");
       CASE(SINT_16, "sint16");
@@ -307,9 +309,12 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(SINT_256, "sint256");
 
       CASE(FLOAT, "float");
+      CASE(FLONG, "flong");
+      CASE(FLEXT, "flext");
       CASE(FLOAT_16, "float16");
       CASE(FLOAT_32, "float32");
       CASE(FLOAT_64, "float64");
+      CASE(FLOAT_80, "float80");
       CASE(FLOAT_128, "float128");
       CASE(FLOAT_256, "float256");
 
@@ -515,6 +520,7 @@ constexpr const mcsl::str_slice clef::toString(const FundTypeID type) {
       CASE(FLOAT16, "float16");
       CASE(FLOAT32, "float32");
       CASE(FLOAT64, "float64");
+      CASE(FLOAT80, "float80");
       CASE(FLOAT128, "float128");
       CASE(FLOAT256, "float256");
 
