@@ -347,7 +347,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
    
    #define SUBEXPR(operand, expr, b, a) file.printf(operand##NeedsParens ? FMT(b "(%s)" a) : FMT(b "%s" a), expr)
    #define BIN(op) SUBEXPR(lhs, TNB_AST(expr.lhs()),,op) + SUBEXPR(rhs, TNB_AST(expr.rhs()),,)
-   #define BIN_OR_UN(op) if (expr.lhs() && expr.rhs()) { return BIN(" " op " "); } else { return BIN(op); }
+   #define BIN_OR_UN(op) if (expr.lhs() && expr.rhs()) { return BIN(" " op " "); } else { return BIN(op); } UNREACHABLE
    const clef::Expr& expr = *obj;
    if ((mode | CASE_BIT) == 's') {
       bool lhsNeedsParens = false;
@@ -376,7 +376,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
             return file.printf(FMT("%s"), TNB_AST(expr.lhs()));
 
          case ESCAPE: return file.printf(FMT("\\"));
-         case EOS   : UNREACHABLE; return file.printf(FMT(";"));
+         case EOS   : UNREACHABLE; //return file.printf(FMT(";"));
 
          case STRING       : UNREACHABLE;
          case CHAR         : UNREACHABLE;
@@ -545,7 +545,10 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case PREPROC_IMPORT    : return file.printf(FMT("#import %s"), TNB_AST(expr.rhs()));
          case PREPROC_LINK      : return file.printf(FMT("#link %s"), TNB_AST(expr.rhs()));
          case PREPROC_EMBED     : return file.printf(FMT("#embed %s %s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
+
+         default: UNREACHABLE;
       }
+      UNREACHABLE;
    } else if ((mode | CASE_BIT) == 'b') {
       switch (expr.opID()) {
          #define CASE(T) case T::pseudoOpID(): return writef(file, +T::nodeType(), mode, fmt) + writef(file, TNB_CAST(T), mode, fmt)
@@ -565,7 +568,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          #undef CASE
 
          default:
-            return file.printf(FMT("%b%b%b%b%b%b%b%b"),
+            return file.printf(FMT("%b%b%b%b%b%b%b%b%b"),
+               +expr.opID(),
                +expr.lhsType(), TNB_AST(expr.lhs()),
                +expr.rhsType(), TNB_AST(expr.rhs()),
                +expr.extraType(), TNB_AST(expr.extra()),
@@ -583,7 +587,12 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Scope> obj, char mode, FmtArgs fmt) {
    if (!obj) { return 0; }
    if ((mode | CASE_BIT) == 's') {
-      return file.printf(FMT("{%s%S}"), TNB_CAST_INDENT(StmtSeq), obj.indents);
+      uint charsPrinted = 0;
+      if (fmt.padForPosSign) {
+         charsPrinted += file.printf(FMT(" "));
+      }
+      charsPrinted += file.printf(FMT("{%s%S}"), TNB_CAST_INDENT(StmtSeq), obj.indents);
+      return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
       return writef(file, TNB_CAST(StmtSeq), mode, fmt);
    } else {
@@ -664,7 +673,19 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
 // }
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::FuncDef> obj, char mode, FmtArgs fmt) {
-   TODO;
+   using namespace clef;
+   if (!obj) {
+      return 0;
+   }
+   const FuncDef& funcDef = *obj;
+   if ((mode | CASE_BIT) == 's') {
+      return file.printf(FMT("func %s(%s) -> %s% s"), TNB(funcDef.name()), TNB(funcDef.params()), TNB(obj.tree[funcDef.params()].extra()), TNB(funcDef.procedure()));
+   } else if ((mode | CASE_BIT) == 'b') {
+      TODO;
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<FuncDef>"), mode);
+   }
+   UNREACHABLE;
 }
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::MacroDef> obj, char mode, FmtArgs fmt) {
    TODO;

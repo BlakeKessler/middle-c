@@ -570,11 +570,12 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction() {
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    PUSH_SCOPE;
 
-   auto [overloadIndex, params] = parseFuncSig(symbol);
+   auto [overloadIndex, params, retType] = parseFuncSig(symbol);
 
    if (tryConsumeEOS()) { //forward declaration
-      tree.freeBuf(*params);
-      return tree.make<FuncDef>(name, overloadIndex, index<ArgList>{});
+      return tree.make<FuncDef>(name, overloadIndex, tree.make<ArgList>(params, retType));
+      // tree.freeBuf(*params);
+      // return tree.make<FuncDef>(name, overloadIndex, index<ArgList>{});
    }
 
    //definition
@@ -585,7 +586,7 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction() {
    consumeEOS("function definition without EOS");
 
    //make definition
-   index<ArgList> paramNode = tree.make<ArgList>(params);
+   index<ArgList> paramNode = tree.make<ArgList>(params, retType);
    index<FuncDef> def = tree.make<FuncDef>(name, overloadIndex, paramNode, procedure);
    symbol->defineOverload(overloadIndex, def);
 
@@ -624,7 +625,7 @@ clef::index<clef::MacroDef> clef::Parser::parseMacro() {
    // }
 }
 
-mcsl::pair<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*> clef::Parser::parseFuncSig(SymbolNode* target) {
+mcsl::tuple<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*, clef::index<clef::Identifier>> clef::Parser::parseFuncSig(SymbolNode* target) {
    TypeSpec* overload = tree.registerType(nullptr, TypeSpec::FUNC_SIG);
    
    //parameters
@@ -650,7 +651,7 @@ mcsl::pair<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*> clef::Par
       tree.freeBuf(params);
    }
    //return
-   return {overloadIndex, &params};
+   return {overloadIndex, &params, retType};
 }
 
 //!TODO: implement parseASM

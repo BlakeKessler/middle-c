@@ -48,9 +48,9 @@ class clef::TypeSpec {
       TypeSpec(TypeSpec* pointee, QualMask quals, IndirTable::Entry firstEntry):
          _metatype{INDIR},
          _indir{
-            pointee,
-            quals,
-            IndirTable{firstEntry}
+            .pointee = pointee,
+            .pointeeQuals = quals,
+            .table = IndirTable{firstEntry}
          } {
 
       }

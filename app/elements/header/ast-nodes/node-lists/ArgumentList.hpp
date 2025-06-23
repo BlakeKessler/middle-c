@@ -9,11 +9,15 @@
 struct clef::ArgumentList : public mcsl::contig_base<index<Expr>> {
    private:
       mcsl::dyn_arr<index<Expr>>* _exprs;
+      index<Identifier> _extra;
    public:
       static constexpr NodeType nodeType() { return NodeType::ARG_LIST; }
 
-      ArgumentList(mcsl::dyn_arr<index<Expr>>* exprs):_exprs{exprs} {}
+      ArgumentList(mcsl::dyn_arr<index<Expr>>* exprs):_exprs{exprs},_extra{} {}
+      ArgumentList(mcsl::dyn_arr<index<Expr>>* exprs, index<Identifier> extra):_exprs{exprs},_extra{extra} {}
 
+      index<Identifier>& extra() { return _extra; }
+      index<Identifier> extra() const { return _extra; }
 
       #pragma region dyn_arr
       auto size() const { return _exprs->size(); }

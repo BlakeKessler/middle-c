@@ -27,13 +27,14 @@ class clef::SyntaxTree {
 
       void initTables();
    public:
-      SyntaxTree():_buf{},_globalScope{},_symbolBuf{},_typeTable{},_alloc{},_dataModel(DataModel::LP64) {
+      SyntaxTree():_buf{},_globalScope{},_keywordTypes{},_symbolBuf{},_typeTable{},_alloc{},_dataModel(DataModel::LP64) {
          _buf.emplace_back(NodeType::ERROR);
          initTables();
       }
       SyntaxTree(SyntaxTree&& other):
          _buf{std::move(other._buf)},
          _globalScope{std::move(other._globalScope)},
+         _keywordTypes{std::move(other._keywordTypes)},
          _symbolBuf{std::move(other._symbolBuf)},
          _typeTable{std::move(other._typeTable)},
          _alloc{std::move(other._alloc)},

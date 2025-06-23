@@ -21,8 +21,8 @@ class clef::Parser {
       //!TODO: use these
       index<Identifier> scopeName;
       SymbolNode* currScope;
-      #define PUSH_SCOPE2(name) index<Identifier> __prevScopeName = scopeName; SymbolNode* __prevScope = currScope; scopeName = name; currScope = tree[name].symbol()
-      #define PUSH_SCOPE PUSH_SCOPE2(name)
+      #define PUSH_SCOPE2(name, symbol) index<Identifier> __prevScopeName = scopeName; SymbolNode* __prevScope = currScope; scopeName = name; currScope = symbol
+      #define PUSH_SCOPE PUSH_SCOPE2(name, symbol)
       #define POP_SCOPE scopeName = __prevScopeName; currScope = __prevScope
 
       ErrCode _errno;
@@ -80,7 +80,7 @@ class clef::Parser {
 
       index<FuncDef> parseFunction(); //function, signature
       index<MacroDef> parseMacro(); //macro, signature
-      mcsl::pair<index<void>, mcsl::dyn_arr<index<Expr>>*> parseFuncSig(SymbolNode* target);
+      mcsl::tuple<index<void>, mcsl::dyn_arr<index<Expr>>*, index<Identifier>> parseFuncSig(SymbolNode* target);
       index<Asm> parseASM();
       
    private:

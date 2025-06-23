@@ -85,7 +85,6 @@ clef::SymbolNode* clef::SyntaxTree::registerSymbol(const mcsl::str_slice name, S
       return entry;
    }
    SymbolNode* entry = _symbolBuf.emplace_back(name, parentScope, nullptr, SymbolType::null);
-   debug_assert(entry);
    table[name] = entry;
    return entry;
 }
