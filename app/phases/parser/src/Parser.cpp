@@ -57,8 +57,8 @@ START_PARSE_STMT:
             case KeywordID::ENUM          : getNextToken(); return parseEnum();
             case KeywordID::MASK          : getNextToken(); return parseMask();
             case KeywordID::NAMESPACE     : getNextToken(); return parseNamespace();
-            case KeywordID::FUNC          : getNextToken(); TODO; //{ auto tmp = parseFunction(); return tree.make<TypeDecl>(tree[tmp].signature(), tmp, tmp); }
-            case KeywordID::MACRO         : getNextToken(); TODO; //{ auto tmp = parseMacro(); return tree.make<TypeDecl>(tree[tmp].signature(), tmp, tmp); }
+            case KeywordID::FUNC          : getNextToken(); { index<astNode> tmp = +parseFunction(); tree[tmp].anyCast(NodeType::STMT); return +tmp; } static_assert(mcsl::is_t<FuncDef, Expr>);
+            case KeywordID::MACRO         : getNextToken(); { index<astNode> tmp = +parseMacro(); tree[tmp].anyCast(NodeType::STMT); return +tmp; } static_assert(mcsl::is_t<MacroDef, Expr>);
 
             
             case KeywordID::IF            : getNextToken(); return parseIf(); break;
