@@ -5,6 +5,8 @@
 
 clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType symbolType, const mcsl::str_slice metatypeName) {
    index<Identifier> name = tryParseIdentifier(symbolType, nullptr);
+   SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
+   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, symbolType);
    
    if (tryConsumeEOS()) { //forward declaration
       if (!name) {
@@ -13,8 +15,6 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType sy
       return tree.make<TypeDecl>(name);
    }
    
-   SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
-   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, symbolType);
    if (spec->metaType() != TypeSpec::COMPOSITE) {
       logError(ErrCode::BAD_TYPE_DECL, "redeclaration of %s `%s`", metatypeName, *symbol);
    }
@@ -80,16 +80,16 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType sy
 
 clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
    index<Identifier> name = parseIdentifier(SymbolType::INTERFACE, nullptr);
-   
-   if (tryConsumeEOS()) { //forward declaration
-      return tree.make<TypeDecl>(name);
-   }
-   
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, SymbolType::INTERFACE);
    if (spec->metaType() != TypeSpec::COMPOSITE) {
       logError(ErrCode::BAD_TYPE_DECL, "redeclaration of interface `%s`", *symbol);
    }
+
+   if (tryConsumeEOS()) { //forward declaration
+      return tree.make<TypeDecl>(name);
+   }
+   
    PUSH_SCOPE;
    
    //inheritance
@@ -143,6 +143,11 @@ clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
 
 clef::index<clef::TypeDecl> clef::Parser::parseUnion() {
    index<Identifier> name = tryParseIdentifier(SymbolType::UNION, nullptr);
+   SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
+   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, SymbolType::UNION);
+   if (spec->metaType() != TypeSpec::COMPOSITE) {
+      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of union `%s`", *symbol);
+   }
 
    if (tryConsumeEOS()) { //forward declaration
       if (!name) {
@@ -151,11 +156,6 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion() {
       return tree.make<TypeDecl>(name);
    }
 
-   SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
-   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, SymbolType::UNION);
-   if (spec->metaType() != TypeSpec::COMPOSITE) {
-      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of union `%s`", *symbol);
-   }
    PUSH_SCOPE;
 
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad union definition");
@@ -180,6 +180,11 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion() {
 
 clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(SymbolType symbolType, const mcsl::str_slice metatypeName) {
    index<Identifier> name = tryParseIdentifier(symbolType, nullptr);
+   SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
+   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, symbolType);
+   if (spec->metaType() != TypeSpec::COMPOSITE) {
+      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of %s `%s`", metatypeName, *symbol);
+   }
 
    if (tryConsumeEOS()) { //forward declaration
       if (!name) {
@@ -188,11 +193,6 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(SymbolType symbolT
       return tree.make<TypeDecl>(name);
    }
 
-   SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
-   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, symbolType);
-   if (spec->metaType() != TypeSpec::COMPOSITE) {
-      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of %s `%s`", metatypeName, *symbol);
-   }
    PUSH_SCOPE;
 
    index<Identifier> baseType;
@@ -232,7 +232,12 @@ clef::index<clef::TypeDecl> clef::Parser::parseEnumUnion() {
 
 clef::index<clef::TypeDecl> clef::Parser::parseNamespace() {
    index<Identifier> name = tryParseIdentifier(SymbolType::NAMESPACE, nullptr);
-   
+   SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
+   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, SymbolType::NAMESPACE);
+   if (spec->metaType() != TypeSpec::COMPOSITE) {
+      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of namespace `%s`", *symbol);
+   }
+
    if (tryConsumeEOS()) { //forward declaration
       if (!name) {
          logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous namespace");
@@ -240,11 +245,6 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace() {
       return tree.make<TypeDecl>(name);
    }
    
-   SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
-   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, SymbolType::NAMESPACE);
-   if (spec->metaType() != TypeSpec::COMPOSITE) {
-      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of namespace `%s`", *symbol);
-   }
    PUSH_SCOPE;
 
    //definition
