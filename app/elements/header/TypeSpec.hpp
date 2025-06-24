@@ -75,6 +75,8 @@ class clef::TypeSpec {
       const IndirTable& indirTable() const { assume(_metatype == INDIR); return _indir.table; }
       TypeSpec* pointee() { assume(_metatype == INDIR); return _indir.pointee; }
       const TypeSpec* pointee() const { assume(_metatype == INDIR); return _indir.pointee; }
+      QualMask& pointeeQuals() { assume(_metatype == INDIR); return _indir.pointeeQuals; }
+      QualMask pointeeQuals() const { assume(_metatype == INDIR); return _indir.pointeeQuals; }
 
 
       auto& fund() { return _fund; }

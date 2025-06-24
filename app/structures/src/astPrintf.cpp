@@ -33,6 +33,12 @@ uint mcsl::writef(mcsl::File& file, const clef::indenter i, char mode, FmtArgs f
 #define TNB_CAST_INDENT(T) TNB_INDENT(clef::index<const clef::T>(obj.i))
 #define TNB_CAST_INDENT2(T, expr) TNB_INDENT(clef::index<const clef::T>(expr))
 
+#define TTsB(expr) clef::astTTsB{obj.tree, expr, obj.indents}
+#define TTsB_INDENT(expr) clef::astTTsB{obj.tree, expr, obj.indents + 1}
+
+#define TSB(expr) clef::astTSB{obj.tree, expr, obj.indents}
+#define TSB_INDENT(expr) clef::astTSB{obj.tree, expr, obj.indents + 1}
+
 //!TODO: probably shouldn't just return 0 without doing anything when printing with `%b`
 
 #define NODE_CAST_TNB_WRITEF(T) case T::nodeType(): return writef(file, TNB(clef::index<const clef::T>(obj.i)), mode, args);
@@ -80,7 +86,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Literal> obj, char 
          case LitType::FORMAT: [[fallthrough]];
          case LitType::REGEX: return file.printf(FMT("\"%s\""), (const str_slice)lit);
 
-         case LitType::TYPEID: return file.printf(FMT("%s"), astTTsB{obj.tree, (const TypeSpec*)lit, obj.indents});
+         case LitType::TYPEID: return file.printf(FMT("%s"), TTsB((const TypeSpec*)lit));
       }
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       uint charsPrinted = writef(file, +lit.type(), 'b', fmt); //write literal type
@@ -307,7 +313,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
       uint charCount = file.printf(FMT("%s %s"), toString(obj.tree[decl.name()].symbol()->symbolType()), TNB(decl.name()));
       if (decl.decl()) {
          if (decl.decl() == decl.name()) {
-            charCount += file.printf(FMT(" {\n%s}"), astTTsB{obj.tree, obj.tree[decl.decl()].symbol()->type(), obj.indents + 1});
+            charCount += file.printf(FMT(" {\n%s}"), TTsB(obj.tree[decl.decl()].symbol()->type()));
          } else {
             charCount += file.printf(FMT(" = %s"), TNB(decl.decl()));
          }
@@ -637,13 +643,13 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
          charsPrinted += file.printf(FMT("%s::"), TNB(iden.scopeName()));
       }
       debug_assert(iden.name().begin() && iden.name().size());
-      charsPrinted += file.printf(FMT("%s"), iden.name());
+      charsPrinted += file.printf(FMT("%s"), TSB(iden.symbol()));
       if (iden.specializer()) {
          charsPrinted += file.printf(FMT("<:%#s:>"), TNB(iden.specializer()));
       }
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
-      return file.printf(FMT("%b%b%b%b%b"), iden.name(), TNB(iden.specializer()), +iden.keywordID(), TNB(iden.scopeName()), +iden.quals());
+      return file.printf(FMT("%b%b%b%b%b"), TSB(iden.symbol()), TNB(iden.specializer()), +iden.keywordID(), TNB(iden.scopeName()), +iden.quals());
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Scope>"), mode);
    }
@@ -787,6 +793,74 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
    }
    UNREACHABLE;
 }
+
+uint mcsl::writef(mcsl::File& file, const clef::astTSB obj, char mode, FmtArgs fmt) {
+   using namespace clef;
+   if (!obj) {
+      return 0;
+   }
+
+   const SymbolNode& symbol = *obj;
+   if ((mode | CASE_BIT) == 's') {
+      uint charsPrinted = file.printf(FMT("%s"), symbol.name());
+      if (isType(symbol.symbolType()) && symbol.type()->metaType() == TypeSpec::INDIR) {
+         charsPrinted += file.printf(FMT("%s%s"), symbol.type()->pointeeQuals(), symbol.type()->indirTable());
+      }
+      return charsPrinted;
+   } else if ((mode | CASE_BIT) == 'b') {
+      TODO;
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTSB"), mode);
+   }
+
+   UNREACHABLE;
+}
+
+uint mcsl::writef(mcsl::File& file, const clef::IndirTable& table, char mode, FmtArgs fmt) {
+   using namespace clef;
+   
+   if ((mode | CASE_BIT) == 's') {
+      uint charsPrinted = 0;
+      for (uint i = 0; i < table.size(); ++i) {
+         IndirTable::Entry entry = table[i];
+         for (uint i = entry.totalRunLength(); i--;) {
+            switch (entry.type()) {
+               case IndirTable::Entry::PTR:
+                  charsPrinted += file.printf(FMT("*"));
+                  break;
+               case IndirTable::Entry::REF:
+                  charsPrinted += file.printf(FMT("&"));
+                  break;
+               case IndirTable::Entry::SLICE:
+                  charsPrinted += file.printf(FMT("[]"));
+                  break;
+               case IndirTable::Entry::ARR:
+                  TODO;
+            }
+            if (entry.isConst()) {
+               charsPrinted += file.printf(FMT(" const"));
+            }
+            if (entry.isVolatile()) {
+               charsPrinted += file.printf(FMT(" volatile"));
+            }
+            if (entry.isAtomic()) {
+               charsPrinted += file.printf(FMT(" atomic"));
+            }
+         }
+      }
+      return charsPrinted;
+   } else if ((mode | CASE_BIT) == 'b') {
+      TODO;
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing IndirTable"), mode);
+   }
+}
+
+#undef TSB_INDENT
+#undef TST
+
+#undef TTsB_INDENT
+#undef TTsB
 
 #undef TNB_CAST_INDENT
 #undef TNB_CAST2

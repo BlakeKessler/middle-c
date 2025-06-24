@@ -43,6 +43,8 @@ class clef::IndirTable {
             bool   isArr() const { return _type == ARR;   }
 
             bool isConst() const { return _isConst && !isArr(); }
+            bool isVolatile() const { return _isVol; }
+            bool isAtomic() const { return _isAtom; }
 
             uint8 extraRepeats() const { debug_assert(!isArr()); return _rle; }
             uint8 totalRunLength() const { debug_assert(!isArr()); return _rle + 1; }
@@ -91,12 +93,14 @@ class clef::IndirTable {
       mcsl::dyn_arr<EntryBlock> _otherBlocks;
    public:
       // constexpr IndirTable():_size{0},_block0{},_otherBlocks{} {}
-      constexpr IndirTable(Entry firstEntry):_size{0},_block0{firstEntry},_otherBlocks{} {}
+      constexpr IndirTable(Entry firstEntry):_size{1},_block0{firstEntry},_otherBlocks{} {}
       IndirTable(const IndirTable&);
       IndirTable(IndirTable&&);
 
       IndirTable& operator=(const IndirTable&);
       IndirTable& operator=(IndirTable&&);
+
+      uint64 size() const { return _size; }
 
       void release();
 

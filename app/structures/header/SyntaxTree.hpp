@@ -160,6 +160,8 @@ namespace mcsl {
    uint writef(File& file, const clef::astTNB<clef::astNode> obj, char mode, FmtArgs args);
    MCSL_MAP(__DEF_TNB_WRITEF, CLEF_ALL_AST_NODE_T)
    uint writef(File& file, const clef::astTTsB obj, char mode, FmtArgs args);
+   uint writef(File& file, const clef::astTSB obj, char mode, FmtArgs args);
+   uint writef(File& file, const clef::IndirTable& obj, char mode, FmtArgs args);
    uint writef(File& file, clef::QualMask, char mode, FmtArgs args);
 
    inline File& write(File& file, const clef::SyntaxTree& obj) { writef(file, obj, 's', {}); return file; }

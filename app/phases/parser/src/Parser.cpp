@@ -419,7 +419,14 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
 
    do {
       symbol = tree.registerSymbol(currTok.name(), symbol); //add symbol to symbol table
-      name = tree.make<Identifier>(symbol, name); //create AST node for symbol
+      debug_assert(symbol);
+      //create AST node for symbol
+      if (!name || symbol->parentScope() != tree[name].symbol()) {
+         name = tree.make<Identifier>(symbol);
+      } else {
+         name = tree.make<Identifier>(symbol, name);
+      }
+      debug_assert(tree[name].symbol() == symbol);
       getNextToken();
 
       if (tryConsumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::OPEN)) {
@@ -432,6 +439,9 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
       else if (currTok.type() != TokenType::IDEN) { logError(ErrCode::BAD_IDEN, "only identifiers may name or be members of scopes (%u)", +currTok.type()); }
    } while (true);
    tree[name].setQualMask(quals);
+   
+   debug_assert(symbol);
+   debug_assert(tree[name].symbol() == symbol);
    
    POP_SCOPE;
 
