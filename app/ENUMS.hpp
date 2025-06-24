@@ -48,6 +48,8 @@ namespace clef {
    enum class SymbolType : uint8 {
       null = 0,
 
+      EXTERN_IDEN,
+
       VAR,
       FUNC,
       MACRO,
@@ -55,6 +57,7 @@ namespace clef {
       LABEL,
       
       __TYPE_BIT = 8_m,
+         EXTERN_TYPE,
          FUND_TYPE,
          CLASS,
          STRUCT,

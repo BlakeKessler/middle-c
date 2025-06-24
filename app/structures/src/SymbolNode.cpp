@@ -85,7 +85,7 @@ void clef::SymbolNode::__checkRep() {
 }
 
 clef::SymbolNode::operator bool() const {
-   return _overloads.size() || _aliases.size() || _symbolType != SymbolType::null;
+   return _overloads.size() || _aliases.size() || (_symbolType != SymbolType::null && _symbolType != SymbolType::EXTERN_IDEN && _symbolType != SymbolType::EXTERN_TYPE);
 }
 
 clef::SymbolNode** clef::SymbolNode::find(mcsl::str_slice name) { //!TODO: should probably be searching only parents and anonymous children

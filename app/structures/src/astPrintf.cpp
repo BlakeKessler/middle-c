@@ -315,7 +315,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
       uint charCount = file.printf(FMT("%s %s"), toString(obj.tree[decl.name()].symbol()->symbolType()), TNB(decl.name()));
       if (decl.decl()) {
          if (decl.decl() == decl.name()) {
-            charCount += file.printf(FMT(" {\n%s}"), TTsB(obj.tree[decl.decl()].symbol()->type()));
+            charCount += file.printf(FMT(" {%s}"), TTsB(obj.tree[decl.decl()].symbol()->type()));
          } else {
             charCount += file.printf(FMT(" = %s"), TNB(decl.decl()));
          }
@@ -784,12 +784,45 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
    const TypeSpec& spec = *obj;
    if ((mode | CASE_BIT) == 's') {
       switch (spec.metaType()) {
+         case TypeSpec::null:
+            if (fmt.isLeftJust) {
+               debug_assert(spec.canonName());
+               return file.printf(FMT("%s"), TSB(spec.canonName()));
+            }
+            TODO;
          case TypeSpec::FUND_TYPE:
             return file.printf(toString(spec.fund().id));
          case TypeSpec::INDIR:
             TODO;
-         case TypeSpec::COMPOSITE:
-            TODO;
+         case TypeSpec::COMPOSITE: {
+            if (fmt.isLeftJust) {
+               debug_assert(spec.canonName());
+               return file.printf(FMT("%s"), TSB(spec.canonName()));
+            }
+            uint charsPrinted = 0;
+            indenter indents = obj.indents + 1;
+            bool needsNewline;
+            #define __print(field) \
+               needsNewline = false; \
+               for (SymbolNode* symbol : spec.composite().field) { \
+                  charsPrinted += file.printf(FMT("%S%#s;"), indents, TSB(symbol)); \
+                  needsNewline = true; \
+               } \
+               if (needsNewline) { charsPrinted += file.printf(FMT("%S"), obj.indents); }
+            
+            __print(tpltParams);
+            __print(impls);
+            __print(dataMembs);
+            __print(methods);
+            __print(staticMembs);
+            __print(staticFuncs);
+            __print(subtypes);
+            #undef __print
+            for (auto [op, symbol] : spec.composite().ops) {
+               TODO;
+            }
+            return charsPrinted;
+         }
          case TypeSpec::FUNC_SIG:
             TODO;
       }
@@ -809,7 +842,16 @@ uint mcsl::writef(mcsl::File& file, const clef::astTSB obj, char mode, FmtArgs f
 
    const SymbolNode& symbol = *obj;
    if ((mode | CASE_BIT) == 's') {
-      uint charsPrinted = file.printf(FMT("%s"), symbol.name());
+      uint charsPrinted = 0;
+      if (fmt.altMode) {
+         if (symbol.symbolType() == SymbolType::VAR) {
+            charsPrinted += file.printf(FMT("%-s "), TTsB(symbol.type()));
+            debug_assert(symbol.type());
+         } else {
+            // TODO;
+         }
+      }
+      charsPrinted += file.printf(FMT("%s"), symbol.name());
       if (symbol.symbolType() == SymbolType::INDIR) {
          debug_assert(symbol.type() && symbol.type()->metaType() == TypeSpec::INDIR);
          charsPrinted += file.printf(FMT("% s%s"), symbol.type()->pointeeQuals(), symbol.type()->indirTable());

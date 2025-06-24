@@ -11,6 +11,7 @@
 class clef::TypeSpec {
    public:
       enum MetaType : uint8 {
+         null,
          FUND_TYPE,
          INDIR,
          COMPOSITE,
@@ -18,6 +19,7 @@ class clef::TypeSpec {
       };
    private:
       MetaType _metatype;
+      SymbolNode* _canonName;
       union {
          struct { //FUND_TYPE
             FundTypeID id;
@@ -36,7 +38,6 @@ class clef::TypeSpec {
             mcsl::dyn_arr<SymbolNode*> staticMembs;
             mcsl::set<SymbolNode*> staticFuncs;
             mcsl::set<SymbolNode*> subtypes;
-            //!TODO: SymbolNode* canonName;
          } _composite;
          struct { //FUNC_SIG
             TypeSpec* retType;
@@ -67,6 +68,8 @@ class clef::TypeSpec {
       ~TypeSpec();
 
       MetaType metaType() const { return _metatype; }
+      SymbolNode*& canonName() { return _canonName; }
+      const SymbolNode* canonName() const { return _canonName; }
 
       TypeSpec& operator=(const TypeSpec& other) { return *new (this) TypeSpec(other); }
       TypeSpec& operator=(TypeSpec&& other) { return *new (this) TypeSpec(std::move(other)); }

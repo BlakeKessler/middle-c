@@ -140,7 +140,7 @@ START_PARSE_STMT:
 
             case KeywordID::ALIAS         : {
                getNextToken();
-               index<Identifier> alias = parseIdentifier(SymbolType::null, nullptr);
+               index<Identifier> alias = parseIdentifier(SymbolType::EXTERN_IDEN, nullptr);
                consumeOperator(OpID::ASSIGN, "alias definitions must use the assignment operator (and cannot be forward-declared)");
                TODO;
                index<Expr> valExpr = parseExpr();
@@ -292,7 +292,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
          }
 
          case TokenType::MACRO_INVOKE: TODO;
-         case TokenType::IDEN: operandStack.push_back(+parseIdentifier(SymbolType::null, nullptr)); prevTokIsOperand = true; goto PARSE_EXPR_CONTINUE;
+         case TokenType::IDEN: operandStack.push_back(+parseIdentifier(SymbolType::EXTERN_IDEN, nullptr)); prevTokIsOperand = true; goto PARSE_EXPR_CONTINUE;
          case TokenType::INT_NUM:
             operandStack.push_back(+tree.make<Literal>(currTok.intVal()));
             getNextToken();
@@ -640,7 +640,7 @@ mcsl::tuple<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*, clef::in
    }
    //return type
    consumeOperator(OpID::ARROW, "func without trailing return type");
-   index<Identifier> retType = parseTypename(SymbolType::null, false);
+   index<Identifier> retType = parseTypename(SymbolType::EXTERN_TYPE, false);
    overload->funcSig().retType = tree[retType].symbol()->type();
 
    //push to overload table

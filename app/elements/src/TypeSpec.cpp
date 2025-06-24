@@ -6,6 +6,8 @@
 
 clef::TypeSpec::TypeSpec(MetaType metatype):_metatype{metatype} {
    switch (metatype) {
+      case null:
+         break;
       case FUND_TYPE:
          _fund = decltype(_fund){};
          break;
@@ -28,6 +30,8 @@ clef::TypeSpec::TypeSpec(FundTypeID id):
 
 clef::TypeSpec::~TypeSpec() {
    switch (_metatype) {
+      case null:
+         break;
       case FUND_TYPE:
          break;
 
@@ -56,6 +60,9 @@ clef::TypeSpec::TypeSpec(const TypeSpec& other):
    _metatype{other._metatype} {
       #define __cpy(field) __curr.field = other.__curr.field
       switch (_metatype) {
+         case null:
+            break;
+
          case FUND_TYPE:
             #define __curr _fund
             __cpy(id);
@@ -97,7 +104,12 @@ bool clef::TypeSpec::operator==(const TypeSpec& other) const {
    if (this == &other) {
       return true;
    }
+   if (_metatype != other._metatype) {
+      return false;
+   }
    switch (_metatype) {
+      case null:
+         return true;
       case FUND_TYPE:
          return _fund.id == other._fund.id;
       case INDIR:

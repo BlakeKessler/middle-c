@@ -89,6 +89,12 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
    if (SymbolNode* symbol = iden.symbol(); !symbol || isNonType(symbol->symbolType())) {
       logError(ErrCode::BAD_IDEN, "`%s` does not name a type", symbol && symbol->name().size() ? symbol->name() : FMT("(anonymous)"));
    }
+   if (!iden.symbol()->type()) {
+      iden.symbol()->setType(tree.registerType(iden.symbol(), TypeSpec::null, SymbolType::EXTERN_TYPE));
+   }
+   if (!iden.symbol()->type()->canonName()) {
+      iden.symbol()->type()->canonName() = iden.symbol();
+   }
 
    //pointers and references
    IndirTable::Entry entry;
@@ -142,8 +148,11 @@ clef::index<clef::Decl> clef::Parser::parseDecl() {
    }
    
    //declaration
-   index<Identifier> type = parseTypename(SymbolType::null, true);
+   index<Identifier> type = parseTypename(SymbolType::EXTERN_TYPE, true);
    index<Identifier> varName = parseIdentifier(SymbolType::VAR, tree[type].symbol());
+   SymbolNode* varSymbol = tree[varName].symbol();
+   varSymbol->setSymbolType(SymbolType::VAR);
+   varSymbol->setType(tree[type].symbol()->type());
    //definition (optional)
    index<Expr> val;
    if (tryConsumeOperator(OpID::ASSIGN)) {
@@ -182,8 +191,11 @@ clef::index<clef::Decl> clef::Parser::parseParam() {
       // return tree.remake<Variable>(name, sig, tree[name]);
    }
 
-   index<Identifier> typeName = parseTypename(SymbolType::null, true);
+   index<Identifier> typeName = parseTypename(SymbolType::EXTERN_TYPE, true);
    index<Identifier> varName = tryParseIdentifier(SymbolType::VAR, tree[typeName].symbol());
+   SymbolNode* varSymbol = tree[varName].symbol();
+   varSymbol->setSymbolType(SymbolType::VAR);
+   varSymbol->setType(tree[typeName].symbol()->type());
    return tree.make<Decl>(typeName, varName);
 }
 clef::index<clef::Decl> clef::Parser::parseDefaultableParam() {
@@ -229,10 +241,10 @@ clef::index<clef::ArgList> clef::Parser::parseSpecList(index<Identifier> target,
    if (isDecl) {
       do {
          if (tryConsumeKeyword(KeywordID::TYPE)) {
-            index<Identifier> typeName = parseTypename(SymbolType::null, true);
+            index<Identifier> typeName = parseTypename(SymbolType::EXTERN_TYPE, true);
             index<TypeDecl> typeDecl;
             if (tryConsumeOperator(OpID::ASSIGN)) {
-               index<Identifier> defaultType = parseTypename(SymbolType::null, false);
+               index<Identifier> defaultType = parseTypename(SymbolType::EXTERN_TYPE, false);
                typeDecl = tree.make<TypeDecl>(typeName, defaultType);
             } else {
                typeDecl = tree.make<TypeDecl>(typeName);

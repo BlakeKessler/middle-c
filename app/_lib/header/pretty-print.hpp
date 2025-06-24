@@ -570,12 +570,14 @@ constexpr const mcsl::str_slice clef::toString(const QualMask quals) {
 constexpr const mcsl::str_slice clef::toString(const SymbolType type) {
    using enum SymbolType;
    switch (type) {
+      CASE(EXTERN_IDEN, "external identifier");
       CASE(VAR, "variable");
       CASE(FUNC, "func");
       CASE(MACRO, "macro");
       
       CASE(LABEL, "label");
       
+      CASE(EXTERN_TYPE, "external type");
       CASE(FUND_TYPE, "fundamental type");
       CASE(CLASS, "class");
       CASE(STRUCT, "struct");

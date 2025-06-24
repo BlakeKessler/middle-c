@@ -108,6 +108,9 @@ clef::TypeSpec* clef::SyntaxTree::registerType(SymbolNode* name, TypeSpec::MetaT
    if (name) {
       name->setType(spec);
       name->setSymbolType(symbolType);
+      if (!spec->canonName()) {
+         spec->canonName() = name;
+      }
    }
    return spec;
 }
