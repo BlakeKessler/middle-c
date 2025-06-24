@@ -403,6 +403,7 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
    if (currTok.type() == TokenType::KEYWORD) {
       index<Identifier> keyword = tree.make<Identifier>(currTok.keywordID(), tree.getFundType(currTok.keywordID()), index<ArgList>{}, quals); //!TODO: put the SymbolNode* in the Identifier
       getNextToken();
+      tree[keyword].addQuals(parseQuals());
       if (tryConsumeOperator(OpID::SCOPE_RESOLUTION)) {
          logError(ErrCode::BAD_KEYWORD, "keywords may not name scopes");
       }
@@ -439,12 +440,22 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
       else if (currTok.type() != TokenType::IDEN) { logError(ErrCode::BAD_IDEN, "only identifiers may name or be members of scopes (%u)", +currTok.type()); }
    } while (true);
    tree[name].setQualMask(quals);
+   if (type) {
+      if (tree[name].symbol()->type()) {
+         if (tree[name].symbol()->type() != type->type()) {
+            logError(ErrCode::BAD_IDEN, "type mismatch");
+         }
+      } else {
+         tree[name].symbol()->setType(type->type());
+      }
+   }
    
    debug_assert(symbol);
    debug_assert(tree[name].symbol() == symbol);
    
    POP_SCOPE;
 
+      tree[name].addQuals(parseQuals());
    return name;
 }
 clef::index<clef::Identifier> clef::Parser::parseIdentifier(SymbolType symbolType, SymbolNode* type) {

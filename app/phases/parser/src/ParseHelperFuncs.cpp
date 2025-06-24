@@ -94,35 +94,32 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
    IndirTable::Entry entry;
    QualMask ptrquals;
    const auto qualsAndMods = [&]() -> bool {
+      bool isDone = false;
       new (&entry) IndirTable::Entry();
-      ptrquals = parseQuals();
-      if (entry.setQuals(ptrquals)) {
-         logError(ErrCode::BAD_IDEN, "illegal qualifiers for typename");
-      }
       if (tryConsumeOperator(OpID::RAW_PTR)) { //pointer
          entry._type = IndirTable::Entry::PTR;
-         return true;
+         isDone = true;
       } else if (tryConsumeOperator(OpID::REFERENCE)) { //reference
          entry._type = IndirTable::Entry::REF;
-         return true;
+         isDone = true;
       } else if (tryConsumeOperator(OpID::SLICE)) { //slice
          entry._type = IndirTable::Entry::SLICE;
-         return true;
+         isDone = true;
       } else if (tryConsumeBlockDelim(BlockType::SUBSCRIPT, BlockDelimRole::OPEN)) { //array literal
          entry._type = IndirTable::Entry::ARR;
          index<Expr> arrSize = parseExprNoPrimaryComma();
          consumeBlockDelim(BlockType::SUBSCRIPT, BlockDelimRole::CLOSE, "array bounds must be a single integer constant expression");
          TODO;
-         return true;
+         isDone = true;
       }
-      //neither -> break
-      if (+ptrquals) { //trailing qualifiers (error)
-         logError(ErrCode::BAD_IDEN, "type qualifiers must precede the type name");
+      ptrquals = parseQuals();
+      if (entry.setQuals(ptrquals)) {
+         logError(ErrCode::BAD_IDEN, "illegal qualifiers for typename");
       }
-      return false;
+      return isDone;
    };
    if (qualsAndMods()) {
-      iden.setQualMask(ptrquals);
+      iden.addQuals(ptrquals);
       TypeSpec* typeDef = tree.makeIndirType(name, iden.symbol()->type(), iden.quals(), entry);
       IndirTable& indirTable = typeDef->indirTable();
       while (qualsAndMods()) {
@@ -132,6 +129,7 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
             indirTable.append(entry);
          }
       }
+      iden.setQualMask(ptrquals);
    }
    return +name;
 }

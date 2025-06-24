@@ -294,6 +294,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Decl> obj, char mod
       } else {
          charsPrinted += file.printf(FMT("%s% s"), TNB(decl.type()), TNB(decl.name()));
       }
+      // file.flush();
+      // debug_assert(obj.tree[decl.type()].symbol()->symbolType() != SymbolType::INDIR);
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       return file.printf(FMT("%b%b%b"), TNB(decl.type()), TNB(decl.name()), TNB_AST(decl.value()));
@@ -623,20 +625,20 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
          charsPrinted += file.printf(FMT(" "));
       }
 
-      if (iden.fundTypeID() != FundTypeID::null) { //FUNDAMENTAL TYPE
-         charsPrinted += file.printf(FMT("%s%s"), iden.quals(), toString(iden.fundTypeID()));
-      }
-      else if (+iden.keywordID()) { //KEYWORD
-         debug_assert(!iden.scopeName());
-         if (isCast(iden.keywordID())) {
-            debug_assert(iden.quals() == QualMask::_no_quals);
-            charsPrinted += file.printf(FMT("%s<:%#s:>"), toString(iden.keywordID()), TNB(iden.specializer()));
-         } else {
-            debug_assert(!iden.specializer());
-            charsPrinted += file.printf(FMT("%s%s"), iden.quals(), toString(iden.keywordID()));
-         }
-      }
-      else { //NORMAL IDENTIFIER
+      // if (iden.fundTypeID() != FundTypeID::null) { //FUNDAMENTAL TYPE
+      //    charsPrinted += file.printf(FMT("%s%s"), iden.quals(), toString(iden.fundTypeID()));
+      // }
+      // else if (+iden.keywordID()) { //KEYWORD
+      //    debug_assert(!iden.scopeName());
+      //    if (isCast(iden.keywordID())) {
+      //       debug_assert(iden.quals() == QualMask::_no_quals);
+      //       charsPrinted += file.printf(FMT("%s<:%#s:>"), toString(iden.keywordID()), TNB(iden.specializer()));
+      //    } else {
+      //       debug_assert(!iden.specializer());
+      //       charsPrinted += file.printf(FMT("%s%s"), iden.quals(), toString(iden.keywordID()));
+      //    }
+      // }
+      // else { //NORMAL IDENTIFIER
          //qualifiers
          charsPrinted += file.printf(FMT("%s"), iden.quals());
          //parent scope
@@ -650,7 +652,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
          if (iden.specializer()) {
             charsPrinted += file.printf(FMT("<:%#s:>"), TNB(iden.specializer()));
          }
-      }
+      // }
 
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
@@ -808,8 +810,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTSB obj, char mode, FmtArgs f
    const SymbolNode& symbol = *obj;
    if ((mode | CASE_BIT) == 's') {
       uint charsPrinted = file.printf(FMT("%s"), symbol.name());
-      if (isType(symbol.symbolType()) && symbol.type()->metaType() == TypeSpec::INDIR) {
-         charsPrinted += file.printf(FMT("%s%s"), symbol.type()->pointeeQuals(), symbol.type()->indirTable());
+      if (symbol.symbolType() == SymbolType::INDIR) {
+         debug_assert(symbol.type() && symbol.type()->metaType() == TypeSpec::INDIR);
+         charsPrinted += file.printf(FMT("% s%s"), symbol.type()->pointeeQuals(), symbol.type()->indirTable());
       }
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {

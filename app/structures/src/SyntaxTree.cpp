@@ -117,6 +117,8 @@ clef::TypeSpec* clef::SyntaxTree::makeIndirType(index<Identifier> targetNode, Ty
    SymbolNode* symbol = _symbolBuf.push_back(SymbolNode::makeIndir(self[targetNode].symbol(), spec));
    self[targetNode].symbol() = symbol;
 
+   debug_assert(symbol->symbolType() == SymbolType::INDIR);
+
    return spec;
 }
 
