@@ -622,11 +622,11 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
       if (fmt.padForPosSign) {
          charsPrinted += file.printf(FMT(" "));
       }
-      if (iden.fundTypeID() != FundTypeID::null) {
+
+      if (iden.fundTypeID() != FundTypeID::null) { //FUNDAMENTAL TYPE
          charsPrinted += file.printf(FMT("%s%s"), iden.quals(), toString(iden.fundTypeID()));
-         return charsPrinted;
       }
-      if (+iden.keywordID()) { //keyword
+      else if (+iden.keywordID()) { //KEYWORD
          debug_assert(!iden.scopeName());
          if (isCast(iden.keywordID())) {
             debug_assert(iden.quals() == QualMask::_no_quals);
@@ -635,18 +635,23 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
             debug_assert(!iden.specializer());
             charsPrinted += file.printf(FMT("%s%s"), iden.quals(), toString(iden.keywordID()));
          }
-         return charsPrinted;
+      }
+      else { //NORMAL IDENTIFIER
+         //qualifiers
+         charsPrinted += file.printf(FMT("%s"), iden.quals());
+         //parent scope
+         if (iden.scopeName()) {
+            charsPrinted += file.printf(FMT("%s::"), TNB(iden.scopeName()));
+         }
+         //name
+         debug_assert(iden.name().begin() && iden.name().size());
+         charsPrinted += file.printf(FMT("%s"), TSB(iden.symbol()));
+         //specializer
+         if (iden.specializer()) {
+            charsPrinted += file.printf(FMT("<:%#s:>"), TNB(iden.specializer()));
+         }
       }
 
-      charsPrinted += file.printf(FMT("%s"), iden.quals());
-      if (iden.scopeName()) {
-         charsPrinted += file.printf(FMT("%s::"), TNB(iden.scopeName()));
-      }
-      debug_assert(iden.name().begin() && iden.name().size());
-      charsPrinted += file.printf(FMT("%s"), TSB(iden.symbol()));
-      if (iden.specializer()) {
-         charsPrinted += file.printf(FMT("<:%#s:>"), TNB(iden.specializer()));
-      }
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
       return file.printf(FMT("%b%b%b%b%b"), TSB(iden.symbol()), TNB(iden.specializer()), +iden.keywordID(), TNB(iden.scopeName()), +iden.quals());
