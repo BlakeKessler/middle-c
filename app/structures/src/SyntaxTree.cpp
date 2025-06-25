@@ -103,14 +103,15 @@ clef::SymbolNode* clef::SyntaxTree::registerAlias(SymbolNode* alias, SymbolNode*
 }
 
 clef::TypeSpec* clef::SyntaxTree::registerType(SymbolNode* name, TypeSpec::MetaType metatype, SymbolType symbolType) {
-   debug_assert(name);
-   debug_assert(!name->type());
+   debug_assert(!name || !name->type());
    TypeSpec* spec = _typeTable.emplace_back(metatype);
-   name->setType(spec);
-   if (symbolType != SymbolType::null && (name->symbolType() == SymbolType::null || name->symbolType() == SymbolType::EXTERN_IDEN || name->symbolType() == SymbolType::EXTERN_TYPE)) {
-      name->setSymbolType(symbolType);
+   if (name) {
+      name->setType(spec);
+      if (symbolType != SymbolType::null && (name->symbolType() == SymbolType::null || name->symbolType() == SymbolType::EXTERN_IDEN || name->symbolType() == SymbolType::EXTERN_TYPE)) {
+         name->setSymbolType(symbolType);
+      }
+      spec->canonName() = name;
    }
-   spec->canonName() = name;
    return spec;
 }
 
