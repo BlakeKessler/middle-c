@@ -793,7 +793,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
          case TypeSpec::FUND_TYPE:
             return file.printf(toString(spec.fund().id));
          case TypeSpec::INDIR:
-            TODO;
+            return file.printf(FMT("%-s%s%s"), TTsB(spec.pointee()), spec.pointeeQuals(), spec.indirTable());
          case TypeSpec::COMPOSITE: {
             if (fmt.isLeftJust) {
                debug_assert(spec.canonName());
