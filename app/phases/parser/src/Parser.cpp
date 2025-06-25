@@ -592,6 +592,7 @@ clef::index<clef::TryCatch> clef::Parser::parseTryCatch() {
 clef::index<clef::FuncDef> clef::Parser::parseFunction() {
    index<Identifier> name = parseIdentifier(SymbolType::FUNC, nullptr);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
+   symbol->setSymbolType(SymbolType::FUNC);
    
    PUSH_SCOPE;
 

@@ -294,8 +294,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Decl> obj, char mod
       } else {
          charsPrinted += file.printf(FMT("%s% s"), TNB(decl.type()), TNB(decl.name()));
       }
-      // file.flush();
-      // debug_assert(obj.tree[decl.type()].symbol()->symbolType() != SymbolType::INDIR);
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
       return file.printf(FMT("%b%b%b"), TNB(decl.type()), TNB(decl.name()), TNB_AST(decl.value()));
@@ -793,7 +791,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
          case TypeSpec::FUND_TYPE:
             return file.printf(toString(spec.fund().id));
          case TypeSpec::INDIR:
-            return file.printf(FMT("%-s%s%s"), TTsB(spec.pointee()), spec.pointeeQuals(), spec.indirTable());
+            return file.printf(FMT("%s%-s%s"), spec.pointeeQuals(), TTsB(spec.pointee()), spec.indirTable());
          case TypeSpec::COMPOSITE: {
             if (fmt.isLeftJust) {
                debug_assert(spec.canonName());
@@ -846,7 +844,17 @@ uint mcsl::writef(mcsl::File& file, const clef::astTSB obj, char mode, FmtArgs f
          if (symbol.symbolType() == SymbolType::VAR) {
             charsPrinted += file.printf(FMT("%-s "), TTsB(symbol.type()));
             debug_assert(symbol.type());
-         } else {
+         }
+         else if (symbol.symbolType() == SymbolType::FUNC) {
+            for (auto [sig, def] : symbol.overloads()) {
+               if (def) {
+                  charsPrinted += file.printf(FMT("%s"), TNB_INDENT(def));
+               } else {
+                  charsPrinted += file.printf(FMT("func% s%s"), symbol.name(), TTsB_INDENT(sig));
+               }
+            }
+            return charsPrinted;
+         } else if (isType(symbol.symbolType())) {
             charsPrinted += file.printf(FMT("%s "), toString(symbol.symbolType()));
          }
       }

@@ -577,7 +577,7 @@ constexpr const mcsl::str_slice clef::toString(const SymbolType type) {
       
       CASE(LABEL, "label");
       
-      CASE(EXTERN_TYPE, "external type");
+      CASE(EXTERN_TYPE, "type");
       CASE(FUND_TYPE, "fundamental type");
       CASE(CLASS, "class");
       CASE(STRUCT, "struct");

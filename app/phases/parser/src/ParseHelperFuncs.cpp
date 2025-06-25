@@ -198,9 +198,11 @@ clef::index<clef::Decl> clef::Parser::parseParam() {
 
    index<Identifier> typeName = parseTypename(SymbolType::EXTERN_TYPE, true);
    index<Identifier> varName = tryParseIdentifier(SymbolType::VAR, tree[typeName].symbol());
-   SymbolNode* varSymbol = tree[varName].symbol();
-   varSymbol->setSymbolType(SymbolType::VAR);
-   varSymbol->setType(tree[typeName].symbol()->type());
+   if (varName) {
+      SymbolNode* varSymbol = tree[varName].symbol();
+      varSymbol->setSymbolType(SymbolType::VAR);
+      varSymbol->setType(tree[typeName].symbol()->type());
+   }
    return tree.make<Decl>(typeName, varName);
 }
 clef::index<clef::Decl> clef::Parser::parseDefaultableParam() {
