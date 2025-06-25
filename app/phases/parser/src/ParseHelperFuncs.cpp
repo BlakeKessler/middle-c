@@ -86,14 +86,19 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
    // }
    index<Identifier> name = parseIdentifier(symbolType, nullptr);
    Identifier& iden = tree[name];
-   if (SymbolNode* symbol = iden.symbol(); !symbol || isNonType(symbol->symbolType())) {
-      logError(ErrCode::BAD_IDEN, "`%s` does not name a type", symbol && symbol->name().size() ? symbol->name() : FMT("(anonymous)"));
-   }
-   if (!iden.symbol()->type()) {
-      iden.symbol()->setType(tree.registerType(iden.symbol(), TypeSpec::null, SymbolType::EXTERN_TYPE));
-   }
-   if (!iden.symbol()->type()->canonName()) {
-      iden.symbol()->type()->canonName() = iden.symbol();
+   {
+      SymbolNode* symbol = iden.symbol();
+      if (!symbol || isNonType(symbol->symbolType())) {
+         logError(ErrCode::BAD_IDEN, "`%s` does not name a type", symbol && symbol->name().size() ? symbol->name() : FMT("(anonymous)"));
+      }
+      debug_assert(symbol);
+      if (!symbol->type()) {
+         symbol->setType(tree.registerType(symbol, TypeSpec::null, SymbolType::EXTERN_TYPE));
+      }
+      else if (SymbolNode*& canon = symbol->type()->canonName(); !canon) {
+         canon = symbol;
+      }
+      debug_assert(symbol->type()->canonName());
    }
 
    //pointers and references

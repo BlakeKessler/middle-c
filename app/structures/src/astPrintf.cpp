@@ -809,7 +809,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
                   needsNewline = true; \
                } \
                if (needsNewline) { charsPrinted += file.printf(FMT("%S"), obj.indents); }
-            
             __print(tpltParams);
             __print(impls);
             __print(dataMembs);

@@ -7,6 +7,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType sy
    index<Identifier> name = tryParseIdentifier(symbolType, nullptr);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, symbolType);
+   debug_assert(spec->canonName());
    
    if (tryConsumeEOS()) { //forward declaration
       if (!name) {
