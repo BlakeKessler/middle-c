@@ -493,10 +493,13 @@ namespace clef {
       PRIVATE,
       PROTECTED,
 
-      __FIRST_TYPE_QUAL = CONST,
-      __LAST_TYPE_QUAL = OVERRIDE,
       __FIRST_QUAL = CONST,
-      __LAST_QUAL = PROTECTED,
+      __LAST_QUAL = OVERRIDE,
+      __FIRST_SCOPE_MOD = PUBLIC,
+      __LAST_SCOPE_MOD = PROTECTED,
+
+      __FIRST_QUAL_LIKE = __FIRST_QUAL,
+      __LAST_QUAL_LIKE = __LAST_SCOPE_MOD,
 
       STATIC,
 
@@ -581,8 +584,9 @@ namespace clef {
          constexpr bool isASCII(const KeywordID id) noexcept { return id == KeywordID::CHAR; }
          constexpr bool isUnicode(const KeywordID id) noexcept { return !isASCII(id) && isText(id); }
    constexpr bool isObjectType(const KeywordID id) noexcept { return __BETWEEN(OBJ_TYPE); }
-   constexpr bool isTypeQualifier(const KeywordID id) noexcept { return __BETWEEN(TYPE_QUAL); }
-   constexpr bool isQualifier(const KeywordID id) noexcept { return __BETWEEN(QUAL); }
+   constexpr bool isQualLike(const KeywordID id) noexcept { return __BETWEEN(QUAL_LIKE); }
+      constexpr bool isQualifier(const KeywordID id) noexcept { return __BETWEEN(QUAL); }
+      constexpr bool isScopeMod(const KeywordID id) noexcept { return __BETWEEN(SCOPE_MOD); }
    constexpr bool isCast(const KeywordID id) noexcept { return __BETWEEN(CAST); }
    constexpr bool isControlFlow(const KeywordID id) noexcept { return __BETWEEN(CONTROL_FLOW); }
    constexpr bool isUnspec(const KeywordID id) noexcept { return __BETWEEN(UNSPEC); }
@@ -815,16 +819,16 @@ namespace clef {
    
    constexpr QualMask toQual(KeywordID kw) {
       //check range
-      if (!isQualifier(kw)) {
+      if (!isQualLike(kw)) {
          return QualMask::_no_quals;
       }
       //apply identity
-      return (QualMask)(1 << (+kw - +KeywordID::__FIRST_QUAL));
+      return (QualMask)(1 << (+kw - +KeywordID::__FIRST_QUAL_LIKE));
 
       //compile-time checks to ensure that this works
-      static_assert((+KeywordID::__LAST_QUAL - +KeywordID::__FIRST_QUAL + 1) == (sizeof(QualMask) * 8));
-      static_assert((1 << (+KeywordID::CONST - +KeywordID::__FIRST_QUAL)) == +QualMask::CONST);
-      static_assert((1 << (+KeywordID::PROTECTED - +KeywordID::__FIRST_QUAL)) == +QualMask::PROTECTED);
+      static_assert((+KeywordID::__LAST_QUAL_LIKE - +KeywordID::__FIRST_QUAL_LIKE + 1) == (sizeof(QualMask) * 8));
+      static_assert((1 << (+KeywordID::CONST - +KeywordID::__FIRST_QUAL_LIKE)) == +QualMask::CONST);
+      static_assert((1 << (+KeywordID::PROTECTED - +KeywordID::__FIRST_QUAL_LIKE)) == +QualMask::PROTECTED);
    }
    static_assert(toQual(KeywordID::PRIVATE) == QualMask::PRIVATE);
 }

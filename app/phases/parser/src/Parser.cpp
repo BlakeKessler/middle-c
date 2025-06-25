@@ -455,7 +455,7 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
    
    POP_SCOPE;
 
-      tree[name].addQuals(parseQuals());
+   tree[name].addQuals(parseQuals());
    return name;
 }
 clef::index<clef::Identifier> clef::Parser::parseIdentifier(SymbolType symbolType, SymbolNode* type) {

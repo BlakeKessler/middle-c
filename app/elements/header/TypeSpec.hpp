@@ -17,6 +17,24 @@ class clef::TypeSpec {
          COMPOSITE,
          FUNC_SIG
       };
+      struct ScopedSymbol {
+         SymbolNode* symbol;
+         QualMask quals;
+
+         ScopedSymbol(): symbol{}, quals{} {}
+         ScopedSymbol(SymbolNode* s): symbol{s}, quals{} {}
+         ScopedSymbol(SymbolNode* s, QualMask q): symbol{s}, quals{q} {}
+
+         SymbolNode& operator*() const { return *symbol; }
+         SymbolNode* operator->() const { return symbol; }
+
+         operator SymbolNode*() const { return symbol; }
+
+         struct hash {
+            using is_transparent = void;
+            static ulong operator()(const ScopedSymbol& obj) { return std::hash<SymbolNode*>()(obj.symbol); }
+         };
+      };
    private:
       MetaType _metatype;
       SymbolNode* _canonName;
@@ -31,13 +49,13 @@ class clef::TypeSpec {
          } _indir;
          struct { //COMPOSITE
             mcsl::dyn_arr<SymbolNode*> tpltParams;
-            mcsl::set<SymbolNode*> impls; //implemented interafaces
-            mcsl::dyn_arr<SymbolNode*> dataMembs;
-            mcsl::set<SymbolNode*> methods;
-            mcsl::map<OpID, SymbolNode*> ops;
-            mcsl::dyn_arr<SymbolNode*> staticMembs;
-            mcsl::set<SymbolNode*> staticFuncs;
-            mcsl::set<SymbolNode*> subtypes;
+            mcsl::set<ScopedSymbol, ScopedSymbol::hash> impls; //implemented interafaces
+            mcsl::dyn_arr<ScopedSymbol> dataMembs;
+            mcsl::set<ScopedSymbol, ScopedSymbol::hash> methods;
+            mcsl::map<OpID, ScopedSymbol> ops;
+            mcsl::dyn_arr<ScopedSymbol> staticMembs;
+            mcsl::set<ScopedSymbol, ScopedSymbol::hash> staticFuncs;
+            mcsl::set<ScopedSymbol, ScopedSymbol::hash> subtypes;
          } _composite;
          struct { //FUNC_SIG
             TypeSpec* retType;
@@ -91,6 +109,13 @@ class clef::TypeSpec {
       const auto& funcSig() const { return _funcSig; }
 
       bool operator==(const TypeSpec& other) const;
+};
+
+
+template<> struct std::hash<clef::TypeSpec::ScopedSymbol> {
+   using is_transparent = void;
+   clef::TypeSpec::ScopedSymbol::hash hash;
+   auto operator()(const clef::TypeSpec::ScopedSymbol& obj) const { return hash(obj); }
 };
 
 /* |===============|
