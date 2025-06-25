@@ -800,20 +800,20 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
             uint charsPrinted = 0;
             indenter indents = obj.indents + 1;
             bool needsNewline;
-            #define __print(field) \
+            #define __print(field, prefix) \
                needsNewline = false; \
                for (SymbolNode* symbol : spec.composite().field) { \
-                  charsPrinted += file.printf(FMT("%S%#s;"), indents, TSB(symbol)); \
+                  charsPrinted += file.printf(FMT("%S" prefix "%#s;"), indents, TSB(symbol)); \
                   needsNewline = true; \
                } \
                if (needsNewline) { charsPrinted += file.printf(FMT("%S"), obj.indents); }
-            __print(tpltParams);
-            __print(impls);
-            __print(dataMembs);
-            __print(methods);
-            __print(staticMembs);
-            __print(staticFuncs);
-            __print(subtypes);
+            __print(tpltParams,);
+            __print(impls,);
+            __print(dataMembs,);
+            __print(methods,);
+            __print(staticMembs,"static ");
+            __print(staticFuncs,"static ");
+            __print(subtypes,);
             #undef __print
             for (auto [op, symbol] : spec.composite().ops) {
                TODO;
