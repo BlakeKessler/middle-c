@@ -847,13 +847,20 @@ uint mcsl::writef(mcsl::File& file, const clef::astTSB obj, char mode, FmtArgs f
             charsPrinted += file.printf(FMT("%-s "), TTsB(symbol.type()));
             debug_assert(symbol.type());
          } else {
-            // TODO;
+            charsPrinted += file.printf(FMT("%s "), toString(symbol.symbolType()));
          }
       }
       charsPrinted += file.printf(FMT("%s"), symbol.name());
       if (symbol.symbolType() == SymbolType::INDIR) {
          debug_assert(symbol.type() && symbol.type()->metaType() == TypeSpec::INDIR);
          charsPrinted += file.printf(FMT("% s%s"), symbol.type()->pointeeQuals(), symbol.type()->indirTable());
+      }
+      if (fmt.altMode) {
+         if (isType(symbol.symbolType())) {
+            charsPrinted += file.printf(FMT(" {%s}"), TTsB_INDENT(symbol.type()));
+         } else if (symbol.symbolType() == SymbolType::FUNC || symbol.symbolType() == SymbolType::MACRO) {
+            TODO;
+         }
       }
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
