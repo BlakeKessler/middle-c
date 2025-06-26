@@ -7,7 +7,6 @@
 #include "ast-nodes/Expression.hpp"
 #include "ast-nodes/Literal.hpp"
 #include "ast-nodes/Scope.hpp"
-#include "ast-nodes/ForLoopParams.hpp"
 #include "ast-nodes/Identifier.hpp"
 #include "ast-nodes/Statement.hpp"
 #include "ast-nodes/exprs/Declaration.hpp"
@@ -33,8 +32,7 @@
 #define CLEF_ALL_AST_NODE_UNION_MEMBS \
    _identifier, _scope, _literal, _expression, _declaration, _typeDecl, _funcDef, _macroDef, \
    _forLoop, _foreachLoop, _whileLoop, _doWhileLoop, _if, _switch, _match, _tryCatch, _asm,  \
-   _forLoopParams, _switchCases, _matchCases, _statement,                \
-   _statementSequence, _argumentList
+   _switchCases, _matchCases, _statement, _statementSequence, _argumentList
 
 struct clef::astNode {
    private:
@@ -56,7 +54,6 @@ struct clef::astNode {
          Match _match;
          TryCatch _tryCatch;
          Asm _asm;
-         ForLoopParams _forLoopParams;
          SwitchCases _switchCases;
          MatchCases _matchCases;
          Statement _statement;

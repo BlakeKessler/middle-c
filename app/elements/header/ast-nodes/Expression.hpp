@@ -20,17 +20,26 @@ struct clef::Expression {
       Expression(OpID op, NodeType lhsType, NodeType rhsType, NodeType extraType, uint lhs, uint rhs, uint extra):Expression{op, lhsType, rhsType, extraType, {}, lhs, rhs, extra, {}} {}
       Expression(OpID op, NodeType lhsType, NodeType rhsType, uint lhs, uint rhs):Expression{op, lhsType, rhsType, NodeType::NONE, lhs, rhs, {}} {}
       Expression(OpID op, NodeType lhsType, uint lhs):Expression{op, lhsType, NodeType::NONE, lhs, {}} {}
+      template<astNode_t lhs_t> Expression(OpID op, index<lhs_t> lhs):
+         _op{op},_lhsType{lhs_t::nodeType()},_rhsType{},_extraTypes{},
+         _lhs{+lhs},_rhs{},_extras{} {}
+      template<astNode_t lhs_t, astNode_t rhs_t> Expression(OpID op, index<lhs_t> lhs, index<rhs_t> rhs):
+         _op{op},_lhsType{lhs_t::nodeType()},_rhsType{rhs_t::nodeType()},_extraTypes{},
+         _lhs{+lhs},_rhs{+rhs},_extras{} {}
       template<astNode_t lhs_t, astNode_t rhs_t, astNode_t extra_t> Expression(OpID op, index<lhs_t> lhs, index<rhs_t> rhs, index<extra_t> extra):
          _op{op},_lhsType{lhs_t::nodeType()},_rhsType{rhs_t::nodeType()},_extraTypes{extra_t::nodeType(), {}},
          _lhs{+lhs},_rhs{+rhs},_extras{+extra, 0} {}
+      template<astNode_t lhs_t, astNode_t rhs_t, astNode_t extra_t, astNode_t extra2_t> Expression(OpID op, index<lhs_t> lhs, index<rhs_t> rhs, index<extra_t> extra, index<extra2_t> extra2):
+         _op{op},_lhsType{lhs_t::nodeType()},_rhsType{rhs_t::nodeType()},_extraTypes{extra_t::nodeType(), extra2_t::nodeType()},
+         _lhs{+lhs},_rhs{+rhs},_extras{+extra, +extra2} {}
    
    public:
       static constexpr NodeType nodeType() { return NodeType::EXPR; }
 
       Expression():_op{},_lhsType{},_rhsType{},_lhs{},_rhs{} {}
 
-      template<operand_t lhs_t, operand_t rhs_t> Expression(OpID binaryOp, index<lhs_t> lhs, index<rhs_t> rhs):Expression{binaryOp, lhs_t::nodeType(), rhs_t::nodeType(), lhs, rhs} {}
-      template<operand_t lhs_t>Expression(OpID unaryOp, index<lhs_t> lhs):Expression{unaryOp, lhs_t::nodeType(), lhs} {}
+      // template<operand_t lhs_t, operand_t rhs_t> Expression(OpID binaryOp, index<lhs_t> lhs, index<rhs_t> rhs):Expression{binaryOp, lhs_t::nodeType(), rhs_t::nodeType(), lhs, rhs} {}
+      // template<operand_t lhs_t>Expression(OpID unaryOp, index<lhs_t> lhs):Expression{unaryOp, lhs_t::nodeType(), lhs} {}
       Expression(OpID unaryOp, NodeType t, index<astNode> lhs):Expression{unaryOp, t, +lhs} {}
       Expression(OpID nullaryOp):Expression{nullaryOp, NodeType::NONE, {}} {}
 

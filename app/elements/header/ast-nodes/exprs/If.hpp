@@ -4,6 +4,7 @@
 
 #include "CLEF.hpp"
 #include "ast-nodes/Statement.hpp"
+#include "ast-nodes/Scope.hpp"
 
 struct clef::If : public clef::Statement {
    private:
@@ -13,10 +14,7 @@ struct clef::If : public clef::Statement {
       static constexpr OpID pseudoOpID() { return OpID::IF; }
 
       If():Statement{} {}
-      If(index<Expr> condition, index<Scope> procedure, index<If> elseStmt = {}):Statement{
-         OpID::IF,NodeType::EXPR,NodeType::SCOPE,NodeType::IF,
-         condition,procedure,elseStmt
-      } {}
+      If(index<Expr> condition, index<Scope> procedure, index<If> elseStmt = {}): Statement{OpID::IF, condition, procedure, elseStmt} {}
 
       index<Expr>& condition() { return reinterpret_cast<index<Expr>&>(_lhs); }
       index<const Expr> condition() const { return _lhs; }

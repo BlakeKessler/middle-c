@@ -6,7 +6,7 @@
 #include "io.hpp"
 
 mcsl::File& mcsl::write(File& file, const clef::ForLoop& obj) {
-   file.printf(FMT("FOR (id=%u) {id=%u}"), +obj.params(), +obj.procedure());
+   file.printf(FMT("FOR (id=%u; id=%u; id=%u) {id=%u}"), +obj.decl(), +obj.condition(), +obj.increment(), +obj.procedure());
    return file;
 }
 

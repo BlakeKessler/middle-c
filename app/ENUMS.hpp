@@ -97,7 +97,6 @@ namespace clef {
             MATCH,
             ASM,
             TRY_CATCH,
-      FOR_LOOP_PARAMS,
       SWITCH_CASES,
       MATCH_CASES,
       STMT_SEQ,

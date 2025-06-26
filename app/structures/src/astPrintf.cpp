@@ -144,30 +144,14 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ForLoop> obj, char 
    }
    const ForLoop& loop = *obj;
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      return file.printf(FMT("for (%s) %s"), TNB(loop.params()), TNB(loop.procedure()));
+      return file.printf(FMT("for (%s;% s;% s) %s"), TNB(loop.decl()), TNB(loop.condition()), TNB(loop.increment()), TNB(loop.procedure()));
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
-      return file.printf(FMT("%b%b"), TNB(loop.params()), TNB(loop.procedure()));
+      return file.printf(FMT("%b%b%b%b"), TNB(loop.decl()), TNB(loop.condition()), TNB(loop.increment()), TNB(loop.procedure()));
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<ForLoop>"), mode);
    }
    UNREACHABLE;
 }
-uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ForLoopParams> obj, char mode, FmtArgs fmt) {
-   using namespace clef;
-   if (!obj) {
-      return 0;
-   }
-   const ForLoopParams& params = *obj;
-   if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      return file.printf(FMT("%s;% s;% s"), TNB(params.decl()), TNB(params.condition()), TNB(params.increment()));
-   } else if ((mode | CASE_BIT) == 'b') { //print in binary format
-      return file.printf(FMT("%b%b%b"), TNB(params.decl()), TNB(params.condition()), TNB(params.increment()));
-   } else {
-      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<ForLoopParams>"), mode);
-   }
-   UNREACHABLE;
-}
-
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ForeachLoop> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -183,7 +167,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ForeachLoop> obj, c
    }
    UNREACHABLE;
 }
-
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::WhileLoop> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -199,7 +182,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::WhileLoop> obj, cha
    }
    UNREACHABLE;
 }
-
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::DoWhileLoop> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -532,7 +514,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case BREAK   : charsPrinted += file.printf(FMT("break")); break;
          case CONTINUE: charsPrinted += file.printf(FMT("continue")); break;
          
-         case THROW        : charsPrinted += file.printf(FMT("throw %s"), TNB_AST(expr.lhs())); break;
+         case THROW        : charsPrinted += file.printf(FMT("throw% s"), TNB_AST(expr.lhs())); break;
          case ASSERT       : charsPrinted += file.printf(FMT("assert %s"), TNB_AST(expr.lhs())); break;
          case DEBUG_ASSERT : charsPrinted += file.printf(FMT("debug_assert %s"), TNB_AST(expr.lhs())); break;
          case STATIC_ASSERT: charsPrinted += file.printf(FMT("static_assert %s"), TNB_AST(expr.lhs())); break;

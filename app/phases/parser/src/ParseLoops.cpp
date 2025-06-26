@@ -23,8 +23,7 @@ clef::index<clef::ForLoop> clef::Parser::parseForLoop() {
    consumeEOS("FOR statement without EOS token");
 
    //return
-   index<ForLoopParams> params = tree.make<ForLoopParams>(decl, condition, inc);
-   index<ForLoop> loop = tree.make<ForLoop>(params, proc);
+   index<ForLoop> loop = tree.make<ForLoop>(decl, condition, inc, proc);
 
    return loop;
 }
