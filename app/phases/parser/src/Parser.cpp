@@ -107,29 +107,16 @@ START_PARSE_STMT:
                consumeEOS("bad CONTINUE");
                return tree.make<Stmt>(KeywordID::CONTINUE);
 
-            case KeywordID::THROW         : {
+            case KeywordID::THROW         : [[fallthrough]];
+            case KeywordID::ASSERT        : [[fallthrough]];
+            case KeywordID::DEBUG_ASSERT  : [[fallthrough]];
+            case KeywordID::STATIC_ASSERT : [[fallthrough]];
+            case KeywordID::ASSUME        : {
+               KeywordID kw = currTok.keywordID();
                getNextToken();
                index<Expr> expr = parseExpr();
-               consumeEOS("bad THROW statement");
-               return tree.make<Stmt>(KeywordID::THROW, expr);
-            }
-            case KeywordID::ASSERT        : {
-               getNextToken();
-               index<Expr> expr = parseExpr();
-               consumeEOS("bad ASSERT statement");
-               return tree.make<Stmt>(KeywordID::ASSERT, expr);
-            }
-            case KeywordID::DEBUG_ASSERT  : {
-               getNextToken();
-               index<Expr> expr = parseExpr();
-               consumeEOS("bad DEBUG_ASSERT statement");
-               return tree.make<Stmt>(KeywordID::DEBUG_ASSERT, expr);
-            }
-            case KeywordID::STATIC_ASSERT : {
-               getNextToken();
-               index<Expr> expr = parseExpr();
-               consumeEOS("bad STATIC_ASSERT statement");
-               return tree.make<Stmt>(KeywordID::STATIC_ASSERT, expr);
+               consumeEOS("bad ASSUME statement");
+               return tree.make<Stmt>(kw, expr);
             }
             case KeywordID::RETURN        : {
                getNextToken();
