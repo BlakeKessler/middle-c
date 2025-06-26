@@ -53,8 +53,7 @@ clef::index<clef::ForeachLoop> clef::Parser::parseForeachLoop() {
    consumeEOS("FOREACH statement without EOS token");
 
    //return
-   index<ForeachLoopParams> params = tree.make<ForeachLoopParams>(decl, target);
-   index<ForeachLoop> loop = tree.make<ForeachLoop>(params, proc);
+   index<ForeachLoop> loop = tree.make<ForeachLoop>(decl, target, proc);
 
    return loop;
 }

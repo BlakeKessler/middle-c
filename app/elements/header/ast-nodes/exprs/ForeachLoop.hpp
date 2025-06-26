@@ -4,6 +4,8 @@
 
 #include "CLEF.hpp"
 #include "ast-nodes/Statement.hpp"
+#include "ast-nodes/exprs/Declaration.hpp"
+#include "ast-nodes/Scope.hpp"
 
 struct clef::ForeachLoop : public clef::Statement {
    private:
@@ -13,12 +15,14 @@ struct clef::ForeachLoop : public clef::Statement {
       static constexpr OpID pseudoOpID() { return OpID::FOREACH; }
 
       ForeachLoop():Statement{} {}
-      ForeachLoop(index<ForeachLoopParams> params, index<Scope> procedure):Statement{OpID::FOREACH,NodeType::FOREACH_LOOP_PARAMS,NodeType::SCOPE,params,procedure} {}
+      ForeachLoop(index<Decl> iterator, index<Expr> target, index<Scope> procedure):Statement{OpID::FOREACH, iterator, target, procedure} {}
 
-      index<ForeachLoopParams>& params() { return reinterpret_cast<index<ForeachLoopParams>&>(_lhs); }
-      index<const ForeachLoopParams> params() const { return _lhs; }
-      index<Scope>& procedure() { return reinterpret_cast<index<Scope>&>(_rhs); }
-      index<const Scope> procedure() const { return _rhs; }
+      index<Decl>& iterator() { return reinterpret_cast<index<Decl>&>(_lhs); }
+      index<const Decl> iterator() const { return _lhs; }
+      index<Expr>& target() { return reinterpret_cast<index<Expr>&>(_rhs); }
+      index<const Expr> target() const { return _rhs; }
+      index<Scope>& procedure() { return reinterpret_cast<index<Scope>&>(_extras[0]); }
+      index<const Scope> procedure() const { return _extras[0]; }
 };
 
 namespace mcsl {

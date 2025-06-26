@@ -360,7 +360,6 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
 
       case Scope::nodeType():
       case ForLoopParams::nodeType():
-      case ForeachLoopParams::nodeType():
       case SwitchCases::nodeType():
       case MatchCases::nodeType():
       case StatementSequence::nodeType():

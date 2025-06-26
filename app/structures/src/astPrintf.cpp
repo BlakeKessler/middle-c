@@ -175,26 +175,11 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ForeachLoop> obj, c
    }
    const ForeachLoop& loop = *obj;
    if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      return file.printf(FMT("foreach (%s) %s"), TNB(loop.params()), TNB(loop.procedure()));
+      return file.printf(FMT("foreach (%#s : %s) %s"), TNB(loop.iterator()), TNB(loop.target()), TNB(loop.procedure()));
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
-      return file.printf(FMT("%b%b"), TNB(loop.params()), TNB(loop.procedure()));
+      return file.printf(FMT("%b%b%b"), TNB(loop.iterator()), TNB(loop.target()), TNB(loop.procedure()));
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<ForeachLoop>"), mode);
-   }
-   UNREACHABLE;
-}
-uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ForeachLoopParams> obj, char mode, FmtArgs fmt) {
-   using namespace clef;
-   if (!obj) {
-      return 0;
-   }
-   const ForeachLoopParams& params = *obj;
-   if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      return file.printf(FMT("%s : %s"), TNB(params.iterator()), TNB(params.target()));
-   } else if ((mode | CASE_BIT) == 'b') { //print in binary format
-      return file.printf(FMT("%b%b"), TNB(params.iterator()), TNB(params.target()));
-   } else {
-      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<ForeachLoopParams>"), mode);
    }
    UNREACHABLE;
 }
@@ -356,7 +341,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
    
    #define SUBEXPR(operand, expr, b, a) file.printf(operand##NeedsParens ? FMT(b "(%s)" a) : FMT(b "%s" a), expr)
    #define BIN(op) SUBEXPR(lhs, TNB_AST(expr.lhs()),,op) + SUBEXPR(rhs, TNB_AST(expr.rhs()),,)
-   #define BIN_OR_UN(op) if (expr.lhs() && expr.rhs()) { return BIN(" " op " "); } else { return BIN(op); } UNREACHABLE
+   #define BIN_OR_UN(op) if (expr.lhs() && expr.rhs()) { charsPrinted += BIN(" " op " "); break; } else { charsPrinted += BIN(op); break; } UNREACHABLE
    const clef::Expr& expr = *obj;
    if ((mode | CASE_BIT) == 's') {
       bool lhsNeedsParens = false;
@@ -379,12 +364,18 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          extraNeedsParens = prec && selfPrec > prec;
       }
 
+      uint charsPrinted = 0;
+      if (fmt.padForPosSign) {
+         charsPrinted += file.printf(FMT(" "));
+      }
+
       switch (expr.opID()) {
          case NULL:
             debug_assert(!expr.rhs() && !expr.extra());
-            return file.printf(FMT("%s"), TNB_AST(expr.lhs()));
+            charsPrinted += file.printf(FMT("%s"), TNB_AST(expr.lhs()));
+            break;
 
-         case ESCAPE: return file.printf(FMT("\\"));
+         case ESCAPE: charsPrinted += file.printf(FMT("\\")); break;
          case EOS   : UNREACHABLE; //return file.printf(FMT(";"));
 
          case STRING       : UNREACHABLE;
@@ -397,13 +388,13 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case BLOCK_CMNT_CLOSE: UNREACHABLE;
 
          case CALL_INVOKE: //parens
-            return file.printf(FMT("%s(%#s)"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
+            charsPrinted += file.printf(FMT("%s(%#s)"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs())); break;
          case SUBSCRIPT_INVOKE: //square brackets
-            return file.printf(FMT("%s[%#s]"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
+            charsPrinted += file.printf(FMT("%s[%#s]"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs())); break;
          case LIST_INVOKE: //curly brackets
-            return file.printf(FMT("%s{%#s}"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
+            charsPrinted += file.printf(FMT("%s{%#s}"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs())); break;
          case SPECIALIZER_INVOKE: //triangle brackets
-            return file.printf(FMT("%s<:%#s:>"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
+            charsPrinted += file.printf(FMT("%s<:%#s:>"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs())); break;
 
          case CALL_OPEN        : UNREACHABLE;
          case CALL_CLOSE       : UNREACHABLE;
@@ -419,9 +410,11 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
 
          case INTERP_STR_INVOKE: TODO;
          case TERNARY_INVOKE   :
-            return SUBEXPR(lhs, TNB_AST(expr.lhs()),, " ? ")
-                 + SUBEXPR(rhs, TNB_AST(expr.rhs()),, " : ")
-                 + SUBEXPR(extra, TNB_AST(expr.extra()),,);
+            charsPrinted +=
+               SUBEXPR(lhs, TNB_AST(expr.lhs()),, " ? ")
+             + SUBEXPR(rhs, TNB_AST(expr.rhs()),, " : ")
+             + SUBEXPR(extra, TNB_AST(expr.extra()),,);
+            break;
 
          case PREPROCESSOR: TODO;
 
@@ -433,40 +426,44 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case MEMBER_ACCESS    : //.
             debug_assert(expr.lhs());
             debug_assert(expr.rhs());
-            return BIN(".");
+            charsPrinted += BIN(".");
+            break;
          case PTR_MEMBER_ACCESS: // ->
             debug_assert(expr.lhs());
             debug_assert(expr.rhs());
-            return BIN("->");
+            charsPrinted += BIN("->");
+            break;
          case METHOD_PTR       : // .*
             debug_assert(expr.lhs());
             debug_assert(expr.rhs());
-            return BIN(".*");
+            charsPrinted += BIN(".*");
+            break;
          case ARROW_METHOD_PTR : // ->*
             debug_assert(expr.lhs());
             debug_assert(expr.rhs());
-            return BIN("->*");
+            charsPrinted += BIN("->*");
+            break;
 
-         case RANGE : return BIN(".."); //relies on printing null nodes being a no-op (not an error)
-         case SPREAD: return BIN("..."); //relies on printing null nodes being a no-op (not an error)
+         case RANGE : charsPrinted += BIN(".."); break; //relies on printing null nodes being a no-op (not an error)
+         case SPREAD: charsPrinted += BIN("..."); break; //relies on printing null nodes being a no-op (not an error)
          
          case ADD: BIN_OR_UN("+");
          case SUB: BIN_OR_UN("-");
          case MUL: BIN_OR_UN("*");
-         case DIV: return BIN(" / ");
-         case MOD: return BIN(" %% ");
-         case EXP: return BIN(" ^^ ");
+         case DIV: charsPrinted += BIN(" / "); break;
+         case MOD: charsPrinted += BIN(" %% "); break;
+         case EXP: charsPrinted += BIN(" ^^ "); break;
          
-         case LOGICAL_NOT: return SUBEXPR(rhs, TNB_AST(expr.rhs()), "!",);
-         case LOGICAL_AND: return BIN(" && ");
-         case LOGICAL_OR : return BIN(" || ");
+         case LOGICAL_NOT: charsPrinted += SUBEXPR(rhs, TNB_AST(expr.rhs()), "!",); break;
+         case LOGICAL_AND: charsPrinted += BIN(" && "); break;
+         case LOGICAL_OR : charsPrinted += BIN(" || "); break;
 
-         case BIT_NOT    : return SUBEXPR(rhs, TNB_AST(expr.rhs()), "~",);
+         case BIT_NOT    : charsPrinted += SUBEXPR(rhs, TNB_AST(expr.rhs()), "~",); break;
          case BIT_AND    : BIN_OR_UN("&");
-         case BIT_OR     : return BIN(" | ");
-         case BIT_XOR    : return BIN(" ^ ");
-         case SHIFT_LEFT : return BIN(" << ");
-         case SHIFT_RIGHT: return BIN(" >> ");
+         case BIT_OR     : charsPrinted += BIN(" | "); break;
+         case BIT_XOR    : charsPrinted += BIN(" ^ "); break;
+         case SHIFT_LEFT : charsPrinted += BIN(" << "); break;
+         case SHIFT_RIGHT: charsPrinted += BIN(" >> "); break;
          
          
          case UNIQUE_PTR: TODO;
@@ -475,89 +472,91 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case ITERATOR  : TODO;
          
 
-         case THREE_WAY_COMP: return BIN(" <=> ");
-         case LESSER        : return BIN(" < ");
-         case GREATER       : return BIN(" > ");
-         case LESSER_OR_EQ  : return BIN(" <= ");
-         case GREATER_OR_EQ : return BIN(" >= ");
+         case THREE_WAY_COMP: charsPrinted += BIN(" <=> "); break;
+         case LESSER        : charsPrinted += BIN(" < "); break;
+         case GREATER       : charsPrinted += BIN(" > "); break;
+         case LESSER_OR_EQ  : charsPrinted += BIN(" <= "); break;
+         case GREATER_OR_EQ : charsPrinted += BIN(" >= "); break;
 
-         case IS_EQUAL  : return BIN(" == ");
-         case IS_UNEQUAL: return BIN(" != ");
-         // case IS_EQUAL_STRICT  : return BIN(" === ");
-         // case IS_UNEQUAL_STRICT: return BIN(" !== ");
+         case IS_EQUAL  : charsPrinted += BIN(" == "); break;
+         case IS_UNEQUAL: charsPrinted += BIN(" != "); break;
+         // case IS_EQUAL_STRICT  : charsPrinted += BIN(" === "); break;
+         // case IS_UNEQUAL_STRICT: charsPrinted += BIN(" !== "); break;
 
-         case COALESCE: return BIN(" ?? "); //null coalescing
+         case COALESCE: charsPrinted += BIN(" ?? "); break; //null coalescing
 
          case INLINE_IF  : UNREACHABLE; //ternary operator opener
-         case LABEL_DELIM: return file.printf(FMT("%s:"), TNB_AST(expr.lhs())); //ternary operator closer
+         case LABEL_DELIM: charsPrinted += file.printf(FMT("%s:"), TNB_AST(expr.lhs())); break; //ternary operator closer
 
-         case ASSIGN: return BIN(" = ");
-         // case CONST_ASSIGN: return BIN(" := ");
-         case ADD_ASSIGN: return BIN(" += ");
-         case SUB_ASSIGN: return BIN(" -= ");
-         case MUL_ASSIGN: return BIN(" *= ");
-         case DIV_ASSIGN: return BIN(" /= ");
-         case MOD_ASSIGN: return BIN(" %%= ");
-         case EXP_ASSIGN: return BIN(" ^^= ");
-         case SHL_ASSIGN: return BIN(" <<= ");
-         case SHR_ASSIGN: return BIN(" >>= ");
-         case AND_ASSIGN: return BIN(" &= ");
-         case XOR_ASSIGN: return BIN(" ^= ");
-         case OR_ASSIGN : return BIN(" |= ");
-         case COALESCE_ASSIGN: return BIN(" ??= ");
+         case ASSIGN: charsPrinted += BIN(" = "); break;
+         // case CONST_ASSIGN: charsPrinted += BIN(" := "); break;
+         case ADD_ASSIGN: charsPrinted += BIN(" += "); break;
+         case SUB_ASSIGN: charsPrinted += BIN(" -= "); break;
+         case MUL_ASSIGN: charsPrinted += BIN(" *= "); break;
+         case DIV_ASSIGN: charsPrinted += BIN(" /= "); break;
+         case MOD_ASSIGN: charsPrinted += BIN(" %%= "); break;
+         case EXP_ASSIGN: charsPrinted += BIN(" ^^= "); break;
+         case SHL_ASSIGN: charsPrinted += BIN(" <<= "); break;
+         case SHR_ASSIGN: charsPrinted += BIN(" >>= "); break;
+         case AND_ASSIGN: charsPrinted += BIN(" &= "); break;
+         case XOR_ASSIGN: charsPrinted += BIN(" ^= "); break;
+         case OR_ASSIGN : charsPrinted += BIN(" |= "); break;
+         case COALESCE_ASSIGN: charsPrinted += BIN(" ??= "); break;
 
-         case COMMA: return BIN(", ");
+         case COMMA: charsPrinted += BIN(", "); break;
 
 
 
          //keyword pseudo-operators
-         case FOR      : return writef(file, TNB_CAST(ForLoop),     mode, fmt);
-         case FOREACH  : return writef(file, TNB_CAST(ForeachLoop), mode, fmt);
-         case WHILE    : return writef(file, TNB_CAST(WhileLoop),   mode, fmt);
-         case DO_WHILE : return writef(file, TNB_CAST(DoWhileLoop), mode, fmt);
-         case IF       : return writef(file, TNB_CAST(If),          mode, fmt);
-         case SWITCH   : return writef(file, TNB_CAST(Switch),      mode, fmt);
-         case MATCH    : return writef(file, TNB_CAST(Match),       mode, fmt);
-         case TRY_CATCH: return writef(file, TNB_CAST(TryCatch),    mode, fmt);
-         case ASM      : return writef(file, TNB_CAST(Asm),         mode, fmt);
-         case LET      : return writef(file, TNB_CAST(Decl),        mode, fmt);
-         case MAKE_TYPE: return writef(file, TNB_CAST(TypeDecl),    mode, fmt);
+         case FOR      : charsPrinted += writef(file, TNB_CAST(ForLoop),     mode, fmt); break;
+         case FOREACH  : charsPrinted += writef(file, TNB_CAST(ForeachLoop), mode, fmt); break;
+         case WHILE    : charsPrinted += writef(file, TNB_CAST(WhileLoop),   mode, fmt); break;
+         case DO_WHILE : charsPrinted += writef(file, TNB_CAST(DoWhileLoop), mode, fmt); break;
+         case IF       : charsPrinted += writef(file, TNB_CAST(If),          mode, fmt); break;
+         case SWITCH   : charsPrinted += writef(file, TNB_CAST(Switch),      mode, fmt); break;
+         case MATCH    : charsPrinted += writef(file, TNB_CAST(Match),       mode, fmt); break;
+         case TRY_CATCH: charsPrinted += writef(file, TNB_CAST(TryCatch),    mode, fmt); break;
+         case ASM      : charsPrinted += writef(file, TNB_CAST(Asm),         mode, fmt); break;
+         case LET      : charsPrinted += writef(file, TNB_CAST(Decl),        mode, fmt); break;
+         case MAKE_TYPE: charsPrinted += writef(file, TNB_CAST(TypeDecl),    mode, fmt); break;
 
-         case GOTO: return file.printf(FMT("goto %s"), TNB_AST(expr.lhs()));
+         case GOTO: charsPrinted += file.printf(FMT("goto %s"), TNB_AST(expr.lhs())); break;
          case GOTO_CASE:
             if (expr.lhs()) {
-               return file.printf(FMT("goto case %s"), TNB_AST(expr.lhs()));
+               charsPrinted += file.printf(FMT("goto case %s"), TNB_AST(expr.lhs()));
             } else {
-               return file.printf(FMT("goto default"));
+               charsPrinted += file.printf(FMT("goto default"));
             }
+            break;
 
-         case BREAK   : return file.printf(FMT("break"));
-         case CONTINUE: return file.printf(FMT("continue"));
+         case BREAK   : charsPrinted += file.printf(FMT("break")); break;
+         case CONTINUE: charsPrinted += file.printf(FMT("continue")); break;
          
-         case THROW        : return file.printf(FMT("throw %s"), TNB_AST(expr.lhs()));
-         case ASSERT       : return file.printf(FMT("assert %s"), TNB_AST(expr.lhs()));
-         case DEBUG_ASSERT : return file.printf(FMT("debug_assert %s"), TNB_AST(expr.lhs()));
-         case STATIC_ASSERT: return file.printf(FMT("static_assert %s"), TNB_AST(expr.lhs()));
-         case ASSUME       : return file.printf(FMT("assume %s"), TNB_AST(expr.lhs()));
-         case RETURN       : return file.printf(FMT("return %s"), TNB_AST(expr.lhs()));
+         case THROW        : charsPrinted += file.printf(FMT("throw %s"), TNB_AST(expr.lhs())); break;
+         case ASSERT       : charsPrinted += file.printf(FMT("assert %s"), TNB_AST(expr.lhs())); break;
+         case DEBUG_ASSERT : charsPrinted += file.printf(FMT("debug_assert %s"), TNB_AST(expr.lhs())); break;
+         case STATIC_ASSERT: charsPrinted += file.printf(FMT("static_assert %s"), TNB_AST(expr.lhs())); break;
+         case ASSUME       : charsPrinted += file.printf(FMT("assume %s"), TNB_AST(expr.lhs())); break;
+         case RETURN       : charsPrinted += file.printf(FMT("return% s"), TNB_AST(expr.lhs())); break;
 
          case ALIAS:
             if (expr.rhs()) {
-               return file.printf(FMT("using %s = %s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
+               charsPrinted += file.printf(FMT("using %s = %s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
             } else {
-               return file.printf(FMT("using %s"), TNB_AST(expr.lhs()));
+               charsPrinted += file.printf(FMT("using %s"), TNB_AST(expr.lhs()));
             }
+            break;
          
-         case DEF_FUNC_PARAMS   : return writef(file, TNB_CAST(FuncDef), mode, fmt);
-         case DEF_MACRO_PARAMS  : return writef(file, TNB_CAST(MacroDef), mode, fmt);
+         case DEF_FUNC_PARAMS   : charsPrinted += writef(file, TNB_CAST(FuncDef), mode, fmt); break;
+         case DEF_MACRO_PARAMS  : charsPrinted += writef(file, TNB_CAST(MacroDef), mode, fmt); break;
 
-         case PREPROC_IMPORT    : return file.printf(FMT("#import %s"), TNB_AST(expr.rhs()));
-         case PREPROC_LINK      : return file.printf(FMT("#link %s"), TNB_AST(expr.rhs()));
-         case PREPROC_EMBED     : return file.printf(FMT("#embed %s %s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
+         case PREPROC_IMPORT    : charsPrinted += file.printf(FMT("#import %s"), TNB_AST(expr.rhs())); break;
+         case PREPROC_LINK      : charsPrinted += file.printf(FMT("#link %s"), TNB_AST(expr.rhs())); break;
+         case PREPROC_EMBED     : charsPrinted += file.printf(FMT("#embed %s %s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs())); break;
 
          default: UNREACHABLE;
       }
-      UNREACHABLE;
+      return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
       switch (expr.opID()) {
          #define CASE(T) case T::pseudoOpID(): return writef(file, +T::nodeType(), mode, fmt) + writef(file, TNB_CAST(T), mode, fmt)

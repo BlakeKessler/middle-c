@@ -50,7 +50,6 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
 
       case Scope::nodeType():
       case ForLoopParams::nodeType():
-      case ForeachLoopParams::nodeType():
       case SwitchCases::nodeType():
       case MatchCases::nodeType():
       case StatementSequence::nodeType():

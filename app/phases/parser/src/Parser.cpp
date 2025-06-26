@@ -133,9 +133,13 @@ START_PARSE_STMT:
             }
             case KeywordID::RETURN        : {
                getNextToken();
-               index<Expr> expr = parseExpr();
-               consumeEOS("bad RETURN statement");
-               return tree.make<Stmt>(KeywordID::RETURN, expr);
+               if (tryConsumeEOS()) {
+                  return tree.make<Stmt>(KeywordID::RETURN);
+               } else {
+                  index<Expr> expr = parseExpr();
+                  consumeEOS("bad RETURN statement");
+                  return tree.make<Stmt>(KeywordID::RETURN, expr);
+               }
             }
 
             case KeywordID::ALIAS         : {

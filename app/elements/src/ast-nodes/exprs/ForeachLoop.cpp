@@ -6,7 +6,7 @@
 #include "io.hpp"
 
 mcsl::File& mcsl::write(File& file, const clef::ForeachLoop& obj) {
-   file.printf(FMT("FOREACH (id=%u) {id=%u}"), +obj.params(), +obj.procedure());
+   file.printf(FMT("FOREACH (id=%u : id=%u) {id=%u}"), +obj.iterator(), +obj.target(), +obj.procedure());
    return file;
 }
 

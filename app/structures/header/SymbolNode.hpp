@@ -10,7 +10,8 @@
 class clef::SymbolNode {
    private:
       mcsl::map<mcsl::str_slice, SymbolNode*> _childSymbols;
-      //!TODO: anonymous children
+      mcsl::dyn_arr<SymbolNode*> _anonChildren; //accessible anonymous children (subtypes)
+      mcsl::dyn_arr<SymbolNode*> _subScopes; //inaccessible anonymous children (funcs, macros, conditionals, loops)
 
       mcsl::str_slice _name;
       mcsl::dyn_arr<mcsl::pair<mcsl::str_slice, SymbolNode*>> _aliases; //pair of name and parent scope //!TODO: maybe make this a map
