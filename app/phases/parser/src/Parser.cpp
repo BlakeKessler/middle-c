@@ -631,8 +631,12 @@ mcsl::tuple<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*, clef::in
       consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "missing closing parentheses in function signature");
    }
    //return type
-   consumeOperator(OpID::ARROW, "func without trailing return type");
-   index<Identifier> retType = parseTypename(SymbolType::EXTERN_TYPE, false);
+   index<Identifier> retType;
+   if (tryConsumeOperator(OpID::ARROW)) { //trailing return type
+      retType = parseTypename(SymbolType::EXTERN_TYPE, false);
+   } else { //no return type - assumed to be auto
+      retType = tree.make<Identifier>(KeywordID::AUTO, tree.getFundType(KeywordID::AUTO));
+   }
    overload->funcSig().retType = tree[retType].symbol()->type();
 
    //push to overload table
