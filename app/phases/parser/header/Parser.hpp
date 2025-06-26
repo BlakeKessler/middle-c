@@ -89,7 +89,7 @@ class clef::Parser {
    public:
       index<TypeDecl> parseClass() { return __parseObjTypeImpl(SymbolType::CLASS, FMT("class")); }
       index<TypeDecl> parseStruct() { return __parseObjTypeImpl(SymbolType::STRUCT, FMT("struct")); }
-      index<TypeDecl> parseInterface();
+      index<TypeDecl> parseTrait();
       index<TypeDecl> parseUnion();
    private:
       index<TypeDecl> __parseEnumlikeImpl(SymbolType symbolType, const mcsl::str_slice metatypeName);

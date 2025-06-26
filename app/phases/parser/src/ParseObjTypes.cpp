@@ -21,12 +21,12 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType sy
    }
    PUSH_SCOPE;
 
-   //implemented interfaces
+   //implemented traits
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
       do {
-         index<Identifier> parentType = parseTypename(SymbolType::INTERFACE, false);
+         index<Identifier> parentType = parseTypename(SymbolType::TRAIT, false);
          if (!spec->composite().impls.insert(tree[parentType].symbol())) {
-            logError(ErrCode::BAD_TYPE_DECL, "%s `%s` already implements interface `%s`", metatypeName, *tree[parentType].symbol());
+            logError(ErrCode::BAD_TYPE_DECL, "%s `%s` already implements trait `%s`", metatypeName, *tree[parentType].symbol());
          }
       } while (tryConsumeOperator(OpID::COMMA));
    }
@@ -62,7 +62,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType sy
          #define KW_CASE(kw, parsingFunc) case KeywordID::kw: getNextToken(); if (isStatic || +quals) { logError(ErrCode::BAD_KEYWORD, "cannot qualify a " #kw " as static"); } { auto tmp = parsingFunc(); tree[(index<Identifier>)tmp].addQuals(scope); spec->composite().subtypes.insert(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol()); } break
          KW_CASE(CLASS, parseClass);
          KW_CASE(STRUCT, parseStruct);
-         KW_CASE(INTERFACE, parseInterface);
+         KW_CASE(TRAIT, parseTrait);
          KW_CASE(UNION, parseUnion);
          KW_CASE(ENUM, parseEnum);
          KW_CASE(MASK, parseMask);
@@ -82,12 +82,12 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(clef::SymbolType sy
    return tree.make<TypeDecl>(name, name);
 }
 
-clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
-   index<Identifier> name = parseIdentifier(SymbolType::INTERFACE, nullptr);
+clef::index<clef::TypeDecl> clef::Parser::parseTrait() {
+   index<Identifier> name = parseIdentifier(SymbolType::TRAIT, nullptr);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
-   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, SymbolType::INTERFACE);
+   TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, SymbolType::TRAIT);
    if (spec->metaType() != TypeSpec::COMPOSITE) {
-      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of interface `%s`", *symbol);
+      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of trait `%s`", *symbol);
    }
 
    if (tryConsumeEOS()) { //forward declaration
@@ -99,15 +99,15 @@ clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
    //inheritance
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
       do {
-         index<Identifier> parentType = parseTypename(SymbolType::INTERFACE, false);
+         index<Identifier> parentType = parseTypename(SymbolType::TRAIT, false);
          if (!spec->composite().impls.insert(tree[parentType].symbol())) {
-            logError(ErrCode::BAD_TYPE_DECL, "interface `%s` already extends interface `%s`", *tree[parentType].symbol());
+            logError(ErrCode::BAD_TYPE_DECL, "trait `%s` already extends trait `%s`", *tree[parentType].symbol());
          }
       } while (tryConsumeOperator(OpID::COMMA));
    }
 
    //definition
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad INTERFACE definition");
+   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad TRAIT definition");
    QualMask scope = QualMask::PUBLIC;
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       if (tryConsumeKeyword(KeywordID::PUBLIC)) {
@@ -129,7 +129,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
       bool isStatic = tryConsumeKeyword(KeywordID::STATIC);
       quals |= parseQuals();
       isStatic |= tryConsumeKeyword(KeywordID::STATIC);
-      consumeKeyword(KeywordID::FUNC, "interfaces can only contain functions and methods");
+      consumeKeyword(KeywordID::FUNC, "traits can only contain functions and methods");
       index<Identifier> func = tree[parseFunction()].name();
       tree[func].addQuals(scope);
       if (isStatic) {
@@ -141,7 +141,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseInterface() {
    }
 
    //EOS
-   consumeEOS("interface without EOS");
+   consumeEOS("trait without EOS");
 
    //return
    POP_SCOPE;
@@ -264,7 +264,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace() {
          #define KW_CASE(kw, parsingFunc) case KeywordID::kw: getNextToken(); { auto tmp = parsingFunc(); spec->composite().subtypes.insert(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol()); } break
          KW_CASE(CLASS, parseClass);
          KW_CASE(STRUCT, parseStruct);
-         KW_CASE(INTERFACE, parseInterface);
+         KW_CASE(TRAIT, parseTrait);
          KW_CASE(UNION, parseUnion);
          KW_CASE(ENUM, parseEnum);
          KW_CASE(MASK, parseMask);

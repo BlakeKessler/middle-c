@@ -322,7 +322,7 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
 
       CASE(CLASS, "class");
       CASE(STRUCT, "struct");
-      CASE(INTERFACE, "interface");
+      CASE(TRAIT, "trait");
       CASE(UNION, "union");
       CASE(ENUM, "enum");
       CASE(ENUM_UNION, "enumunion");
@@ -532,7 +532,7 @@ constexpr const mcsl::str_slice clef::toString(const FundTypeID type) {
       CASE(MASK, "mask");
       CASE(UNION, "union");
       CASE(NAMESPACE, "namespace");
-      CASE(INTERFACE, "interface");
+      CASE(TRAIT, "trait");
       CASE(STRUCT, "struct");
       CASE(CLASS, "class");
    }
@@ -579,7 +579,7 @@ constexpr const mcsl::str_slice clef::toString(const SymbolType type) {
       CASE(FUND_TYPE, "fundamental type");
       CASE(CLASS, "class");
       CASE(STRUCT, "struct");
-      CASE(INTERFACE, "interface");
+      CASE(TRAIT, "trait");
       CASE(UNION, "union");
       CASE(ENUM, "enum");
       CASE(ENUM_UNION, "enumunion");

@@ -52,7 +52,7 @@ START_PARSE_STMT:
             
             case KeywordID::CLASS         : getNextToken(); return parseClass();
             case KeywordID::STRUCT        : getNextToken(); return parseStruct();
-            case KeywordID::INTERFACE     : getNextToken(); return parseInterface();
+            case KeywordID::TRAIT     : getNextToken(); return parseTrait();
             case KeywordID::UNION         : getNextToken(); return parseUnion();
             case KeywordID::ENUM          : getNextToken(); return parseEnum();
             case KeywordID::MASK          : getNextToken(); return parseMask();

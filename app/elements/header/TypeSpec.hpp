@@ -49,7 +49,7 @@ class clef::TypeSpec {
          } _indir;
          struct { //COMPOSITE
             mcsl::dyn_arr<SymbolNode*> tpltParams;
-            mcsl::set<ScopedSymbol, ScopedSymbol::hash> impls; //implemented interafaces
+            mcsl::set<ScopedSymbol, ScopedSymbol::hash> impls; //implemented traits
             mcsl::dyn_arr<ScopedSymbol> dataMembs;
             mcsl::set<ScopedSymbol, ScopedSymbol::hash> methods;
             mcsl::map<OpID, ScopedSymbol> ops;

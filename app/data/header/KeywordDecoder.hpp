@@ -58,7 +58,7 @@ class clef::KeywordDecoder {
          {"type", KeywordID::TYPE},
          {"class", KeywordID::CLASS},
          {"struct", KeywordID::STRUCT},
-         {"interface", KeywordID::INTERFACE},
+         {"trait", KeywordID::TRAIT},
          {"union", KeywordID::UNION},
          {"enum", KeywordID::ENUM},
          {"enumunion", KeywordID::ENUM_UNION},

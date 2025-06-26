@@ -61,7 +61,7 @@ namespace clef {
          FUND_TYPE,
          CLASS,
          STRUCT,
-         INTERFACE,
+         TRAIT,
          UNION,
          ENUM,
          ENUM_UNION,
@@ -461,7 +461,7 @@ namespace clef {
 
       CLASS,
       STRUCT,
-      INTERFACE,
+      TRAIT,
       UNION,
       ENUM,
       ENUM_UNION,
@@ -778,7 +778,7 @@ namespace clef {
       MASK,
       UNION,
       NAMESPACE,
-      INTERFACE,
+      TRAIT,
       STRUCT,
       CLASS,
    };
