@@ -45,7 +45,9 @@ namespace clef {
    uint spaces = mcsl::err_printf(mcsl::FMT("    %u "), lineNum);
    uint spaces2 = mcsl::err_printf(mcsl::FMT("| %s"), beforeTok) - 1;
    mcsl::err_printf(mcsl::FMT("\033[4m%s\033[24m%s"), tok, afterTok);
-   debug_assert(afterTok.back() == '\n');
+   if (afterTok.back() != '\n') {
+      mcsl::stderr.write('\n');
+   }
    mcsl::stderr.write(' ', spaces);
    mcsl::stderr.write('|');
    mcsl::stderr.write(' ', spaces2);
