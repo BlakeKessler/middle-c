@@ -762,23 +762,30 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
 
    const TypeSpec& spec = *obj;
    if ((mode | CASE_BIT) == 's') {
+      uint charsPrinted = 0;
+      if (fmt.padForPosSign) {
+         charsPrinted += file.printf(FMT(" "));
+      }
       switch (spec.metaType()) {
          case TypeSpec::null:
             if (fmt.isLeftJust) {
                debug_assert(spec.canonName());
-               return file.printf(FMT("%s"), TSB(spec.canonName()));
+               charsPrinted += file.printf(FMT("%s"), TSB(spec.canonName()));
+               return charsPrinted;
             }
             TODO;
          case TypeSpec::FUND_TYPE:
-            return file.printf(toString(spec.fund().id));
+            charsPrinted += file.printf(toString(spec.fund().id));
+            return charsPrinted;
          case TypeSpec::INDIR:
-            return file.printf(FMT("%s%-s%s"), spec.pointeeQuals(), TTsB(spec.pointee()), spec.indirTable());
+            charsPrinted += file.printf(FMT("%s%-s%s"), spec.pointeeQuals(), TTsB(spec.pointee()), spec.indirTable());
+            return charsPrinted;
          case TypeSpec::COMPOSITE: {
             if (fmt.isLeftJust) {
                debug_assert(spec.canonName());
-               return file.printf(FMT("%s"), TSB(spec.canonName()));
+               charsPrinted += file.printf(FMT("%s"), TSB(spec.canonName()));
+               return charsPrinted;
             }
-            uint charsPrinted = 0;
             indenter indents = obj.indents + 1;
             bool needsNewline;
             #define __print(field, prefix) \
@@ -799,6 +806,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
             for (auto [op, symbol] : spec.composite().ops) {
                TODO;
             }
+            charsPrinted += charsPrinted;
             return charsPrinted;
          }
          case TypeSpec::FUNC_SIG:
@@ -821,6 +829,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTSB obj, char mode, FmtArgs f
    const SymbolNode& symbol = *obj;
    if ((mode | CASE_BIT) == 's') {
       uint charsPrinted = 0;
+      if (fmt.padForPosSign) {
+         charsPrinted += file.printf(FMT(" "));
+      }
       if (fmt.altMode) {
          if (symbol.symbolType() == SymbolType::VAR) {
             charsPrinted += file.printf(FMT("%-s "), TTsB(symbol.type()));
@@ -831,7 +842,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTSB obj, char mode, FmtArgs f
                if (def) {
                   charsPrinted += file.printf(FMT("%s"), TNB_INDENT(def));
                } else {
-                  charsPrinted += file.printf(FMT("func% s%s"), symbol.name(), TTsB_INDENT(sig));
+                  charsPrinted += file.printf(FMT(symbol.name().size() ? "func " : "func"));
+                  charsPrinted += file.printf(FMT("%s%s"), symbol.name(), TTsB_INDENT(sig));
                }
             }
             return charsPrinted;
