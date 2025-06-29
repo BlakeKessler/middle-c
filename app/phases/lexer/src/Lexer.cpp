@@ -234,8 +234,9 @@ char clef::Lexer::parseChar() {
                   }
                   ++curr;
                }
-               if (numEnd != curr) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("bad binary numeric escape sequence")); }
-               ch = (char)mcsl::str_to_uint(numBegin, numEnd, 2);
+               if (curr == numBegin) { ch = '\b'; }
+               else if (numEnd != curr) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("bad binary numeric escape sequence")); }
+               else { ch = (char)mcsl::str_to_uint(numBegin, numEnd, 2); }
                break;
             }
             case 'o': case 'O': { //1-3 octal digits
@@ -300,6 +301,7 @@ char clef::Lexer::parseChar() {
 
             // case 'a': ch = '\a'; ++curr; break;
             // case 'b': ch = '\b'; ++curr; break;
+            case 'e': ch = '\033'; ++curr; break;
             case 'f': ch = '\f'; ++curr; break;
             case 'n': ch = '\n'; ++curr; break;
             case 'r': ch = '\r'; ++curr; break;

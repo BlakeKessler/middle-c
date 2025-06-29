@@ -366,7 +366,7 @@ mcsl::str_slice clef::Parser::parseStrLit() {
                   }
                   switch (raw[i]) {
                      // case 'a': str.push_back('\a'); break;
-                     // case 'b': str.push_back('\b'); break;
+                     case 'b': str.push_back('\b'); break;
                      case 'f': str.push_back('\f'); break;
                      case 'n': str.push_back('\n'); break;
                      case 'r': str.push_back('\r'); break;
