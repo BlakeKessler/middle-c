@@ -9,6 +9,7 @@ clef::SymbolNode::SymbolNode():
    _name{},
    _aliases{},
    _parentScope{},
+   _symbolType{SymbolType::null},
    _type{},
    _overloads{} {
 
