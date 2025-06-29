@@ -375,6 +375,9 @@ mcsl::str_slice clef::Parser::parseStrLit() {
 
                      default:
                         TODO; //!TODO: warning for invalid escape sequence
+                        [[fallthrough]];
+                     case '\"':
+                     case '\'':
                         str.push_back(raw[i]);
                         break;
                   }
