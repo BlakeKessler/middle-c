@@ -69,6 +69,7 @@ class clef::SyntaxTree {
       TypeSpec* makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable::Entry firstEntry);
 
       mcsl::str_slice storeString(const mcsl::str_slice);
+      mcsl::str_slice storeString(mcsl::string&&);
 
       SymbolNode* globalScope() { return &_globalScope; }
       SymbolNode* getFundType(KeywordID id) { return _keywordTypes[id]; }

@@ -54,6 +54,8 @@ class clef::Parser {
       index<ArgList> parseArgList(const BlockType closer, bool isDecl);
       index<ArgList> parseSpecList(index<Identifier> target, bool isDecl);
 
+      mcsl::str_slice parseStrLit();
+
       index<Expr> parseCast(const KeywordID);
 
       void skipBlockComment();

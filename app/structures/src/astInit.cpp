@@ -8,6 +8,8 @@
 void clef::SyntaxTree::initTables() {
    using enum KeywordID;
 
+   make<StmtSeq>(&allocBuf<index<Stmt>>());
+
    const auto init = [&](KeywordID type) {
       mcsl::str_slice name = toString(type);
       TypeSpec* spec = _typeTable.emplace_back(toTypeID(type, _dataModel));

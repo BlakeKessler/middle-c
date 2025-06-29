@@ -130,5 +130,13 @@ mcsl::str_slice clef::SyntaxTree::storeString(const mcsl::str_slice str) {
    _strings.insert(str);
    return *_strings.find(str);
 }
+mcsl::str_slice clef::SyntaxTree::storeString(mcsl::string&& str) {
+   bool didInsert = _strings.insert(str);
+   mcsl::str_slice slice = *_strings.find(str);
+   if (!didInsert) {
+      std::destroy_at(&str);
+   }
+   return slice;
+}
 
 #endif //SYNTAX_TREE_CPP

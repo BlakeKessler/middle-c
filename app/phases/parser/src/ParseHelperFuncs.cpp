@@ -310,8 +310,7 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
    if (currTok.type() != TokenType::PTXT_SEG || !isString(currTok.ptxtType())) {
       logError(ErrCode::BAD_PREPROC, "invalid `%s` directive", toString(op));
    }
-   const mcsl::str_slice path = tree.storeString(currTok.unprocessedStrVal());
-   getNextToken();
+   const mcsl::str_slice path = parseStrLit();
    index<Literal> pathLit = tree.make<Literal>(path);
    consumeEOS("missing EOS token");
 
@@ -325,6 +324,7 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
       fullPath += path;
       Lexer importedToks = clef::Lexer::fromFile(fullPath);
       Parser::parse(importedToks, tree);
+      return 0;
    }
 #endif
 
@@ -343,6 +343,57 @@ clef::index<clef::Expr> clef::Parser::parseCast(KeywordID castID) {
    index<Expr> contents = parseExpr();
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "typecasting uses function call syntax");
    return tree.makeExpr(OpID::CALL_INVOKE, +castptr, +contents);
+}
+
+mcsl::str_slice clef::Parser::parseStrLit() {
+   mcsl::string str;
+   debug_assert(currTok.type() == TokenType::PTXT_SEG && isString(currTok.ptxtType()));
+   do {
+      switch (currTok.ptxtType()) {
+         case PtxtType::STR: str += currTok.strVal();
+         case PtxtType::WSTR: TODO;
+         case PtxtType::STR8: TODO;
+         case PtxtType::STR16: TODO;
+         case PtxtType::STR32: TODO;
+         case PtxtType::UNPROCESSED_STR: {
+            mcsl::str_slice raw = currTok.unprocessedStrVal();
+            str.reserve(str.size() + raw.size());
+            for (uint i = 0; i < raw.size(); ++i) {
+               if (raw[i] == '\\') {
+                  ++i;
+                  if (i >= raw.size()) {
+                     TODO;
+                  }
+                  switch (raw[i]) {
+                     // case 'a': str.push_back('\a'); break;
+                     // case 'b': str.push_back('\b'); break;
+                     case 'f': str.push_back('\f'); break;
+                     case 'n': str.push_back('\n'); break;
+                     case 'r': str.push_back('\r'); break;
+                     case 't': str.push_back('\t'); break;
+                     case 'v': str.push_back('\v'); break;
+
+                     default:
+                        TODO; //!TODO: warning for invalid escape sequence
+                        str.push_back(raw[i]);
+                        break;
+                  }
+               } else {
+                  str.push_back(raw[i]);
+               }
+            }
+         }
+         break;
+         case PtxtType::UNPROCESSED_WSTR: TODO;
+         case PtxtType::UNPROCESSED_STR8: TODO;
+         case PtxtType::UNPROCESSED_STR16: TODO;
+         case PtxtType::UNPROCESSED_STR32: TODO;
+
+         default: UNREACHABLE;
+      }
+      getNextToken();
+   } while (currTok.type() == TokenType::PTXT_SEG && isString(currTok.ptxtType()));
+   return tree.storeString(std::move(str));
 }
 
 

@@ -84,7 +84,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Literal> obj, char 
          case LitType::STRING: [[fallthrough]];
          case LitType::INTERP_STR: [[fallthrough]];
          case LitType::FORMAT: [[fallthrough]];
-         case LitType::REGEX: return file.printf(FMT("\"%s\""), (const str_slice)lit);
+         case LitType::REGEX: return file.printf(FMT("\"%#s\""), (const str_slice)lit);
 
          case LitType::TYPEID: return file.printf(FMT("%s"), TTsB((const TypeSpec*)lit));
       }
@@ -301,6 +301,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Asm> obj, char mode
 #pragma endregion exprs
 
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Stmt> obj, char mode, FmtArgs fmt) {
+   if (!obj) {
+      return 0;
+   }
    if ((mode | CASE_BIT) == 's') {
       if (obj->opID() == clef::OpID::LABEL_DELIM && !obj->rhs() && !obj->extra()) { //special case for labels
          return file.printf(FMT("%s"), TNB_CAST(Expr));

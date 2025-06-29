@@ -11,7 +11,8 @@ void clef::Parser::parse(const mcsl::str_slice filePath, SyntaxTree& tree) {
 }
 void clef::Parser::parse(Lexer& src, SyntaxTree& tree) {
    Parser parser{src, tree};
-   index<StmtSeq> global = parser.tree.make<StmtSeq>(&tree.allocBuf<index<Stmt>>());
+   index<StmtSeq> global = 1;
+   debug_assert(tree[index<astNode>(global)].nodeType() == NodeType::STMT_SEQ);
    while (!src.done()) {
       index<Stmt> stmt = parser.parseStmt();
       tree[global].push_back(stmt);
@@ -300,17 +301,15 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             goto PARSE_EXPR_CONTINUE;
          case TokenType::PTXT_SEG:
             prevTokIsOperand = true;
-            switch (currTok.ptxtType()) {
-               case PtxtType::CHAR:
-                  operandStack.push_back(+tree.make<Literal>(currTok.charVal()));
-                  getNextToken();
-                  goto PARSE_EXPR_CONTINUE;
-               case PtxtType::UNPROCESSED_STR:
-                  operandStack.push_back(+tree.make<Literal>(currTok.unprocessedStrVal()));
-                  getNextToken();
-                  goto PARSE_EXPR_CONTINUE;
-
-               default: logError(ErrCode::PARSER_NOT_IMPLEMENTED, "cannot currently parse this plaintext segment type (%u)", +currTok.ptxtType());
+            if (isString(currTok.ptxtType())) {
+               operandStack.push_back(+tree.make<Literal>(parseStrLit()));
+               goto PARSE_EXPR_CONTINUE;
+            } else if (currTok.ptxtType() == PtxtType::CHAR) {
+               operandStack.push_back(+tree.make<Literal>(currTok.charVal()));
+               getNextToken();
+               goto PARSE_EXPR_CONTINUE;
+            } else {
+               logError(ErrCode::PARSER_NOT_IMPLEMENTED, "cannot currently parse this plaintext segment type (%u)", +currTok.ptxtType());
                //!TODO: support other types of plaintext literal
             }
             UNREACHABLE;
