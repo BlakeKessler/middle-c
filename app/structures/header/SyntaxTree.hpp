@@ -25,9 +25,11 @@ class clef::SyntaxTree {
 
       DataModel _dataModel;
 
+      mcsl::set<mcsl::string> _strings;
+
       void initTables();
    public:
-      SyntaxTree():_buf{},_globalScope{},_keywordTypes{},_symbolBuf{},_typeTable{},_alloc{},_dataModel(DataModel::LP64) {
+      SyntaxTree():_buf{},_globalScope{},_keywordTypes{},_symbolBuf{},_typeTable{},_alloc{},_dataModel(DataModel::LP64),_strings() {
          _buf.emplace_back(NodeType::ERROR);
          initTables();
       }
@@ -38,7 +40,8 @@ class clef::SyntaxTree {
          _symbolBuf{std::move(other._symbolBuf)},
          _typeTable{std::move(other._typeTable)},
          _alloc{std::move(other._alloc)},
-         _dataModel(other._dataModel) {
+         _dataModel(other._dataModel),
+         _strings(other._strings) {
             if (this != &other) {
                other.release();
             }
@@ -64,6 +67,8 @@ class clef::SyntaxTree {
       // uint freeTypesAfter(TypeSpec*); //inclusive
       // uint popNodesAfter(index<astNode>); //inclusive
       TypeSpec* makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable::Entry firstEntry);
+
+      mcsl::str_slice storeString(const mcsl::str_slice);
 
       SymbolNode* globalScope() { return &_globalScope; }
       SymbolNode* getFundType(KeywordID id) { return _keywordTypes[id]; }

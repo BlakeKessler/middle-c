@@ -18,8 +18,6 @@ class clef::Parser {
       Lexer& src;
       Token currTok;
 
-      mcsl::dyn_arr<Lexer> otherFiles;
-
       index<Identifier> scopeName;
       SymbolNode* currScope;
       #define SAVE_SCOPE index<Identifier> __prevScopeName = scopeName; SymbolNode* __prevScope = currScope
@@ -110,7 +108,8 @@ class clef::Parser {
       Parser(Lexer& s, SyntaxTree& t):tree{t},src{s},currTok{src.nextToken()},scopeName{0},currScope{tree.globalScope()},_errno{} {}
    public:
       //parse tokenized source code
-      static mcsl::dyn_arr<Lexer> parse(Lexer& src, SyntaxTree& tree);
+      static void parse(const mcsl::str_slice filePath, SyntaxTree& tree);
+      static void parse(Lexer& src, SyntaxTree& tree);
 };
 
 

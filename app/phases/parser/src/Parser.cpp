@@ -5,14 +5,17 @@
 
 #include "dyn_arr.hpp"
 
-mcsl::dyn_arr<clef::Lexer> clef::Parser::parse(Lexer& src, SyntaxTree& tree) {
+void clef::Parser::parse(const mcsl::str_slice filePath, SyntaxTree& tree) {
+   Lexer src = Lexer::fromFile(filePath);
+   return parse(src, tree);
+}
+void clef::Parser::parse(Lexer& src, SyntaxTree& tree) {
    Parser parser{src, tree};
    index<StmtSeq> global = parser.tree.make<StmtSeq>(&tree.allocBuf<index<Stmt>>());
    while (!src.done()) {
       index<Stmt> stmt = parser.parseStmt();
       tree[global].push_back(stmt);
    }
-   return std::move(parser.otherFiles);
    // return parser.tree;
 }
 clef::index<clef::Stmt> clef::Parser::parseStmt() {

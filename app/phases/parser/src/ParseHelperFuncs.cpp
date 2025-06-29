@@ -310,7 +310,7 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
    if (currTok.type() != TokenType::PTXT_SEG || !isString(currTok.ptxtType())) {
       logError(ErrCode::BAD_PREPROC, "invalid `%s` directive", toString(op));
    }
-   const mcsl::str_slice path = currTok.unprocessedStrVal();
+   const mcsl::str_slice path = tree.storeString(currTok.unprocessedStrVal());
    getNextToken();
    index<Literal> pathLit = tree.make<Literal>(path);
    consumeEOS("missing EOS token");
@@ -318,17 +318,13 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
 #if !PARALLEL_COMPILE_FILES
    if (op == OpID::PREPROC_IMPORT) {
       //!TODO: make this more robust
-      if (path[0] == '/') {
-         Parser::parse(*otherFiles.push_back(clef::Lexer::fromFile(path)), tree);
-      } else {
-         mcsl::string fullPath = src.path();
-         while (fullPath.size() && fullPath.back() != '/') {
-            fullPath.pop_back();
-         }
-         fullPath += FMT("/");
-         fullPath += path;
-         Parser::parse(*otherFiles.push_back(clef::Lexer::fromFile(fullPath)), tree);
+      mcsl::string fullPath = src.path();
+      while (fullPath.size() && fullPath.back() != '/') {
+         fullPath.pop_back();
       }
+      fullPath += path;
+      Lexer importedToks = clef::Lexer::fromFile(fullPath);
+      Parser::parse(importedToks, tree);
    }
 #endif
 

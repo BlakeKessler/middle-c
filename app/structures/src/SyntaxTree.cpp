@@ -82,7 +82,9 @@ clef::SymbolNode* clef::SyntaxTree::registerSymbol(const mcsl::str_slice name, S
    if (SymbolNode* entry = table.get(name)) {
       return entry;
    }
-   SymbolNode* entry = _symbolBuf.emplace_back(name, parentScope, nullptr, SymbolType::EXTERN_IDEN);
+   _strings.emplace(name);
+   mcsl::str_slice canonName = _strings.find(name)->slice();
+   SymbolNode* entry = _symbolBuf.emplace_back(canonName, parentScope, nullptr, SymbolType::EXTERN_IDEN);
    debug_assert(entry->parentScope() == parentScope);
    table.insert(entry);
    return entry;
@@ -122,6 +124,11 @@ clef::TypeSpec* clef::SyntaxTree::makeIndirType(index<Identifier> targetNode, Ty
    debug_assert(symbol->symbolType() == SymbolType::INDIR);
 
    return spec;
+}
+
+mcsl::str_slice clef::SyntaxTree::storeString(const mcsl::str_slice str) {
+   _strings.insert(str);
+   return *_strings.find(str);
 }
 
 #endif //SYNTAX_TREE_CPP
