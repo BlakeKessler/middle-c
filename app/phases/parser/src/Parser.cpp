@@ -159,7 +159,7 @@ START_PARSE_STMT:
 
             case KeywordID::_NOT_A_KEYWORD: UNREACHABLE;
          }
-      case TokenType::IDEN        : {
+      case TokenType::IDEN        : PARSE_IDEN: {
          index<Expr> stmtContents = parseExpr();
          if (tryConsumeOperator(OpID::LABEL_DELIM)) { //label
             return tree.make<Stmt>(OpID::LABEL_DELIM, stmtContents);
@@ -168,10 +168,11 @@ START_PARSE_STMT:
          tree[(index<astNode>)stmtContents].upCast(NodeType::STMT);
          return (index<Stmt>)stmtContents;
       }
-      
+      UNREACHABLE;
+
+      case TokenType::OP          : if (currTok.opID() == OpID::SCOPE_RESOLUTION) { goto PARSE_IDEN; } [[fallthrough]];
       case TokenType::INT_NUM     : [[fallthrough]];
       case TokenType::REAL_NUM    : [[fallthrough]];
-      case TokenType::OP          : [[fallthrough]];
       case TokenType::BLOCK_DELIM : [[fallthrough]];
       case TokenType::PTXT_SEG    : STMT_STARTS_WITH_VALUE: {
          index<Expr> stmtContents = parseExpr();
@@ -316,6 +317,11 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
 
          case TokenType::EOS: goto END_OF_EXPR;
          case TokenType::OP:
+            if (currTok.opID() == OpID::SCOPE_RESOLUTION) {
+               operandStack.push_back(+parseIdentifier(SymbolType::EXTERN_IDEN, nullptr, false));
+               prevTokIsOperand = true;
+               goto PARSE_EXPR_CONTINUE;
+            }
             if (currTok.opID() == OpID::COMMA || currTok.opID() == OpID::INLINE_ELSE) {
                goto END_OF_EXPR;
             }
@@ -412,6 +418,11 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
    index<Identifier> name = scopeName;
    SymbolNode* symbol = currScope;
 
+   if (tryConsumeOperator(OpID::SCOPE_RESOLUTION)) {
+      name = 0;
+      symbol = tree.globalScope();
+   }
+
    do {
 #if !PARALLEL_COMPILE_FILES
       //!TODO: make this less janky
@@ -441,11 +452,16 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
    } while (true);
 
 #if !PARALLEL_COMPILE_FILES
-      //!TODO: make this less janky
-      if (!isDecl && (symbol->symbolType() == SymbolType::EXTERN_IDEN || symbol->symbolType() == SymbolType::EXTERN_TYPE)) {
-         logError(ErrCode::BAD_IDEN, "undeclared identifier `%s`", astTNB(tree, name, 0));
-      }
+   //!TODO: make this less janky
+   if (!isDecl && (symbol->symbolType() == SymbolType::EXTERN_IDEN || symbol->symbolType() == SymbolType::EXTERN_TYPE)) {
+      logError(ErrCode::BAD_IDEN, "undeclared identifier `%s`", astTNB(tree, name, 0));
+   }
 #endif
+
+   if (symbol == tree.globalScope()) {
+      //!TODO: unget token
+      return 0;
+   }
 
    tree[name].setQualMask(quals);
    if (type) {
