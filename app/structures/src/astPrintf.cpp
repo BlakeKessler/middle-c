@@ -810,7 +810,15 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
             return charsPrinted;
          }
          case TypeSpec::FUNC_SIG:
-            TODO;
+            charsPrinted += file.printf(FMT("("));
+            if (spec.funcSig().params.size()) {
+               charsPrinted += file.printf(FMT("%s"), TTsB(spec.funcSig().params[0]));
+               for (uint i = 1; i < spec.funcSig().params.size(); ++i) {
+                  charsPrinted += file.printf(FMT(", %s"), TTsB(spec.funcSig().params[i]));
+               }
+            }
+            charsPrinted += file.printf(FMT(") -> %s"), TTsB(spec.funcSig().retType));
+            return charsPrinted;
       }
    } else if ((mode | CASE_BIT) == 'b') {
       TODO;
