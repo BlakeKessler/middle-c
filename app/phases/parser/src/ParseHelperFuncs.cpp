@@ -81,10 +81,7 @@ clef::index<clef::Scope> clef::Parser::parseProcedure() {
 
 
 clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType, bool isDecl) {
-   // if (isDecl) {
-   //    TODO;
-   // }
-   index<Identifier> name = parseIdentifier(symbolType, nullptr);
+   index<Identifier> name = parseIdentifier(symbolType, nullptr, isDecl);
    Identifier& iden = tree[name];
    {
       SymbolNode* symbol = iden.symbol();
@@ -154,7 +151,7 @@ clef::index<clef::Decl> clef::Parser::parseDecl() {
    
    //declaration
    index<Identifier> type = parseTypename(SymbolType::EXTERN_TYPE, true);
-   index<Identifier> varName = parseIdentifier(SymbolType::VAR, tree[type].symbol());
+   index<Identifier> varName = parseIdentifier(SymbolType::VAR, tree[type].symbol(), true);
    SymbolNode* varSymbol = tree[varName].symbol();
    varSymbol->setSymbolType(SymbolType::VAR);
    varSymbol->setType(tree[type].symbol()->type());
@@ -197,7 +194,7 @@ clef::index<clef::Decl> clef::Parser::parseParam() {
    }
 
    index<Identifier> typeName = parseTypename(SymbolType::EXTERN_TYPE, true);
-   index<Identifier> varName = tryParseIdentifier(SymbolType::VAR, tree[typeName].symbol());
+   index<Identifier> varName = tryParseIdentifier(SymbolType::VAR, tree[typeName].symbol(), true);
    if (varName) {
       SymbolNode* varSymbol = tree[varName].symbol();
       varSymbol->setSymbolType(SymbolType::VAR);
@@ -300,7 +297,7 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
       SymbolNode* byteType = tree.getFundType(KeywordID::UBYTE);
       index<Identifier> byteSpan = tree.make<Identifier>(KeywordID::UBYTE, byteType);
       tree.makeIndirType(byteSpan, byteType->type(), QualMask::CONST, IndirTable::Entry(IndirTable::Entry::SLICE, true, false, false));
-      name = parseIdentifier(SymbolType::VAR, tree[byteSpan].symbol());
+      name = parseIdentifier(SymbolType::VAR, tree[byteSpan].symbol(), true);
    } else {
       logError(ErrCode::BAD_PREPROC, "unrecognized directive");
       op = OpID::NULL;

@@ -94,7 +94,7 @@ START_PARSE_STMT:
                   return tree.make<Stmt>(OpID::GOTO_CASE);
                }
                //goto
-               index<Identifier> label = parseIdentifier(SymbolType::LABEL, nullptr);
+               index<Identifier> label = parseIdentifier(SymbolType::LABEL, nullptr, false);
                if (tree[label].scopeName()) { logError(ErrCode::BAD_IDEN, "label may not be scoped"); }
                consumeEOS("bad GOTO statement (missing EOS)");
                return tree.make<Stmt>(OpID::GOTO, label);
@@ -136,7 +136,7 @@ START_PARSE_STMT:
 
             case KeywordID::ALIAS         : {
                getNextToken();
-               index<Identifier> alias = parseIdentifier(SymbolType::EXTERN_IDEN, nullptr);
+               index<Identifier> alias = parseIdentifier(SymbolType::EXTERN_IDEN, nullptr, true);
                consumeOperator(OpID::ASSIGN, "alias definitions must use the assignment operator (and cannot be forward-declared)");
                TODO;
                index<Expr> valExpr = parseExpr();
@@ -288,7 +288,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
          }
 
          case TokenType::MACRO_INVOKE: TODO;
-         case TokenType::IDEN: operandStack.push_back(+parseIdentifier(SymbolType::EXTERN_IDEN, nullptr)); prevTokIsOperand = true; goto PARSE_EXPR_CONTINUE;
+         case TokenType::IDEN: operandStack.push_back(+parseIdentifier(SymbolType::EXTERN_IDEN, nullptr, false)); prevTokIsOperand = true; goto PARSE_EXPR_CONTINUE;
          case TokenType::INT_NUM:
             operandStack.push_back(+tree.make<Literal>(currTok.intVal()));
             getNextToken();
@@ -391,7 +391,7 @@ clef::QualMask clef::Parser::parseQuals() {
    return quals;
 }
 
-clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbolType, SymbolNode* type) {
+clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbolType, SymbolNode* type, bool isDecl) {
    QualMask quals = parseQuals();
    //handle keywords
    if (currTok.type() == TokenType::KEYWORD) {
@@ -439,6 +439,14 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
       if (currTok.type() == TokenType::KEYWORD) { logError(ErrCode::BAD_IDEN, "keywords may not name or be members of scopes"); }
       else if (currTok.type() != TokenType::IDEN) { logError(ErrCode::BAD_IDEN, "only identifiers may name or be members of scopes (%u)", +currTok.type()); }
    } while (true);
+
+#if !PARALLEL_COMPILE_FILES
+      //!TODO: make this less janky
+      if (!isDecl && (symbol->symbolType() == SymbolType::EXTERN_IDEN || symbol->symbolType() == SymbolType::EXTERN_TYPE)) {
+         logError(ErrCode::BAD_IDEN, "undeclared identifier `%s`", astTNB(tree, name, 0));
+      }
+#endif
+
    tree[name].setQualMask(quals);
    if (type) {
       if (tree[name].symbol()->type()) {
@@ -458,8 +466,8 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
    tree[name].addQuals(parseQuals());
    return name;
 }
-clef::index<clef::Identifier> clef::Parser::parseIdentifier(SymbolType symbolType, SymbolNode* type) {
-   index<Identifier> name = tryParseIdentifier(symbolType, type);
+clef::index<clef::Identifier> clef::Parser::parseIdentifier(SymbolType symbolType, SymbolNode* type, bool isDecl) {
+   index<Identifier> name = tryParseIdentifier(symbolType, type, isDecl);
    if (!name) {
       logError(ErrCode::BAD_IDEN, "expected an identifier");
    }
@@ -590,7 +598,7 @@ clef::index<clef::TryCatch> clef::Parser::parseTryCatch() {
 }
 
 clef::index<clef::FuncDef> clef::Parser::parseFunction() {
-   index<Identifier> name = parseIdentifier(SymbolType::FUNC, nullptr);
+   index<Identifier> name = parseIdentifier(SymbolType::FUNC, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    symbol->setSymbolType(SymbolType::FUNC);
    
