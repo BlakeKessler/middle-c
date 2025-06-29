@@ -28,7 +28,7 @@ class clef::Lexer {
       Token lexFunclikeMacroArgs();
    public:
       Lexer(Source&& s):src{std::move(s)}, begin{src.buf().begin()}, end{src.buf().end()}, curr{begin}, tokBegin{curr}, lineIndex(0) {}
-      static Lexer fromFile(const char* path) { return Lexer(Source::readFile(path)); }
+      static Lexer fromFile(const mcsl::str_slice path) { return Lexer(Source::readFile(path)); }
 
       bool done() const { return curr >= end; }
       Token nextToken();

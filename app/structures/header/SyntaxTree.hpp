@@ -48,6 +48,10 @@ class clef::SyntaxTree {
 
       inline void reserve(const uint nodeCount) { _buf.reserve(nodeCount); }
 
+#if PARALLEL_COMPILE_FILES
+      void merge(SyntaxTree&& other);
+#endif
+
       index<astNode> getValueKeyword(const KeywordID valueKeyword);
 
       void printf(mcsl::File&) const;
@@ -91,6 +95,20 @@ class clef::SyntaxTree {
 
       template<typename T> mcsl::dyn_arr<T>& allocBuf() { return _alloc.at(_alloc.alloc<T>()); }
       template<typename T> void freeBuf(mcsl::dyn_arr<T>& buf) { _alloc.freeBuf(buf); }
+
+
+
+   private:
+      struct __MangleData {
+         mcsl::dyn_arr<SymbolNode*> substitutions;
+         uint charsPrinted;
+
+         sint subIndex(SymbolNode*) { TODO; }
+      };
+      static void __mangleSpecializerImpl(mcsl::File& file, SyntaxTree& tree, Identifier& name, __MangleData& data) { TODO; }
+      static void __mangleImpl(mcsl::File& file, SyntaxTree& tree, Identifier& name, __MangleData& data);
+   public:
+      static uint manglePrint(mcsl::File& file, SyntaxTree& tree, index<Identifier> name) { TODO; }
 };
 
 //!quick little struct to indent when printing newlines in a `printf` call

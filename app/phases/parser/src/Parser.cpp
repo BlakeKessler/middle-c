@@ -5,13 +5,14 @@
 
 #include "dyn_arr.hpp"
 
-void clef::Parser::parse(Lexer& src, SyntaxTree& tree) {
+mcsl::dyn_arr<clef::Lexer> clef::Parser::parse(Lexer& src, SyntaxTree& tree) {
    Parser parser{src, tree};
    index<StmtSeq> global = parser.tree.make<StmtSeq>(&tree.allocBuf<index<Stmt>>());
    while (!src.done()) {
       index<Stmt> stmt = parser.parseStmt();
       tree[global].push_back(stmt);
    }
+   return std::move(parser.otherFiles);
    // return parser.tree;
 }
 clef::index<clef::Stmt> clef::Parser::parseStmt() {
@@ -410,6 +411,12 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
    SymbolNode* symbol = currScope;
 
    do {
+#if !PARALLEL_COMPILE_FILES
+      //!TODO: make this less janky
+      if (symbol->symbolType() == SymbolType::EXTERN_IDEN || symbol->symbolType() == SymbolType::EXTERN_TYPE || (symbol->symbolType() == SymbolType::null && symbol != tree.globalScope())) {
+         logError(ErrCode::BAD_IDEN, "undeclared identifier `%s`", astTNB(tree, name, 0));
+      }
+#endif
       symbol = tree.registerSymbol(currTok.name(), symbol); //add symbol to symbol table
       debug_assert(symbol);
       //create AST node for symbol

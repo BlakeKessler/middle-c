@@ -560,6 +560,8 @@ constexpr const mcsl::str_slice clef::toString(const QualMask quals) {
       CASE(PRIVATE, "private");
       CASE(PROTECTED, "protected");
 
+      CASE(_no_quals, "");
+
       default: TODO;
    }
    UNREACHABLE;

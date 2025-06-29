@@ -18,7 +18,7 @@ class clef::Source {
       Source(mcsl::string&& buf,mcsl::array<mcsl::str_slice>&& lines, mcsl::str_slice path = {}):_buf(std::move(buf)),_lines(std::move(lines)),_path{path} { buf.release(); lines.release(); }
       void release() {_buf.release();_lines.release();}
       
-      static Source readFile(const char* path);
+      static Source readFile(const mcsl::str_slice path);
 
       mcsl::string& buf() { return _buf; }
       const mcsl::string& buf() const { return _buf; }

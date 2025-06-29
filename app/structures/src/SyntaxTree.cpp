@@ -82,8 +82,9 @@ clef::SymbolNode* clef::SyntaxTree::registerSymbol(const mcsl::str_slice name, S
    if (SymbolNode* entry = table.get(name)) {
       return entry;
    }
-   SymbolNode* entry = _symbolBuf.emplace_back(name, parentScope, nullptr, SymbolType::null);
-   table[name] = entry;
+   SymbolNode* entry = _symbolBuf.emplace_back(name, parentScope, nullptr, SymbolType::EXTERN_IDEN);
+   debug_assert(entry->parentScope() == parentScope);
+   table.insert(entry);
    return entry;
 }
 clef::SymbolNode* clef::SyntaxTree::registerAlias(SymbolNode* alias, SymbolNode* target) {

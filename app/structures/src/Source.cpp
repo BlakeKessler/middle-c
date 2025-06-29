@@ -10,9 +10,13 @@ namespace fs = std::filesystem;
 
 //!read Middle C source code file into vector of lines of code
 //!returns a Source object with the data
-clef::Source clef::Source::readFile(const char* path) {
+clef::Source clef::Source::readFile(const mcsl::str_slice path) {
    //read file into a string
-   const uint fileSize = fs::file_size(fs::path(path));
+   fs::path p(path.begin(), path.end());
+   if (!fs::exists(p)) {
+      __throw(mcsl::ErrCode::FS_ERR, FMT("file `%s` does not exist"), path);
+   }
+   const uint fileSize = fs::file_size(p);
    mcsl::File srcFile(path, "r");
    mcsl::string _buf = srcFile.readChars(fileSize);
    srcFile.close();
@@ -38,7 +42,7 @@ clef::Source clef::Source::readFile(const char* path) {
    }
 
    //return
-   return Source(std::move(_buf),std::move(_lines), mcsl::str_slice::make_from_cstr(path));
+   return Source(std::move(_buf),std::move(_lines), path);
 }
 
 #endif //SOURCE_CPP

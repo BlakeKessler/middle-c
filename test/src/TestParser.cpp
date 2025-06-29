@@ -16,11 +16,11 @@ int main(const int argc, char** argv) {
    mcsl::printf(BIG_HEADER);
    for (int i = 1; i < argc; ++i) {
       //read and tokenize file
-      clef::Lexer tokens = clef::Lexer::fromFile(argv[i]);
+      clef::Lexer tokens = clef::Lexer::fromFile(mcsl::str_slice::make_from_cstr(argv[i]));
 
       //abstract syntax tree
       clef::SyntaxTree tree{};
-      clef::Parser::parse(tokens, tree);
+      auto tmp = clef::Parser::parse(tokens, tree);
       mcsl::printf(mcsl::FMT("\033[1m%s:\033[22m\n%s%s\n%s"), FMT(argv[i]), SMALL_HEADER, tree, BIG_HEADER);
    }
 

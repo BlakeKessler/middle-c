@@ -315,6 +315,23 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
    index<Literal> pathLit = tree.make<Literal>(path);
    consumeEOS("missing EOS token");
 
+#if !PARALLEL_COMPILE_FILES
+   if (op == OpID::PREPROC_IMPORT) {
+      //!TODO: make this more robust
+      if (path[0] == '/') {
+         Parser::parse(*otherFiles.push_back(clef::Lexer::fromFile(path)), tree);
+      } else {
+         mcsl::string fullPath = src.path();
+         while (fullPath.size() && fullPath.back() != '/') {
+            fullPath.pop_back();
+         }
+         fullPath += FMT("/");
+         fullPath += path;
+         Parser::parse(*otherFiles.push_back(clef::Lexer::fromFile(fullPath)), tree);
+      }
+   }
+#endif
+
    //create statement node
    index<Expr> stmt = tree.makeExpr(op, +name, +pathLit);
    tree[(index<astNode>)stmt].upCast(NodeType::STMT);
