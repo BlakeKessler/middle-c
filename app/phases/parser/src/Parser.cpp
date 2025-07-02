@@ -625,9 +625,9 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction() {
 
    if (tryConsumeEOS()) { //forward declaration
       POP_SCOPE;
-      return tree.make<FuncDef>(name, overloadIndex, tree.make<ArgList>(params, retType));
+      return tree.make<FuncDef>(name, tree.make<ArgList>(params, retType));
       // tree.freeBuf(*params);
-      // return tree.make<FuncDef>(name, overloadIndex, index<ArgList>{});
+      // return tree.make<FuncDef>(name, index<ArgList>{});
    }
 
    //definition
@@ -639,7 +639,7 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction() {
 
    //make definition
    index<ArgList> paramNode = tree.make<ArgList>(params, retType);
-   index<FuncDef> def = tree.make<FuncDef>(name, overloadIndex, paramNode, procedure);
+   index<FuncDef> def = tree.make<FuncDef>(name, paramNode, procedure);
    symbol->defineOverload(overloadIndex, def);
 
    //return

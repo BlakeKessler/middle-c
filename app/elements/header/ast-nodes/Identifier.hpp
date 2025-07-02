@@ -38,7 +38,7 @@ struct clef::Identifier {
 
       const mcsl::str_slice name() const { return _name->name(); } //unqualified name
       index<void>& overloadIndex() { return _overloadIndex; }
-      index<void> overloadIndex() const { return _overloadIndex; }
+      index<const void> overloadIndex() const { return _overloadIndex; }
       SymbolNode*& symbol() { return _name; }
       const SymbolNode* symbol() const { return _name; }
       KeywordID keywordID() const { return _keywordID; }
