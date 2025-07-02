@@ -73,6 +73,7 @@ class clef::SyntaxTree {
 
       SymbolNode* globalScope() { return &_globalScope; }
       SymbolNode* getFundType(KeywordID id) { return _keywordTypes[id]; }
+      FundTypeID toFundTypeID(KeywordID id) { return toTypeID(id, _dataModel); }
 
       uint nodeCount() const { return _buf.size(); }
       astNode& getNode(const uint i) { assume(i); return _buf[i]; }
@@ -111,10 +112,10 @@ class clef::SyntaxTree {
 
          sint subIndex(SymbolNode*) { TODO; }
       };
-      static void __mangleSpecializerImpl(mcsl::File& file, SyntaxTree& tree, Identifier& name, __MangleData& data) { TODO; }
+      static void __mangleSpecializerImpl(mcsl::File& file, SyntaxTree& tree, Identifier& name, __MangleData& data) { TODO; (void)(file); (void)(tree); (void)(name); (void)(data); }
       static void __mangleImpl(mcsl::File& file, SyntaxTree& tree, Identifier& name, __MangleData& data);
    public:
-      static uint manglePrint(mcsl::File& file, SyntaxTree& tree, index<Identifier> name) { TODO; }
+      static uint manglePrint(mcsl::File& file, SyntaxTree& tree, index<Identifier> name) { TODO; (void)(file); (void)(tree); (void)(name); }
 };
 
 //!quick little struct to indent when printing newlines in a `printf` call

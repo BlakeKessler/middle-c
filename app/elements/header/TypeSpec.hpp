@@ -58,7 +58,7 @@ class clef::TypeSpec {
             mcsl::set<ScopedSymbol, ScopedSymbol::hash> subtypes;
          } _composite;
          struct { //FUNC_SIG
-            TypeSpec* retType;
+            TypeSpec* retType; //!retType -> auto
             mcsl::dyn_arr<TypeSpec*> params;
          } _funcSig;
       };

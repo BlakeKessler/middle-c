@@ -638,7 +638,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
 
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
-      return file.printf(FMT("%b%b%b%b%b"), TSB(iden.symbol()), TNB(iden.specializer()), +iden.keywordID(), TNB(iden.scopeName()), +iden.quals());
+      return file.printf(FMT("%b%b%b%b%b%b"), TSB(iden.symbol()), +iden.overloadIndex(), TNB(iden.specializer()), +iden.keywordID(), TNB(iden.scopeName()), +iden.quals());
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Scope>"), mode);
    }
@@ -820,7 +820,11 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
                   charsPrinted += file.printf(FMT(", %s"), TTsB(spec.funcSig().params[i]));
                }
             }
-            charsPrinted += file.printf(FMT(") -> %s"), TTsB(spec.funcSig().retType));
+            if (spec.funcSig().retType) {
+               charsPrinted += file.printf(FMT(") -> %s"), TTsB(spec.funcSig().retType));
+            } else {
+               charsPrinted += file.printf(FMT(") -> auto"));
+            }
             return charsPrinted;
       }
    } else if ((mode | CASE_BIT) == 'b') {

@@ -401,7 +401,7 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
    QualMask quals = parseQuals();
    //handle keywords
    if (currTok.type() == TokenType::KEYWORD) {
-      index<Identifier> keyword = tree.make<Identifier>(currTok.keywordID(), tree.getFundType(currTok.keywordID()), index<ArgList>{}, quals); //!TODO: put the SymbolNode* in the Identifier
+      index<Identifier> keyword = tree.make<Identifier>(tree.toFundTypeID(currTok.keywordID()), currTok.keywordID(), tree.getFundType(currTok.keywordID()), index<ArgList>{}, quals); //!TODO: put the SymbolNode* in the Identifier
       getNextToken();
       tree[keyword].addQuals(parseQuals());
       if (tryConsumeOperator(OpID::SCOPE_RESOLUTION)) {
@@ -668,10 +668,11 @@ mcsl::tuple<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*, clef::in
    index<Identifier> retType;
    if (tryConsumeOperator(OpID::ARROW)) { //trailing return type
       retType = parseTypename(SymbolType::EXTERN_TYPE, false);
+      overload->funcSig().retType = tree[retType].symbol()->type();
    } else { //no return type - assumed to be auto
-      retType = tree.make<Identifier>(KeywordID::AUTO, tree.getFundType(KeywordID::AUTO));
+      retType = 0;
+      overload->funcSig().retType = nullptr;
    }
-   overload->funcSig().retType = tree[retType].symbol()->type();
 
    //push to overload table
    auto [overloadIndex, isNew] = target->registerOverload(overload);
