@@ -621,6 +621,7 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction() {
    PUSH_SCOPE;
 
    auto [overloadIndex, params, retType] = parseFuncSig(symbol);
+   tree[name].overloadIndex() = overloadIndex;
 
    if (tryConsumeEOS()) { //forward declaration
       POP_SCOPE;

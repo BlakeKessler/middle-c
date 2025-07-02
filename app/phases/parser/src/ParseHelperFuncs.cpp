@@ -144,9 +144,18 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
 
 clef::index<clef::Decl> clef::Parser::parseDecl() {
    if (tryConsumeKeyword(KeywordID::FUNC)) { [[unlikely]]; //handle functions separately
-      TODO;
-      // index<Function> funcptr = parseFunction();
-      // return tree.make<Decl>(tree[funcptr].signature(), funcptr, toExpr(+funcptr));
+      index<FuncDef> funcDef = parseFunction();
+      index<Expr> val;
+      if (tree[funcDef].procedure()) {
+         val = toExpr(+tree[funcDef].name());
+      } else {
+         if (tryConsumeOperator(OpID::ASSIGN)) {
+            val = parseExpr();
+         } else {
+            val = 0;
+         }
+      }
+      return tree.make<Decl>(tree[funcDef].name(), tree[funcDef].name(), val);
    }
    
    //declaration
