@@ -442,7 +442,7 @@ clef::TypeSpec* clef::Parser::evalType(index<astNode> i) {
       case NodeType::NONE: [[fallthrough]];
       case NodeType::ERROR:
          return nullptr;
-         
+
       case NodeType::IDEN:
          return tree[(index<Identifier>)i].symbol()->type();
          
@@ -451,7 +451,8 @@ clef::TypeSpec* clef::Parser::evalType(index<astNode> i) {
       case NodeType::LITERAL: {
          Literal& lit = tree[(index<Literal>)i];
          switch (lit.type()) {
-            case LitType::NONE: TODO;
+            case LitType::NONE: return nullptr;
+            
             case LitType::POINTER: TODO;
 
             case LitType::UINT: return tree.getFundType(KeywordID::UINT)->type();
@@ -471,6 +472,7 @@ clef::TypeSpec* clef::Parser::evalType(index<astNode> i) {
          UNREACHABLE;
       }
 
+      #pragma region exprs
       case NodeType::EXPR: [[fallthrough]];
       case NodeType::STMT: [[fallthrough]];
       case NodeType::DECL: [[fallthrough]];
@@ -487,6 +489,7 @@ clef::TypeSpec* clef::Parser::evalType(index<astNode> i) {
       case NodeType::ASM: [[fallthrough]];
       case NodeType::TRY_CATCH:
          return tree[(index<Expr>)i].evalType();
+      #pragma endregion exprs
 
       case NodeType::SWITCH_CASES: UNREACHABLE;
       case NodeType::MATCH_CASES: UNREACHABLE;
@@ -499,17 +502,14 @@ void clef::Parser::updateEvalType(index<Expr> i) {
 
    Expr& expr = tree[i];
 
-   bool isAllFundNoIndir = 
-      (expr.lhs() || evalType(+expr.lhs())->metaType() == TypeSpec::FUND_TYPE) &&
-      (expr.rhs() || evalType(+expr.rhs())->metaType() == TypeSpec::FUND_TYPE) &&
-      (expr.extra() || evalType(+expr.extra())->metaType() == TypeSpec::FUND_TYPE) &&
-      (expr.extra2() || evalType(+expr.extra2())->metaType() == TypeSpec::FUND_TYPE) &&
-      (expr.lhs() || evalType(+expr.lhs())->metaType() == TypeSpec::FUND_TYPE);
+   #define IS_PRIM(name) (expr.name() || evalType(+expr.name())->metaType() == TypeSpec::FUND_TYPE)
+   bool isAllPrimitive =  IS_PRIM(lhs) && IS_PRIM(rhs) && IS_PRIM(extra) && IS_PRIM(extra2);
+   #undef IS_PRIM
 
-   if (isAllFundNoIndir) {
+   if (isAllPrimitive) {
       switch (expr.opID()) {
             case OpID::TERNARY_INVOKE: 
-               if (!(expr.evalType() = commonType(+expr.rhs(), +expr.extra()))) {
+               if (!(expr.evalType() = commonType(+expr.rhs(), +expr.extra()))) { //intentionally uses assignment
                   logError(ErrCode::TYPECHECK_ERR, "operands of ternary expression must have a common type");
                }
                return;
@@ -524,17 +524,18 @@ void clef::Parser::updateEvalType(index<Expr> i) {
             case OpID::RANGE: TODO;
             case OpID::SPREAD: TODO;
 
-            //unary identity - common type
+            #pragma region commons
+            //unary identity
             case OpID::INC: [[fallthrough]];
             case OpID::DEC: [[fallthrough]];
             case OpID::BIT_NOT: [[fallthrough]];
-            //bitwise binary identity - common type
+            //bitwise binary identity
             case OpID::BIT_AND: [[fallthrough]];
             case OpID::BIT_OR: [[fallthrough]];
             case OpID::BIT_XOR: [[fallthrough]];
             case OpID::SHIFT_LEFT: [[fallthrough]];
             case OpID::SHIFT_RIGHT: [[fallthrough]];
-            //binary identity - common type
+            //binary identity
             case OpID::ADD: [[fallthrough]];
             case OpID::SUB: [[fallthrough]];
             case OpID::MUL: [[fallthrough]];
@@ -544,10 +545,12 @@ void clef::Parser::updateEvalType(index<Expr> i) {
             case OpID::COALESCE:
                expr.evalType() = commonTypeOfOperands(i);
                return;
+            #pragma endregion commons
 
-            //unary boolean - bool
+            #pragma region bools
+            //unary boolean
             case OpID::LOGICAL_NOT: [[fallthrough]];
-            //binary boolean - bool
+            //binary boolean
             case OpID::LOGICAL_AND: [[fallthrough]];
             case OpID::LOGICAL_OR: [[fallthrough]];
             case OpID::LESSER: [[fallthrough]];
@@ -561,10 +564,12 @@ void clef::Parser::updateEvalType(index<Expr> i) {
             case OpID::THREE_WAY_COMP:
                expr.evalType() = tree.getFundType(KeywordID::BOOL)->type();
                return;
+            #pragma endregion bools
 
-            //null - lhs
+            #pragma region lhss
+            //null
             case OpID::NULL:
-            //assignments - lhs
+            //assignments
             case OpID::ASSIGN: [[fallthrough]];
             //case OpID::CONST_ASSIGN: [[fallthrough]];
             case OpID::ADD_ASSIGN: [[fallthrough]];
@@ -581,15 +586,18 @@ void clef::Parser::updateEvalType(index<Expr> i) {
             case OpID::COALESCE_ASSIGN:
                expr.evalType() = evalType(+expr.lhs());
                return;
+            #pragma endregion lhss
 
-            //misc - rhs
+            #pragma region rhss
             case OpID::COMMA: [[fallthrough]];
             case OpID::LET: [[fallthrough]];
             case OpID::MAKE_TYPE:
                expr.evalType() = evalType(+expr.rhs());
                return;
+            #pragma endregion rhss
 
-            //pseudo-operators - typeless
+            #pragma region typelesses
+            //pseudo-operators
             case OpID::FOR: [[fallthrough]];
             case OpID::FOREACH: [[fallthrough]];
             case OpID::WHILE: [[fallthrough]];
@@ -612,23 +620,27 @@ void clef::Parser::updateEvalType(index<Expr> i) {
             case OpID::ALIAS: [[fallthrough]];
             case OpID::DEF_FUNC_PARAMS: [[fallthrough]];
             case OpID::DEF_MACRO_PARAMS: [[fallthrough]];
-            //labels - typeless
+            //labels
             case OpID::LABEL_DELIM:
                expr.evalType() = nullptr;
                return;
+            #pragma endregion typelesses
 
-            //errors
+            #pragma region errs
+            //dereferences
             case OpID::MEMBER_ACCESS: [[fallthrough]];
             case OpID::PTR_MEMBER_ACCESS: [[fallthrough]];
             case OpID::METHOD_PTR: [[fallthrough]];
             case OpID::ARROW_METHOD_PTR: [[fallthrough]];
+            //invokes
             case OpID::CALL_INVOKE: [[fallthrough]];
             case OpID::SUBSCRIPT_INVOKE: [[fallthrough]];
             case OpID::LIST_INVOKE: [[fallthrough]];
             case OpID::SPECIALIZER_INVOKE: [[fallthrough]];
             case OpID::INTERP_STR_INVOKE: logError(ErrCode::BAD_EXPR, "invalid operator for types");
+            #pragma endregion errs
 
-            //unreachables
+            #pragma region unreachables
             case OpID::INLINE_IF: [[fallthrough]];
             case OpID::UNIQUE_PTR: [[fallthrough]];
             case OpID::SHARED_PTR: [[fallthrough]];
@@ -656,8 +668,9 @@ void clef::Parser::updateEvalType(index<Expr> i) {
             case OpID::SPECIALIZER_CLOSE: [[fallthrough]];
             case OpID::CHAR_INVOKE: [[fallthrough]];
             case OpID::STR_INVOKE: UNREACHABLE;
+            #pragma endregion unreachables
          }
-   }
+   } else { UNREACHABLE; }
 
    switch (expr.opID()) {
       #define __TYPELESS expr.evalType() = nullptr; return
@@ -841,21 +854,17 @@ void clef::Parser::updateEvalType(index<Expr> i) {
 void clef::Parser::updateEvalType_r(index<Expr> i) {
    debug_assert(i);
 
-   Expr& expr = tree[i];
-
    //recursively update types
-   if (expr.lhs() && canDownCastTo(expr.lhsType(), NodeType::EXPR)) {
-      updateEvalType_r(+expr.lhs());
+   Expr& expr = tree[i];
+   #define __RECURSIVE_UPDATE(name, type) \
+   if (expr.name() && canDownCastTo(expr.type(), NodeType::EXPR)) { \
+      updateEvalType_r(+expr.name()); \
    }
-   if (expr.rhs() && canDownCastTo(expr.rhsType(), NodeType::EXPR)) {
-      updateEvalType_r(+expr.rhs());
-   }
-   if (expr.extra() && canDownCastTo(expr.extraType(), NodeType::EXPR)) {
-      updateEvalType_r(+expr.extra());
-   }
-   if (expr.extra2() && canDownCastTo(expr.extraType2(), NodeType::EXPR)) {
-      updateEvalType_r(+expr.extra2());
-   }
+   __RECURSIVE_UPDATE(lhs, lhsType);
+   __RECURSIVE_UPDATE(rhs, rhsType);
+   __RECURSIVE_UPDATE(extra, extraType);
+   __RECURSIVE_UPDATE(extra2, extraType2);
+   #undef __RECURSIVE_UPDATE
 
    //update own type
    updateEvalType(i);
