@@ -865,18 +865,22 @@ void clef::Parser::updateEvalType_r(index<Expr> i) {
 
    //recursively update types
    Expr& expr = tree[i];
-   #define __RECURSIVE_UPDATE(name, type) \
+   #define RECURSE(name, type) \
    if (expr.name() && canDownCastTo(expr.type(), NodeType::EXPR)) { \
       updateEvalType_r(+expr.name()); \
    }
-   __RECURSIVE_UPDATE(lhs, lhsType);
-   __RECURSIVE_UPDATE(rhs, rhsType);
-   __RECURSIVE_UPDATE(extra, extraType);
-   __RECURSIVE_UPDATE(extra2, extraType2);
-   #undef __RECURSIVE_UPDATE
+   RECURSE(lhs, lhsType);
+   RECURSE(rhs, rhsType);
+   RECURSE(extra, extraType);
+   RECURSE(extra2, extraType2);
+   #undef RECURSE
 
    //update own type
    updateEvalType(i);
+}
+
+clef::TypeSpec* clef::Parser::commonType(index<astNode> t1, index<astNode> t2) {
+   
 }
 
 #endif //PARSER_HELPERS_CPP
