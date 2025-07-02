@@ -879,8 +879,4 @@ void clef::Parser::updateEvalType_r(index<Expr> i) {
    updateEvalType(i);
 }
 
-clef::TypeSpec* clef::Parser::commonType(index<astNode> t1, index<astNode> t2) {
-   
-}
-
 #endif //PARSER_HELPERS_CPP
