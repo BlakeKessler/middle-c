@@ -457,6 +457,13 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
       logError(ErrCode::BAD_IDEN, "undeclared identifier `%s`", astTNB(tree, name, 0));
    }
 #endif
+   if (isDecl) {
+      if (symbol->symbolType() == SymbolType::null || symbol->symbolType() == SymbolType::EXTERN_IDEN || (isType(symbolType) && symbol->symbolType() == SymbolType::EXTERN_TYPE)) {
+         symbol->setSymbolType(symbolType);
+      } else {
+         TODO;
+      }
+   }
 
    if (symbol == tree.globalScope()) {
       //!TODO: unget token
