@@ -41,6 +41,9 @@ namespace clef {
       //ast/ast node errors
       BAD_LIT_CAST,
       BAD_NODE_CAST,
+
+      //typechecking errors
+      TYPECHECK_ERR,
    };
    constexpr auto      operator+(const ErrCode t) noexcept { return std::to_underlying(t); }
    

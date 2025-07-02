@@ -35,7 +35,10 @@ const mcsl::str_slice clef::ERR_MSG_ARR[] {
    mcsl::FMT("BAD PREPROCESSOR STATEMENT"),
    //ast/ast node errors
    mcsl::FMT("BAD LITERAL CAST"),
-   mcsl::FMT("BAD AST NODE CAST")
+   mcsl::FMT("BAD AST NODE CAST"),
+   
+   //typechecking errors
+   mcsl::FMT("TYPE ERROR")
 };
 
 #endif //CLEF_ERR_CPP

@@ -6,6 +6,7 @@
 
 struct clef::Expression {
    protected:
+      TypeSpec* _evalType = nullptr;
       OpID _op;
       NodeType _lhsType;
       NodeType _rhsType;
@@ -81,6 +82,9 @@ struct clef::Expression {
       template<astNode_t T> void setRHS(index<T> rhs) { setRHS(rhs, T::nodeType()); }
       template<astNode_t T> void setExtra(index<T> extra) { setExtra(extra, T::nodeType()); }
       template<astNode_t T> void setExtra2(index<T> extra) { setExtra2(extra, T::nodeType()); }
+
+      TypeSpec*& evalType() { return _evalType; }
+      const TypeSpec* evalType() const { return _evalType; }
 };
 
 namespace mcsl {

@@ -68,6 +68,7 @@ namespace clef {
    //classes for phases of compilation
    class Lexer;
    class Parser;
+   class CodeGenerator;
 }
 
 template<typename T> struct clef::index {
