@@ -7,12 +7,6 @@
 #include "pretty-print.hpp"
 #include "io.hpp"
 
-clef::Expression::Expression(OpID op, index<Identifier> type, index<ArgList> ctorArgs): Expression {
-   op, NodeType::IDEN, NodeType::ARG_LIST, type, ctorArgs
-} {
-      debug_assert(op == OpID::CALL_INVOKE || op == OpID::LIST_INVOKE);
-}
-
 clef::Expr clef::Expr::makeTernary(SyntaxTree& tree, index<astNode> cond, index<astNode> ifExpr, index<astNode> elseExpr) {
    return Expression{
       OpID::TERNARY_INVOKE,

@@ -44,8 +44,6 @@ struct clef::Expression {
       Expression(OpID unaryOp, NodeType t, index<astNode> lhs):Expression{unaryOp, t, +lhs} {}
       Expression(OpID nullaryOp):Expression{nullaryOp, NodeType::NONE, {}} {}
 
-      Expression(OpID op, index<Identifier> type, index<ArgList> ctorArgs);
-      
       Expression(KeywordID oplikeKeyword):Expression{toOpID(oplikeKeyword)} {}
       template<operand_t lhs_t>Expression(KeywordID oplikeKeyword, index<lhs_t> operand):Expression{toOpID(oplikeKeyword), operand} {}
       template<operand_t lhs_t, operand_t rhs_t>Expression(KeywordID oplikeKeyword, index<lhs_t> lhs, index<rhs_t> rhs):Expression{toOpID(oplikeKeyword), lhs, rhs} {}

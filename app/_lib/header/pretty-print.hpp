@@ -522,6 +522,14 @@ constexpr const mcsl::str_slice clef::toString(const FundTypeID type) {
       CASE(FLOAT80, "float80");
       CASE(FLOAT128, "float128");
       CASE(FLOAT256, "float256");
+
+      case FundTypeID::__CHARS:
+      case FundTypeID::__UINTS:
+      case FundTypeID::__SINTS:
+      case FundTypeID::__FLOATS:
+      case FundTypeID::__INTS:
+      case FundTypeID::__NUMS:
+         UNREACHABLE;
    }
    UNREACHABLE;
 }

@@ -884,10 +884,57 @@ clef::TypeSpec* clef::Parser::commonType(TypeSpec* t1, TypeSpec* t2) {
    if (!t2) { return t1; }
 
    if (t1->metaType() == TypeSpec::FUND_TYPE && t2->metaType() == TypeSpec::FUND_TYPE) {
-      TODO;
+      FundTypeID f1 = t1->fund().id;
+      FundTypeID f2 = t2->fund().id;
+      FundTypeID common;
+      if (f1 == FundTypeID::AUTO) { common = f2; }
+      else if (f2 == FundTypeID::AUTO) { common = f1; }
+      else if (isNum(f1) && isNum(f2)) { //both numeric types
+         if (isFloat(f1)) { //f1 is float
+            common = (isFloat(f2) && f2 >= f1) ? f2 : f1;
+         } else if (isFloat(f2)) { //f2 is float and f1 is not float
+            common = f2;
+         } else if (isUint(f1) == isUint(f2)) { //both uint or both sint
+            common = f1 >= f2 ? f1 : f2;
+         } else { //a uint and an sint
+            //use the unsigned version of the larger type
+            if (sizeOf(f1, tree.dataModel()) < sizeOf(f2, tree.dataModel())) {
+               common = toUint(f1);
+            } else {
+               common = toUint(f2);
+            }
+         }
+      } else {
+         TODO;
+      }
+      return tree.getFundType(common)->type();
    }
 
    TODO;
+}
+
+clef::TypeSpec* clef::Parser::commonTypeOfOperands(index<Expr> i) {
+   if (!i) {
+      return nullptr;
+   }
+
+   Expr& expr = tree[i];
+
+   TypeSpec* spec = nullptr;
+   #define UPDATE(name) \
+   if (expr.name()) { \
+      spec = commonType(spec, evalType(+expr.name())); \
+      if (!spec) { \
+         logError(ErrCode::TYPECHECK_ERR, "no common type"); \
+      } \
+   }
+   UPDATE(lhs);
+   UPDATE(rhs);
+   UPDATE(extra);
+   UPDATE(extra2);
+   #undef UPDATE
+
+   return spec;
 }
 
 #endif //PARSER_HELPERS_CPP

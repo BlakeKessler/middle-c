@@ -744,11 +744,15 @@ namespace clef {
       VOID,
       AUTO,
 
+      __FLAGS = 0b1111000,
+
+      __CHARS = 0b0001000,
       CHAR,
       CHAR8,
       CHAR16,
       CHAR32,
 
+      __UINTS = __CHARS << 1,
       BOOL,
       UINT8,
       UINT16,
@@ -757,9 +761,7 @@ namespace clef {
       UINT128,
       UINT256,
 
-      __FIRST_UINT = BOOL,
-      __LAST_UINT = UINT256,
-
+      __SINTS = __UINTS << 1,
       SIGN_T,
       SINT8,
       SINT16,
@@ -768,28 +770,45 @@ namespace clef {
       SINT128,
       SINT256,
 
-      __FIRST_SINT = SIGN_T,
-      __LAST_SINT = SINT256,
-
-      __FIRST_INT = __FIRST_UINT,
-      __LAST_INT = __LAST_SINT,
-
-      FLOAT16,
+      __FLOATS = __SINTS << 1,
+      FLOAT16 = __FLOATS + UINT16 - __UINTS,
       FLOAT32,
       FLOAT64,
       FLOAT80,
       FLOAT128,
       FLOAT256,
 
-      __FIRST_REAL = FLOAT16,
-      __LAST_REAL = FLOAT256,
+      __INTS = __CHARS | __UINTS | __SINTS,
+      __NUMS = __INTS | __FLOATS,
    };
-   constexpr bool isUint(FundTypeID id) { return id >= FundTypeID::__FIRST_UINT && id <= FundTypeID::__LAST_UINT; }
-   constexpr bool isSint(FundTypeID id) { return id >= FundTypeID::__FIRST_SINT && id <= FundTypeID::__LAST_SINT; }
-   constexpr bool isInt(FundTypeID id) { return id >= FundTypeID::__FIRST_INT && id <= FundTypeID::__LAST_INT; }
-   constexpr bool isReal(FundTypeID id) { return id >= FundTypeID::__FIRST_REAL && id <= FundTypeID::__LAST_REAL; }
+   constexpr auto operator+(const FundTypeID id) noexcept { return std::to_underlying(id); }
+   constexpr FundTypeID operator~(const FundTypeID id) noexcept { return (FundTypeID)(~+id); }
+   constexpr FundTypeID operator&(FundTypeID id, FundTypeID mask) { return (FundTypeID)(+id & +mask); }
+   constexpr FundTypeID operator|(FundTypeID id, FundTypeID mask) { return (FundTypeID)(+id | +mask); }
 
+   constexpr bool isChar(FundTypeID id) { return +(id & FundTypeID::__CHARS); }
+   constexpr bool isUint(FundTypeID id) { return +(id & FundTypeID::__UINTS); }
+   constexpr bool isSint(FundTypeID id) { return +(id & FundTypeID::__SINTS); }
+   constexpr bool isInt(FundTypeID id) { return +(id & FundTypeID::__INTS); }
+   constexpr bool isFloat(FundTypeID id) { return +(id & FundTypeID::__FLOATS); }
+   constexpr bool isNum(FundTypeID id) { return +(id & FundTypeID::__NUMS); }
 
+   constexpr FundTypeID toUint(FundTypeID id) {
+      return (id & ~FundTypeID::__FLAGS) | FundTypeID::__UINTS;
+   }
+   constexpr FundTypeID toSint(FundTypeID id) {
+      return (id & ~FundTypeID::__FLAGS) | FundTypeID::__SINTS;
+   }
+   constexpr FundTypeID toReal(FundTypeID id) {
+      return (id & ~FundTypeID::__FLAGS) | FundTypeID::__FLOATS;
+   }
+   constexpr FundTypeID toInt(FundTypeID id) {
+      if (isInt(id)) {
+         return id;
+      }
+      return toSint(id);
+   }
+   
 
    enum class [[clang::flag_enum]] QualMask : uint16 {
       _no_quals = 0,

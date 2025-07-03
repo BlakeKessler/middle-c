@@ -17,7 +17,7 @@ class clef::SyntaxTree {
       mcsl::dyn_arr<astNode> _buf; //owning storage for member nodes
 
       SymbolNode _globalScope;
-      mcsl::map<KeywordID, SymbolNode*> _keywordTypes;
+      mcsl::map<FundTypeID, SymbolNode*> _fundTypes;
       mcsl::arr_list<SymbolNode> _symbolBuf;
       mcsl::arr_list<TypeSpec> _typeTable;
 
@@ -29,14 +29,14 @@ class clef::SyntaxTree {
 
       void initTables();
    public:
-      SyntaxTree():_buf{},_globalScope{},_keywordTypes{},_symbolBuf{},_typeTable{},_alloc{},_dataModel(DataModel::LP64),_strings() {
+      SyntaxTree():_buf{},_globalScope{},_fundTypes{},_symbolBuf{},_typeTable{},_alloc{},_dataModel(DataModel::LP64),_strings() {
          _buf.emplace_back(NodeType::ERROR);
          initTables();
       }
       SyntaxTree(SyntaxTree&& other):
          _buf{std::move(other._buf)},
          _globalScope{std::move(other._globalScope)},
-         _keywordTypes{std::move(other._keywordTypes)},
+         _fundTypes{std::move(other._fundTypes)},
          _symbolBuf{std::move(other._symbolBuf)},
          _typeTable{std::move(other._typeTable)},
          _alloc{std::move(other._alloc)},
@@ -72,8 +72,10 @@ class clef::SyntaxTree {
       mcsl::str_slice storeString(mcsl::string&&);
 
       SymbolNode* globalScope() { return &_globalScope; }
-      SymbolNode* getFundType(KeywordID id) { return _keywordTypes[id]; }
+      SymbolNode* getFundType(FundTypeID id) { return _fundTypes[id]; }
+      SymbolNode* getFundType(KeywordID id) { return getFundType(toTypeID(id, _dataModel)); }
       FundTypeID toFundTypeID(KeywordID id) { return toTypeID(id, _dataModel); }
+      DataModel dataModel() const { return _dataModel; }
 
       uint nodeCount() const { return _buf.size(); }
       astNode& getNode(const uint i) { assume(i); return _buf[i]; }

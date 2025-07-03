@@ -6,16 +6,16 @@
 #include "pretty-print.hpp"
 
 void clef::SyntaxTree::initTables() {
-   using enum KeywordID;
+   using enum FundTypeID;
 
    make<StmtSeq>(&allocBuf<index<Stmt>>());
 
-   const auto init = [&](KeywordID type) {
+   const auto init = [&](FundTypeID type) {
       mcsl::str_slice name = toString(type);
-      TypeSpec* spec = _typeTable.emplace_back(toTypeID(type, _dataModel));
+      TypeSpec* spec = _typeTable.emplace_back(type);
       SymbolNode* node = _symbolBuf.emplace_back(name, &_globalScope, spec, SymbolType::FUND_TYPE);
       _globalScope[name] = node;
-      _keywordTypes.insert(type, node);
+      _fundTypes.insert(type, node);
    };
    
    init(VOID);
@@ -23,54 +23,34 @@ void clef::SyntaxTree::initTables() {
 
 
    init(CHAR);
-   init(CHAR_UTF_8);
-   init(CHAR_UTF_16);
-   init(CHAR_UTF_32);
+   init(CHAR8);
+   init(CHAR16);
+   init(CHAR32);
 
 
    init(BOOL);
-   init(UBYTE);
-   init(USHORT);
-   init(UINT);
-   init(ULONG);
-   init(UOVERLONG);
-   init(UINT_PTR);
-   init(UWORD);
-
-   init(UINT_8);
-   init(UINT_16);
-   init(UINT_32);
-   init(UINT_64);
-   init(UINT_128);
-   init(UINT_256);
+   init(UINT8);
+   init(UINT16);
+   init(UINT32);
+   init(UINT64);
+   init(UINT128);
+   init(UINT256);
 
 
    init(SIGN_T);
-   init(SBYTE);
-   init(SSHORT);
-   init(SINT);
-   init(SLONG);
-   init(SOVERLONG);
-   init(SINT_PTR);
-   init(SWORD);
+   init(SINT8);
+   init(SINT16);
+   init(SINT32);
+   init(SINT64);
+   init(SINT128);
+   init(SINT256);
 
-   init(SINT_8);
-   init(SINT_16);
-   init(SINT_32);
-   init(SINT_64);
-   init(SINT_128);
-   init(SINT_256);
-
-   init(FLOAT);
-   init(FLONG);
-   init(FLEXT);
-
-   init(FLOAT_16);
-   init(FLOAT_32);
-   init(FLOAT_64);
-   init(FLOAT_80);
-   init(FLOAT_128);
-   init(FLOAT_256);
+   init(FLOAT16);
+   init(FLOAT32);
+   init(FLOAT64);
+   init(FLOAT80);
+   init(FLOAT128);
+   init(FLOAT256);
 }
 
 #endif //AST_INIT_CPP

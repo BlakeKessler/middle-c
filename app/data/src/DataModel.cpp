@@ -75,4 +75,25 @@ clef::FundTypeID clef::toTypeID(KeywordID kw, DataModel model) {
    #undef CASE
 }
 
+uint clef::sizeOf(FundTypeID id, DataModel model) {
+   using enum FundTypeID;
+   switch (model) {
+      case DataModel::LP64:
+         debug_assert(id != __CHARS && id != __UINTS && id != __SINTS && id != __FLOATS && id != __INTS);
+         if (id == VOID || id == AUTO || id == null) {
+            return 0;
+         }
+         if (id == FUNCTION_SIGNATURE) {
+            return 8;
+         }
+         if (auto offset = +(id & ~__FLAGS) - 1; offset - 1) {
+            return 1 << offset;
+         } else {
+            return 1;
+         }
+      
+      default: TODO;
+   }
+}
+
 #endif //DATA_MODEL_CPP
