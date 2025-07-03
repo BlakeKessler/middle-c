@@ -14,6 +14,8 @@ namespace clef {
    };
    constexpr bool HAS_HW_FLOAT_80 = true;
    FundTypeID toTypeID(KeywordID, DataModel);
+   uint sizeOf(FundTypeID, DataModel);
+   inline uint sizeOf(KeywordID id, DataModel m) { return sizeOf(toTypeID(id, m), m); }
 
 };
 

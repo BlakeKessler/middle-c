@@ -518,7 +518,7 @@ void clef::Parser::updateEvalType(index<Expr> i) {
    if (isAllPrimitive) {
       switch (expr.opID()) {
             case OpID::TERNARY_INVOKE: 
-               if (!(expr.evalType() = commonType(+expr.rhs(), +expr.extra()))) { //intentionally uses assignment
+               if (!(expr.evalType() = commonType(evalType(+expr.rhs()), evalType(+expr.extra())))) { //intentionally uses assignment
                   logError(ErrCode::TYPECHECK_ERR, "operands of ternary expression must have a common type");
                }
                return;
@@ -720,7 +720,7 @@ void clef::Parser::updateEvalType(index<Expr> i) {
       case OpID::STR_INVOKE: UNREACHABLE;
       case OpID::INTERP_STR_INVOKE: TODO;
       case OpID::TERNARY_INVOKE: 
-         if (!(expr.evalType() = commonType(+expr.rhs(), +expr.extra()))) {
+         if (!(expr.evalType() = commonType(evalType(+expr.rhs()), evalType(+expr.extra())))) {
             logError(ErrCode::TYPECHECK_ERR, "operands of ternary expression must have a common type");
          }
          return;
@@ -877,6 +877,17 @@ void clef::Parser::updateEvalType_r(index<Expr> i) {
 
    //update own type
    updateEvalType(i);
+}
+
+clef::TypeSpec* clef::Parser::commonType(TypeSpec* t1, TypeSpec* t2) {
+   if (!t1) { return t2; }
+   if (!t2) { return t1; }
+
+   if (t1->metaType() == TypeSpec::FUND_TYPE && t2->metaType() == TypeSpec::FUND_TYPE) {
+      TODO;
+   }
+
+   TODO;
 }
 
 #endif //PARSER_HELPERS_CPP

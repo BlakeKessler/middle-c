@@ -757,6 +757,9 @@ namespace clef {
       UINT128,
       UINT256,
 
+      __FIRST_UINT = BOOL,
+      __LAST_UINT = UINT256,
+
       SIGN_T,
       SINT8,
       SINT16,
@@ -765,12 +768,21 @@ namespace clef {
       SINT128,
       SINT256,
 
+      __FIRST_SINT = SIGN_T,
+      __LAST_SINT = SINT256,
+
+      __FIRST_INT = __FIRST_UINT,
+      __LAST_INT = __LAST_SINT,
+
       FLOAT16,
       FLOAT32,
       FLOAT64,
       FLOAT80,
       FLOAT128,
       FLOAT256,
+
+      __FIRST_REAL = FLOAT16,
+      __LAST_REAL = FLOAT256,
 
 
       PTR,
@@ -785,6 +797,10 @@ namespace clef {
       STRUCT,
       CLASS,
    };
+   constexpr bool isUint(FundTypeID id) { return id >= FundTypeID::__FIRST_UINT && id <= FundTypeID::__LAST_UINT; }
+   constexpr bool isSint(FundTypeID id) { return id >= FundTypeID::__FIRST_SINT && id <= FundTypeID::__LAST_SINT; }
+   constexpr bool isInt(FundTypeID id) { return id >= FundTypeID::__FIRST_INT && id <= FundTypeID::__LAST_INT; }
+   constexpr bool isReal(FundTypeID id) { return id >= FundTypeID::__FIRST_REAL && id <= FundTypeID::__LAST_REAL; }
 
 
 
