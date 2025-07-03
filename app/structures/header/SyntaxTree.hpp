@@ -102,6 +102,12 @@ class clef::SyntaxTree {
 
       index<Expr> remakeTernary(index<astNode> cond, index<Expr> vals);
 
+      TypeSpec* evalType(index<astNode>);
+      TypeSpec* commonType(TypeSpec*, TypeSpec*);
+      TypeSpec* commonTypeOfOperands(index<Expr>);
+      void updateEvalType(index<Expr>);
+      void updateEvalType_r(index<Expr>); //recursively update eval types
+
       template<typename T> mcsl::dyn_arr<T>& allocBuf() { return _alloc.at(_alloc.alloc<T>()); }
       template<typename T> void freeBuf(mcsl::dyn_arr<T>& buf) { _alloc.freeBuf(buf); }
 
@@ -205,9 +211,13 @@ inline void clef::SyntaxTree::release() {
 }
 
 template<clef::astNode_ptr_t asT, clef::astNode_ptr_t T = asT, typename... Argv_t> asT clef::SyntaxTree::make(Argv_t... argv) requires mcsl::valid_ctor<mcsl::remove_ptr<T>, Argv_t...> {
+   uint index = _buf.size();
    astNode* tmp = _buf.emplace_back(std::move(mcsl::remove_ptr<T>{std::forward<Argv_t>(argv)...}));
    if constexpr (!mcsl::is_t<mcsl::remove_ptr<asT>, mcsl::remove_ptr<T>>) {
       tmp->anyCast(mcsl::remove_ptr<asT>::nodeType());
+   }
+   if constexpr (mcsl::is_t<mcsl::remove_ptr<T>, Expr>) {
+      updateEvalType(index);
    }
    return (asT)tmp;
 }

@@ -56,13 +56,6 @@ class clef::Parser {
 
       mcsl::str_slice parseStrLit();
 
-      //!TODO: maybe move these to SyntaxTree and run them in `make`
-      TypeSpec* evalType(index<astNode>);
-      TypeSpec* commonType(TypeSpec*, TypeSpec*);
-      TypeSpec* commonTypeOfOperands(index<Expr>);
-      void updateEvalType(index<Expr>);
-      void updateEvalType_r(index<Expr>); //recursively update eval types
-
       index<Expr> parseCast(const KeywordID);
 
       void skipBlockComment();
