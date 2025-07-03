@@ -522,19 +522,6 @@ constexpr const mcsl::str_slice clef::toString(const FundTypeID type) {
       CASE(FLOAT80, "float80");
       CASE(FLOAT128, "float128");
       CASE(FLOAT256, "float256");
-
-      
-      CASE(PTR, "POINTER");
-      CASE(REF, "REFERENCE");
-      
-
-      CASE(ENUM, "enum");
-      CASE(MASK, "mask");
-      CASE(UNION, "union");
-      CASE(NAMESPACE, "namespace");
-      CASE(TRAIT, "trait");
-      CASE(STRUCT, "struct");
-      CASE(CLASS, "class");
    }
    UNREACHABLE;
 }

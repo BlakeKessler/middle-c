@@ -783,19 +783,6 @@ namespace clef {
 
       __FIRST_REAL = FLOAT16,
       __LAST_REAL = FLOAT256,
-
-
-      PTR,
-      REF,
-
-
-      ENUM,
-      MASK,
-      UNION,
-      NAMESPACE,
-      TRAIT,
-      STRUCT,
-      CLASS,
    };
    constexpr bool isUint(FundTypeID id) { return id >= FundTypeID::__FIRST_UINT && id <= FundTypeID::__LAST_UINT; }
    constexpr bool isSint(FundTypeID id) { return id >= FundTypeID::__FIRST_SINT && id <= FundTypeID::__LAST_SINT; }
