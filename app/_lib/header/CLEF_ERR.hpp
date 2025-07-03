@@ -16,8 +16,9 @@ namespace clef {
 [[noreturn]] void clef::throwError(const clef::ErrCode code, const mcsl::str_slice formatStr, auto&&... args) {
    // mcsl::printf(mcsl::FMT("\n"));
    mcsl::stdout.flush();
-   mcsl::err_printf(mcsl::FMT("\033[31;1;4mCLEF ERROR:\033[0m %s"), ERR_MSG_ARR[+code]);
+   mcsl::err_printf(mcsl::FMT("\033[31;1;4mCLEF ERROR:\033[0m "));
    mcsl::err_printf(formatStr, args...);
+   mcsl::err_printf(FMT(" [%s]"), ERR_MSG_ARR[+code]);
    mcsl::err_printf(mcsl::FMT("\n"));
    mcsl::stderr.flush();
    #ifdef NDEBUG
