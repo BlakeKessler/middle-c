@@ -18,6 +18,8 @@ class clef::SyntaxTree {
 
       SymbolNode _globalScope;
       mcsl::map<FundTypeID, SymbolNode*> _fundTypes;
+      //!TODO: global table of indirect types
+      //!TODO: global table of function signatures
       mcsl::arr_list<SymbolNode> _symbolBuf;
       mcsl::arr_list<TypeSpec> _typeTable;
 
@@ -66,7 +68,7 @@ class clef::SyntaxTree {
       TypeSpec* registerType(SymbolNode* name, TypeSpec::MetaType metatype, SymbolType symbolType);
       // uint freeTypesAfter(TypeSpec*); //inclusive
       // uint popNodesAfter(index<astNode>); //inclusive
-      TypeSpec* makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable::Entry firstEntry);
+      TypeSpec* makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable&& table);
 
       mcsl::str_slice storeString(const mcsl::str_slice);
       mcsl::str_slice storeString(mcsl::string&&);

@@ -65,6 +65,15 @@ class clef::TypeSpec {
 
       friend class SyntaxTree;
    private:
+      TypeSpec(TypeSpec* pointee, QualMask quals, IndirTable&& table):
+         _metatype{INDIR},
+         _indir{
+            .pointee = pointee,
+            .pointeeQuals = quals,
+            .table = table
+         } {
+
+      }
       TypeSpec(TypeSpec* pointee, QualMask quals, IndirTable::Entry firstEntry):
          _metatype{INDIR},
          _indir{
@@ -80,7 +89,10 @@ class clef::TypeSpec {
       TypeSpec(MetaType);
       TypeSpec(FundTypeID);
       static TypeSpec makeIndir(TypeSpec* pointee, QualMask quals, IndirTable::Entry firstEntry) {
-         return TypeSpec{pointee,quals,firstEntry};
+         return TypeSpec{pointee, quals, firstEntry};
+      }
+      static TypeSpec makeIndir(TypeSpec* pointee, QualMask quals, IndirTable&& table) {
+         return TypeSpec{pointee, quals, std::forward<IndirTable&&>(table)};
       }
 
       ~TypeSpec();

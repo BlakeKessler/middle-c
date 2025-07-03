@@ -116,8 +116,8 @@ clef::TypeSpec* clef::SyntaxTree::registerType(SymbolNode* name, TypeSpec::MetaT
    return spec;
 }
 
-clef::TypeSpec* clef::SyntaxTree::makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable::Entry firstEntry) {
-   TypeSpec* spec = _typeTable.push_back(TypeSpec::makeIndir(pointee, quals, firstEntry));
+clef::TypeSpec* clef::SyntaxTree::makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable&& table) {
+   TypeSpec* spec = _typeTable.push_back(TypeSpec::makeIndir(pointee, quals, std::forward<IndirTable&&>(table)));
    SymbolNode* symbol = _symbolBuf.push_back(SymbolNode::makeIndir(self[targetNode].symbol(), spec));
    self[targetNode].symbol() = symbol;
 

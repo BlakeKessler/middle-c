@@ -127,9 +127,8 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
       return isDone;
    };
    if (qualsAndMods()) {
-      iden.addQuals(ptrquals);
-      TypeSpec* typeDef = tree.makeIndirType(name, iden.symbol()->type(), iden.quals(), entry);
-      IndirTable& indirTable = typeDef->indirTable();
+      QualMask targetQuals = iden.quals() | ptrquals;
+      IndirTable indirTable{entry};
       while (qualsAndMods()) {
          if (+(ptrquals & QualMask::VIEW)) {
             indirTable.appendView(entry);
@@ -137,6 +136,7 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
             indirTable.append(entry);
          }
       }
+      tree.makeIndirType(name, iden.symbol()->type(), targetQuals, std::move(indirTable));
       iden.setQualMask(ptrquals);
    }
    return +name;
@@ -305,7 +305,7 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
       op = OpID::PREPROC_EMBED;
       SymbolNode* byteType = tree.getFundType(KeywordID::UBYTE);
       index<Identifier> byteSpan = tree.make<Identifier>(KeywordID::UBYTE, byteType);
-      tree.makeIndirType(byteSpan, byteType->type(), QualMask::CONST, IndirTable::Entry(IndirTable::Entry::SLICE, true, false, false));
+      tree.makeIndirType(byteSpan, byteType->type(), QualMask::CONST, IndirTable(IndirTable::Entry(IndirTable::Entry::SLICE, true, false, false)));
       name = parseIdentifier(SymbolType::VAR, tree[byteSpan].symbol(), true);
    } else {
       logError(ErrCode::BAD_PREPROC, "unrecognized directive");
