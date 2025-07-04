@@ -120,10 +120,6 @@ template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef:
       _(lit("*"),   Op::DEREF,             Prop::PREFIX,      0,      Type::OP          ), //raw pointer/dereference
       _(lit("&"),   Op::REFERENCE,         Prop::TYPE_MOD,    0,      Type::OP          ), //reference/address of
       _(lit("*"),   Op::RAW_PTR,           Prop::TYPE_MOD,    0,      Type::OP          ), //raw pointer/dereference
-      _(lit("@"),   Op::UNIQUE_PTR,        Prop::TYPE_MOD,    0,      Type::OP          ), //unique pointer
-      _(lit("$"),   Op::SHARED_PTR,        Prop::TYPE_MOD,    0,      Type::OP          ), //shared pointer
-      _(lit("`"),   Op::WEAK_PTR,          Prop::TYPE_MOD,    0,      Type::OP          ), //weak pointer
-      _(lit("%"),   Op::ITERATOR,          Prop::TYPE_MOD,    0,      Type::OP          ), //iterator
       _(lit("[]"),  Op::SLICE,             Prop::TYPE_MOD,    0,      Type::OP          ), //slice
 
       _(lit(".*"),  Op::METHOD_PTR,        Prop::INFIX_LEFT,  --prec, Type::OP          ), //pointer to member

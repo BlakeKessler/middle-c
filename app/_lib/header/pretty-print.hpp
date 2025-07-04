@@ -155,12 +155,6 @@ constexpr const mcsl::str_slice clef::toString(const OpID op) {
       CASE(SHIFT_RIGHT, ">>");
 
 
-      CASE(UNIQUE_PTR, "@");
-      CASE(SHARED_PTR, "$");
-      CASE(WEAK_PTR, "`");
-      CASE(ITERATOR, "%");
-
-
       CASE(THREE_WAY_COMP, "<=>");
       CASE(LESSER, "<");
       CASE(GREATER, ">");

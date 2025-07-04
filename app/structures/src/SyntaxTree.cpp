@@ -371,10 +371,6 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
 
             #pragma region unreachables
             case OpID::INLINE_IF: [[fallthrough]];
-            case OpID::UNIQUE_PTR: [[fallthrough]];
-            case OpID::SHARED_PTR: [[fallthrough]];
-            case OpID::WEAK_PTR: [[fallthrough]];
-            case OpID::ITERATOR: [[fallthrough]];
             case OpID::PREPROC_IMPORT: [[fallthrough]];
             case OpID::PREPROC_LINK: [[fallthrough]];
             case OpID::PREPROC_EMBED: [[fallthrough]];
@@ -498,12 +494,6 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
       case OpID::IS_UNEQUAL:
       //case OpID::IS_EQUAL_STRICT:
       //case OpID::IS_UNEQUAL_STRICT:
-
-
-      case OpID::UNIQUE_PTR: TODO;
-      case OpID::SHARED_PTR: TODO;
-      case OpID::WEAK_PTR: TODO;
-      case OpID::ITERATOR: TODO;
 
 
 

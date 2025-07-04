@@ -212,12 +212,6 @@ namespace clef {
       SHIFT_LEFT,
       SHIFT_RIGHT,
       
-      
-      UNIQUE_PTR,
-      SHARED_PTR,
-      WEAK_PTR,
-      ITERATOR,
-      
 
       THREE_WAY_COMP, //AKA spaceship
       LESSER, //less than

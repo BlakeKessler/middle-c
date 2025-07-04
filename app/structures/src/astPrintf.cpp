@@ -450,12 +450,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case SHIFT_LEFT : charsPrinted += BIN(" << "); break;
          case SHIFT_RIGHT: charsPrinted += BIN(" >> "); break;
          
-         
-         case UNIQUE_PTR: TODO;
-         case SHARED_PTR: TODO;
-         case WEAK_PTR  : TODO;
-         case ITERATOR  : TODO;
-         
 
          case THREE_WAY_COMP: charsPrinted += BIN(" <=> "); break;
          case LESSER        : charsPrinted += BIN(" < "); break;
