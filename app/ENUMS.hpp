@@ -57,6 +57,8 @@ namespace clef {
       FUNC,
       MACRO,
 
+      ATTRIBUTE,
+
       LABEL,
       
       __TYPE_BIT = 8_m,
@@ -155,6 +157,8 @@ namespace clef {
       CHAR,
       INTERP_STRING,
 
+      ATTRIBUTE, //@
+
       LINE_CMNT,
       BLOCK_CMNT,
          BLOCK_CMNT_OPEN,
@@ -245,7 +249,6 @@ namespace clef {
       COALESCE_ASSIGN, //compound assignment (null-coalescing)
 
       COMMA,
-
 
 
       //keyword pseudo-operators

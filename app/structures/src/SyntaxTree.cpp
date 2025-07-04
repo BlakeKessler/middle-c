@@ -253,6 +253,8 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
             case OpID::RANGE: TODO;
             case OpID::SPREAD: TODO;
 
+            case OpID::ATTRIBUTE: TODO;
+
             #pragma region commons
             //unary identity
             case OpID::INC: [[fallthrough]];
@@ -410,6 +412,8 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
       case OpID::STRING: UNREACHABLE;
       case OpID::CHAR: UNREACHABLE;
       case OpID::INTERP_STRING: UNREACHABLE;
+
+      case OpID::ATTRIBUTE: TODO;
 
       case OpID::LINE_CMNT: UNREACHABLE;
       case OpID::BLOCK_CMNT: UNREACHABLE;

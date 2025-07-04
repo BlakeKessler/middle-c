@@ -32,6 +32,7 @@ constexpr clef::OpPrecs clef::GetAllOpPrecsData() {
    #define lit(str) mcsl::str_slice{}
    ubyte prec = 16;
    return OpPrecs{
+      _(lit("@"),   Op::ATTRIBUTE,         Prop::PREFIX,      0,      Type::OP          ), //attribute
       _(lit("++"),  Op::INC,               Prop::PREFIX,      0,      Type::OP          ), //pre-increment
       _(lit("--"),  Op::DEC,               Prop::PREFIX,      0,      Type::OP          ), //pre-decrement
       _(lit("."),   Op::MEMBER_ACCESS,     Prop::INFIX_LEFT,  0,      Type::OP          ), //element access

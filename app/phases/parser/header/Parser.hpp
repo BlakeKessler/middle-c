@@ -56,6 +56,8 @@ class clef::Parser {
 
       mcsl::str_slice parseStrLit();
 
+      void parseAttr();
+
       index<Expr> parseCast(const KeywordID);
 
       void skipBlockComment();

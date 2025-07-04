@@ -97,6 +97,8 @@ constexpr const mcsl::str_slice clef::toString(const OpID op) {
       CASE(STRING, "\"");
       CASE(INTERP_STRING, "`");
 
+      CASE(ATTRIBUTE, "@");
+
       CASE(LINE_CMNT, "//");
       CASE(BLOCK_CMNT, "/**/");
       CASE(BLOCK_CMNT_OPEN, "/*");
@@ -184,7 +186,6 @@ constexpr const mcsl::str_slice clef::toString(const OpID op) {
       CASE(COALESCE_ASSIGN, "??=");
 
       CASE(COMMA, ",");
-
 
 
       CASE(FOR, "FOR");
@@ -565,6 +566,8 @@ constexpr const mcsl::str_slice clef::toString(const SymbolType type) {
       CASE(MACRO, "macro");
       
       CASE(LABEL, "label");
+
+      CASE(ATTRIBUTE, "attribute");
       
       CASE(EXTERN_TYPE, "type");
       CASE(FUND_TYPE, "fundamental type");

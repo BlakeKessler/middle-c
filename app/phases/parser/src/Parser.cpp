@@ -20,6 +20,10 @@ void clef::Parser::parse(Lexer& src, SyntaxTree& tree) {
    // return parser.tree;
 }
 clef::index<clef::Stmt> clef::Parser::parseStmt() {
+   if (tryConsumeOperator(OpID::ATTRIBUTE)) {
+      parseAttr();
+      TODO;
+   }
    clef::index<clef::Stmt> tmp = parseStmtImpl();
    if (tryConsumeOperator(OpID::COMMA)) {
       logError(ErrCode::BAD_EXPR, "`;,` is illegal");
@@ -705,4 +709,15 @@ mcsl::tuple<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*, clef::in
 clef::index<clef::Asm> clef::Parser::parseASM() {
    logError(ErrCode::PARSER_NOT_IMPLEMENTED, "inline assembly is not yet supported");
 }
+
+void clef::Parser::parseAttr() {
+   index<Identifier> name = parseIdentifier(SymbolType::ATTRIBUTE, nullptr, false);
+   index<ArgList> args;
+   if (tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN)) {
+      args = parseArgList(BlockType::CALL, false);
+   } else { args = 0; }
+
+   TODO;
+}
+
 #endif //PARSER_CPP

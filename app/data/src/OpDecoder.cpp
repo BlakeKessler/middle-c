@@ -88,6 +88,7 @@ template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef:
       _(lit("\'"),  Op::CHAR,              Prop::DELIM,       0,      Type::BLOCK_DELIM ), //char
       _(lit("\""),  Op::STRING,            Prop::DELIM,       0,      Type::BLOCK_DELIM ), //string
       _(lit("`"),   Op::INTERP_STRING,     Prop::DELIM,       0,      Type::BLOCK_DELIM ), //interpolated string
+      _(lit("@"),   Op::ATTRIBUTE,         Prop::PREFIX,      0,      Type::OP          ), //interpolated string
 
 
       _(lit("("),   Op::CALL_OPEN,         Prop::OPEN_DELIM,  0,      Type::BLOCK_DELIM ), //function calls/functional casts
