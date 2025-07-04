@@ -154,7 +154,7 @@ bool clef::TypeSpec::operator==(const TypeSpec& other) const {
       case FUND_TYPE:
          return _fund.id == other._fund.id;
       case INDIR:
-         TODO;
+         return _indir.pointee == other._indir.pointee && _indir.pointeeQuals == other._indir.pointeeQuals && _indir.table == other._indir.table;
       case COMPOSITE:
          #define __checkSize(entry) if (_composite.entry.size() != other._composite.entry.size()) { return false; }
          __checkSize(tpltParams);

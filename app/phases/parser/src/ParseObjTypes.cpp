@@ -215,7 +215,6 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(SymbolType symbolT
          index<Expr> val;
          if (tryConsumeOperator(OpID::ASSIGN)) {
             val = parseExprNoPrimaryComma();
-            // TODO;
          } else { val = 0; }
 
          spec->composite().staticMembs.push_back(tree[enumerator].symbol());

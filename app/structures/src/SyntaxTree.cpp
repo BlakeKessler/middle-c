@@ -218,7 +218,7 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
          if (isType(symbol->symbolType())) {
             expr.evalType() = symbol->type();
          } else if (symbol->symbolType() == SymbolType::FUNC) {
-            //!TODO: update overload index
+            //!TODO: deduce and update overload index
             expr.evalType() = symbol->getOverload(lhs.overloadIndex()).first->funcSig().retType;
          }
          else {

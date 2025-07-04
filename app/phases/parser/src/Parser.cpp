@@ -138,8 +138,17 @@ START_PARSE_STMT:
                getNextToken();
                index<Identifier> alias = parseIdentifier(SymbolType::EXTERN_IDEN, nullptr, true);
                consumeOperator(OpID::ASSIGN, "alias definitions must use the assignment operator (and cannot be forward-declared)");
-               TODO;
                index<Expr> valExpr = parseExpr();
+               Expr& val = tree[valExpr];
+               SymbolNode* symbol = tree[alias].symbol();
+               if (val.opID() == OpID::NULL && val.lhsType() == NodeType::IDEN && val.rhsType() == NodeType::NONE && val.extraType() == NodeType::NONE && val.extraType2() == NodeType::NONE) {
+                  SymbolNode* target = tree[(index<Identifier>)val.lhs()].symbol();
+                  tree.registerAlias(symbol, target);
+               } else {
+                  TypeSpec* spec = tree.evalType(+valExpr);
+                  symbol->setType(spec);
+                  symbol->setSymbolType(SymbolType::VAR);
+               }
                return tree.make<Stmt>(KeywordID::ALIAS, alias, valExpr);
             }
 
@@ -401,7 +410,7 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
    QualMask quals = parseQuals();
    //handle keywords
    if (currTok.type() == TokenType::KEYWORD) {
-      index<Identifier> keyword = tree.make<Identifier>(tree.toFundTypeID(currTok.keywordID()), currTok.keywordID(), tree.getFundType(currTok.keywordID()), index<ArgList>{}, quals); //!TODO: put the SymbolNode* in the Identifier
+      index<Identifier> keyword = tree.make<Identifier>(tree.toFundTypeID(currTok.keywordID()), currTok.keywordID(), tree.getFundType(currTok.keywordID()), index<ArgList>{}, quals);
       getNextToken();
       tree[keyword].addQuals(parseQuals());
       if (tryConsumeOperator(OpID::SCOPE_RESOLUTION)) {
@@ -442,7 +451,7 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
       getNextToken();
 
       if (tryConsumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::OPEN)) {
-         parseSpecList(name, type == nullptr);
+         parseSpecList(name, isDecl);
       }
 
       if (!tryConsumeOperator(OpID::SCOPE_RESOLUTION)) { break; }
@@ -457,6 +466,7 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
       logError(ErrCode::BAD_IDEN, "undeclared identifier `%s`", astTNB(tree, name, 0));
    }
 #endif
+   //!TODO: make this less janky
    if (isDecl) {
       if (symbol->symbolType() == SymbolType::null || symbol->symbolType() == SymbolType::EXTERN_IDEN || (isType(symbolType) && symbol->symbolType() == SymbolType::EXTERN_TYPE)) {
          symbol->setSymbolType(symbolType);

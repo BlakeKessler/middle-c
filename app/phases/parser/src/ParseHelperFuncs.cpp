@@ -189,17 +189,11 @@ clef::index<clef::Decl> clef::Parser::parseDecl() {
 
 clef::index<clef::Decl> clef::Parser::parseParam() {
    if (tryConsumeKeyword(KeywordID::FUNC)) { [[unlikely]];
-      TODO;
-      // index<Identifier> name = parseIdentifier(SymbolType::FUNC, nullptr);
-      
-      // consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FUNC without parameters");
-      // index<ArgList> params = parseArgList(BlockType::CALL, true);
-      
-      // consumeOperator(OpID::ARROW, "FUNC without trailing return type");
-      // index<Identifier> returnType = parseTypename(SymbolType::null, true);
-
-      // index<FuncSig> sig = tree.make<FuncSig>(returnType, params);
-      // return tree.remake<Variable>(name, sig, tree[name]);
+      index<FuncDef> funcDef = parseFunction();
+      if (tree[funcDef].procedure()) {
+         logError(ErrCode::BAD_DECL, "cannot inline define parameters of type func");
+      }
+      return tree.make<Decl>(tree[funcDef].name(), tree[funcDef].name());
    }
 
    index<Identifier> typeName = parseTypename(SymbolType::EXTERN_TYPE, true);

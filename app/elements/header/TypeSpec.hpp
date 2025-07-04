@@ -138,6 +138,4 @@ template<> struct std::hash<clef::TypeSpec::ScopedSymbol> {
  * _metatype == UNION -> union members in _dataMembers
  */
 
-//!TODO: maybe effectively make _parentTypes[0] in-place as an optimization?
-
 #endif //TYPE_SPEC_HPP
