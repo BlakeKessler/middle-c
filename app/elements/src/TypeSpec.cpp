@@ -27,6 +27,47 @@ clef::TypeSpec::TypeSpec(FundTypeID id):
    _fund{.id = id} {
 
 }
+clef::TypeSpec::TypeSpec(TypeSpec&& other) {
+   if (this == &other) {
+      return;
+   }
+   #define MOVE(field) new (&__curr.field) decltype(__curr.field)(std::move(other.__curr.field));
+   switch (other._metatype) {
+      case null: break;
+
+      case FUND_TYPE:
+         _fund = other._fund;
+         break;
+
+      case INDIR:
+         #define __curr _indir
+         _indir.pointee = other._indir.pointee;
+         _indir.pointeeQuals = other._indir.pointeeQuals;
+         MOVE(table);
+         break;
+         #undef __curr
+         
+      case COMPOSITE:
+         #define __curr _composite
+         MOVE(tpltParams);
+         MOVE(impls);
+         MOVE(dataMembs);
+         MOVE(methods);
+         MOVE(ops);
+         MOVE(staticMembs);
+         MOVE(staticFuncs);
+         MOVE(subtypes);
+         break;
+         #undef __curr
+
+      case FUNC_SIG:
+         #define __curr _funcSig
+         _funcSig.retType = other._funcSig.retType;
+         new (&_funcSig.params) decltype(_funcSig.params)(std::move(other._funcSig.params));
+         break;
+         #undef __curr
+   }
+}
 
 clef::TypeSpec::~TypeSpec() {
    switch (_metatype) {
