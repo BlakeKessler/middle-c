@@ -142,9 +142,9 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
    return +name;
 }
 
-clef::index<clef::Decl> clef::Parser::parseDecl() {
+clef::index<clef::Decl> clef::Parser::parseDecl(index<Expr> attrs) {
    if (tryConsumeKeyword(KeywordID::FUNC)) { [[unlikely]]; //handle functions separately
-      index<FuncDef> funcDef = parseFunction();
+      index<FuncDef> funcDef = parseFunction(attrs);
       index<Expr> val;
       if (tree[funcDef].procedure()) {
          val = toExpr(+tree[funcDef].name());
@@ -187,9 +187,9 @@ clef::index<clef::Decl> clef::Parser::parseDecl() {
    return tree.make<Decl>(type, varName);
 }
 
-clef::index<clef::Decl> clef::Parser::parseParam() {
+clef::index<clef::Decl> clef::Parser::parseParam(index<Expr> attrs) {
    if (tryConsumeKeyword(KeywordID::FUNC)) { [[unlikely]];
-      index<FuncDef> funcDef = parseFunction();
+      index<FuncDef> funcDef = parseFunction(attrs);
       if (tree[funcDef].procedure()) {
          logError(ErrCode::BAD_DECL, "cannot inline define parameters of type func");
       }
@@ -203,10 +203,11 @@ clef::index<clef::Decl> clef::Parser::parseParam() {
       varSymbol->setSymbolType(SymbolType::VAR);
       varSymbol->setType(tree[typeName].symbol()->type());
    }
+   if (attrs) { TODO; }
    return tree.make<Decl>(typeName, varName);
 }
-clef::index<clef::Decl> clef::Parser::parseDefaultableParam() {
-   index<Decl> var = parseParam();
+clef::index<clef::Decl> clef::Parser::parseDefaultableParam(index<Expr> attrs) {
+   index<Decl> var = parseParam(attrs);
    if (tryConsumeOperator(OpID::ASSIGN)) {
       index<Expr> val = parseExpr();
       tree[var].value() = val;
@@ -221,7 +222,7 @@ clef::index<clef::ArgList> clef::Parser::parseArgList(const BlockType closer, bo
    }
    if (isDecl) {
       do {
-         auto tmp = parseDefaultableParam();
+         auto tmp = parseDefaultableParam(tryParseAttrs());
          tree[args].push_back(tmp);
          if (!tryConsumeOperator(OpID::COMMA)) {
             break;
@@ -258,7 +259,7 @@ clef::index<clef::ArgList> clef::Parser::parseSpecList(index<Identifier> target,
             }
             tree[args].push_back(typeDecl);
          } else {
-            index<Decl> param = parseDefaultableParam();
+            index<Decl> param = parseDefaultableParam(tryParseAttrs());
             tree[args].push_back(param);
          }
          if (!tryConsumeOperator(OpID::COMMA)) {

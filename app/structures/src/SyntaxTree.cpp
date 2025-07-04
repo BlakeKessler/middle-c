@@ -253,7 +253,9 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
             case OpID::RANGE: TODO;
             case OpID::SPREAD: TODO;
 
-            case OpID::ATTRIBUTE: TODO;
+            case OpID::ATTRIBUTE: 
+               expr.evalType() = evalType(+expr.extra2());
+               return;
 
             #pragma region commons
             //unary identity

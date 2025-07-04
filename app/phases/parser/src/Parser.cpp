@@ -20,10 +20,6 @@ void clef::Parser::parse(Lexer& src, SyntaxTree& tree) {
    // return parser.tree;
 }
 clef::index<clef::Stmt> clef::Parser::parseStmt() {
-   if (tryConsumeOperator(OpID::ATTRIBUTE)) {
-      parseAttr();
-      TODO;
-   }
    clef::index<clef::Stmt> tmp = parseStmtImpl();
    if (tryConsumeOperator(OpID::COMMA)) {
       logError(ErrCode::BAD_EXPR, "`;,` is illegal");
@@ -31,6 +27,8 @@ clef::index<clef::Stmt> clef::Parser::parseStmt() {
    return tmp;
 }
 clef::index<clef::Stmt> clef::Parser::parseStmtImpl() {
+   index<Expr> attrs = tryParseAttrs();
+   if (attrs) { TODO; }
 START_PARSE_STMT:
    switch (currTok.type()) {
       case TokenType::NONE        : UNREACHABLE;
@@ -45,7 +43,7 @@ START_PARSE_STMT:
                break;
             case KeywordID::LET     : {
                getNextToken();
-               index<Decl> tmp = parseDecl();
+               index<Decl> tmp = parseDecl(attrs);
                tree[(index<astNode>)(+tmp)].anyCast(NodeType::STMT);
                return +tmp;
             } break;
@@ -57,17 +55,17 @@ START_PARSE_STMT:
             case KeywordID::FALSE   :
                goto STMT_STARTS_WITH_VALUE;
 
-            case KeywordID::ASM           : getNextToken(); return parseASM(); break;
+            case KeywordID::ASM           : getNextToken(); return parseASM(attrs); break;
             
-            case KeywordID::CLASS         : getNextToken(); return parseClass();
-            case KeywordID::STRUCT        : getNextToken(); return parseStruct();
-            case KeywordID::TRAIT     : getNextToken(); return parseTrait();
-            case KeywordID::UNION         : getNextToken(); return parseUnion();
-            case KeywordID::ENUM          : getNextToken(); return parseEnum();
-            case KeywordID::MASK          : getNextToken(); return parseMask();
-            case KeywordID::NAMESPACE     : getNextToken(); return parseNamespace();
-            case KeywordID::FUNC          : getNextToken(); { index<astNode> tmp = +parseFunction(); tree[tmp].anyCast(NodeType::STMT); return +tmp; } static_assert(mcsl::is_t<FuncDef, Expr>);
-            case KeywordID::MACRO         : getNextToken(); { index<astNode> tmp = +parseMacro(); tree[tmp].anyCast(NodeType::STMT); return +tmp; } static_assert(mcsl::is_t<MacroDef, Expr>);
+            case KeywordID::CLASS         : getNextToken(); return parseClass(attrs);
+            case KeywordID::STRUCT        : getNextToken(); return parseStruct(attrs);
+            case KeywordID::TRAIT         : getNextToken(); return parseTrait(attrs);
+            case KeywordID::UNION         : getNextToken(); return parseUnion(attrs);
+            case KeywordID::ENUM          : getNextToken(); return parseEnum(attrs);
+            case KeywordID::MASK          : getNextToken(); return parseMask(attrs);
+            case KeywordID::NAMESPACE     : getNextToken(); return parseNamespace(attrs);
+            case KeywordID::FUNC          : getNextToken(); { index<astNode> tmp = +parseFunction(attrs); tree[tmp].anyCast(NodeType::STMT); return +tmp; } static_assert(mcsl::is_t<FuncDef, Expr>);
+            case KeywordID::MACRO         : getNextToken(); { index<astNode> tmp = +parseMacro(attrs); tree[tmp].anyCast(NodeType::STMT); return +tmp; } static_assert(mcsl::is_t<MacroDef, Expr>);
 
             
             case KeywordID::IF            : getNextToken(); return parseIf(); break;
@@ -260,13 +258,13 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             const KeywordID kw = currTok.keywordID();
             if (kw == KeywordID::FUNC) {
                getNextToken();
-               operandStack.push_back(+parseFunction());
+               operandStack.push_back(+parseFunction(0));
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
             else if (kw == KeywordID::LET) {
                getNextToken();
-               operandStack.push_back(+parseDecl());
+               operandStack.push_back(+parseDecl(0));
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
@@ -628,16 +626,17 @@ clef::index<clef::TryCatch> clef::Parser::parseTryCatch() {
    index<Scope> procedure = parseProcedure();
    consumeKeyword(KeywordID::CATCH, "TRY block without CATCH block");
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "CATCH block without opening parens");
-   index<Decl> err = parseParam();
+   index<Decl> err = parseParam(tryParseAttrs());
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "CATCH block without closing parens");
    index<Scope> handler = parseProcedure();
    return tree.make<TryCatch>(procedure, err, handler);
 }
 
-clef::index<clef::FuncDef> clef::Parser::parseFunction() {
+clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
    index<Identifier> name = parseIdentifier(SymbolType::FUNC, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    symbol->setSymbolType(SymbolType::FUNC);
+   if (attrs) { TODO; }
    
    PUSH_SCOPE;
 
@@ -667,7 +666,7 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction() {
    POP_SCOPE;
    return def;
 }
-clef::index<clef::MacroDef> clef::Parser::parseMacro() {
+clef::index<clef::MacroDef> clef::Parser::parseMacro(index<Expr> attrs) {
    TODO;
 }
 
@@ -679,7 +678,7 @@ mcsl::tuple<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*, clef::in
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "function parameters must be enclosed by parentheses");
    if (!tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE)) {
       do {
-         index<Decl> param = parseDefaultableParam();
+         index<Decl> param = parseDefaultableParam(tryParseAttrs());
          overload->funcSig().params.push_back(tree[tree[param].type()].symbol()->type());
          params.push_back(param);
       } while (tryConsumeOperator(OpID::COMMA));
@@ -706,18 +705,31 @@ mcsl::tuple<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*, clef::in
 }
 
 //!TODO: implement parseASM
-clef::index<clef::Asm> clef::Parser::parseASM() {
+clef::index<clef::Asm> clef::Parser::parseASM(index<Expr> attrs) {
    logError(ErrCode::PARSER_NOT_IMPLEMENTED, "inline assembly is not yet supported");
 }
 
-void clef::Parser::parseAttr() {
+clef::index<clef::Expr> clef::Parser::parseAttr(index<Expr> prevAttrs) {
    index<Identifier> name = parseIdentifier(SymbolType::ATTRIBUTE, nullptr, false);
    index<ArgList> args;
    if (tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN)) {
       args = parseArgList(BlockType::CALL, false);
    } else { args = 0; }
 
-   TODO;
+   return tree.make<Expr>(OpID::ATTRIBUTE, name, args, prevAttrs);
+}
+clef::index<clef::Expr> clef::Parser::parseAttrs() {
+   index<Expr> attr = 0;
+   do {
+      attr = parseAttr(attr);
+   } while (tryConsumeOperator(OpID::ATTRIBUTE));
+   return attr;
+}
+clef::index<clef::Expr> clef::Parser::tryParseAttrs() {
+   if (tryConsumeOperator(OpID::ATTRIBUTE)) {
+      return parseAttrs();
+   }
+   return 0;
 }
 
 #endif //PARSER_CPP

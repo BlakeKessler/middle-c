@@ -56,7 +56,9 @@ class clef::Parser {
 
       mcsl::str_slice parseStrLit();
 
-      void parseAttr();
+      index<Expr> parseAttr(index<Expr> prevAttrs = 0);
+      index<Expr> parseAttrs();
+      index<Expr> tryParseAttrs();
 
       index<Expr> parseCast(const KeywordID);
 
@@ -67,9 +69,9 @@ class clef::Parser {
       index<Identifier> tryParseIdentifier(SymbolType symbolType, SymbolNode* type, bool isDecl);
       index<Identifier> parseIdentifier(SymbolType symbolType, SymbolNode* type, bool isDecl);
       index<Identifier> parseTypename(SymbolType symbolType, bool isDecl);
-      index<Decl> parseDecl();
-      index<Decl> parseParam();
-      index<Decl> parseDefaultableParam();
+      index<Decl> parseDecl(index<Expr> attrs);
+      index<Decl> parseParam(index<Expr> attrs);
+      index<Decl> parseDefaultableParam(index<Expr> attrs);
 
       index<ForLoop> parseForLoop();
       index<ForeachLoop> parseForeachLoop();
@@ -82,25 +84,25 @@ class clef::Parser {
 
       index<TryCatch> parseTryCatch();
 
-      index<FuncDef> parseFunction(); //function, signature
-      index<MacroDef> parseMacro(); //macro, signature
+      index<FuncDef> parseFunction(index<Expr> attrs); //function, signature
+      index<MacroDef> parseMacro(index<Expr> attrs); //macro, signature
       mcsl::tuple<index<void>, mcsl::dyn_arr<index<Expr>>*, index<Identifier>> parseFuncSig(SymbolNode* target);
-      index<Asm> parseASM();
+      index<Asm> parseASM(index<Expr> attrs);
       
    private:
-      index<TypeDecl> __parseObjTypeImpl(SymbolType symbolType, const mcsl::str_slice metatypeName);
+      index<TypeDecl> __parseObjTypeImpl(index<Expr> attrs, SymbolType symbolType, const mcsl::str_slice metatypeName);
    public:
-      index<TypeDecl> parseClass() { return __parseObjTypeImpl(SymbolType::CLASS, FMT("class")); }
-      index<TypeDecl> parseStruct() { return __parseObjTypeImpl(SymbolType::STRUCT, FMT("struct")); }
-      index<TypeDecl> parseTrait();
-      index<TypeDecl> parseUnion();
+      index<TypeDecl> parseClass(index<Expr> attrs) { return __parseObjTypeImpl(attrs, SymbolType::CLASS, FMT("class")); }
+      index<TypeDecl> parseStruct(index<Expr> attrs) { return __parseObjTypeImpl(attrs, SymbolType::STRUCT, FMT("struct")); }
+      index<TypeDecl> parseTrait(index<Expr> attrs);
+      index<TypeDecl> parseUnion(index<Expr> attrs);
    private:
-      index<TypeDecl> __parseEnumlikeImpl(SymbolType symbolType, const mcsl::str_slice metatypeName);
+      index<TypeDecl> __parseEnumlikeImpl(index<Expr> attrs, SymbolType symbolType, const mcsl::str_slice metatypeName);
    public:
-      index<TypeDecl> parseMask() { return __parseEnumlikeImpl(SymbolType::MASK, FMT("mask")); }
-      index<TypeDecl> parseEnum() { return __parseEnumlikeImpl(SymbolType::ENUM, FMT("enum")); }
-      index<TypeDecl> parseEnumUnion();
-      index<TypeDecl> parseNamespace();
+      index<TypeDecl> parseMask(index<Expr> attrs) { return __parseEnumlikeImpl(attrs, SymbolType::MASK, FMT("mask")); }
+      index<TypeDecl> parseEnum(index<Expr> attrs) { return __parseEnumlikeImpl(attrs, SymbolType::ENUM, FMT("enum")); }
+      index<TypeDecl> parseEnumUnion(index<Expr> attrs);
+      index<TypeDecl> parseNamespace(index<Expr> attrs);
 
       //error logging
       void logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, auto&&... args);
