@@ -333,17 +333,17 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
       bool rhsNeedsParens = false;
       bool extraNeedsParens = false;
       auto [selfPrec, selfIsLeftAssoc] = PRECS(expr.opID(), expr.lhs(), expr.rhs());
-      if (canDownCastTo(NodeType::EXPR, expr.lhsType())) {
+      if (canDownCastTo(NodeType::EXPR, expr.lhsType()) && expr.lhs()) {
          const clef::Expr& lhs = obj.tree[(clef::index<Expr>)expr.lhs()];
          auto [prec, isLeftAssoc] = PRECS(lhs.opID(), lhs.lhs(), lhs.rhs());
          lhsNeedsParens = prec && (selfPrec > prec || (!isLeftAssoc && selfPrec == prec));
       }
-      if (canDownCastTo(NodeType::EXPR, expr.rhsType())) {
+      if (canDownCastTo(NodeType::EXPR, expr.rhsType()) && expr.rhs()) {
          const clef::Expr& rhs = obj.tree[(clef::index<Expr>)expr.rhs()];
          auto [prec, isLeftAssoc] = PRECS(rhs.opID(), rhs.lhs(), rhs.rhs());
          rhsNeedsParens = prec && (selfPrec > prec || (isLeftAssoc && selfPrec == prec));
       }
-      if (canDownCastTo(NodeType::EXPR, expr.extraType())) {
+      if (canDownCastTo(NodeType::EXPR, expr.extraType()) && expr.extra()) {
          const clef::Expr& extra = obj.tree[(clef::index<Expr>)expr.extra()];
          auto [prec, isLeftAssoc] = PRECS(extra.opID(), extra.lhs(), extra.rhs());
          extraNeedsParens = prec && selfPrec > prec;
@@ -371,6 +371,13 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case BLOCK_CMNT      : UNREACHABLE;
          case BLOCK_CMNT_OPEN : UNREACHABLE;
          case BLOCK_CMNT_CLOSE: UNREACHABLE;
+
+         case ATTRIBUTE:
+            if (expr.extra2()) {
+               charsPrinted += file.printf(FMT("%s "), TNB_AST(expr.extra()));
+            }
+            charsPrinted += file.printf(FMT("@%s%s% s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()), TNB_AST(expr.extra2()));
+            break;
 
          case CALL_INVOKE: //parens
             charsPrinted += file.printf(FMT("%s(%#s)"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs())); break;
