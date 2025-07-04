@@ -118,10 +118,12 @@ clef::TypeSpec* clef::SyntaxTree::registerType(SymbolNode* name, TypeSpec::MetaT
 
 clef::TypeSpec* clef::SyntaxTree::makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable&& table) {
    TypeSpec* spec = _indirTypes.get_or_insert(pointee, quals, std::forward<IndirTable&&>(table), _typeTable);
-   SymbolNode* symbol = _symbolBuf.push_back(SymbolNode::makeIndir(self[targetNode].symbol(), spec));
-   self[targetNode].symbol() = symbol;
+   if (targetNode) { [[likely]];
+      SymbolNode* symbol = _symbolBuf.push_back(SymbolNode::makeIndir(self[targetNode].symbol(), spec));
+      self[targetNode].symbol() = symbol;
 
-   debug_assert(symbol->symbolType() == SymbolType::INDIR);
+      debug_assert(symbol->symbolType() == SymbolType::INDIR);
+   }
 
    return spec;
 }
@@ -169,8 +171,7 @@ clef::TypeSpec* clef::SyntaxTree::evalType(index<astNode> i) {
 
             case LitType::STRING: { //const char[]
                SymbolNode* charType = getFundType(KeywordID::CHAR);
-               index<Identifier> strType = make<Identifier>(KeywordID::CHAR, charType);
-               return makeIndirType(strType, charType->type(), QualMask::CONST, IndirTable(IndirTable::Entry(IndirTable::Entry::SLICE, true, false, false)));
+               return makeIndirType(0, charType->type(), QualMask::CONST, IndirTable(IndirTable::Entry(IndirTable::Entry::SLICE, true, false, false)));
             }
             case LitType::INTERP_STR: TODO;
             case LitType::FORMAT: TODO;
