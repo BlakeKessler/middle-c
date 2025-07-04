@@ -473,7 +473,9 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
       if (symbol->symbolType() == SymbolType::null || symbol->symbolType() == SymbolType::EXTERN_IDEN || (isType(symbolType) && symbol->symbolType() == SymbolType::EXTERN_TYPE)) {
          symbol->setSymbolType(symbolType);
       } else {
-         TODO;
+         if (symbolType != SymbolType::null && symbolType != SymbolType::EXTERN_IDEN && symbolType != SymbolType::EXTERN_TYPE) {
+            TODO;
+         }
       }
    }
 

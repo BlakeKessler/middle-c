@@ -569,7 +569,7 @@ constexpr const mcsl::str_slice clef::toString(const SymbolType type) {
 
       CASE(ATTRIBUTE, "attribute");
       
-      CASE(EXTERN_TYPE, "type");
+      CASE(EXTERN_TYPE, "external type");
       CASE(FUND_TYPE, "fundamental type");
       CASE(CLASS, "class");
       CASE(STRUCT, "struct");
@@ -579,6 +579,8 @@ constexpr const mcsl::str_slice clef::toString(const SymbolType type) {
       CASE(ENUM_UNION, "enumunion");
       CASE(MASK, "mask");
       CASE(NAMESPACE, "namespace");
+
+      CASE(GENERIC, "type");
       
       CASE(INDIR, "indirect");
 

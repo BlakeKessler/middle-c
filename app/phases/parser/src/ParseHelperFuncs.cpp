@@ -249,7 +249,7 @@ clef::index<clef::ArgList> clef::Parser::parseSpecList(index<Identifier> target,
    if (isDecl) {
       do {
          if (tryConsumeKeyword(KeywordID::TYPE)) {
-            index<Identifier> typeName = parseTypename(SymbolType::EXTERN_TYPE, true);
+            index<Identifier> typeName = parseTypename(SymbolType::GENERIC, true);
             index<TypeDecl> typeDecl;
             if (tryConsumeOperator(OpID::ASSIGN)) {
                index<Identifier> defaultType = parseTypename(SymbolType::EXTERN_TYPE, false);

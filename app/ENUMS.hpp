@@ -73,6 +73,8 @@ namespace clef {
          MASK,
          NAMESPACE,
 
+         GENERIC,
+
          INDIR,
    };
    constexpr auto operator+(const SymbolType t) noexcept { return std::to_underlying(t); }
