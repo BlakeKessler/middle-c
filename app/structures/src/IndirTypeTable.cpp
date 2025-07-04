@@ -3,7 +3,7 @@
 
 #include "IndirTypeTable.hpp"
 
-clef::TypeSpec* clef::IndirTypeTable::get_or_insert(TypeSpec* pointee, QualMask pointeeQuals, IndirTable&& table, mcsl::dyn_arr<TypeSpec>& typeTable) {
+clef::TypeSpec* clef::IndirTypeTable::get_or_insert(TypeSpec* pointee, QualMask pointeeQuals, IndirTable&& table, mcsl::arr_list<TypeSpec>& typeTable) {
    SubTable* ptr = _table.find(pointee);
    if (ptr) { //pointee type found
       TypeSpec** indirType = ptr->find(mcsl::pair{pointeeQuals, &table});
@@ -13,6 +13,7 @@ clef::TypeSpec* clef::IndirTypeTable::get_or_insert(TypeSpec* pointee, QualMask 
       }
    } else {
       ptr = &_table[pointee];
+      new (ptr) SubTable();
    }
 
    //type not found - push type to tables

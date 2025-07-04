@@ -28,7 +28,7 @@ class clef::IndirTypeTable {
       mcsl::map<TypeSpec*, SubTable> _table;
    public:
       IndirTypeTable():_table{} {}
-      TypeSpec* get_or_insert(TypeSpec* pointee, QualMask pointeeQuals, IndirTable&& table, mcsl::dyn_arr<TypeSpec>& typeTable);
+      TypeSpec* get_or_insert(TypeSpec* pointee, QualMask pointeeQuals, IndirTable&& table, mcsl::arr_list<TypeSpec>& typeTable);
 };
 
 #endif //INDIR_TYPE_TABLE_HPP
