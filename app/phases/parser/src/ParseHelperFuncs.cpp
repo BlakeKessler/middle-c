@@ -330,9 +330,7 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
 #endif
 
    //create statement node
-   index<Expr> stmt = tree.makeExpr(op, +name, +pathLit);
-   tree[(index<astNode>)stmt].upCast(NodeType::STMT);
-   return +stmt;
+   return makeStmt(tree.makeExpr(op, +name, +pathLit));
 }
 clef::index<clef::Expr> clef::Parser::parseCast(KeywordID castID) {
    debug_assert(isCast(castID));
@@ -436,6 +434,11 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
       case NodeType::ERROR:
          UNREACHABLE;
    }
+}
+
+clef::index<clef::Stmt> clef::Parser::makeStmt(index<Expr> expr) {
+   tree[(index<astNode>)expr].anyCast(NodeType::STMT);
+   return +expr;
 }
 
 #endif //PARSER_HELPERS_CPP

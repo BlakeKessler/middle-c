@@ -43,9 +43,7 @@ START_PARSE_STMT:
                break;
             case KeywordID::LET     : {
                getNextToken();
-               index<Decl> tmp = parseDecl(attrs);
-               tree[(index<astNode>)(+tmp)].anyCast(NodeType::STMT);
-               return +tmp;
+               return makeStmt(parseDecl(attrs));
             } break;
 
             case KeywordID::NULLPTR : [[fallthrough]];
@@ -64,20 +62,20 @@ START_PARSE_STMT:
             case KeywordID::ENUM          : getNextToken(); return parseEnum(attrs);
             case KeywordID::MASK          : getNextToken(); return parseMask(attrs);
             case KeywordID::NAMESPACE     : getNextToken(); return parseNamespace(attrs);
-            case KeywordID::FUNC          : getNextToken(); { index<astNode> tmp = +parseFunction(attrs); tree[tmp].anyCast(NodeType::STMT); return +tmp; } static_assert(mcsl::is_t<FuncDef, Expr>);
-            case KeywordID::MACRO         : getNextToken(); { index<astNode> tmp = +parseMacro(attrs); tree[tmp].anyCast(NodeType::STMT); return +tmp; } static_assert(mcsl::is_t<MacroDef, Expr>);
+            case KeywordID::FUNC          : getNextToken(); return makeStmt(parseFunction(attrs));
+            case KeywordID::MACRO         : getNextToken(); return makeStmt(parseMacro(attrs));
 
             
-            case KeywordID::IF            : getNextToken(); return parseIf(); break;
+            case KeywordID::IF            : getNextToken(); return addAttrs(parseIf(), attrs); break;
             case KeywordID::ELSE          : logError(ErrCode::BAD_KEYWORD, "floating ELSE");
 
-            case KeywordID::FOR           : getNextToken(); return parseForLoop(); break;
-            case KeywordID::FOREACH       : getNextToken(); return parseForeachLoop(); break;
-            case KeywordID::WHILE         : getNextToken(); return parseWhileLoop(); break;
-            case KeywordID::DO            : getNextToken(); return parseDoWhileLoop(); break;
+            case KeywordID::FOR           : getNextToken(); return addAttrs(parseForLoop(), attrs); break;
+            case KeywordID::FOREACH       : getNextToken(); return addAttrs(parseForeachLoop(), attrs); break;
+            case KeywordID::WHILE         : getNextToken(); return addAttrs(parseWhileLoop(), attrs); break;
+            case KeywordID::DO            : getNextToken(); return addAttrs(parseDoWhileLoop(), attrs); break;
 
-            case KeywordID::SWITCH        : getNextToken(); return parseSwitch(); break;
-            case KeywordID::MATCH         : getNextToken(); return parseMatch(); break;
+            case KeywordID::SWITCH        : getNextToken(); return addAttrs(parseSwitch(), attrs); break;
+            case KeywordID::MATCH         : getNextToken(); return addAttrs(parseMatch(), attrs); break;
             
             case KeywordID::CASE          : logError(ErrCode::BAD_KEYWORD, "floating CASE");
             case KeywordID::DEFAULT       : logError(ErrCode::BAD_KEYWORD, "floating DEFAULT");
@@ -88,31 +86,31 @@ START_PARSE_STMT:
                if (tryConsumeKeyword(KeywordID::CASE)) {
                   index<Expr> caseExpr = parseExpr();
                   consumeEOS("bad GOTO CASE statement (missing EOS)");
-                  return tree.make<Stmt>(OpID::GOTO_CASE, caseExpr);
+                  return addAttrs(tree.make<Stmt>(OpID::GOTO_CASE, caseExpr), attrs);
                }
                //goto default
                if (tryConsumeKeyword(KeywordID::DEFAULT)) {
                   consumeEOS("bad GOTO DEFAULT statement (missing EOS)");
-                  return tree.make<Stmt>(OpID::GOTO_CASE);
+                  return addAttrs(tree.make<Stmt>(OpID::GOTO_CASE), attrs);
                }
                //goto
                index<Identifier> label = parseIdentifier(SymbolType::LABEL, nullptr, false);
                if (tree[label].scopeName()) { logError(ErrCode::BAD_IDEN, "label may not be scoped"); }
                consumeEOS("bad GOTO statement (missing EOS)");
-               return tree.make<Stmt>(OpID::GOTO, label);
+               return addAttrs(tree.make<Stmt>(OpID::GOTO, label), attrs);
             }
 
-            case KeywordID::TRY           : getNextToken(); return parseTryCatch(); break;
+            case KeywordID::TRY           : getNextToken(); return addAttrs(parseTryCatch(), attrs); break;
             case KeywordID::CATCH         : logError(ErrCode::BAD_KEYWORD, "floating CATCH");
 
             case KeywordID::BREAK         :
                getNextToken();
                consumeEOS("bad BREAK");
-               return tree.make<Stmt>(KeywordID::BREAK);
+               return addAttrs(tree.make<Stmt>(KeywordID::BREAK), attrs);
             case KeywordID::CONTINUE      :
                getNextToken();
                consumeEOS("bad CONTINUE");
-               return tree.make<Stmt>(KeywordID::CONTINUE);
+               return addAttrs(tree.make<Stmt>(KeywordID::CONTINUE), attrs);
 
             case KeywordID::THROW         : [[fallthrough]];
             case KeywordID::ASSERT        : [[fallthrough]];
@@ -123,16 +121,16 @@ START_PARSE_STMT:
                getNextToken();
                index<Expr> expr = parseExpr();
                consumeEOS("bad ASSUME statement");
-               return tree.make<Stmt>(kw, expr);
+               return addAttrs(tree.make<Stmt>(kw, expr), attrs);
             }
             case KeywordID::RETURN        : {
                getNextToken();
                if (tryConsumeEOS()) {
-                  return tree.make<Stmt>(KeywordID::RETURN);
+                  return addAttrs(tree.make<Stmt>(KeywordID::RETURN), attrs);
                } else {
                   index<Expr> expr = parseExpr();
                   consumeEOS("bad RETURN statement");
-                  return tree.make<Stmt>(KeywordID::RETURN, expr);
+                  return addAttrs(tree.make<Stmt>(KeywordID::RETURN, expr), attrs);
                }
             }
 
@@ -151,7 +149,7 @@ START_PARSE_STMT:
                   symbol->setType(spec);
                   symbol->setSymbolType(SymbolType::VAR);
                }
-               return tree.make<Stmt>(KeywordID::ALIAS, alias, valExpr);
+               return addAttrs(tree.make<Stmt>(KeywordID::ALIAS, alias, valExpr), attrs);
             }
 
             UNREACHABLE;
@@ -164,8 +162,7 @@ START_PARSE_STMT:
                index<Expr> stmtContents = parseCast(currTok.keywordID());
                getNextToken();
                consumeEOS("bad cast statement");
-               tree.getNode(stmtContents).upCast(NodeType::STMT);
-               return (index<Stmt>)stmtContents;
+               return addAttrs(makeStmt(stmtContents), attrs);
             }
 
             case KeywordID::_NOT_A_KEYWORD: UNREACHABLE;
@@ -173,11 +170,10 @@ START_PARSE_STMT:
       case TokenType::IDEN        : PARSE_IDEN: {
          index<Expr> stmtContents = parseExpr();
          if (tryConsumeOperator(OpID::LABEL_DELIM)) { //label
-            return tree.make<Stmt>(OpID::LABEL_DELIM, stmtContents);
+            return addAttrs(tree.make<Stmt>(OpID::LABEL_DELIM, stmtContents), attrs);
          }
          consumeEOS("invalid statement");
-         tree[(index<astNode>)stmtContents].upCast(NodeType::STMT);
-         return (index<Stmt>)stmtContents;
+         return addAttrs(makeStmt(stmtContents), attrs);
       }
       UNREACHABLE;
 
@@ -188,13 +184,14 @@ START_PARSE_STMT:
       case TokenType::PTXT_SEG    : STMT_STARTS_WITH_VALUE: {
          index<Expr> stmtContents = parseExpr();
          consumeEOS("statement must end with EOS token");
-         tree[(index<astNode>)stmtContents].upCast(NodeType::STMT);
-         return (index<Stmt>)stmtContents;
+         return addAttrs(makeStmt(stmtContents), attrs);
       }
 
-      case TokenType::PREPROC_INIT: getNextToken(); return parsePreprocStmt();
+      case TokenType::PREPROC_INIT: if (attrs) { TODO; } getNextToken(); return parsePreprocStmt();
       case TokenType::PREPROC_EOS : getNextToken(); goto START_PARSE_STMT;
-      case TokenType::EOS         : getNextToken(); return tree.make<Stmt>();
+      case TokenType::EOS         :
+         getNextToken();
+         return makeStmt(attrs);
       case TokenType::ESC         : UNREACHABLE;
 
       default: UNREACHABLE;
@@ -730,6 +727,14 @@ clef::index<clef::Expr> clef::Parser::tryParseAttrs() {
       return parseAttrs();
    }
    return 0;
+}
+
+clef::index<clef::Stmt> clef::Parser::addAttrs(index<Stmt> stmt, index<Expr> attrs) {
+   if (!attrs) {
+      return stmt;
+   }
+   tree[attrs].setExtra2(stmt);
+   return makeStmt(attrs);
 }
 
 #endif //PARSER_CPP

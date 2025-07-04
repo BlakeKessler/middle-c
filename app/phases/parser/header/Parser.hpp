@@ -43,6 +43,8 @@ class clef::Parser {
       /*inline*/ bool tryConsumeEOS();
 
       index<Expr> toExpr(index<astNode>);
+      
+      index<Stmt> makeStmt(index<Expr>);
 
       //parsing functions
       index<Expr> parseExpr(index<astNode> initOperand = 0);
@@ -59,6 +61,8 @@ class clef::Parser {
       index<Expr> parseAttr(index<Expr> prevAttrs = 0);
       index<Expr> parseAttrs();
       index<Expr> tryParseAttrs();
+
+      index<Stmt> addAttrs(index<Stmt> stmt, index<Expr> attrs);
 
       index<Expr> parseCast(const KeywordID);
 
