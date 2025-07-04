@@ -151,7 +151,7 @@ clef::TypeSpec* clef::SyntaxTree::evalType(index<astNode> i) {
       case NodeType::IDEN:
          return self[(index<Identifier>)i].symbol()->type();
          
-      case NodeType::SCOPE: TODO;
+      case NodeType::SCOPE: return nullptr; //!NOTE: this might not be right
 
       case NodeType::LITERAL: {
          Literal& lit = self[(index<Literal>)i];
@@ -167,7 +167,11 @@ clef::TypeSpec* clef::SyntaxTree::evalType(index<astNode> i) {
             case LitType::BOOL: return getFundType(KeywordID::BOOL)->type();
             case LitType::CHAR: return getFundType(KeywordID::CHAR)->type();
 
-            case LitType::STRING: TODO; //const char[]
+            case LitType::STRING: { //const char[]
+               SymbolNode* charType = getFundType(KeywordID::CHAR);
+               index<Identifier> strType = make<Identifier>(KeywordID::CHAR, charType);
+               return makeIndirType(strType, charType->type(), QualMask::CONST, IndirTable(IndirTable::Entry(IndirTable::Entry::SLICE, true, false, false)));
+            }
             case LitType::INTERP_STR: TODO;
             case LitType::FORMAT: TODO;
             case LitType::REGEX: TODO;
