@@ -231,9 +231,11 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
       }
    }
 
-   #define IS_PRIM(name) (!expr.name() || !evalType(+expr.name()) || evalType(+expr.name())->metaType() == TypeSpec::FUND_TYPE)
+   TypeSpec* _tmp;
+   #define IS_PRIM(name) (!expr.name() || !(_tmp = evalType(+expr.name())) || _tmp->metaType() == TypeSpec::FUND_TYPE || (_tmp->metaType() == TypeSpec::INDIR && _tmp->indirTable().back().decaysToFund()))
    bool isAllPrimitive =  IS_PRIM(lhs) && IS_PRIM(rhs) && IS_PRIM(extra) && IS_PRIM(extra2);
    #undef IS_PRIM
+   bool lhsIsPtrlike = expr.lhs() && (_tmp = evalType(+expr.lhs())) && _tmp->metaType() == TypeSpec::INDIR && _tmp->indirTable().back().decaysToFund();
 
    if (isAllPrimitive) {
       switch (expr.opID()) {
@@ -359,15 +361,24 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
                return;
             #pragma endregion typelesses
 
-            #pragma region errs
-            //dereferences
+            #pragma region indirOnly
             case OpID::MEMBER_ACCESS: [[fallthrough]];
             case OpID::PTR_MEMBER_ACCESS: [[fallthrough]];
+            case OpID::CALL_INVOKE: [[fallthrough]];
+            case OpID::SUBSCRIPT_INVOKE:
+               if (lhsIsPtrlike) {
+                  expr.evalType() = evalType(+expr.lhs())->pointee();
+                  return;
+               }
+               [[fallthrough]];
+            
+            #pragma endregion indirOnly
+
+            #pragma region errs
+            //dereferences
             case OpID::METHOD_PTR: [[fallthrough]];
             case OpID::ARROW_METHOD_PTR: [[fallthrough]];
             //invokes
-            case OpID::CALL_INVOKE: [[fallthrough]];
-            case OpID::SUBSCRIPT_INVOKE: [[fallthrough]];
             case OpID::LIST_INVOKE: [[fallthrough]];
             case OpID::SPECIALIZER_INVOKE: [[fallthrough]];
             case OpID::INTERP_STR_INVOKE: throwError(ErrCode::BAD_EXPR, FMT("invalid operator for types (%s)"), toString(expr.opID()));

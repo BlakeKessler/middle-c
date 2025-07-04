@@ -638,7 +638,6 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
    index<Identifier> name = parseIdentifier(SymbolType::FUNC, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    symbol->setSymbolType(SymbolType::FUNC);
-   if (attrs) { TODO; }
    
    PUSH_SCOPE;
 
@@ -647,7 +646,7 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
 
    if (tryConsumeEOS()) { //forward declaration
       POP_SCOPE;
-      return tree.make<FuncDef>(name, tree.make<ArgList>(params, retType));
+      return tree.make<FuncDef>(name, tree.make<ArgList>(params, retType), attrs);
       // tree.freeBuf(*params);
       // return tree.make<FuncDef>(name, index<ArgList>{});
    }
@@ -661,7 +660,7 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
 
    //make definition
    index<ArgList> paramNode = tree.make<ArgList>(params, retType);
-   index<FuncDef> def = tree.make<FuncDef>(name, paramNode, procedure);
+   index<FuncDef> def = tree.make<FuncDef>(name, paramNode, procedure, attrs);
    symbol->defineOverload(overloadIndex, def);
 
    //return

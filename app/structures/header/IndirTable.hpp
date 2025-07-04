@@ -41,6 +41,8 @@ class clef::IndirTable {
             bool   isRef() const { return _type == REF;   }
             bool isSlice() const { return _type == SLICE; }
             bool   isArr() const { return _type == ARR;   }
+            
+            bool decaysToFund() const { return _type != REF; } //!NOTE: check that this still works if new indirect types are added
 
             bool isConst() const { return _isConst && !isArr(); }
             bool isVolatile() const { return _isVol; }
@@ -106,6 +108,8 @@ class clef::IndirTable {
 
       Entry& operator[](uint64 i);
       Entry operator[](uint64 i) const;
+      Entry& back() { return self[_size - 1]; }
+      Entry back() const { return self[_size - 1]; }
 
       void append(Entry entry);
       void appendView(Entry entry);

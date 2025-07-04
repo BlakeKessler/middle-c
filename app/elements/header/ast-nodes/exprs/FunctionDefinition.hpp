@@ -18,6 +18,8 @@ struct clef::FunctionDefinition : public clef::Expression {
       FunctionDefinition():Expression{} {}
       FunctionDefinition(index<Identifier> name, index<ArgList> params):Expression{OpID::DEF_FUNC_PARAMS, name, params} {}
       FunctionDefinition(index<Identifier> name, index<ArgList> params, index<Scope> proc):Expression{OpID::DEF_FUNC_PARAMS, name, params, proc} {}
+      FunctionDefinition(index<Identifier> name, index<ArgList> params, index<Expr> attrs):Expression{OpID::DEF_FUNC_PARAMS, name, params, index<Scope>(0), attrs} {}
+      FunctionDefinition(index<Identifier> name, index<ArgList> params, index<Scope> proc, index<Expr> attrs):Expression{OpID::DEF_FUNC_PARAMS, name, params, proc, attrs} {}
 
 
       index<Identifier>& name() { return reinterpret_cast<index<Identifier>&>(_lhs); }
