@@ -28,7 +28,6 @@ clef::index<clef::Stmt> clef::Parser::parseStmt() {
 }
 clef::index<clef::Stmt> clef::Parser::parseStmtImpl() {
    index<Expr> attrs = tryParseAttrs();
-   if (attrs) { TODO; }
 START_PARSE_STMT:
    switch (currTok.type()) {
       case TokenType::NONE        : UNREACHABLE;
@@ -191,7 +190,11 @@ START_PARSE_STMT:
       case TokenType::PREPROC_EOS : getNextToken(); goto START_PARSE_STMT;
       case TokenType::EOS         :
          getNextToken();
-         return makeStmt(attrs);
+         if (attrs) {
+            return makeStmt(attrs);
+         } else {
+            return tree.make<Stmt>();
+         }
       case TokenType::ESC         : UNREACHABLE;
 
       default: UNREACHABLE;
