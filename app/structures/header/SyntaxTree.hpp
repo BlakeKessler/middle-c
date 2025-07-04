@@ -7,6 +7,7 @@
 #include "TypeSpec.hpp"
 #include "allocator.hpp"
 #include "DataModel.hpp"
+#include "IndirTypeTable.hpp"
 
 #include "dyn_arr.hpp"
 #include "arr_list.hpp"
@@ -18,7 +19,7 @@ class clef::SyntaxTree {
 
       SymbolNode _globalScope;
       mcsl::map<FundTypeID, SymbolNode*> _fundTypes;
-      //!TODO: global table of indirect types
+      IndirTypeTable _indirTypes;
       //!TODO: global table of function signatures
       mcsl::arr_list<SymbolNode> _symbolBuf;
       mcsl::arr_list<TypeSpec> _typeTable;

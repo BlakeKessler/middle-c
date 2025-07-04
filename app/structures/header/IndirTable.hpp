@@ -114,6 +114,20 @@ class clef::IndirTable {
    public:
       operator bool() const { return _size; }
       bool operator==(const IndirTable& other) const;
+
+      auto hash() const {
+         return mcsl::hash_algos::rapid(
+            _otherBlocks.begin(),
+            _otherBlocks.size() * sizeof(EntryBlock),
+            (uint64)_block0
+         );
+      }
+};
+
+template<> struct std::hash<clef::IndirTable> {
+   static inline auto operator()(const clef::IndirTable& table) {
+      return table.hash();
+   }
 };
 
 #endif //INDIR_TABLE_HPP

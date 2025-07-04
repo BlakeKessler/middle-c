@@ -59,6 +59,7 @@ namespace clef {
    class Source;
    class SymbolNode;
    class IndirTable;
+   class IndirTypeTable;
    class SyntaxTree;
       template<typename T> struct astTNB; //astTreeNodeBundle
       struct astTTsB; //astTreeTypespecBundle
