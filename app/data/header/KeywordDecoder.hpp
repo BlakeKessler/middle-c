@@ -78,7 +78,6 @@ class clef::KeywordDecoder {
          {"inline", KeywordID::INLINE},
          {"noexcept", KeywordID::NOEXCEPT},
          {"virtual", KeywordID::VIRTUAL},
-         {"override", KeywordID::OVERRIDE},
          {"public", KeywordID::PUBLIC},
          {"private", KeywordID::PRIVATE},
          {"protected", KeywordID::PROTECTED},

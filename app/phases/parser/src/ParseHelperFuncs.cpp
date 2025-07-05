@@ -139,7 +139,10 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
       tree.makeIndirType(name, iden.symbol()->type(), targetQuals, std::move(indirTable));
       iden.setQualMask(ptrquals);
    }
-   return +name;
+   if (tryConsumeOperator(OpID::VARIADIC_PARAM)) {
+      iden.addQuals(QualMask::VARIADIC);
+   }
+   return name;
 }
 
 clef::index<clef::Decl> clef::Parser::parseDecl(index<Expr> attrs) {

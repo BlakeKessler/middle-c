@@ -487,14 +487,13 @@ namespace clef {
       INLINE,
       NOEXCEPT,
       VIRTUAL,
-      OVERRIDE,
 
-      PUBLIC,
+      PUBLIC = VIRTUAL + 2,
       PRIVATE,
       PROTECTED,
 
       __FIRST_QUAL = CONST,
-      __LAST_QUAL = OVERRIDE,
+      __LAST_QUAL = VIRTUAL,
       __FIRST_SCOPE_MOD = PUBLIC,
       __LAST_SCOPE_MOD = PROTECTED,
 
@@ -824,7 +823,7 @@ namespace clef {
       INLINE      = 10_m,
       NOEXCEPT    = 11_m,
       VIRTUAL     = 12_m,
-      OVERRIDE    = 13_m,
+      VARIADIC    = 13_m,
 
       PUBLIC      = 14_m,
       PRIVATE     = 15_m,

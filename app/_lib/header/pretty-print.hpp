@@ -340,7 +340,6 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(INLINE, "inline");
       CASE(NOEXCEPT, "noexcept");
       CASE(VIRTUAL, "virtual");
-      CASE(OVERRIDE, "override");
 
       CASE(PUBLIC, "public");
       CASE(PRIVATE, "private");
@@ -544,7 +543,7 @@ constexpr const mcsl::str_slice clef::toString(const QualMask quals) {
       CASE(INLINE, "inline");
       CASE(NOEXCEPT, "noexcept");
       CASE(VIRTUAL, "virtual");
-      CASE(OVERRIDE, "override");
+      CASE(VARIADIC, "...");
 
       CASE(PUBLIC, "public");
       CASE(PRIVATE, "private");

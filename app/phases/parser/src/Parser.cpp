@@ -681,7 +681,7 @@ mcsl::tuple<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*, clef::in
    if (!tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE)) {
       do {
          index<Decl> param = parseDefaultableParam(tryParseAttrs());
-         overload->funcSig().params.push_back(tree[tree[param].type()].symbol()->type());
+         overload->funcSig().params.emplace_back(tree[tree[param].type()].symbol()->type(), tree[tree[param].type()].quals());
          params.push_back(param);
       } while (tryConsumeOperator(OpID::COMMA));
       consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "missing closing parentheses in function signature");

@@ -641,6 +641,10 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
          }
       // }
 
+      if (+(iden.quals() & QualMask::VARIADIC)) {
+         charsPrinted += file.printf(FMT("..."));
+      }
+
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
       return file.printf(FMT("%b%b%b%b%b%b"), TSB(iden.symbol()), +iden.overloadIndex(), TNB(iden.specializer()), +iden.keywordID(), TNB(iden.scopeName()), +iden.quals());
@@ -825,9 +829,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
          case TypeSpec::FUNC_SIG:
             charsPrinted += file.printf(FMT("("));
             if (spec.funcSig().params.size()) {
-               charsPrinted += file.printf(FMT("%s"), TTsB(spec.funcSig().params[0]));
+               charsPrinted += file.printf(FMT("%s% s"), TTsB(spec.funcSig().params[0].first), spec.funcSig().params[0].second);
                for (uint i = 1; i < spec.funcSig().params.size(); ++i) {
-                  charsPrinted += file.printf(FMT(", %s"), TTsB(spec.funcSig().params[i]));
+                  charsPrinted += file.printf(FMT(", %s% s"), TTsB(spec.funcSig().params[i].first), spec.funcSig().params[i].second);
                }
             }
             if (spec.funcSig().retType) {

@@ -208,7 +208,7 @@ bool clef::TypeSpec::operator==(const TypeSpec& other) const {
             return false;
          }
          for (uint i = 0; i < _funcSig.params.size(); ++i) {
-            if (*_funcSig.params[i] != *other._funcSig.params[i]) {
+            if (*_funcSig.params[i].first != *other._funcSig.params[i].first || _funcSig.params[i].second != other._funcSig.params[i].second) {
                return false;
             }
          }
