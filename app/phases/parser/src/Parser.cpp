@@ -5,6 +5,8 @@
 
 #include "dyn_arr.hpp"
 
+#include "pretty-print.hpp"
+
 void clef::Parser::parse(const mcsl::str_slice filePath, SyntaxTree& tree) {
    Lexer src = Lexer::fromFile(filePath);
    return parse(src, tree);
@@ -639,6 +641,49 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
    index<Identifier> name = parseIdentifier(SymbolType::FUNC, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    symbol->setSymbolType(SymbolType::FUNC);
+
+   //handle operator overloading
+   //!TODO: make this more efficient and less janky
+   //!TODO: maybe move this to the call site?
+   if (index<Expr> opAttr = tree.findAttr(attrs, tree.findSymbol(FMT("op"))); opAttr) {
+      index<ArgList> argsIndex = +tree[opAttr].rhs();
+      if (!argsIndex) {
+         TODO; //error
+      }
+      auto argv = tree[argsIndex].span();
+      if (argv.size() == 0 || argv.size() > 2) {
+         TODO; //error
+      }
+      mcsl::str_slice arg0 = tree.extractStrLit(argv[0]);
+      OpData op = OPERATORS[arg0];
+      if (!op) { [[unlikely]]; //operator not found
+         logError(ErrCode::BAD_ATTR, "`%s` is not an operator", arg0);
+      }
+      if (argv.size() > 1) { //process second arg if it is present
+         mcsl::str_slice arg1 = tree.extractStrLit(argv[1]);
+         if (arg1 == POSTFIX_OVERLOAD_STR) { //overload of postfix operator
+            if (+(op.props() & OpProps::CAN_BE_POSTFIX)) {
+               op.removeProps(OpProps::CAN_BE_PREFIX);
+            } else { [[unlikely]];
+               logError(ErrCode::BAD_ATTR, "`%s` is not a postfix operator", toString(op.opID()));
+            }
+         }
+         else if (arg1 == PREFIX_OVERLOAD_STR) { //overload of prefix operator
+            if (+(op.props() & OpProps::CAN_BE_PREFIX)) {
+               op.removeProps(OpProps::CAN_BE_POSTFIX);
+            } else { [[unlikely]];
+               logError(ErrCode::BAD_ATTR, "`%s` is not a prefix operator", toString(op.opID()));
+            }
+         } else { [[unlikely]]; //second arg is invalid
+            logError(ErrCode::BAD_ATTR, "invalid second parameter for `@op` attribute");
+            TODO; //error
+         }
+      } else if (+(op.props() & (OpProps::CAN_BE_POSTFIX)) && +(op.props() & OpProps::CAN_BE_PREFIX)) {
+         op.removeProps(OpProps::CAN_BE_POSTFIX);
+      }
+      
+      TODO; //!TODO: register overload
+   }
    
    PUSH_SCOPE;
 
@@ -734,12 +779,15 @@ clef::index<clef::Expr> clef::Parser::tryParseAttrs() {
    return 0;
 }
 
+//add attributes to a statement
 clef::index<clef::Stmt> clef::Parser::addAttrs(index<Stmt> stmt, index<Expr> attrs) {
-   if (!attrs) {
+   if (!attrs) { //do nothing if there are no attributes to add
       return stmt;
    }
+   //demote statement to expression
    index<Expr> asExpr = stmt;
    tree[(index<astNode>)stmt].downCast(NodeType::EXPR);
+   //put the statement in the attribute node and promote the latter to a statement
    tree[attrs].setExtra2(asExpr);
    return makeStmt(attrs);
 }

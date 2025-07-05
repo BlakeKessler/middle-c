@@ -38,6 +38,8 @@ namespace clef {
       BAD_TYPE_DECL,
 
       BAD_PREPROC,
+
+      BAD_ATTR,
       //ast/ast node errors
       BAD_LIT_CAST,
       BAD_NODE_CAST,

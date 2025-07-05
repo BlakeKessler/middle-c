@@ -664,4 +664,16 @@ clef::TypeSpec* clef::SyntaxTree::commonTypeOfOperands(index<Expr> i) {
    return spec;
 }
 
+mcsl::str_slice clef::SyntaxTree::extractStrLit(index<Expr> strLitExpr) {
+   Expr& expr = self[strLitExpr];
+   if (expr.opID() != OpID::NULL || expr.lhsType() != NodeType::LITERAL) {
+      TODO; //error
+   }
+   Literal& lit = self[(index<Literal>)expr.lhs()];
+   if (lit.type() != LitType::STRING) {
+      TODO; //error
+   }
+   return lit;
+}
+
 #endif //SYNTAX_TREE_CPP
