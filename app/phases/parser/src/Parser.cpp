@@ -737,7 +737,9 @@ clef::index<clef::Stmt> clef::Parser::addAttrs(index<Stmt> stmt, index<Expr> att
    if (!attrs) {
       return stmt;
    }
-   tree[attrs].setExtra2(stmt);
+   index<Expr> asExpr = stmt;
+   tree[(index<astNode>)stmt].downCast(NodeType::EXPR);
+   tree[attrs].setExtra2(asExpr);
    return makeStmt(attrs);
 }
 
