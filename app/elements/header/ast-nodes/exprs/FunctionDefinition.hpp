@@ -28,6 +28,8 @@ struct clef::FunctionDefinition : public clef::Expression {
       index<const ArgList> params() const { return _rhs; }
       index<Scope>& procedure() { return reinterpret_cast<index<Scope>&>(_extras[0]); }
       index<const Scope> procedure() const { return _extras[0]; }
+      index<Expr>& attrs() { return reinterpret_cast<index<Expr>&>(_extras[1]); }
+      index<const Expr> attrs() const { return _extras[1]; }
 };
 
 namespace mcsl {

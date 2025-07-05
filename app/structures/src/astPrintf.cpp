@@ -376,7 +376,11 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
             if (expr.extra2()) {
                charsPrinted += file.printf(FMT("%s "), TNB_AST(expr.extra()));
             }
-            charsPrinted += file.printf(FMT("@%s%s% s"), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()), TNB_AST(expr.extra2()));
+            charsPrinted += file.printf(FMT("@%s"), TNB_AST(expr.lhs()));
+            if (expr.rhs()) {
+               charsPrinted += file.printf(FMT("(%s)"), TNB_AST(expr.rhs()));
+            }
+            charsPrinted += file.printf(FMT("% s"), TNB_AST(expr.extra2()));
             break;
 
          case CALL_INVOKE: //parens
@@ -653,7 +657,12 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::FuncDef> obj, char 
    }
    const FuncDef& funcDef = *obj;
    if ((mode | CASE_BIT) == 's') {
-      return file.printf(FMT("func% s(%#s) -> %#s% s"), TNB(funcDef.name()), TNB(funcDef.params()), TNB(obj.tree[funcDef.params()].extra()), TNB(funcDef.procedure()));
+      uint charsPrinted = 0;
+      if (funcDef.attrs()) {
+         charsPrinted += file.printf(FMT("%s "), TNB(funcDef.attrs()));
+      }
+      charsPrinted += file.printf(FMT("func% s(%#s) -> %#s% s"), TNB(funcDef.name()), TNB(funcDef.params()), TNB(obj.tree[funcDef.params()].extra()), TNB(funcDef.procedure()));
+      return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
       TODO;
    } else {
