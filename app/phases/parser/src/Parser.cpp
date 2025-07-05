@@ -138,6 +138,7 @@ START_PARSE_STMT:
                index<Identifier> alias = parseIdentifier(SymbolType::EXTERN_IDEN, nullptr, true);
                consumeOperator(OpID::ASSIGN, "alias definitions must use the assignment operator (and cannot be forward-declared)");
                index<Expr> valExpr = parseExpr();
+               consumeEOS("invalid alias declaration");
                Expr& val = tree[valExpr];
                SymbolNode* symbol = tree[alias].symbol();
                if (val.opID() == OpID::NULL && val.lhsType() == NodeType::IDEN && val.rhsType() == NodeType::NONE && val.extraType() == NodeType::NONE && val.extraType2() == NodeType::NONE) {
