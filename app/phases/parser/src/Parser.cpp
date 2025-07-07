@@ -205,6 +205,7 @@ START_PARSE_STMT:
    UNREACHABLE;
 }
 
+//greedily parse an expression
 clef::index<clef::Expr> clef::Parser::parseExpr(index<astNode> initOperand) {
    index<Expr> expr = parseExprNoPrimaryComma(initOperand);
    while (tryConsumeOperator(OpID::COMMA)) {
@@ -212,7 +213,9 @@ clef::index<clef::Expr> clef::Parser::parseExpr(index<astNode> initOperand) {
    }
    return expr;
 }
+//greedily parse an expression (closed early by comma operators) using the shunting-yard algorithm (modified to support unary operators)
 clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> initOperand) {
+   //setup
    mcsl::dyn_arr<OpData> operatorStack;
    mcsl::dyn_arr<index<astNode>> operandStack;
    bool prevTokIsOperand = false;
@@ -221,35 +224,38 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
       operandStack.push_back(initOperand);
    }
 
-   const auto eval = [&]() { //evaluate the subexpression on the top of the stacks
+   //local function to evaluate the subexpression on the top of the stacks
+   const auto eval = [&]() {
       OpData op = operatorStack.pop_back();
       if (!operandStack.size()) { logError(ErrCode::BAD_EXPR, "bad expression (missing RHS on stack)"); }
 
       index<astNode> rhs = operandStack.pop_back();
       index<astNode> lhs;
-      if (op.opID() == OpID::TERNARY_INVOKE) {
+      if (op.opID() == OpID::TERNARY_INVOKE) { //special case for ternary expressions
          if (operandStack.size() < 2) {
             logError(ErrCode::BAD_EXPR, "bad ternary conditional expression");
          }
-         lhs = operandStack.pop_back();
+         lhs = operandStack.pop_back(); //value if true (value if false is in rhs)
          index<astNode> cond = operandStack.pop_back();
          operandStack.push_back(+tree.make<Expr>(Expr::makeTernary(tree, cond, lhs, rhs)));
       }
-      else if (isBinary(op)) { //!NOTE: PRIORITIZES BINARY OVER POSTFIX-UNARY
+      else if (isBinary(op)) { //binary operator //!NOTE: PRIORITIZES BINARY OVER POSTFIX-UNARY
          if (!operandStack.size()) { logError(ErrCode::BAD_EXPR, "bad expression (missing LHS on stack)"); }
          lhs = operandStack.pop_back();
          operandStack.push_back(+tree.makeExpr(op.opID(), lhs, rhs));
-      } else {
-         if (+(op & OpProps::CAN_BE_POSTFIX)) {
+      } else { //unary operator
+         if (+(op & OpProps::CAN_BE_POSTFIX)) { //postfix unary operator
             operandStack.push_back(+tree.makeExpr(op.opID(), rhs));
-         } else {
+         } else { //prefix unary operator
             debug_assert(+(op & OpProps::CAN_BE_PREFIX));
             operandStack.push_back(+tree.makeExpr(op.opID(), 0, rhs));
          }
       }
    };
 
+   //parse expression
    while (!src.done()) {
+      //evaluate current token
       switch (currTok.type()) {
          case TokenType::NONE: UNREACHABLE;
          case TokenType::__OPLIKE: UNREACHABLE;
@@ -257,7 +263,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
          case TokenType::PREPROC_EOS: getNextToken(); goto PARSE_EXPR_CONTINUE;
          case TokenType::ESC: UNREACHABLE;
          
-         case TokenType::KEYWORD:{
+         case TokenType::KEYWORD:{ //keywords
             const KeywordID kw = currTok.keywordID();
             if (kw == KeywordID::FUNC) {
                getNextToken();
@@ -294,27 +300,30 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             else if (isType(kw)) {
                TODO;
                // operandStack.push_back(+tree.getFundType(kw));
-               getNextToken();
-               prevTokIsOperand = true;
-               goto PARSE_EXPR_CONTINUE;
+               // getNextToken();
+               // prevTokIsOperand = true;
+               // goto PARSE_EXPR_CONTINUE;
             }
             
             logError(ErrCode::BAD_KEYWORD, "bad keyword in expression");
          }
 
          case TokenType::MACRO_INVOKE: TODO;
-         case TokenType::IDEN: operandStack.push_back(+parseIdentifier(SymbolType::EXTERN_IDEN, nullptr, false)); prevTokIsOperand = true; goto PARSE_EXPR_CONTINUE;
-         case TokenType::INT_NUM:
+         case TokenType::IDEN: //identifiers
+            operandStack.push_back(+parseIdentifier(SymbolType::EXTERN_IDEN, nullptr, false));
+            prevTokIsOperand = true;
+            goto PARSE_EXPR_CONTINUE;
+         case TokenType::INT_NUM: //ints
             operandStack.push_back(+tree.make<Literal>(currTok.intVal()));
             getNextToken();
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
-         case TokenType::REAL_NUM:
+         case TokenType::REAL_NUM: //floats
             operandStack.push_back(+tree.make<Literal>(currTok.realVal()));
             getNextToken();
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
-         case TokenType::PTXT_SEG:
+         case TokenType::PTXT_SEG: //strings and chars
             prevTokIsOperand = true;
             if (isString(currTok.ptxtType())) {
                operandStack.push_back(+tree.make<Literal>(parseStrLit()));
@@ -329,17 +338,18 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             }
             UNREACHABLE;
 
-         case TokenType::EOS: goto END_OF_EXPR;
+         case TokenType::EOS: //end of statement token - end of expression
+            goto END_OF_EXPR;
          case TokenType::OP:
             if (currTok.opID() == OpID::SCOPE_RESOLUTION) {
                operandStack.push_back(+parseIdentifier(SymbolType::EXTERN_IDEN, nullptr, false));
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
-            if (currTok.opID() == OpID::COMMA || currTok.opID() == OpID::INLINE_ELSE) {
+            if (currTok.opID() == OpID::COMMA || currTok.opID() == OpID::LABEL_DELIM) { //comma or label delimiter - end of expression
                goto END_OF_EXPR;
             }
-            else if (currTok.opID() == OpID::INLINE_IF) {
+            else if (currTok.opID() == OpID::INLINE_IF) { //special case for ternary expressions
                getNextToken();
                operatorStack.emplace_back(FMT(""), OpID::TERNARY_INVOKE, OpProps::null, (ubyte)0, TokenType::OP);
                index<Expr> trueVal = parseExpr();
@@ -392,8 +402,10 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
       UNREACHABLE;
       PARSE_EXPR_CONTINUE:
    }
-   END_OF_EXPR:
 
+   //entire expression has been parsed
+   //assemble final expression node
+   END_OF_EXPR:
    while (operatorStack.size()) { eval(); }
    if (operandStack.size() != 1) {
       mcsl::err_printf(mcsl::FMT("%u excess operand(s)\n"), operandStack.size() - 1);
@@ -402,6 +414,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
    return toExpr(operandStack[0]);
 }
 
+//parse type qualifier keywords
 clef::QualMask clef::Parser::parseQuals() {
    QualMask quals = QualMask::_no_quals;
    while (currTok.type() == TokenType::KEYWORD && isQualifier(currTok.keywordID())) {
@@ -411,8 +424,11 @@ clef::QualMask clef::Parser::parseQuals() {
    return quals;
 }
 
+//parse an identifier if one is present (returns 0 otherwise)
 clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbolType, SymbolNode* type, bool isDecl) {
+   //qualifiers
    QualMask quals = parseQuals();
+
    //handle keywords
    if (currTok.type() == TokenType::KEYWORD) {
       index<Identifier> keyword = tree.make<Identifier>(tree.toFundTypeID(currTok.keywordID()), currTok.keywordID(), tree.getFundType(currTok.keywordID()), index<ArgList>{}, quals);
@@ -424,53 +440,63 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
       return keyword;
    }
 
-   //handle other identifiers
-   if (currTok.type() != TokenType::IDEN) { return 0; }
-
+   //preserve current scope data
    SAVE_SCOPE;
-
+   //deduce parent scope
    index<Identifier> name = scopeName;
    SymbolNode* symbol = currScope;
-
-   if (tryConsumeOperator(OpID::SCOPE_RESOLUTION)) {
+   if (tryConsumeOperator(OpID::SCOPE_RESOLUTION)) { //fully qualified name
       name = 0;
       symbol = tree.globalScope();
    }
 
-   do {
-#if !PARALLEL_COMPILE_FILES
-      //!TODO: make this less janky
-      if (symbol->symbolType() == SymbolType::EXTERN_IDEN || symbol->symbolType() == SymbolType::EXTERN_TYPE || (symbol->symbolType() == SymbolType::null && symbol != tree.globalScope())) {
-         logError(ErrCode::BAD_IDEN, "undeclared identifier `%s`", astTNB(tree, name, 0));
+   if (currTok.type() != TokenType::IDEN) {
+      if (+quals) {
+         TODO; //!TODO: unget quals or log error
       }
-#endif
-      symbol = tree.registerSymbol(currTok.name(), symbol); //add symbol to symbol table
+      return 0;
+   }
+
+   //parse the identifier itself (with scope resolution)
+   do {
+      //check token type
+      if (currTok.type() == TokenType::KEYWORD) { logError(ErrCode::BAD_IDEN, "keywords may not name or be members of scopes"); }
+      else if (currTok.type() != TokenType::IDEN) { logError(ErrCode::BAD_IDEN, "only identifiers may name or be members of scopes (%u)", +currTok.type()); }
+      
+      //check for undeclared identifiers being used as scopes
+      //deferred until later if files are compiled in parallel
+      if constexpr (!PARALLEL_COMPILE_FILES) {
+         //!TODO: make this less janky
+         if (symbol->symbolType() == SymbolType::EXTERN_IDEN || symbol->symbolType() == SymbolType::EXTERN_TYPE || (symbol->symbolType() == SymbolType::null && symbol != tree.globalScope())) {
+            logError(ErrCode::BAD_IDEN, "undeclared identifier `%s`", astTNB(tree, name, 0));
+         }
+      }
+      //add symbol to symbol table
+      symbol = tree.registerSymbol(currTok.name(), symbol);
       debug_assert(symbol);
+      getNextToken();
       //create AST node for symbol
-      if (!name || symbol->parentScope() != tree[name].symbol()) {
-         name = tree.make<Identifier>(symbol);
-      } else {
+      if (name && symbol->parentScope() == tree[name].symbol()) { //symbol is in the current scope or is not yet defined
          name = tree.make<Identifier>(symbol, name);
+      } else { //symbol is in another scope
+         name = tree.make<Identifier>(symbol);
       }
       debug_assert(tree[name].symbol() == symbol);
-      getNextToken();
 
+      //parse specializer
       if (tryConsumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::OPEN)) {
          parseSpecList(name, isDecl);
       }
+   } while (tryConsumeOperator(OpID::SCOPE_RESOLUTION));
 
-      if (!tryConsumeOperator(OpID::SCOPE_RESOLUTION)) { break; }
-
-      if (currTok.type() == TokenType::KEYWORD) { logError(ErrCode::BAD_IDEN, "keywords may not name or be members of scopes"); }
-      else if (currTok.type() != TokenType::IDEN) { logError(ErrCode::BAD_IDEN, "only identifiers may name or be members of scopes (%u)", +currTok.type()); }
-   } while (true);
-
-#if !PARALLEL_COMPILE_FILES
-   //!TODO: make this less janky
-   if (!isDecl && (symbol->symbolType() == SymbolType::EXTERN_IDEN || symbol->symbolType() == SymbolType::EXTERN_TYPE)) {
-      logError(ErrCode::BAD_IDEN, "undeclared identifier `%s`", astTNB(tree, name, 0));
+   //check that the symbol has been declared if not parsing its declaration
+   if constexpr (!PARALLEL_COMPILE_FILES) {
+      //!TODO: make this less janky
+      if (!isDecl && (symbol->symbolType() == SymbolType::EXTERN_IDEN || symbol->symbolType() == SymbolType::EXTERN_TYPE)) {
+         logError(ErrCode::BAD_IDEN, "undeclared identifier `%s`", astTNB(tree, name, 0));
+      }
    }
-#endif
+   
    //!TODO: make this less janky
    if (isDecl) {
       if (symbol->symbolType() == SymbolType::null || symbol->symbolType() == SymbolType::EXTERN_IDEN || (isType(symbolType) && symbol->symbolType() == SymbolType::EXTERN_TYPE)) {
@@ -501,11 +527,13 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
    debug_assert(symbol);
    debug_assert(tree[name].symbol() == symbol);
    
+   //restore current scope data
    POP_SCOPE;
 
    tree[name].addQuals(parseQuals());
    return name;
 }
+//parse an identifier
 clef::index<clef::Identifier> clef::Parser::parseIdentifier(SymbolType symbolType, SymbolNode* type, bool isDecl) {
    index<Identifier> name = tryParseIdentifier(symbolType, type, isDecl);
    if (!name) {
@@ -524,7 +552,7 @@ clef::index<clef::If> clef::Parser::parseIf() {
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad IF block");
    index<Scope> proc = parseProcedure();
 
-   //EOS
+   //EOS for if statement with no else
    if (tryConsumeEOS()) {
       return tree.make<If>(condition, proc);
    }
@@ -554,6 +582,7 @@ clef::index<clef::If> clef::Parser::parseIf() {
    }
 }
 
+//parse a switch statement
 clef::index<clef::Switch> clef::Parser::parseSwitch() {
    //condition
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "SWITCH without opening parens for condition");
@@ -595,6 +624,7 @@ clef::index<clef::Switch> clef::Parser::parseSwitch() {
    return tree.make<Switch>(condition, cases);
 }
 
+//parse a match statement
 clef::index<clef::Match> clef::Parser::parseMatch() {
    //condition
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "MATCH without opening parens for condition");
@@ -607,9 +637,9 @@ clef::index<clef::Match> clef::Parser::parseMatch() {
 
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       index<Expr> caseExpr;
-      if (tryConsumeKeyword(KeywordID::CASE)) { //CASE
+      if (tryConsumeKeyword(KeywordID::CASE)) { //case
          caseExpr = parseExpr();
-      } else {
+      } else { //default
          consumeKeyword(KeywordID::DEFAULT, "bad MATCH block procedure");
          caseExpr = 0;   
       }
@@ -627,20 +657,27 @@ clef::index<clef::Match> clef::Parser::parseMatch() {
    return tree.make<Match>(condition, cases);
 }
 
+//parse a try-catch block
 clef::index<clef::TryCatch> clef::Parser::parseTryCatch() {
+   //parse the code in the try block
    index<Scope> procedure = parseProcedure();
+   //parse the catch block
    consumeKeyword(KeywordID::CATCH, "TRY block without CATCH block");
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "CATCH block without opening parens");
-   index<Decl> err = parseParam(tryParseAttrs());
+   index<Decl> err = parseParam(tryParseAttrs()); //error variable
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "CATCH block without closing parens");
+   //parse the error handler code
    index<Scope> handler = parseProcedure();
    return tree.make<TryCatch>(procedure, err, handler);
 }
 
+//parse a function
 clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
+   //parse function name
    index<Identifier> name = parseIdentifier(SymbolType::FUNC, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
-   symbol->setSymbolType(SymbolType::FUNC);
+   debug_assert(symbol->symbolType() == SymbolType::FUNC);
+   // symbol->setSymbolType(SymbolType::FUNC);
 
    //handle operator overloading
    //!TODO: make this more efficient and less janky
@@ -687,24 +724,24 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
    
    PUSH_SCOPE;
 
+   //parse signature and update overload index
    auto [overloadIndex, params, retType] = parseFuncSig(symbol);
    tree[name].overloadIndex() = overloadIndex;
 
-   if (tryConsumeEOS()) { //forward declaration
+   //check for forward declaration
+   if (tryConsumeEOS()) {
       POP_SCOPE;
       return tree.make<FuncDef>(name, tree.make<ArgList>(params, retType), attrs);
-      // tree.freeBuf(*params);
-      // return tree.make<FuncDef>(name, index<ArgList>{});
    }
 
-   //definition
+   //parse function definition
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad FUNC definition");
    index<Scope> procedure = parseProcedure();
 
    //EOS
    consumeEOS("function definition without EOS");
 
-   //make definition
+   //make definition node
    index<ArgList> paramNode = tree.make<ArgList>(params, retType);
    index<FuncDef> def = tree.make<FuncDef>(name, paramNode, procedure, attrs);
    symbol->defineOverload(overloadIndex, def);
@@ -717,26 +754,29 @@ clef::index<clef::MacroDef> clef::Parser::parseMacro(index<Expr> attrs) {
    TODO;
 }
 
+//parse a function signature (params and return type)
 mcsl::tuple<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*, clef::index<clef::Identifier>> clef::Parser::parseFuncSig(SymbolNode* target) {
    TypeSpec* overload = tree.registerType(nullptr, TypeSpec::FUNC_SIG, SymbolType::null);
    
-   //parameters
+   //parse parameters
    mcsl::dyn_arr<index<Expr>>& params = tree.allocBuf<index<Expr>>();
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "function parameters must be enclosed by parentheses");
    if (!tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE)) {
+      //parse comma-separated parameters until no comma is found
       do {
          index<Decl> param = parseDefaultableParam(tryParseAttrs());
          overload->funcSig().params.emplace_back(tree[tree[param].type()].symbol()->type(), tree[tree[param].type()].quals());
          params.push_back(param);
       } while (tryConsumeOperator(OpID::COMMA));
+      //consume closing paren
       consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "missing closing parentheses in function signature");
    }
-   //return type
+   //determine return type
    index<Identifier> retType;
    if (tryConsumeOperator(OpID::ARROW)) { //trailing return type
       retType = parseTypename(SymbolType::EXTERN_TYPE, false);
       overload->funcSig().retType = tree[retType].symbol()->type();
-   } else { //no return type - assumed to be auto
+   } else { //no return type provided - assumed to be auto //!TODO: maybe add a warning for this
       retType = 0;
       overload->funcSig().retType = nullptr;
    }
@@ -756,6 +796,7 @@ clef::index<clef::Asm> clef::Parser::parseASM(index<Expr> attrs) {
    logError(ErrCode::PARSER_NOT_IMPLEMENTED, "inline assembly is not yet supported");
 }
 
+//parse a single attribute (attribute operator must aleady be consumed)
 clef::index<clef::Expr> clef::Parser::parseAttr(index<Expr> prevAttrs) {
    index<Identifier> name = parseIdentifier(SymbolType::ATTRIBUTE, nullptr, false);
    index<ArgList> args;
@@ -765,6 +806,7 @@ clef::index<clef::Expr> clef::Parser::parseAttr(index<Expr> prevAttrs) {
 
    return tree.make<Expr>(OpID::ATTRIBUTE, name, args, prevAttrs);
 }
+//parse all attributes (the first attribute operator must already be consumed)
 clef::index<clef::Expr> clef::Parser::parseAttrs() {
    index<Expr> attr = 0;
    do {
@@ -772,6 +814,7 @@ clef::index<clef::Expr> clef::Parser::parseAttrs() {
    } while (tryConsumeOperator(OpID::ATTRIBUTE));
    return attr;
 }
+//parse attributes if they are present
 clef::index<clef::Expr> clef::Parser::tryParseAttrs() {
    if (tryConsumeOperator(OpID::ATTRIBUTE)) {
       return parseAttrs();

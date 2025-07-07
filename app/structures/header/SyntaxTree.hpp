@@ -72,7 +72,7 @@ class clef::SyntaxTree {
       TypeSpec* makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable&& table);
 
       mcsl::str_slice extractStrLit(index<Expr> strLitExpr);
-      index<Expr> findAttr(index<Expr> attrs, SymbolNode* name);
+      index<Expr> findAttr(index<Expr> attrs, SymbolNode* name) { return 0; }
 
       mcsl::str_slice storeString(const mcsl::str_slice);
       mcsl::str_slice storeString(mcsl::string&&);

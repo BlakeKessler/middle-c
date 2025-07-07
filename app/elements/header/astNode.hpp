@@ -67,10 +67,10 @@ struct clef::astNode {
       #pragma region constructor
       /*unsafe<UNINIT_MEM>*/ astNode(const NodeType type = NodeType::NONE):_nodeType{type} {
          #if defined SAFE_MODE || !defined(NDEBUG)
-         std::memset(this, 0, sizeof(astNode) - sizeof(NodeType));
+         std::memset((void*)this, 0, sizeof(astNode) - sizeof(NodeType));
          #endif
       }
-      astNode(const astNode& other) { std::memcpy(this, &other, sizeof(self)); }
+      astNode(const astNode& other) { std::memcpy((void*)this, &other, sizeof(self)); }
       astNode& operator=(const astNode& other) { new (this) astNode{other}; return self; }
       #define _def_ctor(varName) astNode(decltype(varName)& node):varName{node},_nodeType{decltype(varName)::nodeType()} {}
       MCSL_MAP(_def_ctor, CLEF_ALL_AST_NODE_UNION_MEMBS)

@@ -6,7 +6,7 @@
 
 #include "str_slice.hpp"
 
-struct clef::Literal {
+struct [[clang::trivial_abi]] clef::Literal {
    private:
       union {
          void* _ptrLit;
@@ -45,7 +45,7 @@ struct clef::Literal {
       Literal(Literal& other) {
          if (this != &other) {
             assert((ulong)absdif(this, &other) >= 8U*sizeof(Literal));
-            std::memcpy(this, &other, sizeof(Literal));
+            std::memcpy((void*)this, &other, sizeof(Literal));
          }
       }
       #pragma endregion constructors
