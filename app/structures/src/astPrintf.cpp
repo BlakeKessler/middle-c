@@ -10,13 +10,14 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
+//print an AST by printing its root node
 uint mcsl::writef(File& file, const clef::SyntaxTree& tree, char mode, FmtArgs args) {
    assume((mode | CASE_BIT) == 's');
    return writef(file, clef::astTNB<clef::astNode>{tree, 1, 0}, mode, args) + (file.write('\n'), 1);
 }
 
 
-
+//indent
 uint mcsl::writef(mcsl::File& file, const clef::indenter i, char mode, FmtArgs fmt) {
    assume((mode | CASE_BIT) == 's');
    file.write('\n');
@@ -25,6 +26,7 @@ uint mcsl::writef(mcsl::File& file, const clef::indenter i, char mode, FmtArgs f
    return charCount + 1;
 }
 
+//helper macros for printing AST nodes
 #define TNB(expr) clef::astTNB{obj.tree, expr, obj.indents}
 #define TNB_INDENT(expr) clef::astTNB{obj.tree, expr, obj.indents + 1}
 #define TNB_AST(expr) TNB((clef::index<const clef::astNode>)expr)
@@ -33,14 +35,19 @@ uint mcsl::writef(mcsl::File& file, const clef::indenter i, char mode, FmtArgs f
 #define TNB_CAST_INDENT(T) TNB_INDENT(clef::index<const clef::T>(obj.i))
 #define TNB_CAST_INDENT2(T, expr) TNB_INDENT(clef::index<const clef::T>(expr))
 
+//helper macros for printing type specifications
 #define TTsB(expr) clef::astTTsB{obj.tree, expr, obj.indents}
 #define TTsB_INDENT(expr) clef::astTTsB{obj.tree, expr, obj.indents + 1}
 
+//helper macros for printing symbols
 #define TSB(expr) clef::astTSB{obj.tree, expr, obj.indents}
 #define TSB_INDENT(expr) clef::astTSB{obj.tree, expr, obj.indents + 1}
 
 //!TODO: probably shouldn't just return 0 without doing anything when printing with `%b`
 
+//print a generic AST node
+//delegates to the type indicated by the node's nodeType
+//passes any format codes on
 #define NODE_CAST_TNB_WRITEF(T) case T::nodeType(): return writef(file, TNB(clef::index<const clef::T>(obj.i)), mode, args);
 #include "MAP_MACRO.h"
 uint mcsl::writef(File& file, const clef::astTNB<clef::astNode> obj, char mode, FmtArgs args) {
@@ -59,7 +66,8 @@ uint mcsl::writef(File& file, const clef::astTNB<clef::astNode> obj, char mode, 
 #include "MAP_MACRO_UNDEF.h"
 #undef NODE_CAST_TNB_WRITEF
 
-
+//print a literal
+//ignores all format codes
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Literal> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -74,18 +82,21 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Literal> obj, char 
 
          case LitType::POINTER: return file.printf(FMT("%r"), (const void*)lit);
 
+         //numeric
          case LitType::UINT: return file.printf(FMT("%u"), (ulong)lit);
          case LitType::SINT: return file.printf(FMT("%i"), (slong)lit);
          case LitType::FLOAT: return file.printf(FMT("%f"), (flong)lit);
 
          case LitType::BOOL: return file.printf(FMT("%s"), (bool)lit);
 
+         //text
          case LitType::CHAR: return file.printf(FMT("\'%c\'"), (char)lit);
          case LitType::STRING: [[fallthrough]];
          case LitType::INTERP_STR: [[fallthrough]];
          case LitType::FORMAT: [[fallthrough]];
          case LitType::REGEX: return file.printf(FMT("\"%#s\""), (const str_slice)lit);
 
+         //type
          case LitType::TYPEID: return file.printf(FMT("%s"), TTsB((const TypeSpec*)lit));
       }
    } else if ((mode | CASE_BIT) == 'b') { //print in binary format
@@ -117,6 +128,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Literal> obj, char 
 
 #pragma region exprs
 
+//print an if statement
+//altMode: prints as an else-if
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::If> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -137,6 +150,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::If> obj, char mode,
    UNREACHABLE;
 }
 
+//print a for loop
+//ignores all format codes
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ForLoop> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -152,6 +167,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ForLoop> obj, char 
    }
    UNREACHABLE;
 }
+//print a foreach loop
+//ignores all foramt codes
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ForeachLoop> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -167,6 +184,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ForeachLoop> obj, c
    }
    UNREACHABLE;
 }
+//print a while loop
+//ignores all foramt codes
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::WhileLoop> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -182,6 +201,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::WhileLoop> obj, cha
    }
    UNREACHABLE;
 }
+//print a do-while loop
+//ignores all format codes
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::DoWhileLoop> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -197,7 +218,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::DoWhileLoop> obj, c
    }
    UNREACHABLE;
 }
-
+//print a switch statement
+//ignores all format codes
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Switch> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -213,6 +235,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Switch> obj, char m
    }
    UNREACHABLE;
 }
+//print a match statement
+//ignores all format codes
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Match> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -229,6 +253,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Match> obj, char mo
    UNREACHABLE;
 }
 
+//print a try-catch block
+//ignores all format codes
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TryCatch> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -245,6 +271,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TryCatch> obj, char
    UNREACHABLE;
 }
 
+//print a declaration
+//altMode: suppress printing of `let` prefix
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Decl> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -269,7 +297,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Decl> obj, char mod
    }
    UNREACHABLE;
 }
-
+//print a type declaration
+//ignores all format codes
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -294,12 +323,16 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TypeDecl> obj, char
    UNREACHABLE;
 }
 
+//print an inline assembly block
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Asm> obj, char mode, FmtArgs fmt) {
-   clef::throwError(clef::ErrCode::PARSER_NOT_IMPLEMENTED, FMT("inline ASM is not implemented yet"));
+   TODO;
 }
 
 #pragma endregion exprs
 
+//print a statement
+//delegates to Expression
+//ignores all format codes
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Stmt> obj, char mode, FmtArgs fmt) {
    if (!obj) {
       return 0;
@@ -317,6 +350,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Stmt> obj, char mod
    UNREACHABLE;
 }
 
+//print expressions
+//may delegate to subtypes based on the operator 
+//ignores all format codes
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    using enum OpID;
@@ -581,7 +617,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
    #undef SUBEXPR
 }
 
-
+//print a scope
+//padForPosSign: print a leading space for non-null nodes
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Scope> obj, char mode, FmtArgs fmt) {
    if (!obj) { return 0; }
    if ((mode | CASE_BIT) == 's') {
@@ -599,7 +636,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Scope> obj, char mo
    UNREACHABLE;
 }
 
-
+//print an identifier
+//padForPosSign: print a leading space for non-null nodes
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -654,6 +692,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
    UNREACHABLE;
 }
 
+//print a function definition
+//ignores all format codes
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::FuncDef> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -680,6 +720,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::MacroDef> obj, char
 
 #pragma region lists
 
+//print an argument list
+//forwards format codes when printing list elements
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ArgList> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -700,6 +742,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::ArgList> obj, char 
    }
    UNREACHABLE;
 }
+//print a statement sequence
+//ignores all format codes
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::StmtSeq> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -726,6 +770,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::StmtSeq> obj, char 
    UNREACHABLE;
 }
 
+//print the cases of a switch statement
+//ignores all format codes
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::SwitchCases> obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -765,12 +811,16 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::SwitchCases> obj, c
    }
    UNREACHABLE;
 }
+//print the cases of a match statement
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::MatchCases> obj, char mode, FmtArgs fmt) {
    TODO;
 }
 
 #pragma endregion lists
 
+//print a type specification
+//padForPosSign: print a leading space for non-null nodes
+//isLeftJust: print the canon name of the type
 uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -784,20 +834,20 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
          charsPrinted += file.printf(FMT(" "));
       }
       switch (spec.metaType()) {
-         case TypeSpec::null:
+         case TypeSpec::null: //unknown type
             if (fmt.isLeftJust) {
                debug_assert(spec.canonName());
                charsPrinted += file.printf(FMT("%s"), TSB(spec.canonName()));
                return charsPrinted;
             }
             TODO;
-         case TypeSpec::FUND_TYPE:
+         case TypeSpec::FUND_TYPE: //fundamental type
             charsPrinted += file.printf(toString(spec.fund().id));
             return charsPrinted;
-         case TypeSpec::INDIR:
+         case TypeSpec::INDIR: //indirect type (pointer, reference, slice, array)
             charsPrinted += file.printf(FMT("%s%-s%s"), spec.pointeeQuals(), TTsB(spec.pointee()), spec.indirTable());
             return charsPrinted;
-         case TypeSpec::COMPOSITE: {
+         case TypeSpec::COMPOSITE: { //composite object type
             if (fmt.isLeftJust) {
                debug_assert(spec.canonName());
                charsPrinted += file.printf(FMT("%s"), TSB(spec.canonName()));
@@ -820,13 +870,13 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
             __print(staticFuncs,"static ");
             __print(methods,);
             #undef __print
-            for (auto [op, symbol] : spec.composite().ops) {
-               TODO;
-            }
+            // for (auto [op, symbol] : spec.composite().ops) {
+            //    TODO;
+            // }
             charsPrinted += charsPrinted;
             return charsPrinted;
          }
-         case TypeSpec::FUNC_SIG:
+         case TypeSpec::FUNC_SIG: //function signature type
             charsPrinted += file.printf(FMT("("));
             if (spec.funcSig().params.size()) {
                charsPrinted += file.printf(FMT("%s% s"), TTsB(spec.funcSig().params[0].first), spec.funcSig().params[0].second);
@@ -848,7 +898,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
    }
    UNREACHABLE;
 }
-
+//print a symbol
+//padForPosSign: print a leading space for non-null nodes
+//altMode: print definition (instead of just the name)
 uint mcsl::writef(mcsl::File& file, const clef::astTSB obj, char mode, FmtArgs fmt) {
    using namespace clef;
    if (!obj) {
@@ -901,7 +953,8 @@ uint mcsl::writef(mcsl::File& file, const clef::astTSB obj, char mode, FmtArgs f
 
    UNREACHABLE;
 }
-
+//print an indirection table
+//ignores all format codes
 uint mcsl::writef(mcsl::File& file, const clef::IndirTable& table, char mode, FmtArgs fmt) {
    using namespace clef;
    
@@ -955,6 +1008,7 @@ uint mcsl::writef(mcsl::File& file, const clef::IndirTable& table, char mode, Fm
 #undef TNB_INDENT
 #undef TNB
 
+//print type qualifiers
 uint mcsl::writef(mcsl::File& file, clef::QualMask quals, char mode, FmtArgs fmt) {
    using namespace clef;
    switch (mode | mcsl::CASE_BIT) {
