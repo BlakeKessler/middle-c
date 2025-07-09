@@ -43,6 +43,10 @@ uint mcsl::writef(mcsl::File& file, const clef::indenter i, char mode, FmtArgs f
 #define TSB(expr) clef::astTSB{obj.tree, expr, obj.indents}
 #define TSB_INDENT(expr) clef::astTSB{obj.tree, expr, obj.indents + 1}
 
+//helper macros for printing indirection tables
+#define TItB(expr) clef::astTItB{obj.tree, expr, obj.indents}
+#define TItB_INDENT(expr) clef::astTItB{obj.tree, expr, obj.indents + 1}
+
 //!TODO: probably shouldn't just return 0 without doing anything when printing with `%b`
 
 //print a generic AST node
@@ -845,7 +849,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
             charsPrinted += file.printf(toString(spec.fund().id));
             return charsPrinted;
          case TypeSpec::INDIR: //indirect type (pointer, reference, slice, array)
-            charsPrinted += file.printf(FMT("%s%-s%s"), spec.pointeeQuals(), TTsB(spec.pointee()), spec.indirTable());
+            charsPrinted += file.printf(FMT("%s%-s%s"), spec.pointeeQuals(), TTsB(spec.pointee()), TItB(&spec.indirTable()));
             return charsPrinted;
          case TypeSpec::COMPOSITE: { //composite object type
             if (fmt.isLeftJust) {
@@ -935,7 +939,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTSB obj, char mode, FmtArgs f
       charsPrinted += file.printf(FMT("%s"), symbol.name());
       if (symbol.symbolType() == SymbolType::INDIR) {
          debug_assert(symbol.type() && symbol.type()->metaType() == TypeSpec::INDIR);
-         charsPrinted += file.printf(FMT("% s%s"), symbol.type()->pointeeQuals(), symbol.type()->indirTable());
+         charsPrinted += file.printf(FMT("% s%s"), symbol.type()->pointeeQuals(), TItB(&symbol.type()->indirTable()));
       }
       if (fmt.altMode) {
          if (isType(symbol.symbolType())) {
@@ -955,14 +959,22 @@ uint mcsl::writef(mcsl::File& file, const clef::astTSB obj, char mode, FmtArgs f
 }
 //print an indirection table
 //ignores all format codes
-uint mcsl::writef(mcsl::File& file, const clef::IndirTable& table, char mode, FmtArgs fmt) {
+uint mcsl::writef(mcsl::File& file, const clef::astTItB& obj, char mode, FmtArgs fmt) {
    using namespace clef;
-   
+   if (!obj) {
+      return 0;
+   }
+
+   const IndirTable& table = *obj;
    if ((mode | CASE_BIT) == 's') {
       uint charsPrinted = 0;
       for (uint i = 0; i < table.size(); ++i) {
          IndirTable::Entry entry = table[i];
-         for (uint i = entry.totalRunLength(); i--;) {
+         IndirTable::ArrExt ext = IndirTable::ArrExt::make();
+         if (entry.isArr()) {
+            ext = table.arrExtent(i);
+         }
+         for (uint j = (entry.isArr() && !entry.extIsIndex()) ? 0 : entry.totalRunLength(); j--;) {
             switch (entry.type()) {
                case IndirTable::Entry::PTR:
                   charsPrinted += file.printf(FMT("*"));
@@ -974,7 +986,18 @@ uint mcsl::writef(mcsl::File& file, const clef::IndirTable& table, char mode, Fm
                   charsPrinted += file.printf(FMT("[]"));
                   break;
                case IndirTable::Entry::ARR:
-                  TODO;
+                  if (ext.isIndex) {
+                     charsPrinted += file.printf(FMT("[%s]"), TNB_AST(ext.i));
+                     if (!j) {
+                        i += 4;
+                     }
+                  } else {
+                     charsPrinted += file.printf(FMT("[%u]"), ext.size);
+                     if (!j) {
+                        i += entry.arrSizeBytes();
+                     }
+                  }
+                  break;
             }
             if (entry.isConst()) {
                charsPrinted += file.printf(FMT(" const"));
@@ -994,6 +1017,9 @@ uint mcsl::writef(mcsl::File& file, const clef::IndirTable& table, char mode, Fm
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing IndirTable"), mode);
    }
 }
+
+#undef TItB_INDENT
+#undef TItB
 
 #undef TSB_INDENT
 #undef TST

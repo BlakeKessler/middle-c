@@ -102,6 +102,7 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
    //pointer and reference types
    IndirTable::Entry entry;
    QualMask ptrquals;
+   index<Expr> arrSize;
    const auto qualsAndMods = [&]() -> bool { //local function to parse qualifiers
       bool isDone = false;
       new (&entry) IndirTable::Entry();
@@ -114,14 +115,21 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
       } else if (tryConsumeOperator(OpID::SLICE)) { //slice
          entry._type = IndirTable::Entry::SLICE;
          isDone = true;
-      } else if (tryConsumeBlockDelim(BlockType::SUBSCRIPT, BlockDelimRole::OPEN)) { //array literal
+      } else if (tryConsumeBlockDelim(BlockType::SUBSCRIPT, BlockDelimRole::OPEN)) { //in-place array
          entry._type = IndirTable::Entry::ARR;
-         index<Expr> arrSize = parseExprNoPrimaryComma();
+         arrSize = parseExprNoPrimaryComma();
          consumeBlockDelim(BlockType::SUBSCRIPT, BlockDelimRole::CLOSE, "array bounds must be a single integer constant expression");
-         TODO;
          isDone = true;
+
+         //special handling for in-place arrays
+         ptrquals = parseQuals();
+         if (+(ptrquals & QualMask::CONST)) {
+            logError(ErrCode::BAD_IDEN, "in-place arrays cannot be marked `const`");
+         }
+         ptrquals |= QualMask::CONST;
+         goto AFTER_PARSE_QUALS;
       }
-      ptrquals = parseQuals();
+      ptrquals = parseQuals(); AFTER_PARSE_QUALS:
       if (entry.setQuals(ptrquals)) {
          logError(ErrCode::BAD_IDEN, "illegal qualifiers for typename");
       }
@@ -130,11 +138,17 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
    if (qualsAndMods()) {
       QualMask targetQuals = iden.quals() | ptrquals;
       IndirTable indirTable{entry};
+      if (entry.isArr()) {
+         indirTable.appendArrExtent(arrSize, sizeof(arrSize));
+      }
       while (qualsAndMods()) {
          if (+(ptrquals & QualMask::VIEW)) {
             indirTable.appendView(entry);
          } else {
             indirTable.append(entry);
+         }
+         if (entry.isArr()) {
+            indirTable.appendArrExtent(arrSize, sizeof(arrSize));
          }
       }
       tree.makeIndirType(name, iden.symbol()->type(), targetQuals, std::move(indirTable));

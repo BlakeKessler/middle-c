@@ -188,6 +188,20 @@ struct clef::astTSB {
 
    operator bool() const { return ptr; }
 };
+//!astTreeTreeIndirtableBundle - for printf
+struct clef::astTItB {
+   const SyntaxTree& tree;
+   const IndirTable* ptr;
+   indenter indents = 0;
+
+   astTItB(const SyntaxTree& t, const IndirTable* p, indenter ind = 0):tree{t}, ptr{p}, indents{ind} {}
+   
+   const IndirTable& get() const { return *ptr; }
+   const IndirTable& operator*() const { return *ptr; }
+   const IndirTable* operator->() const { return ptr; }
+
+   operator bool() const { return ptr; }
+};
 
 #include "MAP_MACRO.h"
 #define __DEF_TNB_WRITEF(T) uint writef(File& file, const clef::astTNB<clef::T> obj, char mode, FmtArgs args);
@@ -200,7 +214,7 @@ namespace mcsl {
    MCSL_MAP(__DEF_TNB_WRITEF, CLEF_ALL_AST_NODE_T)
    uint writef(File& file, const clef::astTTsB obj, char mode, FmtArgs args);
    uint writef(File& file, const clef::astTSB obj, char mode, FmtArgs args);
-   uint writef(File& file, const clef::IndirTable& obj, char mode, FmtArgs args);
+   uint writef(File& file, const clef::astTItB& obj, char mode, FmtArgs args);
    uint writef(File& file, clef::QualMask, char mode, FmtArgs args);
 
    inline File& write(File& file, const clef::SyntaxTree& obj) { writef(file, obj, 's', {}); return file; }

@@ -64,6 +64,7 @@ namespace clef {
       template<typename T> struct astTNB; //astTreeNodeBundle
       struct astTTsB; //astTreeTypespecBundle
       struct astTSB; //astTreeSymbolBundle
+      struct astTItB; //astTreeIndirtableBundle
       struct indenter;
 
    //classes for phases of compilation

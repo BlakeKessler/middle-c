@@ -26,13 +26,11 @@ class clef::IndirTable {
                   uint8 _rle    : 3;
                };
             };
-            //!NOTE: non-const array literal is meaningless
-            //!TODO: isArr() && _isConst -> has an RLE byte?
             static constexpr uint8 ONE_TOTAL_REPEAT = 0;
             static constexpr uint8 MAX_TOTAL_REPEATS = 0b111;
-         private:
+
             constexpr Entry(uint8 data):_data{data} {}
-         public:
+
             constexpr Entry():_data() {}
             constexpr Entry(Type type, bool isconst, bool isvol, bool isatom):_type{type},_isConst{isconst},_isVol{isvol},_isAtom{isatom},_rle{ONE_TOTAL_REPEAT} {}
             
@@ -48,18 +46,17 @@ class clef::IndirTable {
             bool isVolatile() const { return _isVol; }
             bool isAtomic() const { return _isAtom; }
 
-            uint8 extraRepeats() const { debug_assert(!isArr()); return _rle; }
-            uint8 totalRunLength() const { debug_assert(!isArr()); return _rle + 1; }
-            uint8 arrSizeBytes() const { debug_assert(isArr()); return _rle + 1; }
+            bool extIsIndex() const { return isArr() && _isConst; }
+
+            uint8 extraRepeats() const { debug_assert(!isArr() || extIsIndex()); return _rle; }
+            uint8 totalRunLength() const { debug_assert(!isArr() || extIsIndex()); return _rle + 1; }
+            uint8 arrSizeBytes() const { debug_assert(isArr() && !extIsIndex()); return _rle + 1; }
 
             bool setQuals(QualMask quals); //returns whether illegal modifiers are included
 
             operator bool() const { return _data; }
             bool operator==(const Entry other) const { return _data == other._data; }
             bool isSame(const Entry other) const;
-         private:
-            static uint64 readArrExtent(Entry* addr, ubyte byteC);
-            static uint64 readArrExtent(Entry* addr1, Entry* addr2, ubyte byteC1, ubyte byteC2);
       };
       static_assert(sizeof(Entry) == sizeof(uint8));
    private:
@@ -93,9 +90,10 @@ class clef::IndirTable {
       uint64 _size;
       EntryBlock _block0;
       mcsl::dyn_arr<EntryBlock> _otherBlocks;
+      ubyte _backExtraBytes;
    public:
       // constexpr IndirTable():_size{0},_block0{},_otherBlocks{} {}
-      constexpr IndirTable(Entry firstEntry):_size{1},_block0{firstEntry},_otherBlocks{} {}
+      constexpr IndirTable(Entry firstEntry):_size{1},_block0{firstEntry},_otherBlocks{},_backExtraBytes{0} {}
       IndirTable(const IndirTable&);
       IndirTable(IndirTable&&);
 
@@ -108,9 +106,23 @@ class clef::IndirTable {
 
       Entry& operator[](uint64 i);
       Entry operator[](uint64 i) const;
-      Entry& back() { return self[_size - 1]; }
-      Entry back() const { return self[_size - 1]; }
+      Entry& back() { return self[_size - 1 - _backExtraBytes]; }
+      Entry back() const { return self[_size - 1 - _backExtraBytes]; }
 
+      struct ArrExt {
+         union {
+            index<Expr> i;
+            uint64 size;
+         };
+         bool isIndex;
+
+         static ArrExt make(uint64 i = 0, bool isI = false) {
+            return {.i = i, .isIndex = isI};
+         }
+      };
+      ArrExt arrExtent(uint64 i) const;
+
+      void appendArrExtent(uint64 extent, ubyte byteCount);
       void append(Entry entry);
       void appendView(Entry entry);
    private:

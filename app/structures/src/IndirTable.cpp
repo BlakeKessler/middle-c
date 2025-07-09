@@ -6,13 +6,15 @@
 clef::IndirTable::IndirTable(const IndirTable& other): 
    _size(other._size),
    _block0(other._block0),
-   _otherBlocks(other._otherBlocks) {
+   _otherBlocks(other._otherBlocks),
+   _backExtraBytes(other._backExtraBytes) {
 
 }
 clef::IndirTable::IndirTable(IndirTable&& other): 
    _size(other._size),
    _block0(other._block0),
-   _otherBlocks(std::move(other._otherBlocks)) {
+   _otherBlocks(std::move(other._otherBlocks)),
+   _backExtraBytes(other._backExtraBytes) {
       if (this != &other) {
          other.release();
       }
@@ -84,16 +86,18 @@ bool clef::IndirTable::operator==(const IndirTable& other) const {
 
 void clef::IndirTable::append(Entry entry) {
    debug_assert(_size);
-   if (Entry& back = self[_size - 1]; entry.isSame(back) && back._rle != Entry::MAX_TOTAL_REPEATS) {
+   if (Entry& back = self.back(); !back.isArr() && entry.isSame(back) && back._rle != Entry::MAX_TOTAL_REPEATS) {
       ++back._rle;
    } else {
       debug_assert(entry._rle == Entry::ONE_TOTAL_REPEAT);
       __push_back(entry);
+      _backExtraBytes = 0;
    }
 }
 void clef::IndirTable::appendView(Entry entry) {
    debug_assert(_size);
-   Entry& back = self[_size - 1];
+   Entry& back = self.back();
+   if (back.isArr()) { TODO; }
    if (!back.isConst()) {
       if (back._rle != Entry::ONE_TOTAL_REPEAT) {
          --back._rle;
@@ -109,12 +113,16 @@ void clef::IndirTable::appendView(Entry entry) {
 }
 void clef::IndirTable::__push_back(Entry entry) {
    debug_assert(_size);
-   ++_size;
-   if (!(_size & 7)) {
-      _otherBlocks.emplace_back(entry);
+   if (_size < 8) {
+      _block0[_size] = entry;
    } else {
-      _block0[_size - 1] = entry;
+      if (_size & 7) {
+         _otherBlocks.back()[_size & 7] = entry;
+      } else {
+         _otherBlocks.emplace_back(entry);
+      }
    }
+   ++_size;
 }
 #include "pretty-print.hpp"
 bool clef::IndirTable::Entry::setQuals(QualMask quals) {
@@ -131,6 +139,54 @@ bool clef::IndirTable::Entry::setQuals(QualMask quals) {
 bool clef::IndirTable::Entry::isSame(const Entry other) const {
    constexpr Entry mask(__all_bits_set, true, true, true);
    return (_data ^ other._data) & mask._data;
+}
+
+//get the extent of the entry at index i
+clef::IndirTable::ArrExt clef::IndirTable::arrExtent(uint64 i) const {
+   //get entry
+   Entry entry = self[i];
+
+   //check that the entry represents an array
+   if (!entry.isArr()) {
+      return ArrExt{
+         .size = 0,
+         .isIndex = false
+      };
+   }
+
+   //calculate the number of bytes
+   ubyte bytes = entry.extIsIndex() ? sizeof(index<Expr>) : entry.arrSizeBytes();
+   debug_assert(bytes);
+   debug_assert(i + bytes < _size);
+   
+   //read extent //!NOTE: modifies i
+   uint64 n = 0;
+   do {
+      --bytes;
+      n = n << 8 | self[++i]._data;
+   } while (bytes);
+
+   //return
+   return ArrExt::make(n, entry.extIsIndex());
+}
+//append the extent of an array to the table
+void clef::IndirTable::appendArrExtent(uint64 ext, ubyte bytes) {
+   //safety and debug checks
+   assume(bytes);
+   debug_assert(bytes <= sizeof(ext));
+   debug_assert(back().isArr());
+
+   //update _backExtraBytes
+   _backExtraBytes = bytes;
+
+   //ensure the correct byte order (big-endian)
+   ext = mcsl::byteswap(ext);
+   ext >>= 8 * bytes;
+   //push bytes
+   do {
+      __push_back((uint8)ext);
+      ext >>= 8;
+   } while (--bytes);
 }
 
 #endif //INDIR_TABLE_CPP
