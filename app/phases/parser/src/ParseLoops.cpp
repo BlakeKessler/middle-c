@@ -3,6 +3,7 @@
 
 #include "Parser.hpp"
 
+//parse a for loop (assumes `for` keyword has already been consumed)
 clef::index<clef::ForLoop> clef::Parser::parseForLoop() {
    //open parens
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FOR loop without opening parens for condition");
@@ -28,6 +29,7 @@ clef::index<clef::ForLoop> clef::Parser::parseForLoop() {
    return loop;
 }
 
+//parse a foreach loop (assumes `foreach` keyword has already been consumed)
 clef::index<clef::ForeachLoop> clef::Parser::parseForeachLoop() {
    //open parens
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "FOREACH loop without opening parens for condition");
@@ -57,6 +59,7 @@ clef::index<clef::ForeachLoop> clef::Parser::parseForeachLoop() {
    return loop;
 }
 
+//parse a while loop (assumes `while` keyword has already been consumed)
 clef::index<clef::WhileLoop> clef::Parser::parseWhileLoop() {
    //open parens
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "WHILE loop without opening parens for condition");
@@ -78,6 +81,7 @@ clef::index<clef::WhileLoop> clef::Parser::parseWhileLoop() {
    return tree.make<WhileLoop>(condition, proc);
 }
 
+//parse a do-while loop (assumes `do` keyword has already been consumed)
 clef::index<clef::DoWhileLoop> clef::Parser::parseDoWhileLoop() {
    //procedure
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad DO WHILE block");

@@ -79,7 +79,8 @@ clef::index<clef::Scope> clef::Parser::parseProcedure() {
    logError(ErrCode::UNCLOSED_BLOCK, "unclosed procedure block");
 }
 
-
+//parse a typename
+//assumed to already be declared if !isDecl
 clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType, bool isDecl) {
    index<Identifier> name = parseIdentifier(symbolType, nullptr, isDecl);
    Identifier& iden = tree[name];
@@ -98,10 +99,10 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
       debug_assert(symbol->type()->canonName());
    }
 
-   //pointers and references
+   //pointer and reference types
    IndirTable::Entry entry;
    QualMask ptrquals;
-   const auto qualsAndMods = [&]() -> bool {
+   const auto qualsAndMods = [&]() -> bool { //local function to parse qualifiers
       bool isDone = false;
       new (&entry) IndirTable::Entry();
       if (tryConsumeOperator(OpID::RAW_PTR)) { //pointer
@@ -139,12 +140,15 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
       tree.makeIndirType(name, iden.symbol()->type(), targetQuals, std::move(indirTable));
       iden.setQualMask(ptrquals);
    }
+   //variadic parameters
    if (tryConsumeOperator(OpID::VARIADIC_PARAM)) {
       iden.addQuals(QualMask::VARIADIC);
    }
+   //return
    return name;
 }
 
+//parse a variable declaration (where required, it is assumed that the `let` keyword has already been consumed)
 clef::index<clef::Decl> clef::Parser::parseDecl(index<Expr> attrs) {
    if (tryConsumeKeyword(KeywordID::FUNC)) { [[unlikely]]; //handle functions separately
       index<FuncDef> funcDef = parseFunction(attrs);
@@ -190,6 +194,7 @@ clef::index<clef::Decl> clef::Parser::parseDecl(index<Expr> attrs) {
    return tree.make<Decl>(type, varName);
 }
 
+//parse a parameter
 clef::index<clef::Decl> clef::Parser::parseParam(index<Expr> attrs) {
    if (tryConsumeKeyword(KeywordID::FUNC)) { [[unlikely]];
       index<FuncDef> funcDef = parseFunction(attrs);
@@ -209,6 +214,7 @@ clef::index<clef::Decl> clef::Parser::parseParam(index<Expr> attrs) {
    if (attrs) { TODO; }
    return tree.make<Decl>(typeName, varName);
 }
+//parse a parameter and (optional) default value
 clef::index<clef::Decl> clef::Parser::parseDefaultableParam(index<Expr> attrs) {
    index<Decl> var = parseParam(attrs);
    if (tryConsumeOperator(OpID::ASSIGN)) {
@@ -218,40 +224,36 @@ clef::index<clef::Decl> clef::Parser::parseDefaultableParam(index<Expr> attrs) {
    return var;
 }
 
+//parse a comma-separated list of arguments (if !isDecl) or parameters (if isDecl)
 clef::index<clef::ArgList> clef::Parser::parseArgList(const BlockType closer, bool isDecl) {
    index<ArgList> args = tree.make<ArgList>(&tree.allocBuf<index<Expr>>());
    if (tryConsumeBlockDelim(closer, BlockDelimRole::CLOSE)) {
       return args;
    }
-   if (isDecl) {
+   if (isDecl) { //parameter list
       do {
          auto tmp = parseDefaultableParam(tryParseAttrs());
          tree[args].push_back(tmp);
-         if (!tryConsumeOperator(OpID::COMMA)) {
-            break;
-         }
-      } while (true);
-   } else {
+      } while (tryConsumeOperator(OpID::COMMA));
+   } else { //argument list
       do {
          auto tmp = parseExpr();
          tree[args].push_back(tmp);
-         if (!tryConsumeOperator(OpID::COMMA)) {
-            break;
-         }
-      } while (true);
+      } while (tryConsumeOperator(OpID::COMMA));
    }
    consumeBlockDelim(closer, BlockDelimRole::CLOSE, "argument list must end with the correct closing delimiter");
    return args;
 }
 
+//parse a specializer list
 clef::index<clef::ArgList> clef::Parser::parseSpecList(index<Identifier> target, bool isDecl) {
    index<ArgList> args = tree.make<ArgList>(&tree.allocBuf<index<Expr>>());
    if (tryConsumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::CLOSE)) {
       return args;
    }
-   if (isDecl) {
+   if (isDecl) { //template declaration
       do {
-         if (tryConsumeKeyword(KeywordID::TYPE)) {
+         if (tryConsumeKeyword(KeywordID::TYPE)) { //typename template parameter
             index<Identifier> typeName = parseTypename(SymbolType::GENERIC, true);
             index<TypeDecl> typeDecl;
             if (tryConsumeOperator(OpID::ASSIGN)) {
@@ -261,28 +263,26 @@ clef::index<clef::ArgList> clef::Parser::parseSpecList(index<Identifier> target,
                typeDecl = tree.make<TypeDecl>(typeName);
             }
             tree[args].push_back(typeDecl);
-         } else {
+         } else { //value template parameter
             index<Decl> param = parseDefaultableParam(tryParseAttrs());
             tree[args].push_back(param);
          }
-         if (!tryConsumeOperator(OpID::COMMA)) {
-            break;
-         }
-      } while (true);
-   } else {
+      } while (tryConsumeOperator(OpID::COMMA));
+   } else { //templated entity
       do {
          index<Expr> arg = parseExpr();
          tree[args].push_back(arg);
-         if (!tryConsumeOperator(OpID::COMMA)) {
-            break;
-         }
-      } while (true);
+      } while (tryConsumeOperator(OpID::COMMA));
    }
-         consumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::CLOSE, "argument list must end with the correct closing delimiter");
+   //closing delimiter
+   consumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::CLOSE, "argument list must end with the correct closing delimiter");
+   //update AST and return
    tree[target].specializer() = args;
    return args;
 }
 
+//parse a preprocessor statement
+//!NOTE: currently supported directives: `import`, `link`, and `embed`
 clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
    //deduce directive
    if (currTok.type() != TokenType::IDEN) {
@@ -347,6 +347,7 @@ clef::index<clef::Expr> clef::Parser::parseCast(KeywordID castID) {
    return tree.makeExpr(OpID::CALL_INVOKE, +castptr, +contents);
 }
 
+//parse a string literal (adjacent string literals are concatenated, like in C)
 mcsl::str_slice clef::Parser::parseStrLit() {
    mcsl::string str;
    debug_assert(currTok.type() == TokenType::PTXT_SEG && isString(currTok.ptxtType()));
@@ -361,7 +362,7 @@ mcsl::str_slice clef::Parser::parseStrLit() {
             mcsl::str_slice raw = currTok.unprocessedStrVal();
             str.reserve(str.size() + raw.size());
             for (uint i = 0; i < raw.size(); ++i) {
-               if (raw[i] == '\\') {
+               if (raw[i] == '\\') { //escape sequence
                   ++i;
                   if (i >= raw.size()) {
                      TODO;
@@ -383,7 +384,7 @@ mcsl::str_slice clef::Parser::parseStrLit() {
                         str.push_back(raw[i]);
                         break;
                   }
-               } else {
+               } else { //standard char
                   str.push_back(raw[i]);
                }
             }
@@ -402,14 +403,16 @@ mcsl::str_slice clef::Parser::parseStrLit() {
 }
 
 
-
+//get an expression AST node encoding of another node
 clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
    astNode& node = tree[index];
    switch (node.nodeType()) {
+      //value nodes - return an expression with no operator and the node as the only argument
       case Identifier::nodeType():
       case Literal::nodeType():
          return tree.makeExpr(OpID::NULL, index);
 
+      //expressions - return the node unaltered
       case Expression::nodeType():
       case Declaration::nodeType():
       case FunctionDefinition::nodeType():
@@ -426,7 +429,7 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
       case Asm::nodeType():
          return +index;
 
-
+      //non-expression types
       case Scope::nodeType():
       case SwitchCases::nodeType():
       case MatchCases::nodeType():
@@ -439,6 +442,7 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
    }
 }
 
+//make an expression into a statement (in-place)
 clef::index<clef::Stmt> clef::Parser::makeStmt(index<Expr> expr) {
    tree[(index<astNode>)expr].anyCast(NodeType::STMT);
    return +expr;

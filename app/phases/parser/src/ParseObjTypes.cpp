@@ -3,6 +3,7 @@
 
 #include "Parser.hpp"
 
+//helper function used to implement parsing of classes and structs
 clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(index<Expr> attrs, clef::SymbolType symbolType, const mcsl::str_slice metatypeName) {
    index<Identifier> name = tryParseIdentifier(symbolType, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
@@ -85,6 +86,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(index<Expr> attrs, 
    return tree.make<TypeDecl>(name, name);
 }
 
+//parse a trait declaration/definition
 clef::index<clef::TypeDecl> clef::Parser::parseTrait(index<Expr> attrs) {
    index<Identifier> name = parseIdentifier(SymbolType::TRAIT, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
@@ -115,6 +117,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseTrait(index<Expr> attrs) {
    QualMask scope = QualMask::PUBLIC;
    index<Expr> fieldAttrs;
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
+      //acess control
       if (tryConsumeKeyword(KeywordID::PUBLIC)) {
          scope = QualMask::PUBLIC;
          consumeOperator(OpID::LABEL_DELIM, "invalid PUBLIC label");
@@ -130,13 +133,16 @@ clef::index<clef::TypeDecl> clef::Parser::parseTrait(index<Expr> attrs) {
          consumeOperator(OpID::LABEL_DELIM, "invalid PROTECTED label");
          continue;
       }
+      //attributes
       fieldAttrs = tryParseAttrs();
+      //qualifiers
       QualMask quals = parseQuals();
       bool isStatic = tryConsumeKeyword(KeywordID::STATIC);
       quals |= parseQuals();
       isStatic |= tryConsumeKeyword(KeywordID::STATIC);
+      //function declaration
       consumeKeyword(KeywordID::FUNC, "traits can only contain functions and methods");
-      index<Identifier> func = tree[parseFunction(fieldAttrs)].name();
+      index<Identifier> func = tree[parseFunction(fieldAttrs)].name(); //function definition (optional)
       tree[func].addQuals(scope);
       if (isStatic) {
          spec->composite().staticFuncs.emplace(tree[func].symbol(), scope | quals);
@@ -154,6 +160,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseTrait(index<Expr> attrs) {
    return tree.make<TypeDecl>(name, name);
 }
 
+//parse a union declaration/definition
 clef::index<clef::TypeDecl> clef::Parser::parseUnion(index<Expr> attrs) {
    index<Identifier> name = tryParseIdentifier(SymbolType::UNION, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
@@ -172,6 +179,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion(index<Expr> attrs) {
 
    PUSH_SCOPE;
 
+   //definition
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad union definition");
    
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
@@ -192,6 +200,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion(index<Expr> attrs) {
    return tree.make<TypeDecl>(name, name);
 }
 
+//helper function used to implement parsing of enums and masks
 clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(index<Expr> attrs, SymbolType symbolType, const mcsl::str_slice metatypeName) {
    index<Identifier> name = tryParseIdentifier(symbolType, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
@@ -239,11 +248,12 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(index<Expr> attrs,
    return tree.make<TypeDecl>(name, name);
 }
 
-//!TODO: implement enumunions
+//parse an enumunion declaration/definition
 clef::index<clef::TypeDecl> clef::Parser::parseEnumUnion(index<Expr> attrs) {
-   logError(ErrCode::PARSER_NOT_IMPLEMENTED, "enumunions are not yet supported");
+   TODO;
 }
 
+//parse a namespace declaration/definition
 clef::index<clef::TypeDecl> clef::Parser::parseNamespace(index<Expr> attrs) {
    index<Identifier> name = tryParseIdentifier(SymbolType::NAMESPACE, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
@@ -270,6 +280,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace(index<Expr> attrs) {
       if (currTok.type() != TokenType::KEYWORD) {
          logError(ErrCode::BAD_STMT, "invalid statement in namespace definition");
       }
+      //parse member
       switch (currTok.keywordID()) {
          #define KW_CASE(kw, parsingFunc) case KeywordID::kw: getNextToken(); { auto tmp = parsingFunc(fieldAttrs); spec->composite().subtypes.insert(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol()); } break
          KW_CASE(CLASS, parseClass);

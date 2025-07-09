@@ -513,6 +513,7 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
       return 0;
    }
 
+   //preliminary typechecking
    tree[name].setQualMask(quals);
    if (type) {
       if (tree[name].symbol()->type()) {
@@ -530,7 +531,10 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
    //restore current scope data
    POP_SCOPE;
 
+   //postfix qualifiers
    tree[name].addQuals(parseQuals());
+
+   //return
    return name;
 }
 //parse an identifier
@@ -542,6 +546,7 @@ clef::index<clef::Identifier> clef::Parser::parseIdentifier(SymbolType symbolTyp
    return name;
 }
 
+//parse an if statement
 clef::index<clef::If> clef::Parser::parseIf() {
    //condition
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "IF statement without opening parens for condition");
@@ -750,6 +755,8 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
    POP_SCOPE;
    return def;
 }
+
+//parse a macro declaration
 clef::index<clef::MacroDef> clef::Parser::parseMacro(index<Expr> attrs) {
    TODO;
 }
@@ -791,9 +798,9 @@ mcsl::tuple<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*, clef::in
    return {overloadIndex, &params, retType};
 }
 
-//!TODO: implement parseASM
+//parse an inline assembly block
 clef::index<clef::Asm> clef::Parser::parseASM(index<Expr> attrs) {
-   logError(ErrCode::PARSER_NOT_IMPLEMENTED, "inline assembly is not yet supported");
+   TODO;
 }
 
 //parse a single attribute (attribute operator must aleady be consumed)
