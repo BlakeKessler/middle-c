@@ -138,7 +138,7 @@ bool clef::IndirTable::Entry::setQuals(QualMask quals) {
 }
 bool clef::IndirTable::Entry::isSame(const Entry other) const {
    constexpr Entry mask(__all_bits_set, true, true, true);
-   return (_data ^ other._data) & mask._data;
+   return !((_data ^ other._data) & mask._data);
 }
 
 //get the extent of the entry at index i
