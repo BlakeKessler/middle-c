@@ -38,6 +38,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(index<Expr> attrs, 
    QualMask scope = QualMask::PRIVATE;
    index<Expr> fieldAttrs;
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
+      //access modifiers
       if (tryConsumeKeyword(KeywordID::PUBLIC)) {
          scope = QualMask::PUBLIC;
          consumeOperator(OpID::LABEL_DELIM, "invalid PUBLIC label");
@@ -274,15 +275,34 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace(index<Expr> attrs) {
 
    //definition
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "namespace definition");
+   QualMask scope = QualMask::PUBLIC;
    index<Expr> fieldAttrs;
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
+      //access modifiers
+      if (tryConsumeKeyword(KeywordID::PUBLIC)) {
+         scope = QualMask::PUBLIC;
+         consumeOperator(OpID::LABEL_DELIM, "invalid PUBLIC label");
+         continue;
+      }
+      if (tryConsumeKeyword(KeywordID::PRIVATE)) {
+         scope = QualMask::PRIVATE;
+         consumeOperator(OpID::LABEL_DELIM, "invalid PRIVATE label");
+         continue;
+      }
+      if (tryConsumeKeyword(KeywordID::PROTECTED)) {
+         scope = QualMask::PROTECTED;
+         consumeOperator(OpID::LABEL_DELIM, "invalid PROTECTED label");
+         continue;
+      }
+
+      //member attributes
       fieldAttrs = tryParseAttrs();
       if (currTok.type() != TokenType::KEYWORD) {
          logError(ErrCode::BAD_STMT, "invalid statement in namespace definition");
       }
       //parse member
       switch (currTok.keywordID()) {
-         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: getNextToken(); { auto tmp = parsingFunc(fieldAttrs); spec->composite().subtypes.insert(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol()); } break
+         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: getNextToken(); { auto tmp = parsingFunc(fieldAttrs); tree[tree[tmp].name()].addQuals(scope); spec->composite().subtypes.insert(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol()); } break
          KW_CASE(CLASS, parseClass);
          KW_CASE(STRUCT, parseStruct);
          KW_CASE(TRAIT, parseTrait);
@@ -291,8 +311,8 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace(index<Expr> attrs) {
          KW_CASE(MASK, parseMask);
          KW_CASE(NAMESPACE, parseNamespace);
          #undef KW_CASE
-         case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(fieldAttrs); spec->composite().staticFuncs.insert(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol());} break;
-         case KeywordID::LET : getNextToken(); {auto tmp = parseDecl(fieldAttrs); spec->composite().staticMembs.push_back(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol());} break;
+         case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(fieldAttrs); spec->composite().staticFuncs.emplace(tree[tree[tmp].name()].symbol(), scope); symbol->insert(tree[tree[tmp].name()].symbol());} break;
+         case KeywordID::LET : getNextToken(); {auto tmp = parseDecl(fieldAttrs); spec->composite().staticMembs.emplace_back(tree[tree[tmp].name()].symbol(), scope); symbol->insert(tree[tree[tmp].name()].symbol());} break;
          default: logError(ErrCode::BAD_STMT, "invalid statement in namespace definition");
       }
    }
