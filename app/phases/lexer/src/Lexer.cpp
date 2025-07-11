@@ -17,82 +17,26 @@ RESTART:
    if (curr >= end) { [[unlikely]];
       return {};
    }
-   uint radix;
-   bool isReal;
+   mcsl::_::n val;
 
    //process token
    tokBegin = curr;
    switch (*curr) {
       //!NUMBERS
-      case '0':
-         isReal = false;
-         //check for radix specifier
-         if (++curr >= end) { radix = 10; goto PUSH_NUM_TOK; }
-         switch (*curr) {
-            default:
-               radix = 10;
-               --curr;
-               goto PROCESS_NUM;
+      case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+         val = mcsl::str_to_num(curr, end);
+         curr += val.len;
 
-            case 'b': case 'B': radix = 2;  break;
-            case 'o': case 'O': radix = 8;  break;
-            case 'd': case 'D': radix = 10; break;
-            case 'x': case 'X': radix = 16; break;
-         }
-         if (++curr >= end || !mcsl::is_digit(*curr, radix)) {
-            throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix specifier must be followed by digits"));
-         }
-         goto PROCESS_NUM;
-
-      //!NUMBERS
-      case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-         //setup
-         radix = 10;
-         isReal = false;
-PROCESS_NUM:
-         //integer part
-         do {
-            if (++curr >= end) { goto PUSH_NUM_TOK; }
-         } while (mcsl::is_digit(*curr, radix));
-
-         //radix point
-         if (*curr == RADIX_POINT) {
-            isReal = true;
-            //check first digit
-            if (++curr >= end || !mcsl::is_digit(*curr, radix)) {
-               throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix point must be followed by digits"));
-            }
-            //skip following digits
-            do {
-               if (++curr >= end) { goto PUSH_NUM_TOK; }
-            } while (mcsl::is_digit(*curr, radix));
-
-         }
-         //radix separator
-         if (curr + 2 < end && curr[0] == '~' && curr[1] == '^') {
-            isReal = true;
-            curr += 2;
-            if (curr >= end) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }
-            //skip sign if present
-            if (*curr == '-' || *curr == '+') { if (++curr >= end) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }}
-            //check first digit
-            if (!mcsl::is_digit(*curr, radix)) { throwError(ErrCode::BAD_LITERAL, mcsl::FMT("radix separator must be followed by digits")); }
-            //skip following digits
-            do {
-               if (++curr >= end) { goto PUSH_NUM_TOK; }
-            } while (mcsl::is_digit(*curr, radix));
-         }
-
-PUSH_NUM_TOK:
-         if (curr < end && mcsl::is_letter(*curr)) {
+         if (curr < end && mcsl::is_letter(*curr)) { //!TODO: trailing type specifiers
             throwError(ErrCode::BAD_LITERAL, mcsl::FMT("identifier may not start with digit, and numeric literal must not be directly followed by identifier without separating whitespace"));
          }
 
          //convert to number and push token to stream
-         if (isReal) {
-            return {mcsl::str_to_real(tokBegin, curr, radix)};
-         } else {
-            return {mcsl::str_to_uint(tokBegin, curr, radix)};
+         switch (val.val.type) {
+            case mcsl::NumType::null: UNREACHABLE;
+            case mcsl::NumType::UINT: return {val.val.u};
+            case mcsl::NumType::SINT: UNREACHABLE;
+            case mcsl::NumType::REAL: return {val.val.f};
          }
       UNREACHABLE;
 
