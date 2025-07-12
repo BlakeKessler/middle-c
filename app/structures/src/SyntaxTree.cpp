@@ -211,14 +211,15 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
    debug_assert(i);
 
    Expr& expr = self[i];
-
+   
+   //constructors and function calls
    if (expr.opID() == OpID::CALL_INVOKE || expr.opID() == OpID::LIST_INVOKE) {
       if (expr.lhsType() == NodeType::IDEN) {
          Identifier& lhs = self[(index<Identifier>)expr.lhs()];
          SymbolNode* symbol = lhs.symbol();
-         if (isType(symbol->symbolType())) {
+         if (isType(symbol->symbolType())) { //constructors
             expr.evalType() = symbol->type();
-         } else if (symbol->symbolType() == SymbolType::FUNC) {
+         } else if (symbol->symbolType() == SymbolType::FUNC) { //functions
             //!TODO: deduce and update overload index
             expr.evalType() = symbol->getOverload(lhs.overloadIndex()).first->funcSig().retType;
          }
@@ -419,38 +420,8 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
          expr.evalType() = evalType(+expr.lhs());
          return;
 
-      case OpID::ESCAPE: UNREACHABLE;
-      case OpID::EOS: UNREACHABLE;
-
-      case OpID::STRING: UNREACHABLE;
-      case OpID::CHAR: UNREACHABLE;
-      case OpID::INTERP_STRING: UNREACHABLE;
-
       case OpID::ATTRIBUTE: TODO;
 
-      case OpID::LINE_CMNT: UNREACHABLE;
-      case OpID::BLOCK_CMNT: UNREACHABLE;
-      case OpID::BLOCK_CMNT_OPEN: UNREACHABLE;
-      case OpID::BLOCK_CMNT_CLOSE: UNREACHABLE;
-
-      case OpID::CALL_OPEN: UNREACHABLE;
-      case OpID::CALL_CLOSE: UNREACHABLE;
-      case OpID::SUBSCRIPT_OPEN: UNREACHABLE;
-      case OpID::SUBSCRIPT_CLOSE: UNREACHABLE;
-      case OpID::LIST_OPEN: UNREACHABLE;
-      case OpID::LIST_CLOSE: UNREACHABLE;
-      case OpID::SPECIALIZER_OPEN: UNREACHABLE;
-      case OpID::SPECIALIZER_CLOSE: UNREACHABLE;
-
-      case OpID::CALL_INVOKE:
-      case OpID::SUBSCRIPT_INVOKE:
-      case OpID::LIST_INVOKE:
-      case OpID::SPECIALIZER_INVOKE:
-
-         TODO;
-
-      case OpID::CHAR_INVOKE: UNREACHABLE;
-      case OpID::STR_INVOKE: UNREACHABLE;
       case OpID::INTERP_STR_INVOKE: TODO;
       case OpID::TERNARY_INVOKE: 
          if (!(expr.evalType() = commonType(evalType(+expr.rhs()), evalType(+expr.extra())))) {
@@ -461,8 +432,6 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
 
       case OpID::PREPROCESSOR: TODO;
 
-      case OpID::SCOPE_RESOLUTION: UNREACHABLE;
-
          TODO;
 
       case OpID::MEMBER_ACCESS: [[fallthrough]];
@@ -472,22 +441,23 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
          expr.evalType() = evalType(+expr.rhs());
          return;
 
-      case OpID::RANGE: TODO;
-      case OpID::SPREAD: TODO;
+      #pragma region standards
+      case OpID::CALL_INVOKE:
+      case OpID::SUBSCRIPT_INVOKE:
 
-      //unary identity
+      case OpID::RANGE:
+      case OpID::SPREAD:
+
       case OpID::INC:
       case OpID::DEC:
       case OpID::BIT_NOT:
 
-      //bitwise binary identity
       case OpID::BIT_AND:
       case OpID::BIT_OR:
       case OpID::BIT_XOR:
       case OpID::SHIFT_LEFT:
       case OpID::SHIFT_RIGHT:
 
-      //bitwise binary identity
       case OpID::ADD:
       case OpID::SUB:
       case OpID::MUL:
@@ -495,7 +465,7 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
       case OpID::MOD:
       case OpID::EXP:
 
-      case OpID::THREE_WAY_COMP: TODO;
+      case OpID::THREE_WAY_COMP:
 
       //unary boolean
       case OpID::LOGICAL_NOT:
@@ -512,17 +482,6 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
       //case OpID::IS_EQUAL_STRICT:
       //case OpID::IS_UNEQUAL_STRICT:
 
-
-
-      case OpID::COALESCE: TODO;
-
-      case OpID::INLINE_IF: UNREACHABLE;
-      case OpID::LABEL_DELIM: __TYPELESS;
-
-      case OpID::ASSIGN:
-         expr.evalType() = evalType(+expr.lhs());
-         return;
-      //case OpID::CONST_ASSIGN: TODO;
       case OpID::ADD_ASSIGN:
       case OpID::SUB_ASSIGN:
       case OpID::MUL_ASSIGN:
@@ -535,14 +494,34 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
       case OpID::XOR_ASSIGN:
       case OpID::OR_ASSIGN:
       case OpID::COALESCE_ASSIGN:
-
-
          TODO;
+      #pragma endregion standards
+
+
+
+      case OpID::ASSIGN:
+      //case OpID::CONST_ASSIGN: TODO;
+         expr.evalType() = evalType(+expr.lhs());
+         return;
+
+      case OpID::COALESCE: TODO;
 
       case OpID::COMMA:
          expr.evalType() = evalType(+expr.rhs());
          return;
 
+      case OpID::LET: [[fallthrough]];
+      case OpID::MAKE_TYPE:
+         expr.evalType() = evalType(+expr.rhs());
+         return;
+
+
+      case OpID::PREPROC_IMPORT: TODO;
+      case OpID::PREPROC_LINK: TODO;
+      case OpID::PREPROC_EMBED: TODO;
+         
+      #pragma region typelesses
+      case OpID::LABEL_DELIM: [[fallthrough]];
       case OpID::FOR: [[fallthrough]];
       case OpID::FOREACH: [[fallthrough]];
       case OpID::WHILE: [[fallthrough]];
@@ -569,21 +548,44 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
       case OpID::ASSUME: [[fallthrough]];
       case OpID::RETURN: [[fallthrough]];
 
-      case OpID::ALIAS:
-         __TYPELESS;
-
-      case OpID::LET: [[fallthrough]];
-      case OpID::MAKE_TYPE:
-         expr.evalType() = evalType(+expr.rhs());
-         return;
+      case OpID::ALIAS:[[fallthrough]];
 
       case OpID::DEF_FUNC_PARAMS: [[fallthrough]];
       case OpID::DEF_MACRO_PARAMS: __TYPELESS;
+      #pragma endregion typelesses
 
+      #pragma region unreachables
+      case OpID::LIST_INVOKE:
+      case OpID::SPECIALIZER_INVOKE:
 
-      case OpID::PREPROC_IMPORT: TODO;
-      case OpID::PREPROC_LINK: TODO;
-      case OpID::PREPROC_EMBED: TODO;
+      case OpID::ESCAPE: UNREACHABLE;
+      case OpID::EOS: UNREACHABLE;
+
+      case OpID::STRING: UNREACHABLE;
+      case OpID::CHAR: UNREACHABLE;
+      case OpID::INTERP_STRING: UNREACHABLE;
+
+      case OpID::LINE_CMNT: UNREACHABLE;
+      case OpID::BLOCK_CMNT: UNREACHABLE;
+      case OpID::BLOCK_CMNT_OPEN: UNREACHABLE;
+      case OpID::BLOCK_CMNT_CLOSE: UNREACHABLE;
+
+      case OpID::CALL_OPEN: UNREACHABLE;
+      case OpID::CALL_CLOSE: UNREACHABLE;
+      case OpID::SUBSCRIPT_OPEN: UNREACHABLE;
+      case OpID::SUBSCRIPT_CLOSE: UNREACHABLE;
+      case OpID::LIST_OPEN: UNREACHABLE;
+      case OpID::LIST_CLOSE: UNREACHABLE;
+      case OpID::SPECIALIZER_OPEN: UNREACHABLE;
+      case OpID::SPECIALIZER_CLOSE: UNREACHABLE;
+
+      case OpID::CHAR_INVOKE: UNREACHABLE;
+      case OpID::STR_INVOKE: UNREACHABLE;
+
+      case OpID::SCOPE_RESOLUTION: UNREACHABLE;
+      
+      case OpID::INLINE_IF: UNREACHABLE;
+      #pragma endregion unreachables
       #undef __TYPELESS
    }
 }
