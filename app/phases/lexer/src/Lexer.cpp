@@ -41,6 +41,7 @@ RESTART:
                case UINT_LIT_CHAR: kw = KeywordID::UINT;
                case SINT_LIT_CHAR: kw = KeywordID::SINT;
                case REAL_LIT_CHAR: kw = KeywordID::FLOAT;
+               case CHAR_LIT_CHAR: kw = KeywordID::CHAR;
 
                default: throwError(ErrCode::BAD_LITERAL, mcsl::FMT("invalid literal type specifier `%c`"), type);
             }
