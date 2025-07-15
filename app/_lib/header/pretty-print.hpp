@@ -303,6 +303,7 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(SINT_128, "sint128");
       CASE(SINT_256, "sint256");
 
+      CASE(FP3, "fp3");
       CASE(FBYTE, "fbyte");
       CASE(FSHORT, "fshort");
       CASE(FLOAT, "float");

@@ -10,6 +10,7 @@
 #include "char_type.hpp"
 #include "str_to_num.hpp"
 #include "unreachable.hpp"
+#include "pretty-print.hpp"
 
 //!lex the next token
 clef::Token clef::Lexer::nextToken() {
@@ -77,9 +78,24 @@ RESTART:
          //convert to number and push token to stream
          switch (val.val.type) {
             case mcsl::NumType::null: UNREACHABLE;
-            case mcsl::NumType::UINT: return {val.val.u};
+            case mcsl::NumType::UINT:
+               if (kw == KeywordID::_NOT_A_KEYWORD || isUint(kw)) {
+                  return {val.val.u, kw};
+               } else if (isSint(kw)) {
+                  return {(slong)val.val.u, kw};
+               } else if (isFloatingPoint(kw)) {
+                  return {(flong)val.val.u, kw};
+               } else { [[unlikely]];
+                  debug_assert(isText(kw));
+                  TODO;
+               }
             case mcsl::NumType::SINT: UNREACHABLE;
-            case mcsl::NumType::REAL: return {val.val.f};
+            case mcsl::NumType::REAL:
+               if (kw == KeywordID::_NOT_A_KEYWORD || isFloatingPoint(kw)) {
+                  return {val.val.f, kw};
+               } else { [[unlikely]];
+                  throwError(ErrCode::BAD_LITERAL, FMT("cannot narrow floating point literal to integer type `%s`"), toString(kw));
+               }
          }
       UNREACHABLE;
 

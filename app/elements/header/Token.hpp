@@ -32,9 +32,9 @@ struct [[clang::trivial_abi]] clef::Token {
       Token(const mcsl::str_slice name):_name{name},_type{TokenType::IDEN} {}
       Token(const mcsl::str_slice name, bool isMacro):_name{name},_type{isMacro ? TokenType::MACRO_INVOKE : TokenType::IDEN} {}
       Token(const KeywordID id):_keyword{id},_type{+id ? TokenType::KEYWORD : TokenType::IDEN} {}
-      Token(const ulong val):_uintVal{val},_type{TokenType::UINT_NUM} {}
-      Token(const slong val):_sintVal{val},_type{TokenType::SINT_NUM} {}
-      Token(const flong val):_realVal{val},_type{TokenType::REAL_NUM} {}
+      Token(const ulong val, const KeywordID t):_uintVal{val},_keyword{t == KeywordID::_NOT_A_KEYWORD ? KeywordID::UINT  : t},_type{TokenType::UINT_NUM} {}
+      Token(const slong val, const KeywordID t):_sintVal{val},_keyword{t == KeywordID::_NOT_A_KEYWORD ? KeywordID::SINT  : t},_type{TokenType::SINT_NUM} {}
+      Token(const flong val, const KeywordID t):_realVal{val},_keyword{t == KeywordID::_NOT_A_KEYWORD ? KeywordID::FLOAT : t},_type{TokenType::REAL_NUM} {}
       Token(const OpData op):_op{op},_type{TokenType::OP} {}
       Token(const BlockType type, const BlockDelimRole role):_blockDelim{mcsl::pair{type,role}},_type{TokenType::BLOCK_DELIM} {}
       Token(const mcsl::str_slice val, const PtxtType type):_strVal{val},_ptxtType{type},_type{TokenType::PTXT_SEG} {}
@@ -55,7 +55,7 @@ struct [[clang::trivial_abi]] clef::Token {
       const mcsl::str_slice& unprocessedStrVal() const { debug_assert(_type == TokenType::PTXT_SEG && _ptxtType == PtxtType::UNPROCESSED_STR); return _strVal; }
       char charVal() const { debug_assert(_type == TokenType::PTXT_SEG && _ptxtType == PtxtType::CHAR); return _charVal; }
 
-      KeywordID keywordID() const { debug_assert(_type == TokenType::KEYWORD); return _keyword; }
+      KeywordID keywordID() const { debug_assert(_type == TokenType::KEYWORD || isNumber(_type)); return _keyword; }
       OpData op() const { debug_assert(_type == TokenType::OP); return _op; }
       OpID opID() const { debug_assert(_type == TokenType::OP); return _op; }
       OpProps opProps() const { debug_assert(_type == TokenType::OP); return _op.props(); }
