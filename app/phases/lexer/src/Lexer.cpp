@@ -39,10 +39,10 @@ RESTART:
             //uint, sint, or float
             char type = *curr++ | mcsl::CASE_BIT;
             switch (type) {
-               case UINT_LIT_CHAR: kw = KeywordID::UINT;
-               case SINT_LIT_CHAR: kw = KeywordID::SINT;
-               case REAL_LIT_CHAR: kw = KeywordID::FLOAT;
-               case CHAR_LIT_CHAR: kw = KeywordID::CHAR;
+               case UINT_LIT_CHAR: kw = KeywordID::UINT; break;
+               case SINT_LIT_CHAR: kw = KeywordID::SINT; break;
+               case REAL_LIT_CHAR: kw = KeywordID::FLOAT; break;
+               case CHAR_LIT_CHAR: kw = KeywordID::CHAR; break;
 
                default: throwError(ErrCode::BAD_LITERAL, mcsl::FMT("invalid literal type specifier `%c`"), type);
             }
