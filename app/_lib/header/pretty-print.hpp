@@ -600,26 +600,26 @@ constexpr const mcsl::str_slice clef::toString(const SymbolType type) {
 constexpr const mcsl::str_slice clef::getSuffix(const FundTypeID id) {
    using enum FundTypeID;
    switch (id) {
-      CASE(UINT8,   "u8");
-      CASE(UINT16,  "u16");
-      CASE(UINT32,  "u32");
-      CASE(UINT64,  "u64");
-      CASE(UINT128, "u128");
-      CASE(UINT256, "u256");
+      CASE(UINT8,   "_u8");
+      CASE(UINT16,  "_u16");
+      CASE(UINT32,  "_u32");
+      CASE(UINT64,  "_u64");
+      CASE(UINT128, "_u128");
+      CASE(UINT256, "_u256");
 
-      CASE(SINT8,   "s8");
-      CASE(SINT16,  "s16");
-      CASE(SINT32,  "s32");
-      CASE(SINT64,  "s64");
-      CASE(SINT128, "s128");
-      CASE(SINT256, "s256");
+      CASE(SINT8,   "_s8");
+      CASE(SINT16,  "_s16");
+      CASE(SINT32,  "_s32");
+      CASE(SINT64,  "_s64");
+      CASE(SINT128, "_s128");
+      CASE(SINT256, "_s256");
 
-      // CASE(FLOAT8,   "f8");
-      CASE(FLOAT16,  "f16");
-      CASE(FLOAT32,  "f32");
-      CASE(FLOAT64,  "f64");
-      CASE(FLOAT128, "f128");
-      CASE(FLOAT256, "f256");
+      // CASE(FLOAT8,   "_f8");
+      CASE(FLOAT16,  "_f16");
+      CASE(FLOAT32,  "_f32");
+      CASE(FLOAT64,  "_f64");
+      CASE(FLOAT128, "_f128");
+      CASE(FLOAT256, "_f256");
 
       default: UNREACHABLE;
    }
