@@ -269,9 +269,9 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(AUTO, "auto");
 
       CASE(CHAR, "char");
-      CASE(CHAR_UTF_8, "char8");
-      CASE(CHAR_UTF_16, "char16");
-      CASE(CHAR_UTF_32, "char32");
+      CASE(CHAR_8, "char8");
+      CASE(CHAR_16, "char16");
+      CASE(CHAR_32, "char32");
       
       CASE(BOOL, "bool");
       CASE(UBYTE, "ubyte");

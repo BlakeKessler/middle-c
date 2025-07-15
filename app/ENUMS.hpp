@@ -391,9 +391,9 @@ namespace clef {
 
 
       CHAR,
-      CHAR_UTF_8,
-      CHAR_UTF_16,
-      CHAR_UTF_32,
+      CHAR_8,
+      CHAR_16,
+      CHAR_32,
       
 
       BOOL,
@@ -413,7 +413,7 @@ namespace clef {
       UINT_256,
 
 
-      SIGN_T,
+      SIGN_T, //to_signed<bool>
       SBYTE,
       SSHORT,
       SINT,
@@ -429,6 +429,7 @@ namespace clef {
       SINT_128,
       SINT_256,
 
+      FP3, //to_float<bool>
       FBYTE,
       FSHORT,
       FLOAT,
@@ -449,14 +450,14 @@ namespace clef {
       __SIGN_TYPE_OFFSET = SBYTE - UBYTE,
 
       __FIRST_TEXT_TYPE = CHAR,
-      __LAST_TEXT_TYPE = CHAR_UTF_32,
+      __LAST_TEXT_TYPE = CHAR_32,
       __FIRST_INT_TYPE = BOOL,
       __LAST_INT_TYPE = SINT_256,
       __FIRST_UINT_TYPE = BOOL,
       __LAST_UINT_TYPE = UINT_256,
       __FIRST_SINT_TYPE = SIGN_T,
       __LAST_SINT_TYPE = SINT_256,
-      __FIRST_FLOAT_TYPE = FBYTE,
+      __FIRST_FLOAT_TYPE = FP3,
       __LAST_FLOAT_TYPE = FLOAT_256,
       __FIRST_NUM_TYPE = __FIRST_INT_TYPE,
       __LAST_NUM_TYPE = __LAST_FLOAT_TYPE,
@@ -645,7 +646,12 @@ namespace clef {
    }
 
    constexpr KeywordID makeSized_c(const KeywordID id, const char ch) {
-      assume(id == KeywordID::UINT || id == KeywordID::SINT || id == KeywordID::FLOAT);
+      using enum KeywordID;
+      assume(id == UINT || id == SINT || id == FLOAT || id == CHAR);
+
+      if (id == CHAR) {
+         return ch ? _NOT_A_KEYWORD : id;
+      }
       switch (ch) {
          case     WORD_LIT_CHAR: return (KeywordID)(+id + 4);
          case      PTR_LIT_CHAR: return (KeywordID)(+id + 3);
@@ -660,30 +666,33 @@ namespace clef {
    }
    constexpr KeywordID makeSized_n(const KeywordID id, const uint size) {
       using enum KeywordID;
-      assume(id == UINT || id == SINT || id == FLOAT);
+      assume(id == UINT || id == SINT || id == FLOAT || id == CHAR);
 
-      constexpr KeywordID table[3][8] = {
-         { UINT_8,  UINT_16,  UINT_32,  UINT_64,  UINT_128,  UINT_256, _NOT_A_KEYWORD, _NOT_A_KEYWORD},
-         { SINT_8,  SINT_16,  SINT_32,  SINT_64,  SINT_128,  SINT_256, _NOT_A_KEYWORD, _NOT_A_KEYWORD},
-         {FLOAT_8, FLOAT_16, FLOAT_32, FLOAT_64, FLOAT_128, FLOAT_256, _NOT_A_KEYWORD, _NOT_A_KEYWORD}
+      static_assert(+_NOT_A_KEYWORD == 0);
+      constexpr KeywordID table[4][8] = {
+         { UINT,  UINT_8,  UINT_16,  UINT_32,  UINT_64,  UINT_128,  UINT_256, _NOT_A_KEYWORD},
+         { SINT,  SINT_8,  SINT_16,  SINT_32,  SINT_64,  SINT_128,  SINT_256, _NOT_A_KEYWORD},
+         {FLOAT, FLOAT_8, FLOAT_16, FLOAT_32, FLOAT_64, FLOAT_128, FLOAT_256, _NOT_A_KEYWORD},
+         { CHAR,  CHAR_8,  CHAR_16,  CHAR_32,       {},        {},        {}, _NOT_A_KEYWORD}
       };
 
       uint offset;
       switch (size) {
-         case   0: return id;
-         case   8: offset = 0; break;
-         case  16: offset = 1; break;
-         case  32: offset = 2; break;
-         case  64: offset = 3; break;
-         case 128: offset = 4; break;
-         case 256: offset = 5; break;
+         case   0: offset = 0; break;
+         case   8: offset = 1; break;
+         case  16: offset = 2; break;
+         case  32: offset = 3; break;
+         case  64: offset = 4; break;
+         case 128: offset = 5; break;
+         case 256: offset = 6; break;
 
-         default: return _NOT_A_KEYWORD;
+         default: offset = 7; break;
       }
       switch (id) {
          case UINT : return table[0][offset];
          case SINT : return table[1][offset];
          case FLOAT: return table[2][offset];
+         case CHAR : return table[3][offset];
          default: UNREACHABLE;
       }
    }

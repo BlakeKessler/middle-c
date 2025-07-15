@@ -30,6 +30,7 @@
 #define UINT_LIT_CHAR 'u'
 #define SINT_LIT_CHAR 's'
 #define REAL_LIT_CHAR 'f'
+#define CHAR_LIT_CHAR 'c'
 
 #define BYTE_LIT_CHAR 'b'
 #define SHORT_LIT_CHAR 's'

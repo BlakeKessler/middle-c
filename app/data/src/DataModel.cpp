@@ -13,9 +13,9 @@ clef::FundTypeID clef::toTypeID(KeywordID kw, DataModel model) {
 
 
             CASE(CHAR, CHAR);
-            CASE(CHAR_UTF_8, CHAR8);
-            CASE(CHAR_UTF_16, CHAR16);
-            CASE(CHAR_UTF_32, CHAR32);
+            CASE(CHAR_8, CHAR8);
+            CASE(CHAR_16, CHAR16);
+            CASE(CHAR_32, CHAR32);
 
 
             CASE(BOOL, BOOL);
