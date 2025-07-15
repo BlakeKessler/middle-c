@@ -19,8 +19,8 @@ mcsl::File& mcsl::write(File& file, const clef::Token& tok) {
       case TokenType::KEYWORD:
          file.printf(mcsl::FMT("\033[35mKEYWORD:\033[39m %s"), toString(tok.keywordID()));
          break;
-      case TokenType::INT_NUM:
-         file.printf(mcsl::FMT("\033[35mINTEGER:\033[39m %u"), tok.intVal());
+      case TokenType::UINT_NUM:
+         file.printf(mcsl::FMT("\033[35mINTEGER:\033[39m %u"), tok.uintVal());
          break;
       case TokenType::REAL_NUM:
          file.printf(mcsl::FMT("\033[35mREAL NUMBER:\033[39m %f"), tok.realVal());
@@ -70,8 +70,8 @@ uint mcsl::writef(File& file, const clef::Token& tok, char mode, FmtArgs args) {
          return writef(file, tok.name(), mode, args);
       case TokenType::KEYWORD:
          return writef(file, toString(tok.keywordID()), mode, args);
-      case TokenType::INT_NUM:
-         return writef(file, tok.intVal(), intMode, args);
+      case TokenType::UINT_NUM:
+         return writef(file, tok.uintVal(), intMode, args);
       case TokenType::REAL_NUM:
          return writef(file, tok.realVal(), fltMode, args);
       case TokenType::OP:

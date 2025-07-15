@@ -13,7 +13,8 @@ struct [[clang::trivial_abi]] clef::Token {
    private:
       union {
          const mcsl::str_slice _name; //identifier
-         ulong _intVal;
+         ulong _uintVal;
+         slong _sintVal;
          flong _realVal;
          const mcsl::str_slice _strVal;
          char _charVal;
@@ -31,7 +32,8 @@ struct [[clang::trivial_abi]] clef::Token {
       Token(const mcsl::str_slice name):_name{name},_type{TokenType::IDEN} {}
       Token(const mcsl::str_slice name, bool isMacro):_name{name},_type{isMacro ? TokenType::MACRO_INVOKE : TokenType::IDEN} {}
       Token(const KeywordID id):_keyword{id},_type{+id ? TokenType::KEYWORD : TokenType::IDEN} {}
-      Token(const ulong val):_intVal{val},_type{TokenType::INT_NUM} {}
+      Token(const ulong val):_uintVal{val},_type{TokenType::UINT_NUM} {}
+      Token(const slong val):_sintVal{val},_type{TokenType::SINT_NUM} {}
       Token(const flong val):_realVal{val},_type{TokenType::REAL_NUM} {}
       Token(const OpData op):_op{op},_type{TokenType::OP} {}
       Token(const BlockType type, const BlockDelimRole role):_blockDelim{mcsl::pair{type,role}},_type{TokenType::BLOCK_DELIM} {}
@@ -46,7 +48,8 @@ struct [[clang::trivial_abi]] clef::Token {
       TokenType type() const { return _type; }
       
       const mcsl::str_slice& name() const { debug_assert(_type == TokenType::IDEN); return _name; }
-      ulong intVal() const { debug_assert(_type == TokenType::INT_NUM); return _intVal; }
+      ulong uintVal() const { debug_assert(_type == TokenType::UINT_NUM); return _uintVal; }
+      ulong sintVal() const { debug_assert(_type == TokenType::SINT_NUM); return _sintVal; }
       flong realVal() const { debug_assert(_type == TokenType::REAL_NUM); return _realVal; }
       const mcsl::str_slice& strVal() const { debug_assert(_type == TokenType::PTXT_SEG && _ptxtType == PtxtType::STR); return _strVal; }
       const mcsl::str_slice& unprocessedStrVal() const { debug_assert(_type == TokenType::PTXT_SEG && _ptxtType == PtxtType::UNPROCESSED_STR); return _strVal; }

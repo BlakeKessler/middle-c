@@ -24,7 +24,7 @@ clef::FundTypeID clef::toTypeID(KeywordID kw, DataModel model) {
             CASE(UINT, UINT32);
             CASE(ULONG, UINT64);
             CASE(UOVERLONG, UINT128);
-            CASE(UINT_PTR, UINT64);
+            CASE(UPTR, UINT64);
             CASE(UWORD, UINT64);
 
             CASE(UINT_8, UINT8);
@@ -41,7 +41,7 @@ clef::FundTypeID clef::toTypeID(KeywordID kw, DataModel model) {
             CASE(SINT, SINT32);
             CASE(SLONG, SINT64);
             CASE(SOVERLONG, SINT128);
-            CASE(SINT_PTR, SINT64);
+            CASE(SPTR, SINT64);
             CASE(SWORD, SINT64);
 
             CASE(SINT_8, SINT8);

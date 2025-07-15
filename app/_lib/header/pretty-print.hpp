@@ -69,7 +69,8 @@ constexpr const mcsl::str_slice clef::toString(const TokenType type) {
       CASE(IDEN, "IDENTIFIER");
       CASE(MACRO_INVOKE, "MACRO_INVOKE");
       CASE(KEYWORD, "KEYWORD");
-      CASE(INT_NUM, "INTEGER");
+      CASE(UINT_NUM, "UNSIGNED_INTEGER");
+      CASE(SINT_NUM, "SIGNED_INTEGER");
       CASE(REAL_NUM, "REAL_NUMBER");
       
       CASE(OP, "OPERATOR");
@@ -278,7 +279,7 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(UINT, "uint");
       CASE(ULONG, "ulong");
       CASE(UOVERLONG, "uoverlong");
-      CASE(UINT_PTR, "uptr");
+      CASE(UPTR, "uptr");
       CASE(UWORD, "uword");
       CASE(UINT_8, "uint8");
       CASE(UINT_16, "uint16");
@@ -293,7 +294,7 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(SINT, "sint");
       CASE(SLONG, "slong");
       CASE(SOVERLONG, "soverlong");
-      CASE(SINT_PTR, "sptr");
+      CASE(SPTR, "sptr");
       CASE(SWORD, "sword");
       CASE(SINT_8, "sint8");
       CASE(SINT_16, "sint16");
@@ -302,9 +303,14 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(SINT_128, "sint128");
       CASE(SINT_256, "sint256");
 
+      CASE(FBYTE, "fbyte");
+      CASE(FSHORT, "fshort");
       CASE(FLOAT, "float");
       CASE(FLONG, "flong");
       CASE(FLEXT, "flext");
+      CASE(FPTR, "fptr");
+      CASE(FWORD, "fword");
+      CASE(FLOAT_8, "float8");
       CASE(FLOAT_16, "float16");
       CASE(FLOAT_32, "float32");
       CASE(FLOAT_64, "float64");

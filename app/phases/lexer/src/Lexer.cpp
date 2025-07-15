@@ -18,6 +18,7 @@ RESTART:
       return {};
    }
    mcsl::_::n val;
+   KeywordID kw;
 
    //process token
    tokBegin = curr;
@@ -27,9 +28,50 @@ RESTART:
          val = mcsl::str_to_num(curr, end);
          curr += val.len;
 
-         if (curr < end && mcsl::is_letter(*curr)) { //!TODO: trailing type specifiers
+         //skip trailing underscores (to allow hex literals to be marked as floats)
+         while (curr < end && *curr == NUM_LIT_DELIM) {
+            ++curr;
+         }
+
+         //numeric literal suffix
+         if (curr < end && mcsl::is_letter(*curr)) {
+            //uint, sint, or float
+            char type = *curr++ | mcsl::CASE_BIT;
+            switch (type) {
+               case UINT_LIT_CHAR: kw = KeywordID::UINT;
+               case SINT_LIT_CHAR: kw = KeywordID::SINT;
+               case REAL_LIT_CHAR: kw = KeywordID::FLOAT;
+
+               default: throwError(ErrCode::BAD_LITERAL, mcsl::FMT("invalid literal type specifier `%c`"), type);
+            }
+            if (curr < end) {
+               //architecture-dependant types
+               if (mcsl::is_letter(*curr)) {
+                  char size = *curr++ | mcsl::CASE_BIT;
+                  kw = makeSized_c(kw, size);
+                  if (kw == KeywordID::_NOT_A_KEYWORD) {
+                     throwError(ErrCode::BAD_LITERAL, mcsl::FMT("invalid literal type specifier `%c%c`"), type, size);
+                  }
+               }
+               //explicitly sized types
+               else if (mcsl::is_digit(*curr)) {
+                  mcsl::_::u typeSize;
+                  typeSize = mcsl::str_to_uint(curr, end - curr, 10);
+                  curr += typeSize.len;
+                  kw = makeSized_n(kw, typeSize.val);
+                  if (kw == KeywordID::_NOT_A_KEYWORD) {
+                     throwError(ErrCode::BAD_LITERAL, mcsl::FMT("invalid literal type specifier `%c%u`"), type, typeSize.val);
+                  }
+               }
+            }
+         } else {
+            kw = KeywordID::_NOT_A_KEYWORD;
+         }
+         if (curr < end && mcsl::is_letter(*curr)) {
             throwError(ErrCode::BAD_LITERAL, mcsl::FMT("identifier may not start with digit, and numeric literal must not be directly followed by identifier without separating whitespace"));
          }
+
+         //!TODO: use kw
 
          //convert to number and push token to stream
          switch (val.val.type) {

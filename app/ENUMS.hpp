@@ -131,7 +131,8 @@ namespace clef {
       IDEN,
       MACRO_INVOKE,
       KEYWORD,
-      INT_NUM,
+      UINT_NUM,
+      SINT_NUM,
       REAL_NUM,
 
       __OPLIKE = 0x80,
@@ -149,7 +150,7 @@ namespace clef {
    constexpr bool isOperator(const TokenType t) { return t == TokenType::OP; }
    constexpr bool isBlockLike(const TokenType t) { return t == TokenType::BLOCK_DELIM; }
    constexpr bool isOperand(const TokenType t) { return !+(t & TokenType::__OPLIKE); }
-      constexpr bool isNumber(const TokenType t) { return t == TokenType::INT_NUM || t == TokenType::REAL_NUM; }
+      constexpr bool isNumber(const TokenType t) { return t == TokenType::UINT_NUM || t == TokenType::SINT_NUM || t == TokenType::REAL_NUM; }
    #pragma region ops
    enum class OpID : uint8 {
       NULL = 0, //nop or not an operator
@@ -401,7 +402,7 @@ namespace clef {
       UINT,
       ULONG,
       UOVERLONG,
-      UINT_PTR,
+      UPTR,
       UWORD,
 
       UINT_8,
@@ -418,7 +419,7 @@ namespace clef {
       SINT,
       SLONG,
       SOVERLONG,
-      SINT_PTR,
+      SPTR,
       SWORD,
 
       SINT_8,
@@ -428,10 +429,15 @@ namespace clef {
       SINT_128,
       SINT_256,
 
+      FBYTE,
+      FSHORT,
       FLOAT,
       FLONG,
       FLEXT,
+      FPTR,
+      FWORD,
 
+      FLOAT_8,
       FLOAT_16,
       FLOAT_32,
       FLOAT_64,
@@ -450,7 +456,7 @@ namespace clef {
       __LAST_UINT_TYPE = UINT_256,
       __FIRST_SINT_TYPE = SIGN_T,
       __LAST_SINT_TYPE = SINT_256,
-      __FIRST_FLOAT_TYPE = FLOAT,
+      __FIRST_FLOAT_TYPE = FBYTE,
       __LAST_FLOAT_TYPE = FLOAT_256,
       __FIRST_NUM_TYPE = __FIRST_INT_TYPE,
       __LAST_NUM_TYPE = __LAST_FLOAT_TYPE,
@@ -637,6 +643,77 @@ namespace clef {
          default: UNREACHABLE;
       }
    }
+
+   constexpr KeywordID makeSized_c(const KeywordID id, const char ch) {
+      assume(id == KeywordID::UINT || id == KeywordID::SINT || id == KeywordID::FLOAT);
+      switch (ch) {
+         case     WORD_LIT_CHAR: return (KeywordID)(+id + 4);
+         case      PTR_LIT_CHAR: return (KeywordID)(+id + 3);
+         case OVERLONG_LIT_CHAR: return (KeywordID)(+id + 2);
+         case     LONG_LIT_CHAR: return (KeywordID)(+id + 1);
+         case                 0: return              id     ;
+         case    SHORT_LIT_CHAR: return (KeywordID)(+id - 1);
+         case     BYTE_LIT_CHAR: return (KeywordID)(+id - 2);
+
+         default: return KeywordID::_NOT_A_KEYWORD;
+      }
+   }
+   constexpr KeywordID makeSized_n(const KeywordID id, const uint size) {
+      using enum KeywordID;
+      assume(id == UINT || id == SINT || id == FLOAT);
+
+      constexpr KeywordID table[3][8] = {
+         { UINT_8,  UINT_16,  UINT_32,  UINT_64,  UINT_128,  UINT_256, _NOT_A_KEYWORD, _NOT_A_KEYWORD},
+         { SINT_8,  SINT_16,  SINT_32,  SINT_64,  SINT_128,  SINT_256, _NOT_A_KEYWORD, _NOT_A_KEYWORD},
+         {FLOAT_8, FLOAT_16, FLOAT_32, FLOAT_64, FLOAT_128, FLOAT_256, _NOT_A_KEYWORD, _NOT_A_KEYWORD}
+      };
+
+      uint offset;
+      switch (size) {
+         case   0: return id;
+         case   8: offset = 0; break;
+         case  16: offset = 1; break;
+         case  32: offset = 2; break;
+         case  64: offset = 3; break;
+         case 128: offset = 4; break;
+         case 256: offset = 5; break;
+
+         default: return _NOT_A_KEYWORD;
+      }
+      switch (id) {
+         case UINT : return table[0][offset];
+         case SINT : return table[1][offset];
+         case FLOAT: return table[2][offset];
+         default: UNREACHABLE;
+      }
+   }
+   #pragma region testsize
+   #pragma region testsize_c
+   static_assert(makeSized_c(KeywordID::UINT , 0) == KeywordID::UINT );
+   static_assert(makeSized_c(KeywordID::SINT , 0) == KeywordID::SINT );
+   static_assert(makeSized_c(KeywordID::FLOAT, 0) == KeywordID::FLOAT);
+
+   #define CHECK(base, baseChar, offset) static_assert(makeSized_c(KeywordID::base, offset##_LIT_CHAR) == KeywordID::baseChar##offset)
+   #define FOVERLONG FLEXT
+   CHECK( UINT, U, BYTE); CHECK( UINT, U, SHORT); CHECK( UINT, U, LONG); CHECK( UINT, U, OVERLONG); CHECK( UINT, U, PTR); CHECK( UINT, U, WORD);
+   CHECK( SINT, S, BYTE); CHECK( SINT, S, SHORT); CHECK( SINT, S, LONG); CHECK( SINT, S, OVERLONG); CHECK( SINT, S, PTR); CHECK( SINT, S, WORD);
+   CHECK(FLOAT, F, BYTE); CHECK(FLOAT, F, SHORT); CHECK(FLOAT, F, LONG); CHECK(FLOAT, F, OVERLONG); CHECK(FLOAT, F, PTR); CHECK(FLOAT, F, WORD);
+   #undef FOVERLONG
+   #undef CHECK
+   #pragma endregion testsize_c
+
+   #pragma region testsize_n
+   static_assert(makeSized_n(KeywordID::UINT , 0) == KeywordID::UINT );
+   static_assert(makeSized_n(KeywordID::SINT , 0) == KeywordID::SINT );
+   static_assert(makeSized_n(KeywordID::FLOAT, 0) == KeywordID::FLOAT);
+
+   #define CHECK(base, size) static_assert(makeSized_n(KeywordID::base, size) == KeywordID::base##_##size)
+   CHECK( UINT, 8); CHECK( UINT, 16); CHECK( UINT, 32); CHECK( UINT, 64); CHECK( UINT, 128); CHECK( UINT, 256);
+   CHECK( SINT, 8); CHECK( SINT, 16); CHECK( SINT, 32); CHECK( SINT, 64); CHECK( SINT, 128); CHECK( SINT, 256);
+   CHECK(FLOAT, 8); CHECK(FLOAT, 16); CHECK(FLOAT, 32); CHECK(FLOAT, 64); CHECK(FLOAT, 128); CHECK(FLOAT, 256);
+   #undef CHECK
+   #pragma endregion testsize_n
+   #pragma endregion testsize
    #pragma endregion keyword
 
    //delimiter pair specification

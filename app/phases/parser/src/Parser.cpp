@@ -180,7 +180,8 @@ START_PARSE_STMT:
       UNREACHABLE;
 
       case TokenType::OP          : if (currTok.opID() == OpID::SCOPE_RESOLUTION) { goto PARSE_IDEN; } [[fallthrough]];
-      case TokenType::INT_NUM     : [[fallthrough]];
+      case TokenType::UINT_NUM    : [[fallthrough]];
+      case TokenType::SINT_NUM    : [[fallthrough]];
       case TokenType::REAL_NUM    : [[fallthrough]];
       case TokenType::BLOCK_DELIM : [[fallthrough]];
       case TokenType::PTXT_SEG    : STMT_STARTS_WITH_VALUE: {
@@ -313,8 +314,13 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             operandStack.push_back(+parseIdentifier(SymbolType::EXTERN_IDEN, nullptr, false));
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
-         case TokenType::INT_NUM: //ints
-            operandStack.push_back(+tree.make<Literal>(currTok.intVal()));
+         case TokenType::UINT_NUM: //uints
+            operandStack.push_back(+tree.make<Literal>(currTok.uintVal()));
+            getNextToken();
+            prevTokIsOperand = true;
+            goto PARSE_EXPR_CONTINUE;
+         case TokenType::SINT_NUM: //sints
+            operandStack.push_back(+tree.make<Literal>(currTok.sintVal()));
             getNextToken();
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
