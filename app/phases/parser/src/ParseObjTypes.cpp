@@ -252,6 +252,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(index<Expr> attrs,
 //parse an enumunion declaration/definition
 clef::index<clef::TypeDecl> clef::Parser::parseEnumUnion(index<Expr> attrs) {
    TODO;
+   (void)attrs;
 }
 
 //parse a namespace declaration/definition
