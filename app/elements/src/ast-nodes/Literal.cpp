@@ -8,7 +8,7 @@
 
 mcsl::File& mcsl::write(mcsl::File& file, const clef::Literal& obj) {
    using namespace clef;
-   file.printf(mcsl::FMT("%s literal: "), toString(obj.type()));
+   file.printf(mcsl::FMT("%s literal (%s): "), toString(obj.type()), toString(obj.typeName()));
    switch (obj.type()) {
       case LitType::NONE: break;
 

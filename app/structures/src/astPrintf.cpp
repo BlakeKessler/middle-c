@@ -87,9 +87,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Literal> obj, char 
          case LitType::POINTER: return file.printf(FMT("%r"), (const void*)lit);
 
          //numeric
-         case LitType::UINT: return file.printf(FMT("%u"), (ulong)lit);
-         case LitType::SINT: return file.printf(FMT("%i"), (slong)lit);
-         case LitType::FLOAT: return file.printf(FMT("%f"), (flong)lit);
+         case LitType::UINT: return file.printf(FMT("%u%s"), (ulong)lit, getSuffix(lit.typeName()));
+         case LitType::SINT: return file.printf(FMT("%i%s"), (slong)lit, getSuffix(lit.typeName()));
+         case LitType::FLOAT: return file.printf(FMT("%f%s"), (flong)lit, getSuffix(lit.typeName()));
 
          case LitType::BOOL: return file.printf(FMT("%s"), (bool)lit);
 

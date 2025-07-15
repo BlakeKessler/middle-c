@@ -329,7 +329,7 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
       logError(ErrCode::BAD_PREPROC, "invalid `%s` directive", toString(op));
    }
    const mcsl::str_slice path = parseStrLit();
-   index<Literal> pathLit = tree.make<Literal>(path);
+   index<Literal> pathLit = tree.make<Literal>(path, FundTypeID::CHAR);
    consumeEOS("missing EOS token");
 
 #if !PARALLEL_COMPILE_FILES

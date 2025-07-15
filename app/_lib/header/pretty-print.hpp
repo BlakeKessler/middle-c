@@ -21,6 +21,8 @@ namespace clef {
    constexpr const mcsl::str_slice toString(const FundTypeID);
    constexpr const mcsl::str_slice toString(const QualMask);
    constexpr const mcsl::str_slice toString(const SymbolType);
+
+   constexpr const mcsl::str_slice getSuffix(const FundTypeID);
 };
 
 
@@ -592,6 +594,34 @@ constexpr const mcsl::str_slice clef::toString(const SymbolType type) {
 
       case __TYPE_BIT: UNREACHABLE;
       case null: UNREACHABLE;
+   }
+}
+
+constexpr const mcsl::str_slice clef::getSuffix(const FundTypeID id) {
+   using enum FundTypeID;
+   switch (id) {
+      CASE(UINT8,   "u8");
+      CASE(UINT16,  "u16");
+      CASE(UINT32,  "u32");
+      CASE(UINT64,  "u64");
+      CASE(UINT128, "u128");
+      CASE(UINT256, "u256");
+
+      CASE(SINT8,   "s8");
+      CASE(SINT16,  "s16");
+      CASE(SINT32,  "s32");
+      CASE(SINT64,  "s64");
+      CASE(SINT128, "s128");
+      CASE(SINT256, "s256");
+
+      // CASE(FLOAT8,   "f8");
+      CASE(FLOAT16,  "f16");
+      CASE(FLOAT32,  "f32");
+      CASE(FLOAT64,  "f64");
+      CASE(FLOAT128, "f128");
+      CASE(FLOAT256, "f256");
+
+      default: UNREACHABLE;
    }
 }
 

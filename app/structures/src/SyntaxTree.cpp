@@ -162,15 +162,15 @@ clef::TypeSpec* clef::SyntaxTree::evalType(index<astNode> i) {
             
             case LitType::POINTER: TODO;
 
-            case LitType::UINT: return getFundType(KeywordID::UINT)->type();
-            case LitType::SINT: return getFundType(KeywordID::SINT)->type();
-            case LitType::FLOAT: return getFundType(KeywordID::FLONG)->type();
+            case LitType::UINT: [[fallthrough]];
+            case LitType::SINT: [[fallthrough]];
+            case LitType::FLOAT: [[fallthrough]];
 
-            case LitType::BOOL: return getFundType(KeywordID::BOOL)->type();
-            case LitType::CHAR: return getFundType(KeywordID::CHAR)->type();
+            case LitType::BOOL: [[fallthrough]];
+            case LitType::CHAR: return getFundType(lit.typeName())->type();
 
             case LitType::STRING: { //const char[]
-               SymbolNode* charType = getFundType(KeywordID::CHAR);
+               SymbolNode* charType = getFundType(lit.typeName());
                return makeIndirType(0, charType->type(), QualMask::CONST, IndirTable(IndirTable::Entry(IndirTable::Entry::SLICE, true, false, false)));
             }
             case LitType::INTERP_STR: TODO;

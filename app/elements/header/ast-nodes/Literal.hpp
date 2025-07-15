@@ -21,36 +21,38 @@ struct [[clang::trivial_abi]] clef::Literal {
          mcsl::str_slice _regexLit;
          TypeSpec* _typeid;
       };
+      FundTypeID _typeName;
       LitType _type;
    public:
       static constexpr NodeType nodeType() { return NodeType::LITERAL; }
 
       #pragma region constructors
-      Literal(const char ch):_charLit{ch},_type{LitType::CHAR} {}
-      template<mcsl::uint_t  uint_t > Literal(const  uint_t i):_uintLit{i}, _type{LitType::UINT}  {}
-      template<mcsl::sint_t  sint_t > Literal(const  sint_t i):_sintLit{i}, _type{LitType::SINT}  {}
-      template<mcsl::float_t float_t> Literal(const float_t i):_floatLit{i},_type{LitType::FLOAT} {}
-      Literal(const bool b):_boolLit{b},_type{LitType::BOOL} {}
-      Literal(mcsl::str_slice str):_strLit{str},_type{LitType::STRING} {}
-      Literal(mcsl::str_slice str, const LitType type):_strLit{str},_type{type} {
+      Literal(const char ch, FundTypeID t):_charLit{ch},_typeName(t),_type{LitType::CHAR}  { debug_assert(isChar(t)); }
+      Literal(const ulong i, FundTypeID t):_uintLit{i}, _typeName(t),_type{LitType::UINT}  { debug_assert(isUint(t)); }
+      Literal(const slong i, FundTypeID t):_sintLit{i}, _typeName(t),_type{LitType::SINT}  { debug_assert(isSint(t)); }
+      Literal(const flong i, FundTypeID t):_floatLit{i},_typeName(t),_type{LitType::FLOAT} { debug_assert(isFloat(t)); }
+      Literal(const bool b):_boolLit{b},_typeName(FundTypeID::BOOL),_type{LitType::BOOL} {}
+      Literal(mcsl::str_slice str, FundTypeID t):_strLit{str},_typeName{t},_type{LitType::STRING} { debug_assert(isChar(t)); }
+      Literal(mcsl::str_slice str, FundTypeID t, const LitType type):_strLit{str},_typeName{t},_type{type} {
+         debug_assert(isChar(t));
          //check type
          if (_type != LitType::STRING && _type != LitType::INTERP_STR && _type != LitType::FORMAT && _type != LitType::REGEX) {
             throwError(ErrCode::BAD_LITERAL, mcsl::FMT("attempt to construct string-like Literal node with non-string-like LitType"));
          }
       }
-      Literal(TypeSpec* typeID):_typeid{typeID},_type{LitType::TYPEID} {}
+      Literal(TypeSpec* typeID):_typeid{typeID},_typeName{FundTypeID::null},_type{LitType::TYPEID} {}
 
-      Literal(void* ptr):_ptrLit{ptr},_type{LitType::POINTER} {}
+      Literal(void* ptr):_ptrLit{ptr},_typeName{FundTypeID::null},_type{LitType::POINTER} {}
 
       Literal(Literal& other) {
          if (this != &other) {
-            assert((ulong)absdif(this, &other) >= 8U*sizeof(Literal));
             std::memcpy((void*)this, &other, sizeof(Literal));
          }
       }
       #pragma endregion constructors
 
       LitType type() const { return _type; }
+      FundTypeID typeName() const { return _typeName; }
 
       [[noreturn]] void throwCastErr(LitType target) const { throwError(ErrCode::BAD_LIT_CAST, mcsl::FMT("%u to %u"), +_type, +target); }
 

@@ -315,27 +315,27 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
          case TokenType::UINT_NUM: //uints
-            operandStack.push_back(+tree.make<Literal>(currTok.uintVal()));
+            operandStack.push_back(+tree.make<Literal>(currTok.uintVal(), tree.toFundTypeID(currTok.keywordID())));
             getNextToken();
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
          case TokenType::SINT_NUM: //sints
-            operandStack.push_back(+tree.make<Literal>(currTok.sintVal()));
+            operandStack.push_back(+tree.make<Literal>(currTok.sintVal(), tree.toFundTypeID(currTok.keywordID())));
             getNextToken();
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
          case TokenType::REAL_NUM: //floats
-            operandStack.push_back(+tree.make<Literal>(currTok.realVal()));
+            operandStack.push_back(+tree.make<Literal>(currTok.realVal(), tree.toFundTypeID(currTok.keywordID())));
             getNextToken();
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
          case TokenType::PTXT_SEG: //strings and chars
             prevTokIsOperand = true;
             if (isString(currTok.ptxtType())) {
-               operandStack.push_back(+tree.make<Literal>(parseStrLit()));
+               operandStack.push_back(+tree.make<Literal>(parseStrLit(), FundTypeID::CHAR));
                goto PARSE_EXPR_CONTINUE;
             } else if (currTok.ptxtType() == PtxtType::CHAR) {
-               operandStack.push_back(+tree.make<Literal>(currTok.charVal()));
+               operandStack.push_back(+tree.make<Literal>(currTok.charVal(), FundTypeID::CHAR));
                getNextToken();
                goto PARSE_EXPR_CONTINUE;
             } else {
@@ -765,6 +765,7 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
 //parse a macro declaration
 clef::index<clef::MacroDef> clef::Parser::parseMacro(index<Expr> attrs) {
    TODO;
+   (void)attrs;
 }
 
 //parse a function signature (params and return type)
@@ -807,6 +808,7 @@ mcsl::tuple<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*, clef::in
 //parse an inline assembly block
 clef::index<clef::Asm> clef::Parser::parseASM(index<Expr> attrs) {
    TODO;
+   (void)attrs;
 }
 
 //parse a single attribute (attribute operator must aleady be consumed)
