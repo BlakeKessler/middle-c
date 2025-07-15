@@ -49,7 +49,7 @@ struct [[clang::trivial_abi]] clef::Token {
       
       const mcsl::str_slice& name() const { debug_assert(_type == TokenType::IDEN); return _name; }
       ulong uintVal() const { debug_assert(_type == TokenType::UINT_NUM); return _uintVal; }
-      ulong sintVal() const { debug_assert(_type == TokenType::SINT_NUM); return _sintVal; }
+      slong sintVal() const { debug_assert(_type == TokenType::SINT_NUM); return _sintVal; }
       flong realVal() const { debug_assert(_type == TokenType::REAL_NUM); return _realVal; }
       const mcsl::str_slice& strVal() const { debug_assert(_type == TokenType::PTXT_SEG && _ptxtType == PtxtType::STR); return _strVal; }
       const mcsl::str_slice& unprocessedStrVal() const { debug_assert(_type == TokenType::PTXT_SEG && _ptxtType == PtxtType::UNPROCESSED_STR); return _strVal; }
