@@ -221,7 +221,7 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
             debug_assert(canDownCastTo(expr.rhsType(), NodeType::ARG_LIST));
             auto tmp = deduceOverload(symbol, +expr.rhs());
             if (!std::get<0>(tmp)) {
-               throwError(ErrCode::TYPECHECK_ERR, FMT("no matching function signature found for func `%s%s`"), astTNB{self, (index<Identifier>)expr.lhs(), 0}, astTTsB{self, std::get<2>(tmp), 0});
+               throwError(ErrCode::TYPECHECK_ERR, FMT("no matching function signature found for func `%s(%s)`"), astTNB{self, (index<Identifier>)expr.lhs(), 0}, astTNB{self, (index<ArgList>)expr.rhs(), 0});
             }
             lhs.overloadIndex() = std::get<1>(tmp);
             debug_assert(std::get<2>(tmp)->metaType() == TypeSpec::FUNC_SIG);
@@ -629,20 +629,31 @@ mcsl::tuple<bool, clef::index<void>, clef::TypeSpec*> clef::SyntaxTree::deduceOv
       debug_assert(sig);
       debug_assert(sig->metaType() == TypeSpec::FUNC_SIG);
       auto& params = sig->funcSig().params;
+
+      uint len;
+      //special case for variadics
+      if (params.size() && +(params.back().second & QualMask::VARIADIC)) {
+         if (args.size() < params.size() - 1) {
+            goto DEDUCE_CONTINUE;
+         }
+         len = mcsl::min(args.size(), params.size() - 1);
+      }
       //check argc
-      if (params.size() != args.size()) {
+      else if (args.size() != params.size()) {
          goto DEDUCE_CONTINUE;
+      } else {
+         len = args.size();
       }
       //check that the arguments match the parameters
-      for (uint j = 0; j < args.size(); ++j) {
+      for (uint j = 0; j < len; ++j) {
          if (self[args[j]].evalType() != params[j].first) {
             goto DEDUCE_CONTINUE;
          }
          //!TODO: check implicit casts
          //!TODO: generic parameters
-         //!TODO: variadic parameters
          //!TODO: check type qualifiers
       }
+      //!TODO: check constraints for variadic parameters
       //all arguments match parameters
       return {true, i, sig};
 
