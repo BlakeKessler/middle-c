@@ -502,7 +502,14 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
    
    //!TODO: make this less janky
    if (isDecl) {
-      if (symbol->symbolType() == SymbolType::null || symbol->symbolType() == SymbolType::EXTERN_IDEN || (isType(symbolType) && symbol->symbolType() == SymbolType::EXTERN_TYPE)) {
+      if (symbol->symbolType() == SymbolType::FUNC) {
+         if (symbolType == SymbolType::FUNC || symbolType == SymbolType::null || symbolType == SymbolType::EXTERN_IDEN || symbolType == SymbolType::EXTERN_TYPE) { //define an overload
+            TODO;
+         } else {
+            logError(ErrCode::TYPECHECK_ERR, "cannot redeclare a func as a %s", toString(symbolType));
+         }
+      }
+      else if (symbol->symbolType() == SymbolType::null || symbol->symbolType() == SymbolType::EXTERN_IDEN || (isType(symbolType) && symbol->symbolType() == SymbolType::EXTERN_TYPE)) {
          symbol->setSymbolType(symbolType);
       } else {
          if (symbolType != SymbolType::null && symbolType != SymbolType::EXTERN_IDEN && symbolType != SymbolType::EXTERN_TYPE) {

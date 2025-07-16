@@ -170,7 +170,7 @@ clef::TypeSpec* clef::SyntaxTree::evalType(index<astNode> i) {
 
             case LitType::STRING: { //const char[]
                SymbolNode* charType = getFundType(lit.typeName());
-               return makeIndirType(0, charType->type(), QualMask::CONST, IndirTable(IndirTable::Entry(IndirTable::Entry::SLICE, true, false, false)));
+               return makeIndirType(0, charType->type(), QualMask::CONST, IndirTable(IndirTable::Entry(IndirTable::Entry::SLICE, false, false, false)));
             }
             case LitType::INTERP_STR: TODO;
             case LitType::FORMAT: TODO;
@@ -212,14 +212,21 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
    
    //constructors and function calls
    if (expr.opID() == OpID::CALL_INVOKE || expr.opID() == OpID::LIST_INVOKE) {
-      if (expr.lhsType() == NodeType::IDEN) {
+      if (canDownCastTo(expr.lhsType(), NodeType::IDEN)) {
          Identifier& lhs = self[(index<Identifier>)expr.lhs()];
          SymbolNode* symbol = lhs.symbol();
          if (isType(symbol->symbolType())) { //constructors
             expr.evalType() = symbol->type();
          } else if (symbol->symbolType() == SymbolType::FUNC) { //functions
-            //!TODO: deduce and update overload index
-            expr.evalType() = symbol->getOverload(lhs.overloadIndex()).first->funcSig().retType;
+            debug_assert(canDownCastTo(expr.rhsType(), NodeType::ARG_LIST));
+            auto tmp = deduceOverload(symbol, +expr.rhs());
+            if (!std::get<0>(tmp)) {
+               throwError(ErrCode::TYPECHECK_ERR, FMT("no matching function signature found for func `%s%s`"), astTNB{self, (index<Identifier>)expr.lhs(), 0}, astTTsB{self, std::get<2>(tmp), 0});
+            }
+            lhs.overloadIndex() = std::get<1>(tmp);
+            debug_assert(std::get<2>(tmp)->metaType() == TypeSpec::FUNC_SIG);
+            expr.evalType() = std::get<2>(tmp)->funcSig().retType;
+            return;
          }
          else {
             TODO;
@@ -602,6 +609,49 @@ void clef::SyntaxTree::updateEvalType_r(index<Expr> i) {
 
    //update own type
    updateEvalType(i);
+}
+
+mcsl::tuple<bool, clef::index<void>, clef::TypeSpec*> clef::SyntaxTree::deduceOverload(SymbolNode* symbol, index<ArgList> argv) {
+   //validate argv
+   auto args = self[argv].span();
+   for (index<Expr> arg : args) {
+      if (!arg || !self[arg].evalType()) {
+         TODO;
+      }
+   }
+
+   //deduce overload
+   debug_assert(symbol);
+   debug_assert(symbol->symbolType() == SymbolType::FUNC);
+   auto overloads = symbol->overloads();
+   for (uint i = 0; i < overloads.size(); ++i) {
+      auto [sig, def] = overloads[i];
+      debug_assert(sig);
+      debug_assert(sig->metaType() == TypeSpec::FUNC_SIG);
+      auto& params = sig->funcSig().params;
+      //check argc
+      if (params.size() != args.size()) {
+         goto DEDUCE_CONTINUE;
+      }
+      //check that the arguments match the parameters
+      for (uint j = 0; j < args.size(); ++j) {
+         if (self[args[j]].evalType() != params[j].first) {
+            goto DEDUCE_CONTINUE;
+         }
+         //!TODO: check implicit casts
+         //!TODO: generic parameters
+         //!TODO: variadic parameters
+         //!TODO: check type qualifiers
+      }
+      //all arguments match parameters
+      return {true, i, sig};
+
+      //emulate labeled loops
+      DEDUCE_CONTINUE:
+   }
+
+   //no valid overload found
+   return {false, 0, nullptr};
 }
 
 clef::TypeSpec* clef::SyntaxTree::commonType(TypeSpec* t1, TypeSpec* t2) {

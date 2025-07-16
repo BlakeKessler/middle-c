@@ -71,6 +71,8 @@ class clef::SyntaxTree {
       // uint popNodesAfter(index<astNode>); //inclusive
       TypeSpec* makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable&& table);
 
+      mcsl::tuple<bool, index<void>, TypeSpec*> deduceOverload(SymbolNode*, index<ArgList>); //isValid, overload index, signature
+
       mcsl::str_slice extractStrLit(index<Expr> strLitExpr);
       index<Expr> findAttr(index<Expr> attrs, SymbolNode* name) { return 0; (void)attrs; (void)name; }
 
