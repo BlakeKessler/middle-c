@@ -735,4 +735,19 @@ mcsl::str_slice clef::SyntaxTree::extractStrLit(index<Expr> strLitExpr) {
    return lit;
 }
 
+clef::index<clef::Expr> clef::SyntaxTree::findAttr(index<Expr> attrs, SymbolNode* name) {
+   if (!attrs || !name) { return 0; }
+   do {
+      Expr& expr = self[attrs];
+      if (expr.opID() == OpID::ATTRIBUTE && expr.lhs() && expr.lhsType() == NodeType::IDEN && self[(index<Identifier>)expr.lhs()].symbol() == name) {
+         return attrs;
+      }
+      if (!canDownCastTo(expr.extraType2(), NodeType::EXPR)) {
+         return 0;
+      }
+      attrs = +expr.extra2();
+   } while (attrs);
+   return attrs;
+}
+
 #endif //SYNTAX_TREE_CPP

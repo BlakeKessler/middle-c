@@ -74,7 +74,7 @@ class clef::SyntaxTree {
       mcsl::tuple<bool, index<void>, TypeSpec*> deduceOverload(SymbolNode*, index<ArgList>); //isValid, overload index, signature
 
       mcsl::str_slice extractStrLit(index<Expr> strLitExpr);
-      index<Expr> findAttr(index<Expr> attrs, SymbolNode* name) { return 0; (void)attrs; (void)name; }
+      index<Expr> findAttr(index<Expr> attrs, SymbolNode* name);
 
       mcsl::str_slice storeString(const mcsl::str_slice);
       mcsl::str_slice storeString(mcsl::string&&);
