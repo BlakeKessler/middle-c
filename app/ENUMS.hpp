@@ -105,7 +105,6 @@ namespace clef {
             SWITCH,
             MATCH,
             ASM,
-            TRY_CATCH,
       SWITCH_CASES,
       MATCH_CASES,
       STMT_SEQ,
@@ -115,9 +114,9 @@ namespace clef {
    constexpr bool canDownCastTo(const NodeType from, const NodeType to) {
       switch (to) {
          case NodeType::EXPR:
-            return from >= NodeType::EXPR && from <= NodeType::TRY_CATCH;
+            return from >= NodeType::EXPR && from <= NodeType::ASM;
          case NodeType::STMT:
-            return from >= NodeType::STMT && from <= NodeType::TRY_CATCH;
+            return from >= NodeType::STMT && from <= NodeType::ASM;
          
          default:
             return from == to;
@@ -270,7 +269,6 @@ namespace clef {
       SWITCH,
       MATCH,
 
-      TRY_CATCH,
       ASM,
 
       BREAK,
@@ -543,7 +541,6 @@ namespace clef {
       MATCH,
       CASE,
       DEFAULT,
-      TRY,
       CATCH,
       THROW,
 

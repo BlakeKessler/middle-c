@@ -40,7 +40,6 @@ namespace clef {
             struct If;
             struct Switch;
             struct Match;
-            struct TryCatch;
             struct Asm; //!TODO: implement asm
       struct SwitchCases;
       struct MatchCases;
@@ -50,7 +49,7 @@ namespace clef {
       template<typename T> concept astNode_ptr_t = mcsl::ptr_t<T> && astNode_t<mcsl::remove_ptr<T>>;
       template<typename T> concept operand_t = mcsl::is_t<T, clef::Identifier> || mcsl::is_t<T,Expression> || mcsl::is_t<T,Literal>;
       #define CLEF_ALL_FUND_AST_NODE_T Expression, Literal, Scope, Identifier, Statement
-      #define CLEF_ALL_EXPR_AST_NODE_T Declaration, FuncDef, MacroDef, TypeDecl, If, ForLoop, ForeachLoop, WhileLoop, DoWhileLoop, Switch, Match, TryCatch, Asm
+      #define CLEF_ALL_EXPR_AST_NODE_T Declaration, FuncDef, MacroDef, TypeDecl, If, ForLoop, ForeachLoop, WhileLoop, DoWhileLoop, Switch, Match, Asm
       #define CLEF_ALL_NODE_LIST_AST_NODE_T ArgumentList, MatchCases, StatementSequence, SwitchCases
       #define CLEF_ALL_AST_NODE_T CLEF_ALL_FUND_AST_NODE_T, CLEF_ALL_EXPR_AST_NODE_T, CLEF_ALL_NODE_LIST_AST_NODE_T
    class TypeSpec;

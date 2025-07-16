@@ -257,24 +257,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Match> obj, char mo
    UNREACHABLE;
 }
 
-//print a try-catch block
-//ignores all format codes
-uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::TryCatch> obj, char mode, FmtArgs fmt) {
-   using namespace clef;
-   if (!obj) {
-      return 0;
-   }
-   const TryCatch& trycatch = *obj;
-   if ((mode | CASE_BIT) == 's') { //print as human-readable Middle-C code
-      return file.printf(FMT("try %s catch (%s) %s"), TNB(trycatch.procedure()), TNB(trycatch.err()), TNB(trycatch.errHandler()));
-   } else if ((mode | CASE_BIT) == 'b') { //print in binary format
-      return file.printf(FMT("%b%b%b"), TNB(trycatch.procedure()), TNB(trycatch.err()), TNB(trycatch.errHandler()));
-   } else {
-      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<TryCatch>"), mode);
-   }
-   UNREACHABLE;
-}
-
 //print a declaration
 //altMode: suppress printing of `let` prefix
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Decl> obj, char mode, FmtArgs fmt) {
@@ -545,7 +527,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case IF       : charsPrinted += writef(file, TNB_CAST(If),          mode, fmt); break;
          case SWITCH   : charsPrinted += writef(file, TNB_CAST(Switch),      mode, fmt); break;
          case MATCH    : charsPrinted += writef(file, TNB_CAST(Match),       mode, fmt); break;
-         case TRY_CATCH: charsPrinted += writef(file, TNB_CAST(TryCatch),    mode, fmt); break;
          case ASM      : charsPrinted += writef(file, TNB_CAST(Asm),         mode, fmt); break;
          case LET      : charsPrinted += writef(file, TNB_CAST(Decl),        mode, fmt); break;
          case MAKE_TYPE: charsPrinted += writef(file, TNB_CAST(TypeDecl),    mode, fmt); break;
@@ -597,7 +578,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          CASE(If);
          CASE(Switch);
          CASE(Match);
-         CASE(TryCatch);
          CASE(Asm);
          CASE(Decl);
          CASE(FuncDef);

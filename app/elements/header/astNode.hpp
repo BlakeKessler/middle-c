@@ -20,7 +20,6 @@
 #include "ast-nodes/exprs/DoWhileLoop.hpp"
 #include "ast-nodes/exprs/Switch.hpp"
 #include "ast-nodes/exprs/Match.hpp"
-#include "ast-nodes/exprs/TryCatch.hpp"
 #include "ast-nodes/exprs/Asm.hpp"
 #include "ast-nodes/node-lists/ArgumentList.hpp"
 #include "ast-nodes/node-lists/MatchCases.hpp"
@@ -30,9 +29,9 @@
 
 #include "MAP_MACRO.h"
 #define CLEF_ALL_AST_NODE_UNION_MEMBS \
-   _identifier, _scope, _literal, _expression, _declaration, _typeDecl, _funcDef, _macroDef, \
-   _forLoop, _foreachLoop, _whileLoop, _doWhileLoop, _if, _switch, _match, _tryCatch, _asm,  \
-   _switchCases, _matchCases, _statement, _statementSequence, _argumentList
+   _identifier, _scope, _literal, _expression, _declaration, _typeDecl, _funcDef, _macroDef,   \
+   _forLoop, _foreachLoop, _whileLoop, _doWhileLoop, _if, _switch, _match, _asm, _switchCases, \
+   _matchCases, _statement, _statementSequence, _argumentList
 
 struct clef::astNode {
    private:
@@ -52,7 +51,6 @@ struct clef::astNode {
          If _if;
          Switch _switch;
          Match _match;
-         TryCatch _tryCatch;
          Asm _asm;
          SwitchCases _switchCases;
          MatchCases _matchCases;

@@ -106,7 +106,6 @@ class clef::KeywordDecoder {
          {"match", KeywordID::MATCH},
          {"case", KeywordID::CASE},
          {"default", KeywordID::DEFAULT},
-         {"try", KeywordID::TRY},
          {"catch", KeywordID::CATCH},
          {"throw", KeywordID::THROW},
          {"this", KeywordID::THIS},

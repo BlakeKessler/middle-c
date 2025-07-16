@@ -43,7 +43,6 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
       case If::nodeType():
       case Switch::nodeType():
       case Match::nodeType():
-      case TryCatch::nodeType():
       case Asm::nodeType():
          return +index;
 
@@ -196,8 +195,7 @@ clef::TypeSpec* clef::SyntaxTree::evalType(index<astNode> i) {
       case NodeType::IF: [[fallthrough]];
       case NodeType::SWITCH: [[fallthrough]];
       case NodeType::MATCH: [[fallthrough]];
-      case NodeType::ASM: [[fallthrough]];
-      case NodeType::TRY_CATCH:
+      case NodeType::ASM:
          return self[(index<Expr>)i].evalType();
       #pragma endregion exprs
 
@@ -343,7 +341,6 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
             case OpID::IF: [[fallthrough]];
             case OpID::SWITCH: [[fallthrough]];
             case OpID::MATCH: [[fallthrough]];
-            case OpID::TRY_CATCH: [[fallthrough]];
             case OpID::ASM: [[fallthrough]];
             case OpID::BREAK: [[fallthrough]];
             case OpID::CONTINUE: [[fallthrough]];
@@ -535,7 +532,6 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
       case OpID::SWITCH: [[fallthrough]];
       case OpID::MATCH: [[fallthrough]];
 
-      case OpID::TRY_CATCH: [[fallthrough]];
       case OpID::ASM: [[fallthrough]];
 
       case OpID::BREAK: [[fallthrough]];

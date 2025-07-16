@@ -53,7 +53,6 @@ constexpr const mcsl::str_slice clef::toString(const NodeType type) {
       CASE(SWITCH, "SWITCH");
       CASE(MATCH, "MATCH");
       CASE(ASM, "ASM");
-      CASE(TRY_CATCH, "TRY_CATCH");
       CASE(SWITCH_CASES, "SWITCH_CASES");
       CASE(MATCH_CASES, "MATCH_CASES");
       CASE(STMT_SEQ, "STATEMENT_SEQUENCE");
@@ -204,7 +203,6 @@ constexpr const mcsl::str_slice clef::toString(const OpID op) {
       CASE(SWITCH, "SWITCH");
       CASE(MATCH, "MATCH");
 
-      CASE(TRY_CATCH, "TRY_CATCH");
       CASE(ASM, "ASM");
 
       CASE(BREAK, "BREAK");
@@ -382,7 +380,6 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(CASE, "case");
       CASE(DEFAULT, "default");
 
-      CASE(TRY, "try");
       CASE(CATCH, "catch");
       CASE(THROW, "throw");
 

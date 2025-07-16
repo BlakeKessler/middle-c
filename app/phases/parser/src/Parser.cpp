@@ -101,9 +101,6 @@ START_PARSE_STMT:
                return addAttrs(tree.make<Stmt>(OpID::GOTO, label), attrs);
             }
 
-            case KeywordID::TRY           : getNextToken(); return addAttrs(parseTryCatch(), attrs); break;
-            case KeywordID::CATCH         : logError(ErrCode::BAD_KEYWORD, "floating CATCH");
-
             case KeywordID::BREAK         :
                getNextToken();
                consumeEOS("bad BREAK");
@@ -666,20 +663,6 @@ clef::index<clef::Match> clef::Parser::parseMatch() {
 
    //return
    return tree.make<Match>(condition, cases);
-}
-
-//parse a try-catch block
-clef::index<clef::TryCatch> clef::Parser::parseTryCatch() {
-   //parse the code in the try block
-   index<Scope> procedure = parseProcedure();
-   //parse the catch block
-   consumeKeyword(KeywordID::CATCH, "TRY block without CATCH block");
-   consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "CATCH block without opening parens");
-   index<Decl> err = parseParam(tryParseAttrs()); //error variable
-   consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "CATCH block without closing parens");
-   //parse the error handler code
-   index<Scope> handler = parseProcedure();
-   return tree.make<TryCatch>(procedure, err, handler);
 }
 
 //parse a function

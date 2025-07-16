@@ -86,8 +86,6 @@ class clef::Parser {
       index<Switch> parseSwitch();
       index<Match> parseMatch();
 
-      index<TryCatch> parseTryCatch();
-
       index<FuncDef> parseFunction(index<Expr> attrs); //function, signature
       index<MacroDef> parseMacro(index<Expr> attrs); //macro, signature
       mcsl::tuple<index<void>, mcsl::dyn_arr<index<Expr>>*, index<Identifier>> parseFuncSig(SymbolNode* target);

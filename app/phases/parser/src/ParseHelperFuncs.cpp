@@ -439,7 +439,6 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
       case If::nodeType():
       case Switch::nodeType():
       case Match::nodeType():
-      case TryCatch::nodeType():
       case Asm::nodeType():
          return +index;
 
