@@ -54,7 +54,7 @@ clef::TypeSpec::TypeSpec(TypeSpec&& other) {
          MOVE(impls);
          MOVE(dataMembs);
          MOVE(methods);
-         // MOVE(ops);
+         MOVE(ops);
          MOVE(staticMembs);
          MOVE(staticFuncs);
          MOVE(subtypes);
@@ -86,7 +86,7 @@ clef::TypeSpec::~TypeSpec() {
          std::destroy_at(&_composite.impls);
          std::destroy_at(&_composite.dataMembs);
          std::destroy_at(&_composite.methods);
-         // std::destroy_at(&_composite.ops);
+         std::destroy_at(&_composite.ops);
          std::destroy_at(&_composite.staticMembs);
          std::destroy_at(&_composite.staticFuncs);
          std::destroy_at(&_composite.subtypes);
@@ -125,7 +125,7 @@ clef::TypeSpec::TypeSpec(const TypeSpec& other):
             __cpy(impls);
             __cpy(dataMembs);
             __cpy(methods);
-            // __cpy(ops);
+            __cpy(ops);
             __cpy(staticMembs);
             __cpy(staticFuncs);
             __cpy(subtypes);
@@ -162,7 +162,7 @@ bool clef::TypeSpec::operator==(const TypeSpec& other) const {
          __checkSize(impls);
          __checkSize(dataMembs);
          __checkSize(methods);
-         // __checkSize(ops);
+         __checkSize(ops);
          __checkSize(staticMembs);
          __checkSize(staticFuncs);
          __checkSize(subtypes);
@@ -197,7 +197,7 @@ bool clef::TypeSpec::operator==(const TypeSpec& other) const {
                   return false; \
                } */ TODO; \
             }
-         // __checkMap(ops);
+         __checkMap(ops);
          #undef __checkMap
 
          return true;
