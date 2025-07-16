@@ -54,7 +54,7 @@ class clef::IndirTable {
 
             bool setQuals(QualMask quals); //returns whether illegal modifiers are included
 
-            operator bool() const { return _data; }
+            explicit operator bool() const { return _data; }
             bool operator==(const Entry other) const { return _data == other._data; }
             bool isSame(const Entry other) const;
       };
@@ -79,9 +79,10 @@ class clef::IndirTable {
             Entry operator[](ubyte i) const { return _elems[i]; }
 
             EntryBlock operator&(const uint64 mask) const { return {_data & mask}; }
-            EntryBlock operator^(const EntryBlock mask) const { return {_data ^ mask}; }
+            EntryBlock operator^(const EntryBlock mask) const { return {_data ^ mask._data}; }
 
-            operator bool() const { return _data; }
+            operator uint64() const { return _data; }
+            explicit operator bool() const { return _data; }
             bool operator==(const EntryBlock other) const { return _data == other._data; }
       };
       static_assert(sizeof(EntryBlock) == sizeof(uint64));
@@ -128,7 +129,7 @@ class clef::IndirTable {
    private:
       void __push_back(Entry entry);
    public:
-      operator bool() const { return _size; }
+      explicit operator bool() const { return _size; }
       bool operator==(const IndirTable& other) const;
 
       auto hash() const {

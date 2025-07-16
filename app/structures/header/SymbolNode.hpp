@@ -39,7 +39,7 @@ class clef::SymbolNode {
       void setSymbolType(SymbolType symbolType) { _symbolType = symbolType; }
       void setType(TypeSpec* type) { _type = type;}
 
-      operator bool() const; //if anything has been done with the node
+      explicit operator bool() const; //if anything has been done with the node
 
       SymbolNode** find(mcsl::str_slice name);
       SymbolNode* get(mcsl::str_slice name); //single-token identifier

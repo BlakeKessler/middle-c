@@ -19,7 +19,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(index<Expr> attrs, 
    }
    
    if (spec->metaType() != TypeSpec::COMPOSITE) {
-      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of %s `%s`", metatypeName, *symbol);
+      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of %s `%s`", metatypeName, astTSB{tree, symbol, 0});
    }
    PUSH_SCOPE;
 
@@ -28,7 +28,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(index<Expr> attrs, 
       do {
          index<Identifier> parentType = parseTypename(SymbolType::TRAIT, false);
          if (!spec->composite().impls.insert(tree[parentType].symbol())) {
-            logError(ErrCode::BAD_TYPE_DECL, "%s `%s` already implements trait `%s`", metatypeName, *tree[parentType].symbol());
+            logError(ErrCode::BAD_TYPE_DECL, "%s `%s` already implements trait `%s`", metatypeName, astTSB{tree, tree[parentType].symbol(), 0});
          }
       } while (tryConsumeOperator(OpID::COMMA));
    }
@@ -93,7 +93,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseTrait(index<Expr> attrs) {
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, SymbolType::TRAIT);
    if (spec->metaType() != TypeSpec::COMPOSITE) {
-      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of trait `%s`", *symbol);
+      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of trait `%s`", astTSB{tree, symbol, 0});
    }
    if (attrs) { TODO; }
 
@@ -108,7 +108,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseTrait(index<Expr> attrs) {
       do {
          index<Identifier> parentType = parseTypename(SymbolType::TRAIT, false);
          if (!spec->composite().impls.insert(tree[parentType].symbol())) {
-            logError(ErrCode::BAD_TYPE_DECL, "trait `%s` already extends trait `%s`", *tree[parentType].symbol());
+            logError(ErrCode::BAD_TYPE_DECL, "trait `%s` already extends trait `%s`", astTSB{tree, tree[parentType].symbol(), 0});
          }
       } while (tryConsumeOperator(OpID::COMMA));
    }
@@ -167,7 +167,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion(index<Expr> attrs) {
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, SymbolType::UNION);
    if (spec->metaType() != TypeSpec::COMPOSITE) {
-      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of union `%s`", *symbol);
+      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of union `%s`", astTSB{tree, symbol, 0});
    }
    if (attrs) { TODO; }
 
@@ -207,7 +207,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(index<Expr> attrs,
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, symbolType);
    if (spec->metaType() != TypeSpec::COMPOSITE) {
-      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of %s `%s`", metatypeName, *symbol);
+      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of %s `%s`", metatypeName, astTSB{tree, symbol, 0});
    }
    if (attrs) { TODO; }
 
@@ -261,7 +261,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace(index<Expr> attrs) {
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, SymbolType::NAMESPACE);
    if (spec->metaType() != TypeSpec::COMPOSITE) {
-      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of namespace `%s`", *symbol);
+      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of namespace `%s`", astTSB{tree, symbol, 0});
    }
    if (attrs) { TODO; }
 

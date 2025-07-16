@@ -35,7 +35,7 @@ clef::SymbolNode::SymbolNode(mcsl::str_slice name, decltype(_aliases) aliases, S
 
 }
 clef::SymbolNode::SymbolNode(const SymbolNode& other):
-   _childSymbols(other),
+   _childSymbols(other._childSymbols),
    _name{other._name},
    _aliases{other._aliases},
    _parentScope{other._parentScope},
@@ -59,6 +59,7 @@ clef::SymbolNode::SymbolNode(SymbolNode&& other):
 
 void clef::SymbolNode::release() {
    _childSymbols.release();
+   _anonChildren.release();
    _aliases.release();
    _overloads.release();
 }

@@ -808,7 +808,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::SwitchCases> obj, c
       for (uint i = 0; i < caseBuf.size(); ++i) {
          charsPrinted += file.printf(FMT("%b%b"), TNB(caseBuf[i].first), TNB(caseBuf[i].second));
       }
-      charsPrinted += file.printf(FMT("%b"), scope);
+      charsPrinted += file.printf(FMT("%b"), TNB(cases.procedure()));
       return charsPrinted;
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<SwitchCases>"), mode);

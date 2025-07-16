@@ -52,7 +52,7 @@ class clef::TypeSpec {
             mcsl::set<ScopedSymbol, ScopedSymbol::hash> impls; //implemented traits
             mcsl::dyn_arr<ScopedSymbol> dataMembs;
             mcsl::set<ScopedSymbol, ScopedSymbol::hash> methods;
-            mcsl::map<OpID, ScopedSymbol> ops;
+            // mcsl::map<OpID, mcsl::map<mcsl::pair<TypeSpec*, TypeSpec*>, mcsl::pair<ScopedSymbol, index<void>>>> ops;
             mcsl::dyn_arr<ScopedSymbol> staticMembs;
             mcsl::set<ScopedSymbol, ScopedSymbol::hash> staticFuncs;
             mcsl::set<ScopedSymbol, ScopedSymbol::hash> subtypes;

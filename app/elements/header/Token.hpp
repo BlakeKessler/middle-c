@@ -16,15 +16,21 @@ struct [[clang::trivial_abi]] clef::Token {
          ulong _uintVal;
          slong _sintVal;
          flong _realVal;
-         const mcsl::str_slice _strVal;
-         char _charVal;
-      };
-      union {
-         KeywordID _keyword;
+         struct {
+            union {
+               const mcsl::str_slice _strVal;
+               char _charVal;
+               char8 _char8Val;
+               char16 _char16Val;
+               char32 _char32Val;
+            };
+            PtxtType _ptxtType;
+         };
+
          OpData _op;
          mcsl::pair<BlockType,BlockDelimRole> _blockDelim;
-         PtxtType _ptxtType;
       };
+      KeywordID _keyword;
       TokenType _type;
    public:
       //constructors
@@ -38,7 +44,10 @@ struct [[clang::trivial_abi]] clef::Token {
       Token(const OpData op):_op{op},_type{TokenType::OP} {}
       Token(const BlockType type, const BlockDelimRole role):_blockDelim{mcsl::pair{type,role}},_type{TokenType::BLOCK_DELIM} {}
       Token(const mcsl::str_slice val, const PtxtType type):_strVal{val},_ptxtType{type},_type{TokenType::PTXT_SEG} {}
-      Token(const char c):_charVal{c},_ptxtType{PtxtType::CHAR},_type{TokenType::PTXT_SEG} {}
+      Token(const char c):_charVal{c},_ptxtType{PtxtType::CHAR},_keyword{KeywordID::CHAR},_type{TokenType::PTXT_SEG} {}
+      Token(const char8 c):_char8Val{c},_ptxtType{PtxtType::CHAR},_keyword{KeywordID::CHAR_8},_type{TokenType::PTXT_SEG} {}
+      Token(const char16 c):_char16Val{c},_ptxtType{PtxtType::CHAR},_keyword{KeywordID::CHAR_16},_type{TokenType::PTXT_SEG} {}
+      Token(const char32 c):_char32Val{c},_ptxtType{PtxtType::CHAR},_keyword{KeywordID::CHAR_32},_type{TokenType::PTXT_SEG} {}
       Token(const TokenType type):_type{type} { debug_assert(_type == TokenType::PREPROC_INIT || _type == TokenType::PREPROC_EOS || _type == TokenType::EOS || _type == TokenType::ESC); } //intended for PREPROC_INIT, PREPROC_EOS, EOS, ESC only
 
       Token(const Token& other) { mcsl::memcpy((ubyte*)this, (ubyte*)&other, sizeof(Token)); }

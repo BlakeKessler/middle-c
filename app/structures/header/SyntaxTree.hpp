@@ -158,7 +158,7 @@ template<typename T> struct clef::astTNB {
    const T& operator*() const { return tree[i]; }
    const T* operator->() const { return tree + i; }
 
-   operator bool() const { return i; }
+   explicit operator bool() const { return i; }
 };
 //!astTreeTypespecBundle - for printf
 struct clef::astTTsB {
@@ -172,7 +172,7 @@ struct clef::astTTsB {
    const TypeSpec& operator*() const { return *ptr; }
    const TypeSpec* operator->() const { return ptr; }
 
-   operator bool() const { return ptr; }
+   explicit operator bool() const { return ptr; }
 };
 //!astTreeSymbolBundle - for printf
 struct clef::astTSB {
@@ -186,7 +186,7 @@ struct clef::astTSB {
    const SymbolNode& operator*() const { return *ptr; }
    const SymbolNode* operator->() const { return ptr; }
 
-   operator bool() const { return ptr; }
+   explicit operator bool() const { return ptr; }
 };
 //!astTreeTreeIndirtableBundle - for printf
 struct clef::astTItB {
@@ -200,7 +200,7 @@ struct clef::astTItB {
    const IndirTable& operator*() const { return *ptr; }
    const IndirTable* operator->() const { return ptr; }
 
-   operator bool() const { return ptr; }
+   explicit operator bool() const { return ptr; }
 };
 
 #include "MAP_MACRO.h"
