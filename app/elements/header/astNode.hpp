@@ -72,7 +72,9 @@ struct clef::astNode {
       }
       astNode(const astNode& other) { std::memcpy((void*)this, &other, sizeof(self)); }
       astNode& operator=(const astNode& other) { new (this) astNode{other}; return self; }
-      #define _def_ctor(varName) astNode(decltype(varName)& node):varName{node},_nodeType{decltype(varName)::nodeType()} {}
+      #define _def_ctor(varName) \
+         astNode(const decltype(varName)& node):varName{node},_nodeType{decltype(varName)::nodeType()} {} \
+         astNode(decltype(varName)&& node):varName{std::forward<decltype(node)>(node)},_nodeType{decltype(varName)::nodeType()} {}
       MCSL_MAP(_def_ctor, CLEF_ALL_AST_NODE_UNION_MEMBS)
       #undef _def_ctor
       #pragma endregion constructors

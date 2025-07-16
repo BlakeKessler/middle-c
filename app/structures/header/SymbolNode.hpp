@@ -23,7 +23,8 @@ class clef::SymbolNode {
 
       void __checkRep();
 
-      SymbolNode(mcsl::str_slice, decltype(_aliases), SymbolNode*, SymbolType, TypeSpec*, decltype(_overloads));
+      SymbolNode(mcsl::str_slice, decltype(_aliases), SymbolNode*, SymbolType, TypeSpec*, const decltype(_overloads)&);
+      SymbolNode(mcsl::str_slice, decltype(_aliases), SymbolNode*, SymbolType, TypeSpec*, decltype(_overloads)&&);
    public:
       SymbolNode();
       SymbolNode(const mcsl::str_slice name, SymbolNode* parentScope, TypeSpec* typespec, SymbolType symbType);

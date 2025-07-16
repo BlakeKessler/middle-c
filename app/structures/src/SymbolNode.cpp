@@ -24,7 +24,7 @@ clef::SymbolNode::SymbolNode(const mcsl::str_slice name, SymbolNode* parentScope
    _overloads{} {
 
 }
-clef::SymbolNode::SymbolNode(mcsl::str_slice name, decltype(_aliases) aliases, SymbolNode* parentScope, SymbolType symbolType, TypeSpec* type, decltype(_overloads) overloads):
+clef::SymbolNode::SymbolNode(mcsl::str_slice name, decltype(_aliases) aliases, SymbolNode* parentScope, SymbolType symbolType, TypeSpec* type, const decltype(_overloads)& overloads):
    _childSymbols(),
    _name{name},
    _aliases{aliases},
@@ -32,6 +32,16 @@ clef::SymbolNode::SymbolNode(mcsl::str_slice name, decltype(_aliases) aliases, S
    _symbolType{symbolType},
    _type{type},
    _overloads{overloads} {
+
+}
+clef::SymbolNode::SymbolNode(mcsl::str_slice name, decltype(_aliases) aliases, SymbolNode* parentScope, SymbolType symbolType, TypeSpec* type, decltype(_overloads)&& overloads):
+   _childSymbols(),
+   _name{name},
+   _aliases{aliases},
+   _parentScope{parentScope},
+   _symbolType{symbolType},
+   _type{type},
+   _overloads{std::forward<decltype(overloads)>(overloads)} {
 
 }
 clef::SymbolNode::SymbolNode(const SymbolNode& other):
@@ -60,6 +70,7 @@ clef::SymbolNode::SymbolNode(SymbolNode&& other):
 void clef::SymbolNode::release() {
    _childSymbols.release();
    _anonChildren.release();
+   _subScopes.release();
    _aliases.release();
    _overloads.release();
 }

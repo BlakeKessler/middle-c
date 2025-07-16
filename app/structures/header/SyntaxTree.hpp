@@ -44,7 +44,7 @@ class clef::SyntaxTree {
          _typeTable{std::move(other._typeTable)},
          _alloc{std::move(other._alloc)},
          _dataModel(other._dataModel),
-         _strings(other._strings) {
+         _strings(std::move(other._strings)) {
             if (this != &other) {
                other.release();
             }
@@ -227,7 +227,13 @@ namespace mcsl {
 
 inline void clef::SyntaxTree::release() {
    _buf.release();
+   _globalScope.release();
+   _fundTypes.release();
+   _indirTypes.release();
+   _symbolBuf.release();
+   _typeTable.release();
    _alloc.release();
+   _strings.release();
 }
 
 template<clef::astNode_ptr_t asT, clef::astNode_ptr_t T = asT, typename... Argv_t> asT clef::SyntaxTree::make(Argv_t... argv) requires mcsl::valid_ctor<mcsl::remove_ptr<T>, Argv_t...> {

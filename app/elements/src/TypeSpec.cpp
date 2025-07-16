@@ -31,6 +31,7 @@ clef::TypeSpec::TypeSpec(TypeSpec&& other) {
    if (this == &other) {
       return;
    }
+   _metatype = other._metatype;
    #define MOVE(field) new (&__curr.field) decltype(__curr.field)(std::move(other.__curr.field));
    switch (other._metatype) {
       case null: break;

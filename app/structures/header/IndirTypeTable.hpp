@@ -29,6 +29,7 @@ class clef::IndirTypeTable {
    public:
       IndirTypeTable():_table{} {}
       TypeSpec* get_or_insert(TypeSpec* pointee, QualMask pointeeQuals, IndirTable&& table, mcsl::arr_list<TypeSpec>& typeTable);
+      inline void release() { _table.release(); }
 };
 
 #endif //INDIR_TYPE_TABLE_HPP

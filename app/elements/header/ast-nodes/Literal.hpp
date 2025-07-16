@@ -45,9 +45,10 @@ struct [[clang::trivial_abi]] clef::Literal {
       Literal(void* ptr):_ptrLit{ptr},_typeName{FundTypeID::null},_type{LitType::POINTER} {}
 
       Literal(Literal& other) {
-         if (this != &other) {
-            std::memcpy((void*)this, &other, sizeof(Literal));
-         }
+         std::memcpy((void*)this, &other, sizeof(Literal));
+      }
+      Literal(Literal&& other) {
+         std::memcpy((void*)this, &other, sizeof(Literal));
       }
       #pragma endregion constructors
 
