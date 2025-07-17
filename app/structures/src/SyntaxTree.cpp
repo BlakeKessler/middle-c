@@ -205,7 +205,7 @@ clef::TypeSpec* clef::SyntaxTree::evalType(index<astNode> i) {
       case NodeType::ARG_LIST: return nullptr;
    }
 }
-void clef::SyntaxTree::updateEvalType(index<Expr> i) {
+clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
    debug_assert(i);
 
    Expr& expr = self[i];
@@ -226,212 +226,221 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
             lhs.overloadIndex() = std::get<1>(tmp);
             debug_assert(std::get<2>(tmp)->metaType() == TypeSpec::FUNC_SIG);
             expr.evalType() = std::get<2>(tmp)->funcSig().retType;
-            return;
+            return {};
          }
          else {
             TODO;
          }
-         return;
+         return {};
       } else {
          TODO;
       }
    }
 
-   TypeSpec* _tmp;
-   #define IS_PRIM(name) (!expr.name() || !(_tmp = evalType(+expr.name())) || _tmp->metaType() == TypeSpec::FUND_TYPE || (_tmp->metaType() == TypeSpec::INDIR && _tmp->indirTable().back().decaysToFund()))
-   bool isAllPrimitive =  IS_PRIM(lhs) && IS_PRIM(rhs) && IS_PRIM(extra) && IS_PRIM(extra2);
+   TypeSpec* __tmp;
+   #define IS_PRIM(name) (!expr.name() || !(__tmp = evalType(+expr.name())) || __tmp->metaType() == TypeSpec::FUND_TYPE || (__tmp->metaType() == TypeSpec::INDIR && __tmp->indirTable().back().decaysToFund()))
+   bool isAllPrimitive =
+      IS_PRIM(lhs) &&
+      IS_PRIM(rhs) &&
+      IS_PRIM(extra) &&
+      IS_PRIM(extra2);
    #undef IS_PRIM
-   bool lhsIsPtrlike = expr.lhs() && (_tmp = evalType(+expr.lhs())) && _tmp->metaType() == TypeSpec::INDIR && _tmp->indirTable().back().decaysToFund();
+   bool lhsIsPtrlike = expr.lhs() && (__tmp = evalType(+expr.lhs())) && __tmp->metaType() == TypeSpec::INDIR && __tmp->indirTable().back().decaysToFund();
 
    if (isAllPrimitive) {
       switch (expr.opID()) {
-            case OpID::TERNARY_INVOKE: 
-               if (!(expr.evalType() = commonType(evalType(+expr.rhs()), evalType(+expr.extra())))) { //intentionally uses assignment
-                  throwError(ErrCode::TYPECHECK_ERR, FMT("operands of ternary expression must have a common type"));
-               }
-               return;
+         case OpID::TERNARY_INVOKE:
+            if (!(expr.evalType() = commonType(evalType(+expr.rhs()), evalType(+expr.extra())))) { //intentionally uses assignment
+               return ErrCode::TYPECHECK_ERR; //operands of ternary expression must have a common type
+            }
+            return {};
 
 
-            case OpID::PREPROCESSOR: TODO;
+         case OpID::PREPROCESSOR: TODO;
 
-            case OpID::SCOPE_RESOLUTION: UNREACHABLE;
+         case OpID::SCOPE_RESOLUTION: UNREACHABLE;
 
-               TODO;
+            TODO;
 
-            case OpID::RANGE: TODO;
-            case OpID::SPREAD: TODO;
+         case OpID::RANGE: TODO;
+         case OpID::SPREAD: TODO;
 
-            case OpID::ATTRIBUTE: 
-               expr.evalType() = evalType(+expr.extra2());
-               return;
+         case OpID::ATTRIBUTE: 
+            expr.evalType() = evalType(+expr.extra2());
+            return {};
 
-            #pragma region commons
-            //unary identity
-            case OpID::INC: [[fallthrough]];
-            case OpID::DEC: [[fallthrough]];
-            case OpID::BIT_NOT: [[fallthrough]];
-            //bitwise binary identity
-            case OpID::BIT_AND: [[fallthrough]];
-            case OpID::BIT_OR: [[fallthrough]];
-            case OpID::BIT_XOR: [[fallthrough]];
-            case OpID::SHIFT_LEFT: [[fallthrough]];
-            case OpID::SHIFT_RIGHT: [[fallthrough]];
-            //binary identity
-            case OpID::ADD: [[fallthrough]];
-            case OpID::SUB: [[fallthrough]];
-            case OpID::MUL: [[fallthrough]];
-            case OpID::DIV: [[fallthrough]];
-            case OpID::MOD: [[fallthrough]];
-            case OpID::EXP: [[fallthrough]];
-            case OpID::COALESCE:
-               expr.evalType() = commonTypeOfOperands(i);
-               return;
-            #pragma endregion commons
-
-            #pragma region bools
-            //unary boolean
-            case OpID::LOGICAL_NOT: [[fallthrough]];
-            //binary boolean
-            case OpID::LOGICAL_AND: [[fallthrough]];
-            case OpID::LOGICAL_OR: [[fallthrough]];
-            case OpID::LESSER: [[fallthrough]];
-            case OpID::GREATER: [[fallthrough]];
-            case OpID::LESSER_OR_EQ: [[fallthrough]];
-            case OpID::GREATER_OR_EQ: [[fallthrough]];
-            case OpID::IS_EQUAL: [[fallthrough]];
-            case OpID::IS_UNEQUAL: [[fallthrough]];
-            //case OpID::IS_EQUAL_STRICT: [[fallthrough]];
-            //case OpID::IS_UNEQUAL_STRICT: [[fallthrough]];
-            case OpID::THREE_WAY_COMP:
-               expr.evalType() = getFundType(KeywordID::BOOL)->type();
-               return;
-            #pragma endregion bools
-
-            #pragma region lhss
-            //null
-            case OpID::NULL:
-            //assignments
-            case OpID::ASSIGN: [[fallthrough]];
-            //case OpID::CONST_ASSIGN: [[fallthrough]];
-            case OpID::ADD_ASSIGN: [[fallthrough]];
-            case OpID::SUB_ASSIGN: [[fallthrough]];
-            case OpID::MUL_ASSIGN: [[fallthrough]];
-            case OpID::DIV_ASSIGN: [[fallthrough]];
-            case OpID::MOD_ASSIGN: [[fallthrough]];
-            case OpID::EXP_ASSIGN: [[fallthrough]];
-            case OpID::SHL_ASSIGN: [[fallthrough]];
-            case OpID::SHR_ASSIGN: [[fallthrough]];
-            case OpID::AND_ASSIGN: [[fallthrough]];
-            case OpID::XOR_ASSIGN: [[fallthrough]];
-            case OpID::OR_ASSIGN: [[fallthrough]];
-            case OpID::COALESCE_ASSIGN:
-               expr.evalType() = evalType(+expr.lhs());
-               return;
-            #pragma endregion lhss
-
-            #pragma region rhss
-            case OpID::COMMA: [[fallthrough]];
-            case OpID::LET: [[fallthrough]];
-            case OpID::MAKE_TYPE:
-               expr.evalType() = evalType(+expr.rhs());
-               return;
-            #pragma endregion rhss
-
-            #pragma region typelesses
-            //pseudo-operators
-            case OpID::FOR: [[fallthrough]];
-            case OpID::FOREACH: [[fallthrough]];
-            case OpID::WHILE: [[fallthrough]];
-            case OpID::DO_WHILE: [[fallthrough]];
-            case OpID::GOTO: [[fallthrough]];
-            case OpID::GOTO_CASE: [[fallthrough]];
-            case OpID::IF: [[fallthrough]];
-            case OpID::SWITCH: [[fallthrough]];
-            case OpID::MATCH: [[fallthrough]];
-            case OpID::ASM: [[fallthrough]];
-            case OpID::BREAK: [[fallthrough]];
-            case OpID::CONTINUE: [[fallthrough]];
-            case OpID::THROW: [[fallthrough]];
-            case OpID::ASSERT: [[fallthrough]];
-            case OpID::DEBUG_ASSERT: [[fallthrough]];
-            case OpID::STATIC_ASSERT: [[fallthrough]];
-            case OpID::ASSUME: [[fallthrough]];
-            case OpID::RETURN: [[fallthrough]];
-            case OpID::ALIAS: [[fallthrough]];
-            case OpID::DEF_FUNC_PARAMS: [[fallthrough]];
-            case OpID::DEF_MACRO_PARAMS: [[fallthrough]];
-            //labels
-            case OpID::LABEL_DELIM:
-               expr.evalType() = nullptr;
-               return;
-            #pragma endregion typelesses
-
-            #pragma region indirOnly
-            case OpID::MEMBER_ACCESS: [[fallthrough]];
-            case OpID::PTR_MEMBER_ACCESS: [[fallthrough]];
-            case OpID::CALL_INVOKE: [[fallthrough]];
-            case OpID::SUBSCRIPT_INVOKE:
-               if (lhsIsPtrlike) {
-                  expr.evalType() = evalType(+expr.lhs())->pointee();
-                  return;
-               }
-               [[fallthrough]];
-            
-            #pragma endregion indirOnly
-
-            #pragma region errs
-            //dereferences
-            case OpID::METHOD_PTR: [[fallthrough]];
-            case OpID::ARROW_METHOD_PTR: [[fallthrough]];
-            //invokes
-            case OpID::LIST_INVOKE: [[fallthrough]];
-            case OpID::SPECIALIZER_INVOKE: [[fallthrough]];
-            case OpID::INTERP_STR_INVOKE: throwError(ErrCode::BAD_EXPR, FMT("invalid operator for types (%s)"), toString(expr.opID()));
-            #pragma endregion errs
-
-            #pragma region unreachables
-            case OpID::INLINE_IF: [[fallthrough]];
-            case OpID::PREPROC_IMPORT: [[fallthrough]];
-            case OpID::PREPROC_LINK: [[fallthrough]];
-            case OpID::PREPROC_EMBED: [[fallthrough]];
-            case OpID::ESCAPE: [[fallthrough]];
-            case OpID::EOS: [[fallthrough]];
-            case OpID::STRING: [[fallthrough]];
-            case OpID::CHAR: [[fallthrough]];
-            case OpID::INTERP_STRING: [[fallthrough]];
-            case OpID::LINE_CMNT: [[fallthrough]];
-            case OpID::BLOCK_CMNT: [[fallthrough]];
-            case OpID::BLOCK_CMNT_OPEN: [[fallthrough]];
-            case OpID::BLOCK_CMNT_CLOSE: [[fallthrough]];
-            case OpID::CALL_OPEN: [[fallthrough]];
-            case OpID::CALL_CLOSE: [[fallthrough]];
-            case OpID::SUBSCRIPT_OPEN: [[fallthrough]];
-            case OpID::SUBSCRIPT_CLOSE: [[fallthrough]];
-            case OpID::LIST_OPEN: [[fallthrough]];
-            case OpID::LIST_CLOSE: [[fallthrough]];
-            case OpID::SPECIALIZER_OPEN: [[fallthrough]];
-            case OpID::SPECIALIZER_CLOSE: [[fallthrough]];
-            case OpID::CHAR_INVOKE: [[fallthrough]];
-            case OpID::STR_INVOKE: UNREACHABLE;
-            #pragma endregion unreachables
+         #pragma region commons
+         //unary identity
+         case OpID::INC: [[fallthrough]];
+         case OpID::DEC: [[fallthrough]];
+         case OpID::BIT_NOT: [[fallthrough]];
+         //bitwise binary identity
+         case OpID::BIT_AND: [[fallthrough]];
+         case OpID::BIT_OR: [[fallthrough]];
+         case OpID::BIT_XOR: [[fallthrough]];
+         case OpID::SHIFT_LEFT: [[fallthrough]];
+         case OpID::SHIFT_RIGHT: [[fallthrough]];
+         //binary identity
+         case OpID::ADD: [[fallthrough]];
+         case OpID::SUB: [[fallthrough]];
+         case OpID::MUL: [[fallthrough]];
+         case OpID::DIV: [[fallthrough]];
+         case OpID::MOD: [[fallthrough]];
+         case OpID::EXP: [[fallthrough]];
+         case OpID::COALESCE: {
+            res<TypeSpec*> tmp = commonTypeOfOperands(i);
+            if (tmp.is_err()) {
+               return tmp.err();
+            }
+            expr.evalType() = tmp.ok();
+            return {};
          }
+         #pragma endregion commons
+
+         #pragma region bools
+         //unary boolean
+         case OpID::LOGICAL_NOT: [[fallthrough]];
+         //binary boolean
+         case OpID::LOGICAL_AND: [[fallthrough]];
+         case OpID::LOGICAL_OR: [[fallthrough]];
+         case OpID::LESSER: [[fallthrough]];
+         case OpID::GREATER: [[fallthrough]];
+         case OpID::LESSER_OR_EQ: [[fallthrough]];
+         case OpID::GREATER_OR_EQ: [[fallthrough]];
+         case OpID::IS_EQUAL: [[fallthrough]];
+         case OpID::IS_UNEQUAL: [[fallthrough]];
+         //case OpID::IS_EQUAL_STRICT: [[fallthrough]];
+         //case OpID::IS_UNEQUAL_STRICT: [[fallthrough]];
+         case OpID::THREE_WAY_COMP:
+            expr.evalType() = getFundType(KeywordID::BOOL)->type();
+            return {};
+         #pragma endregion bools
+
+         #pragma region lhss
+         //null
+         case OpID::NULL:
+         //assignments
+         case OpID::ASSIGN: [[fallthrough]];
+         //case OpID::CONST_ASSIGN: [[fallthrough]];
+         case OpID::ADD_ASSIGN: [[fallthrough]];
+         case OpID::SUB_ASSIGN: [[fallthrough]];
+         case OpID::MUL_ASSIGN: [[fallthrough]];
+         case OpID::DIV_ASSIGN: [[fallthrough]];
+         case OpID::MOD_ASSIGN: [[fallthrough]];
+         case OpID::EXP_ASSIGN: [[fallthrough]];
+         case OpID::SHL_ASSIGN: [[fallthrough]];
+         case OpID::SHR_ASSIGN: [[fallthrough]];
+         case OpID::AND_ASSIGN: [[fallthrough]];
+         case OpID::XOR_ASSIGN: [[fallthrough]];
+         case OpID::OR_ASSIGN: [[fallthrough]];
+         case OpID::COALESCE_ASSIGN:
+            expr.evalType() = evalType(+expr.lhs());
+            return {};
+         #pragma endregion lhss
+
+         #pragma region rhss
+         case OpID::COMMA: [[fallthrough]];
+         case OpID::LET: [[fallthrough]];
+         case OpID::MAKE_TYPE:
+            expr.evalType() = evalType(+expr.rhs());
+            return {};
+         #pragma endregion rhss
+
+         #pragma region typelesses
+         //pseudo-operators
+         case OpID::FOR: [[fallthrough]];
+         case OpID::FOREACH: [[fallthrough]];
+         case OpID::WHILE: [[fallthrough]];
+         case OpID::DO_WHILE: [[fallthrough]];
+         case OpID::GOTO: [[fallthrough]];
+         case OpID::GOTO_CASE: [[fallthrough]];
+         case OpID::IF: [[fallthrough]];
+         case OpID::SWITCH: [[fallthrough]];
+         case OpID::MATCH: [[fallthrough]];
+         case OpID::ASM: [[fallthrough]];
+         case OpID::BREAK: [[fallthrough]];
+         case OpID::CONTINUE: [[fallthrough]];
+         case OpID::THROW: [[fallthrough]];
+         case OpID::ASSERT: [[fallthrough]];
+         case OpID::DEBUG_ASSERT: [[fallthrough]];
+         case OpID::STATIC_ASSERT: [[fallthrough]];
+         case OpID::ASSUME: [[fallthrough]];
+         case OpID::RETURN: [[fallthrough]];
+         case OpID::ALIAS: [[fallthrough]];
+         case OpID::DEF_FUNC_PARAMS: [[fallthrough]];
+         case OpID::DEF_MACRO_PARAMS: [[fallthrough]];
+         //labels
+         case OpID::LABEL_DELIM:
+            expr.evalType() = nullptr;
+            return {};
+         #pragma endregion typelesses
+
+         #pragma region indirOnly
+         case OpID::MEMBER_ACCESS: [[fallthrough]];
+         case OpID::PTR_MEMBER_ACCESS: [[fallthrough]];
+         case OpID::CALL_INVOKE: [[fallthrough]];
+         case OpID::SUBSCRIPT_INVOKE:
+            if (lhsIsPtrlike) {
+               expr.evalType() = evalType(+expr.lhs())->pointee();
+               return {};
+            }
+            [[fallthrough]];
+         
+         #pragma endregion indirOnly
+
+         #pragma region errs
+         //dereferences
+         case OpID::METHOD_PTR: [[fallthrough]];
+         case OpID::ARROW_METHOD_PTR: [[fallthrough]];
+         //invokes
+         case OpID::LIST_INVOKE: [[fallthrough]];
+         case OpID::SPECIALIZER_INVOKE: [[fallthrough]];
+         case OpID::INTERP_STR_INVOKE: throwError(ErrCode::BAD_EXPR, FMT("invalid operator for types (%s)"), toString(expr.opID()));
+         #pragma endregion errs
+
+         #pragma region unreachables
+         case OpID::INLINE_IF: [[fallthrough]];
+         case OpID::PREPROC_IMPORT: [[fallthrough]];
+         case OpID::PREPROC_LINK: [[fallthrough]];
+         case OpID::PREPROC_EMBED: [[fallthrough]];
+         case OpID::ESCAPE: [[fallthrough]];
+         case OpID::EOS: [[fallthrough]];
+         case OpID::STRING: [[fallthrough]];
+         case OpID::CHAR: [[fallthrough]];
+         case OpID::INTERP_STRING: [[fallthrough]];
+         case OpID::LINE_CMNT: [[fallthrough]];
+         case OpID::BLOCK_CMNT: [[fallthrough]];
+         case OpID::BLOCK_CMNT_OPEN: [[fallthrough]];
+         case OpID::BLOCK_CMNT_CLOSE: [[fallthrough]];
+         case OpID::CALL_OPEN: [[fallthrough]];
+         case OpID::CALL_CLOSE: [[fallthrough]];
+         case OpID::SUBSCRIPT_OPEN: [[fallthrough]];
+         case OpID::SUBSCRIPT_CLOSE: [[fallthrough]];
+         case OpID::LIST_OPEN: [[fallthrough]];
+         case OpID::LIST_CLOSE: [[fallthrough]];
+         case OpID::SPECIALIZER_OPEN: [[fallthrough]];
+         case OpID::SPECIALIZER_CLOSE: [[fallthrough]];
+         case OpID::CHAR_INVOKE: [[fallthrough]];
+         case OpID::STR_INVOKE: UNREACHABLE;
+         #pragma endregion unreachables
+      }
    }
 
    switch (expr.opID()) {
-      #define __TYPELESS expr.evalType() = nullptr; return
+      #define __TYPELESS expr.evalType() = nullptr; return {}
       case OpID::NULL:
          debug_assert(!expr.rhs() && !expr.extra() && !expr.extra2());
          expr.evalType() = evalType(+expr.lhs());
-         return;
+         return {};
 
       case OpID::ATTRIBUTE: TODO;
 
       case OpID::INTERP_STR_INVOKE: TODO;
-      case OpID::TERNARY_INVOKE: 
-         if (!(expr.evalType() = commonType(evalType(+expr.rhs()), evalType(+expr.extra())))) {
-            throwError(ErrCode::TYPECHECK_ERR, FMT("operands of ternary expression must have a common type"));
+      case OpID::TERNARY_INVOKE:
+         if (!(expr.evalType() = commonType(evalType(+expr.rhs()), evalType(+expr.extra())))) { //intentionally uses assignment
+            return ErrCode::TYPECHECK_ERR; //operands of ternary expression must have a common type
          }
-         return;
+         return {};
 
 
       case OpID::PREPROCESSOR: TODO;
@@ -443,7 +452,7 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
       case OpID::METHOD_PTR: [[fallthrough]];
       case OpID::ARROW_METHOD_PTR:
          expr.evalType() = evalType(+expr.rhs());
-         return;
+         return {};
 
       #pragma region standards
       case OpID::CALL_INVOKE:
@@ -506,18 +515,18 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
       case OpID::ASSIGN:
       //case OpID::CONST_ASSIGN: TODO;
          expr.evalType() = evalType(+expr.lhs());
-         return;
+         return {};
 
       case OpID::COALESCE: TODO;
 
       case OpID::COMMA:
          expr.evalType() = evalType(+expr.rhs());
-         return;
+         return {};
 
       case OpID::LET: [[fallthrough]];
       case OpID::MAKE_TYPE:
          expr.evalType() = evalType(+expr.rhs());
-         return;
+         return {};
 
 
       case OpID::PREPROC_IMPORT: TODO;
@@ -591,24 +600,6 @@ void clef::SyntaxTree::updateEvalType(index<Expr> i) {
       #pragma endregion unreachables
       #undef __TYPELESS
    }
-}
-void clef::SyntaxTree::updateEvalType_r(index<Expr> i) {
-   debug_assert(i);
-
-   //recursively update types
-   Expr& expr = self[i];
-   #define RECURSE(name, type) \
-   if (expr.name() && canDownCastTo(expr.type(), NodeType::EXPR)) { \
-      updateEvalType_r(+expr.name()); \
-   }
-   RECURSE(lhs, lhsType);
-   RECURSE(rhs, rhsType);
-   RECURSE(extra, extraType);
-   RECURSE(extra2, extraType2);
-   #undef RECURSE
-
-   //update own type
-   updateEvalType(i);
 }
 
 mcsl::tuple<bool, clef::index<void>, clef::TypeSpec*> clef::SyntaxTree::deduceOverload(SymbolNode* symbol, index<ArgList> argv) {
@@ -699,7 +690,7 @@ clef::TypeSpec* clef::SyntaxTree::commonType(TypeSpec* t1, TypeSpec* t2) {
    TODO;
 }
 
-clef::TypeSpec* clef::SyntaxTree::commonTypeOfOperands(index<Expr> i) {
+clef::res<clef::TypeSpec*> clef::SyntaxTree::commonTypeOfOperands(index<Expr> i) {
    if (!i) {
       return nullptr;
    }
@@ -711,7 +702,7 @@ clef::TypeSpec* clef::SyntaxTree::commonTypeOfOperands(index<Expr> i) {
    if (expr.name()) { \
       spec = commonType(spec, evalType(+expr.name())); \
       if (!spec) { \
-         throwError(ErrCode::TYPECHECK_ERR, FMT("no common type")); \
+         return ErrCode::TYPECHECK_ERR; /*no common type*/ \
       } \
    }
    UPDATE(lhs);

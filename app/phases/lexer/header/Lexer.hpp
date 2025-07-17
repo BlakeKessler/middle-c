@@ -36,6 +36,19 @@ class clef::Lexer {
       uint lineNum() { return lineIndex + 1; }
       mcsl::str_slice prevTokStr() { return {tokBegin, curr}; }
       const mcsl::str_slice path() const { return src.path(); }
+
+      //error logging
+      void logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, const mcsl::Printable auto&... args);
 };
+
+
+#pragma region inlinesrc
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
+void clef::Lexer::logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, const mcsl::Printable auto&... args) {
+   clef::throwError(code, lineNum(), currLine(), prevTokStr(), path(), mcsl::FMT(formatStr), std::forward<decltype(args)>(args)...);
+}
+#pragma GCC diagnostic pop
+#pragma endregion inlinesrc
 
 #endif //LEXER_HPP

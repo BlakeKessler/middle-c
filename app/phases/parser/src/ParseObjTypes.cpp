@@ -15,7 +15,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(index<Expr> attrs, 
       if (!name) {
          logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous class/struct");
       }
-      return tree.make<TypeDecl>(name);
+      return make<TypeDecl>(name);
    }
    
    if (spec->metaType() != TypeSpec::COMPOSITE) {
@@ -59,12 +59,12 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(index<Expr> attrs, 
       QualMask quals = parseQuals();
       bool isStatic = tryConsumeKeyword(KeywordID::STATIC);
       quals |= parseQuals();
-      isStatic |= tryConsumeKeyword(KeywordID::STATIC);
+      isStatic = isStatic || tryConsumeKeyword(KeywordID::STATIC);
       if (currTok.type() != TokenType::KEYWORD) {
          logError(ErrCode::BAD_STMT, "invalid statement in %s definition", metatypeName);
       }
       switch (currTok.keywordID()) {
-         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: getNextToken(); if (isStatic || +quals) { logError(ErrCode::BAD_KEYWORD, "cannot qualify a " #kw " as static"); } { auto tmp = parsingFunc(fieldAttrs); tree[(index<Identifier>)tmp].addQuals(scope); spec->composite().subtypes.insert(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol()); } break
+         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: getNextToken(); if (isStatic || +quals) { logError(ErrCode::BAD_KEYWORD, "cannot qualify a " #kw " as%s% s", isStatic ? FMT(" static") : FMT(""), quals); } { auto tmp = parsingFunc(fieldAttrs); tree[(index<Identifier>)tmp].addQuals(scope); spec->composite().subtypes.insert(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol()); } break
          KW_CASE(CLASS, parseClass);
          KW_CASE(STRUCT, parseStruct);
          KW_CASE(TRAIT, parseTrait);
@@ -84,7 +84,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(index<Expr> attrs, 
 
    //return
    POP_SCOPE;
-   return tree.make<TypeDecl>(name, name);
+   return make<TypeDecl>(name, name);
 }
 
 //parse a trait declaration/definition
@@ -98,7 +98,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseTrait(index<Expr> attrs) {
    if (attrs) { TODO; }
 
    if (tryConsumeEOS()) { //forward declaration
-      return tree.make<TypeDecl>(name);
+      return make<TypeDecl>(name);
    }
    
    PUSH_SCOPE;
@@ -158,7 +158,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseTrait(index<Expr> attrs) {
 
    //return
    POP_SCOPE;
-   return tree.make<TypeDecl>(name, name);
+   return make<TypeDecl>(name, name);
 }
 
 //parse a union declaration/definition
@@ -175,7 +175,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion(index<Expr> attrs) {
       if (!name) {
          logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous union");
       }
-      return tree.make<TypeDecl>(name);
+      return make<TypeDecl>(name);
    }
 
    PUSH_SCOPE;
@@ -198,7 +198,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion(index<Expr> attrs) {
 
    //return
    POP_SCOPE;
-   return tree.make<TypeDecl>(name, name);
+   return make<TypeDecl>(name, name);
 }
 
 //helper function used to implement parsing of enums and masks
@@ -215,7 +215,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(index<Expr> attrs,
       if (!name) {
          logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous enum/mask");
       }
-      return tree.make<TypeDecl>(name);
+      return make<TypeDecl>(name);
    }
 
    PUSH_SCOPE;
@@ -246,7 +246,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(index<Expr> attrs,
 
    //return
    POP_SCOPE;
-   return tree.make<TypeDecl>(name, name);
+   return make<TypeDecl>(name, name);
 }
 
 //parse an enumunion declaration/definition
@@ -269,7 +269,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace(index<Expr> attrs) {
       if (!name) {
          logError(ErrCode::BAD_DECL, "cannot forward-declare an anonymous namespace");
       }
-      return tree.make<TypeDecl>(name);
+      return make<TypeDecl>(name);
    }
    
    PUSH_SCOPE;
@@ -323,7 +323,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace(index<Expr> attrs) {
 
    //return
    POP_SCOPE;
-   return tree.make<TypeDecl>(name, name);
+   return make<TypeDecl>(name, name);
 }
 
 #endif

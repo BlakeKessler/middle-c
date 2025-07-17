@@ -65,7 +65,7 @@
 
 
 clef::index<clef::Scope> clef::Parser::parseProcedure() {
-   index<Scope> scope = tree.make<Scope>(&tree.allocBuf<index<Stmt>>());
+   index<Scope> scope = make<Scope>(&tree.allocBuf<index<Stmt>>());
 
    while (!src.done()) {
       if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
@@ -176,7 +176,7 @@ clef::index<clef::Decl> clef::Parser::parseDecl(index<Expr> attrs) {
             val = 0;
          }
       }
-      return tree.make<Decl>(tree[funcDef].name(), tree[funcDef].name(), val);
+      return make<Decl>(tree[funcDef].name(), tree[funcDef].name(), val);
    }
    
    //declaration
@@ -192,20 +192,20 @@ clef::index<clef::Decl> clef::Parser::parseDecl(index<Expr> attrs) {
    }
    else if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN)) {
       index<ArgList> args = parseArgList(BlockType::INIT_LIST, false);
-      val = tree.make<Expr>(OpID::LIST_INVOKE, type, args);
+      val = make<Expr>(OpID::LIST_INVOKE, type, args);
    }
    else if (tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN)) {
       index<ArgList> args = parseArgList(BlockType::CALL, false);
-      val = tree.make<Expr>(OpID::CALL_INVOKE, type, args);
+      val = make<Expr>(OpID::CALL_INVOKE, type, args);
    } else {
       val = 0;
    }
 
    consumeEOS("LET statement must end with EOS token");
    if (val) {
-      return tree.make<Decl>(type, varName, val);
+      return make<Decl>(type, varName, val);
    }
-   return tree.make<Decl>(type, varName);
+   return make<Decl>(type, varName);
 }
 
 //parse a parameter
@@ -215,7 +215,7 @@ clef::index<clef::Decl> clef::Parser::parseParam(index<Expr> attrs) {
       if (tree[funcDef].procedure()) {
          logError(ErrCode::BAD_DECL, "cannot inline define parameters of type func");
       }
-      return tree.make<Decl>(tree[funcDef].name(), tree[funcDef].name());
+      return make<Decl>(tree[funcDef].name(), tree[funcDef].name());
    }
 
    index<Identifier> typeName = parseTypename(SymbolType::EXTERN_TYPE, true);
@@ -226,7 +226,7 @@ clef::index<clef::Decl> clef::Parser::parseParam(index<Expr> attrs) {
       varSymbol->setType(tree[typeName].symbol()->type());
    }
    if (attrs) { TODO; }
-   return tree.make<Decl>(typeName, varName);
+   return make<Decl>(typeName, varName);
 }
 //parse a parameter and (optional) default value
 clef::index<clef::Decl> clef::Parser::parseDefaultableParam(index<Expr> attrs) {
@@ -240,7 +240,7 @@ clef::index<clef::Decl> clef::Parser::parseDefaultableParam(index<Expr> attrs) {
 
 //parse a comma-separated list of arguments (if !isDecl) or parameters (if isDecl)
 clef::index<clef::ArgList> clef::Parser::parseArgList(const BlockType closer, bool isDecl) {
-   index<ArgList> args = tree.make<ArgList>(&tree.allocBuf<index<Expr>>());
+   index<ArgList> args = make<ArgList>(&tree.allocBuf<index<Expr>>());
    if (tryConsumeBlockDelim(closer, BlockDelimRole::CLOSE)) {
       return args;
    }
@@ -261,7 +261,7 @@ clef::index<clef::ArgList> clef::Parser::parseArgList(const BlockType closer, bo
 
 //parse a specializer list
 clef::index<clef::ArgList> clef::Parser::parseSpecList(index<Identifier> target, bool isDecl) {
-   index<ArgList> args = tree.make<ArgList>(&tree.allocBuf<index<Expr>>());
+   index<ArgList> args = make<ArgList>(&tree.allocBuf<index<Expr>>());
    if (tryConsumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::CLOSE)) {
       return args;
    }
@@ -272,9 +272,9 @@ clef::index<clef::ArgList> clef::Parser::parseSpecList(index<Identifier> target,
             index<TypeDecl> typeDecl;
             if (tryConsumeOperator(OpID::ASSIGN)) {
                index<Identifier> defaultType = parseTypename(SymbolType::EXTERN_TYPE, false);
-               typeDecl = tree.make<TypeDecl>(typeName, defaultType);
+               typeDecl = make<TypeDecl>(typeName, defaultType);
             } else {
-               typeDecl = tree.make<TypeDecl>(typeName);
+               typeDecl = make<TypeDecl>(typeName);
             }
             tree[args].push_back(typeDecl);
          } else { //value template parameter
@@ -316,7 +316,7 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
       getNextToken();
       op = OpID::PREPROC_EMBED;
       SymbolNode* byteType = tree.getFundType(KeywordID::UBYTE);
-      index<Identifier> byteSpan = tree.make<Identifier>(KeywordID::UBYTE, byteType);
+      index<Identifier> byteSpan = make<Identifier>(KeywordID::UBYTE, byteType);
       tree.makeIndirType(byteSpan, byteType->type(), QualMask::CONST, IndirTable(IndirTable::Entry(IndirTable::Entry::SLICE, true, false, false)));
       name = parseIdentifier(SymbolType::VAR, tree[byteSpan].symbol(), true);
    } else {
@@ -329,7 +329,7 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
       logError(ErrCode::BAD_PREPROC, "invalid `%s` directive", toString(op));
    }
    const mcsl::str_slice path = parseStrLit();
-   index<Literal> pathLit = tree.make<Literal>(path, FundTypeID::CHAR);
+   index<Literal> pathLit = make<Literal>(path, FundTypeID::CHAR);
    consumeEOS("missing EOS token");
 
 #if !PARALLEL_COMPILE_FILES
@@ -353,7 +353,7 @@ clef::index<clef::Expr> clef::Parser::parseCast(KeywordID castID) {
    debug_assert(isCast(castID));
    consumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::OPEN, "must specify type of cast");
    index<ArgList> typeptr = parseArgList(BlockType::SPECIALIZER, false);
-   index<Identifier> castptr = tree.make<Identifier>(castID, nullptr, typeptr);
+   index<Identifier> castptr = make<Identifier>(castID, nullptr, typeptr);
    //!TODO: validate cast specializer
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "typecasting uses function call syntax");
    index<Expr> contents = parseExpr();

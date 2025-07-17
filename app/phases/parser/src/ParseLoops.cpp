@@ -24,7 +24,7 @@ clef::index<clef::ForLoop> clef::Parser::parseForLoop() {
    consumeEOS("FOR statement without EOS token");
 
    //return
-   index<ForLoop> loop = tree.make<ForLoop>(decl, condition, inc, proc);
+   index<ForLoop> loop = make<ForLoop>(decl, condition, inc, proc);
 
    return loop;
 }
@@ -54,7 +54,7 @@ clef::index<clef::ForeachLoop> clef::Parser::parseForeachLoop() {
    consumeEOS("FOREACH statement without EOS token");
 
    //return
-   index<ForeachLoop> loop = tree.make<ForeachLoop>(decl, target, proc);
+   index<ForeachLoop> loop = make<ForeachLoop>(decl, target, proc);
 
    return loop;
 }
@@ -78,7 +78,7 @@ clef::index<clef::WhileLoop> clef::Parser::parseWhileLoop() {
    consumeEOS("WHILE statement without EOS token");
 
    //return
-   return tree.make<WhileLoop>(condition, proc);
+   return make<WhileLoop>(condition, proc);
 }
 
 //parse a do-while loop (assumes `do` keyword has already been consumed)
@@ -99,7 +99,7 @@ clef::index<clef::DoWhileLoop> clef::Parser::parseDoWhileLoop() {
    consumeEOS("DO WHILE statement without EOS token");
 
    //return
-   return tree.make<DoWhileLoop>(condition, proc);
+   return make<DoWhileLoop>(condition, proc);
 }
 
 #endif //PARSE_LOOPS

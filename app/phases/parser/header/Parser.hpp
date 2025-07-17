@@ -107,10 +107,29 @@ class clef::Parser {
       index<TypeDecl> parseNamespace(index<Expr> attrs);
 
       //error logging
-      void logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, const mcsl::Printable auto&... args);
+      void logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, const mcsl::Printable auto&... args) {
+         src.logError(code, formatStr, args...);
+      }
+      template<typename T> T unwrap(res<T> r) {
+         if (r.is_ok()) { return r.ok(); }
+         else { TODO; }
+      }
+      template<typename T> T unwrap(res<T> r, void(*onerr)(ErrCode)) {
+         if (r.is_ok()) { return r.ok(); }
+         else { onerr(r.err()); UNREACHABLE; }
+      }
       
       //get next token
       void getNextToken() { currTok = src.nextToken(); }
+
+      //make an AST node
+      #define __DEF(expr) requires requires { expr; } { return expr; }
+      template<astNode_ptr_t asT, astNode_ptr_t T, typename... Argv_t> asT make(Argv_t... argv) __DEF((tree.make<asT, T>(std::forward<Argv_t>(argv)...)))
+      template<astNode_t asT, astNode_t T = asT, typename... Argv_t> index<asT> make(Argv_t... argv) __DEF((tree.make<asT, T>(std::forward<Argv_t>(argv)...)))
+
+      template<astNode_ptr_t newT, astNode_t oldT, typename... Argv_t> newT remake(index<oldT> i, Argv_t... argv) __DEF((tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...)))
+      template<astNode_t newT, astNode_t oldT, typename... Argv_t> index<newT> remake(index<oldT> i, Argv_t... argv) __DEF((tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...)))
+      #undef __DEF
 
       //constructors
       Parser(Lexer& s, SyntaxTree& t):tree{t},src{s},currTok{src.nextToken()},scopeName{0},currScope{tree.globalScope()},_errno{} {}
@@ -119,18 +138,5 @@ class clef::Parser {
       static void parse(const mcsl::str_slice filePath, SyntaxTree& tree);
       static void parse(Lexer& src, SyntaxTree& tree);
 };
-
-
-#pragma region inlinesrc
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-security"
-void clef::Parser::logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, const mcsl::Printable auto&... args) {
-   _errno = code;
-   // mcsl::write(mcsl::stderr, currTok);
-   // mcsl::write(mcsl::stderr, tree);
-   clef::throwError(code, src.lineNum(), src.currLine(), src.prevTokStr(), src.path(), mcsl::FMT(formatStr), std::forward<decltype(args)>(args)...);
-}
-#pragma GCC diagnostic pop
-#pragma endregion inlinesrc
 
 #endif //PARSER_HPP

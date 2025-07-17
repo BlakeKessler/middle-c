@@ -87,28 +87,28 @@ START_PARSE_STMT:
                if (tryConsumeKeyword(KeywordID::CASE)) {
                   index<Expr> caseExpr = parseExpr();
                   consumeEOS("bad GOTO CASE statement (missing EOS)");
-                  return addAttrs(tree.make<Stmt>(OpID::GOTO_CASE, caseExpr), attrs);
+                  return addAttrs(make<Stmt>(OpID::GOTO_CASE, caseExpr), attrs);
                }
                //goto default
                if (tryConsumeKeyword(KeywordID::DEFAULT)) {
                   consumeEOS("bad GOTO DEFAULT statement (missing EOS)");
-                  return addAttrs(tree.make<Stmt>(OpID::GOTO_CASE), attrs);
+                  return addAttrs(make<Stmt>(OpID::GOTO_CASE), attrs);
                }
                //goto
                index<Identifier> label = parseIdentifier(SymbolType::LABEL, nullptr, false);
                if (tree[label].scopeName()) { logError(ErrCode::BAD_IDEN, "label may not be scoped"); }
                consumeEOS("bad GOTO statement (missing EOS)");
-               return addAttrs(tree.make<Stmt>(OpID::GOTO, label), attrs);
+               return addAttrs(make<Stmt>(OpID::GOTO, label), attrs);
             }
 
             case KeywordID::BREAK         :
                getNextToken();
                consumeEOS("bad BREAK");
-               return addAttrs(tree.make<Stmt>(KeywordID::BREAK), attrs);
+               return addAttrs(make<Stmt>(KeywordID::BREAK), attrs);
             case KeywordID::CONTINUE      :
                getNextToken();
                consumeEOS("bad CONTINUE");
-               return addAttrs(tree.make<Stmt>(KeywordID::CONTINUE), attrs);
+               return addAttrs(make<Stmt>(KeywordID::CONTINUE), attrs);
 
             case KeywordID::THROW         : [[fallthrough]];
             case KeywordID::ASSERT        : [[fallthrough]];
@@ -119,16 +119,16 @@ START_PARSE_STMT:
                getNextToken();
                index<Expr> expr = parseExpr();
                consumeEOS("bad ASSUME statement");
-               return addAttrs(tree.make<Stmt>(kw, expr), attrs);
+               return addAttrs(make<Stmt>(kw, expr), attrs);
             }
             case KeywordID::RETURN        : {
                getNextToken();
                if (tryConsumeEOS()) {
-                  return addAttrs(tree.make<Stmt>(KeywordID::RETURN), attrs);
+                  return addAttrs(make<Stmt>(KeywordID::RETURN), attrs);
                } else {
                   index<Expr> expr = parseExpr();
                   consumeEOS("bad RETURN statement");
-                  return addAttrs(tree.make<Stmt>(KeywordID::RETURN, expr), attrs);
+                  return addAttrs(make<Stmt>(KeywordID::RETURN, expr), attrs);
                }
             }
 
@@ -148,7 +148,7 @@ START_PARSE_STMT:
                   symbol->setType(spec);
                   symbol->setSymbolType(SymbolType::VAR);
                }
-               return addAttrs(tree.make<Stmt>(KeywordID::ALIAS, alias, valExpr), attrs);
+               return addAttrs(make<Stmt>(KeywordID::ALIAS, alias, valExpr), attrs);
             }
 
             UNREACHABLE;
@@ -169,7 +169,7 @@ START_PARSE_STMT:
       case TokenType::IDEN        : PARSE_IDEN: {
          index<Expr> stmtContents = parseExpr();
          if (tryConsumeOperator(OpID::LABEL_DELIM)) { //label
-            return addAttrs(tree.make<Stmt>(OpID::LABEL_DELIM, stmtContents), attrs);
+            return addAttrs(make<Stmt>(OpID::LABEL_DELIM, stmtContents), attrs);
          }
          consumeEOS("invalid statement");
          return addAttrs(makeStmt(stmtContents), attrs);
@@ -194,7 +194,7 @@ START_PARSE_STMT:
          if (attrs) {
             return makeStmt(attrs);
          } else {
-            return tree.make<Stmt>();
+            return make<Stmt>();
          }
       case TokenType::ESC         : UNREACHABLE;
 
@@ -207,7 +207,7 @@ START_PARSE_STMT:
 clef::index<clef::Expr> clef::Parser::parseExpr(index<astNode> initOperand) {
    index<Expr> expr = parseExprNoPrimaryComma(initOperand);
    while (tryConsumeOperator(OpID::COMMA)) {
-      expr = tree.make<Expr>(OpID::COMMA, expr, parseExprNoPrimaryComma());
+      expr = make<Expr>(OpID::COMMA, expr, parseExprNoPrimaryComma());
    }
    return expr;
 }
@@ -235,7 +235,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
          }
          lhs = operandStack.pop_back(); //value if true (value if false is in rhs)
          index<astNode> cond = operandStack.pop_back();
-         operandStack.push_back(+tree.make<Expr>(Expr::makeTernary(tree, cond, lhs, rhs)));
+         operandStack.push_back(+make<Expr>(Expr::makeTernary(tree, cond, lhs, rhs)));
       }
       else if (isBinary(op)) { //binary operator //!NOTE: PRIORITIZES BINARY OVER POSTFIX-UNARY
          if (!operandStack.size()) { logError(ErrCode::BAD_EXPR, "bad expression (missing LHS on stack)"); }
@@ -291,7 +291,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
                getNextToken();
                consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "bad function-like keyword use");
                index<ArgList> argList = parseArgList(BlockType::CALL, false);
-               operandStack.push_back(+tree.make<Expr>(kw, argList));
+               operandStack.push_back(+make<Expr>(kw, argList));
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
@@ -312,27 +312,27 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
          case TokenType::UINT_NUM: //uints
-            operandStack.push_back(+tree.make<Literal>(currTok.uintVal(), tree.toFundTypeID(currTok.keywordID())));
+            operandStack.push_back(+make<Literal>(currTok.uintVal(), tree.toFundTypeID(currTok.keywordID())));
             getNextToken();
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
          case TokenType::SINT_NUM: //sints
-            operandStack.push_back(+tree.make<Literal>(currTok.sintVal(), tree.toFundTypeID(currTok.keywordID())));
+            operandStack.push_back(+make<Literal>(currTok.sintVal(), tree.toFundTypeID(currTok.keywordID())));
             getNextToken();
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
          case TokenType::REAL_NUM: //floats
-            operandStack.push_back(+tree.make<Literal>(currTok.realVal(), tree.toFundTypeID(currTok.keywordID())));
+            operandStack.push_back(+make<Literal>(currTok.realVal(), tree.toFundTypeID(currTok.keywordID())));
             getNextToken();
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
          case TokenType::PTXT_SEG: //strings and chars
             prevTokIsOperand = true;
             if (isString(currTok.ptxtType())) {
-               operandStack.push_back(+tree.make<Literal>(parseStrLit(), FundTypeID::CHAR));
+               operandStack.push_back(+make<Literal>(parseStrLit(), FundTypeID::CHAR));
                goto PARSE_EXPR_CONTINUE;
             } else if (currTok.ptxtType() == PtxtType::CHAR) {
-               operandStack.push_back(+tree.make<Literal>(currTok.charVal(), FundTypeID::CHAR));
+               operandStack.push_back(+make<Literal>(currTok.charVal(), FundTypeID::CHAR));
                getNextToken();
                goto PARSE_EXPR_CONTINUE;
             } else {
@@ -434,7 +434,7 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
 
    //handle keywords
    if (currTok.type() == TokenType::KEYWORD) {
-      index<Identifier> keyword = tree.make<Identifier>(tree.toFundTypeID(currTok.keywordID()), currTok.keywordID(), tree.getFundType(currTok.keywordID()), index<ArgList>{}, quals);
+      index<Identifier> keyword = make<Identifier>(tree.toFundTypeID(currTok.keywordID()), currTok.keywordID(), tree.getFundType(currTok.keywordID()), index<ArgList>{}, quals);
       getNextToken();
       tree[keyword].addQuals(parseQuals());
       if (tryConsumeOperator(OpID::SCOPE_RESOLUTION)) {
@@ -480,9 +480,9 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
       getNextToken();
       //create AST node for symbol
       if (name && symbol->parentScope() == tree[name].symbol()) { //symbol is in the current scope or is not yet defined
-         name = tree.make<Identifier>(symbol, name);
+         name = make<Identifier>(symbol, name);
       } else { //symbol is in another scope
-         name = tree.make<Identifier>(symbol);
+         name = make<Identifier>(symbol);
       }
       debug_assert(tree[name].symbol() == symbol);
 
@@ -569,7 +569,7 @@ clef::index<clef::If> clef::Parser::parseIf() {
 
    //EOS for if statement with no else
    if (tryConsumeEOS()) {
-      return tree.make<If>(condition, proc);
+      return make<If>(condition, proc);
    }
 
    //ELSE
@@ -582,8 +582,8 @@ clef::index<clef::If> clef::Parser::parseIf() {
          consumeEOS("DO WHILE statement without EOS token");
 
          //return
-         index<If> elseStmt = tree.make<If>((index<Expr>)0, elseProc, (index<If>)0);
-         index<If> ifStmt = tree.make<If>(condition, proc, elseStmt);
+         index<If> elseStmt = make<If>((index<Expr>)0, elseProc, (index<If>)0);
+         index<If> ifStmt = make<If>(condition, proc, elseStmt);
          return ifStmt;
       }
       default: { //ELSE IF
@@ -591,7 +591,7 @@ clef::index<clef::If> clef::Parser::parseIf() {
          index<If> elifStmt = parseIf(); //will consume EOS
 
          //return
-         index<If> ifStmt = tree.make<If>(condition, proc, elifStmt);
+         index<If> ifStmt = make<If>(condition, proc, elifStmt);
          return ifStmt;
       }
    }
@@ -606,8 +606,8 @@ clef::index<clef::Switch> clef::Parser::parseSwitch() {
 
    //procedure
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad SWITCH block");
-   index<Scope> procedure = tree.make<Scope>(&tree.allocBuf<index<Stmt>>());
-   index<SwitchCases> cases = tree.make<SwitchCases>(&tree.allocBuf<mcsl::pair<index<Expr>, index<Stmt>>>(), procedure);
+   index<Scope> procedure = make<Scope>(&tree.allocBuf<index<Stmt>>());
+   index<SwitchCases> cases = make<SwitchCases>(&tree.allocBuf<mcsl::pair<index<Expr>, index<Stmt>>>(), procedure);
 
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       if (tryConsumeKeyword(KeywordID::CASE)) { //CASE
@@ -636,7 +636,7 @@ clef::index<clef::Switch> clef::Parser::parseSwitch() {
    consumeEOS("SWITCH statement without EOS");
 
    //return
-   return tree.make<Switch>(condition, cases);
+   return make<Switch>(condition, cases);
 }
 
 //parse a match statement
@@ -648,7 +648,7 @@ clef::index<clef::Match> clef::Parser::parseMatch() {
 
    //procedure
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad MATCH block");
-   index<MatchCases> cases = tree.make<MatchCases>(&tree.allocBuf<mcsl::pair<index<Expr>, index<Scope>>>());
+   index<MatchCases> cases = make<MatchCases>(&tree.allocBuf<mcsl::pair<index<Expr>, index<Scope>>>());
 
    while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       index<Expr> caseExpr;
@@ -669,7 +669,7 @@ clef::index<clef::Match> clef::Parser::parseMatch() {
    consumeEOS("MATCH statement without EOS");
 
    //return
-   return tree.make<Match>(condition, cases);
+   return make<Match>(condition, cases);
 }
 
 //parse a function
@@ -719,8 +719,6 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
       } else if (+(op.props() & (OpProps::CAN_BE_POSTFIX)) && +(op.props() & OpProps::CAN_BE_PREFIX)) {
          op.removeProps(OpProps::CAN_BE_POSTFIX);
       }
-      
-      TODO; //!TODO: register overload
    }
    
    PUSH_SCOPE;
@@ -728,11 +726,12 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
    //parse signature and update overload index
    auto [overloadIndex, params, retType] = parseFuncSig(symbol);
    tree[name].overloadIndex() = overloadIndex;
+   // symbol->registerOverload
 
    //check for forward declaration
    if (tryConsumeEOS()) {
       POP_SCOPE;
-      return tree.make<FuncDef>(name, tree.make<ArgList>(params, retType), attrs);
+      return make<FuncDef>(name, make<ArgList>(params, retType), attrs);
    }
 
    //parse function definition
@@ -743,8 +742,8 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
    consumeEOS("function definition without EOS");
 
    //make definition node
-   index<ArgList> paramNode = tree.make<ArgList>(params, retType);
-   index<FuncDef> def = tree.make<FuncDef>(name, paramNode, procedure, attrs);
+   index<ArgList> paramNode = make<ArgList>(params, retType);
+   index<FuncDef> def = make<FuncDef>(name, paramNode, procedure, attrs);
    symbol->defineOverload(overloadIndex, def);
 
    //return
@@ -809,7 +808,7 @@ clef::index<clef::Expr> clef::Parser::parseAttr(index<Expr> prevAttrs) {
       args = parseArgList(BlockType::CALL, false);
    } else { args = 0; }
 
-   return tree.make<Expr>(OpID::ATTRIBUTE, name, args, prevAttrs);
+   return make<Expr>(OpID::ATTRIBUTE, name, args, prevAttrs);
 }
 //parse all attributes (the first attribute operator must already be consumed)
 clef::index<clef::Expr> clef::Parser::parseAttrs() {
