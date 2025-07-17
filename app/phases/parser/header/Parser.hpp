@@ -107,7 +107,7 @@ class clef::Parser {
       index<TypeDecl> parseNamespace(index<Expr> attrs);
 
       //error logging
-      void logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, auto&&... args);
+      void logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, const mcsl::Printable auto&... args);
       
       //get next token
       void getNextToken() { currTok = src.nextToken(); }
@@ -124,7 +124,7 @@ class clef::Parser {
 #pragma region inlinesrc
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-security"
-void clef::Parser::logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, auto&&... args) {
+void clef::Parser::logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, const mcsl::Printable auto&... args) {
    _errno = code;
    // mcsl::write(mcsl::stderr, currTok);
    // mcsl::write(mcsl::stderr, tree);
