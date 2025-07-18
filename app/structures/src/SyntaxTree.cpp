@@ -93,8 +93,7 @@ clef::SymbolNode* clef::SyntaxTree::registerAlias(SymbolNode* alias, SymbolNode*
    debug_assert(target);
 
    if (*alias) { //prevent illegal redeclarations from causing memory leaks
-      internalError(ErrCode::BAD_IDEN, FMT("identifier `%s` redefined as alias"), alias->name());
-      //!TODO: maybe just return a nullptr and let the parser handle it
+      return nullptr;
    }
 
    (*alias->parentScope())[alias->name()] = target;
@@ -221,7 +220,7 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
             debug_assert(canDownCastTo(expr.rhsType(), NodeType::ARG_LIST));
             auto tmp = deduceOverload(symbol, +expr.rhs());
             if (!std::get<0>(tmp)) {
-               internalError(ErrCode::TYPECHECK_ERR, FMT("no matching function signature found for func `%s(%s)`"), astTNB{self, (index<Identifier>)expr.lhs(), 0}, astTNB{self, (index<ArgList>)expr.rhs(), 0});
+               return ErrCode::TYPECHECK_ERR; //!NOTE: error message: "no matching function signature found for func `%s(%s)`", astTNB{self, (index<Identifier>)expr.lhs(), 0}, astTNB{self, (index<ArgList>)expr.rhs(), 0}
             }
             lhs.overloadIndex() = std::get<1>(tmp);
             debug_assert(std::get<2>(tmp)->metaType() == TypeSpec::FUNC_SIG);
@@ -247,7 +246,7 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
       switch (expr.opID()) {
          case OpID::TERNARY_INVOKE:
             if (!(expr.evalType() = commonType(evalType(+expr.rhs()), evalType(+expr.extra())))) { //intentionally uses assignment
-               return ErrCode::TYPECHECK_ERR; //operands of ternary expression must have a common type
+               return ErrCode::TYPECHECK_ERR; //!NOTE: error message: `operands of ternary expression must have a common type`
             }
             return {};
 
@@ -391,7 +390,7 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
          //invokes
          case OpID::LIST_INVOKE: [[fallthrough]];
          case OpID::SPECIALIZER_INVOKE: [[fallthrough]];
-         case OpID::INTERP_STR_INVOKE: internalError(ErrCode::BAD_EXPR, FMT("invalid operator for types (%s)"), toString(expr.opID()));
+         case OpID::INTERP_STR_INVOKE: internalError(ErrCode::BAD_EXPR, FMT("invalid operator for types (%s)"), toString(expr.opID())); //!NOTE: should return a res
          #pragma endregion errs
 
          #pragma region unreachables
@@ -434,7 +433,7 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
       case OpID::INTERP_STR_INVOKE: TODO;
       case OpID::TERNARY_INVOKE:
          if (!(expr.evalType() = commonType(evalType(+expr.rhs()), evalType(+expr.extra())))) { //intentionally uses assignment
-            return ErrCode::TYPECHECK_ERR; //operands of ternary expression must have a common type
+            return ErrCode::TYPECHECK_ERR; //!NOTE: error message: `operands of ternary expression must have a common type`
          }
          return {};
 
@@ -698,7 +697,7 @@ clef::res<clef::TypeSpec*> clef::SyntaxTree::commonTypeOfOperands(index<Expr> i)
    if (expr.name()) { \
       spec = commonType(spec, evalType(+expr.name())); \
       if (!spec) { \
-         return ErrCode::TYPECHECK_ERR; /*no common type*/ \
+         return ErrCode::TYPECHECK_ERR; /*//!NOTE: error message: `no common type`*/ \
       } \
    }
    UPDATE(lhs);
@@ -713,11 +712,11 @@ clef::res<clef::TypeSpec*> clef::SyntaxTree::commonTypeOfOperands(index<Expr> i)
 mcsl::str_slice clef::SyntaxTree::extractStrLit(index<Expr> strLitExpr) {
    Expr& expr = self[strLitExpr];
    if (expr.opID() != OpID::NULL || expr.lhsType() != NodeType::LITERAL) {
-      TODO; //error
+      TODO; //!TODO: return an error res
    }
    Literal& lit = self[(index<Literal>)expr.lhs()];
    if (lit.type() != LitType::STRING) {
-      TODO; //error
+      TODO; //!TODO: return an error res
    }
    return lit;
 }

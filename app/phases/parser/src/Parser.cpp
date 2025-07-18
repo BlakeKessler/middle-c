@@ -142,7 +142,9 @@ START_PARSE_STMT:
                SymbolNode* symbol = tree[alias].symbol();
                if (val.opID() == OpID::NULL && val.lhsType() == NodeType::IDEN && val.rhsType() == NodeType::NONE && val.extraType() == NodeType::NONE && val.extraType2() == NodeType::NONE) {
                   SymbolNode* target = tree[(index<Identifier>)val.lhs()].symbol();
-                  tree.registerAlias(symbol, target);
+                  if (!tree.registerAlias(symbol, target)) {
+                     logError(ErrCode::BAD_IDEN, "identifier `%s` redefined as alias", symbol->name());
+                  }
                } else {
                   TypeSpec* spec = tree.evalType(+valExpr);
                   symbol->setType(spec);
@@ -714,7 +716,6 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
             }
          } else { [[unlikely]]; //second arg is invalid
             logError(ErrCode::BAD_ATTR, "invalid second parameter for `@op` attribute");
-            TODO; //error
          }
       } else if (+(op.props() & (OpProps::CAN_BE_POSTFIX)) && +(op.props() & OpProps::CAN_BE_PREFIX)) {
          op.removeProps(OpProps::CAN_BE_POSTFIX);
