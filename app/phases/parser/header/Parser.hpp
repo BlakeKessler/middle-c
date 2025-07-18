@@ -129,6 +129,12 @@ class clef::Parser {
       template<astNode_ptr_t newT, astNode_t oldT, typename... Argv_t> newT remake(index<oldT> i, Argv_t... argv) requires requires { tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...); };
       template<astNode_t newT, astNode_t oldT, typename... Argv_t> index<newT> remake(index<oldT> i, Argv_t... argv) requires requires { tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...); } { remake<newT*>(i, std::forward<Argv_t>(argv)...); return +i; }
 
+      template<astNode_ptr_t asT, astNode_ptr_t T, typename... Argv_t> asT make(void (*onerr)(ErrCode), Argv_t... argv) requires requires { tree.make<asT, T>(std::forward<Argv_t>(argv)...); };
+      template<astNode_t asT, astNode_t T = asT, typename... Argv_t> index<asT> make(void (*onerr)(ErrCode), Argv_t... argv) requires requires { tree.make<asT, T>(std::forward<Argv_t>(argv)...); } { index<asT> index = tree.nodeCount(); make<asT*,T*>(onerr, std::forward<Argv_t>(argv)...); return index; }
+
+      template<astNode_ptr_t newT, astNode_t oldT, typename... Argv_t> newT remake(void (*onerr)(ErrCode), index<oldT> i, Argv_t... argv) requires requires { tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...); };
+      template<astNode_t newT, astNode_t oldT, typename... Argv_t> index<newT> remake(void (*onerr)(ErrCode), index<oldT> i, Argv_t... argv) requires requires { tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...); } { remake<newT*>(onerr, i, std::forward<Argv_t>(argv)...); return +i; }
+
       //constructors
       Parser(Lexer& s, SyntaxTree& t):tree{t},src{s},currTok{src.nextToken()},scopeName{0},currScope{tree.globalScope()},_errno{} {}
    public:
@@ -139,7 +145,11 @@ class clef::Parser {
 
 #pragma region inlinesrc
 
-template<clef::astNode_ptr_t asT, clef::astNode_ptr_t T = asT, typename... Argv_t> asT clef::Parser::make(Argv_t... argv) requires requires { tree.make<asT, T>(std::forward<Argv_t>(argv)...); } {
+template<clef::astNode_ptr_t asT, clef::astNode_ptr_t T = asT, typename... Argv_t>
+asT clef::Parser::make(Argv_t... argv)
+requires requires {
+   tree.make<asT, T>(std::forward<Argv_t>(argv)...);
+} {
    uint index = tree.nodeCount();
    asT tmp = tree.make<asT, T>(std::forward<Argv_t>(argv)...);
    if constexpr (mcsl::is_t<mcsl::remove_ptr<T>, Expr>) {
@@ -151,13 +161,51 @@ template<clef::astNode_ptr_t asT, clef::astNode_ptr_t T = asT, typename... Argv_
    return tmp;
 }
 
-template<clef::astNode_ptr_t newT, clef::astNode_t oldT, typename... Argv_t> newT clef::Parser::remake(index<oldT> i, Argv_t... argv) requires requires { tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...); } {
+template<clef::astNode_ptr_t newT, clef::astNode_t oldT, typename... Argv_t>
+newT clef::Parser::remake(index<oldT> i, Argv_t... argv)
+requires requires {
+   tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...);
+} {
    assume(i);
    newT tmp = tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...);
    if constexpr (mcsl::is_t<mcsl::remove_ptr<newT>, Expr>) {
       res<void> r = tree.updateEvalType(i);
       if (r.is_err()) {
          logError(r.err(), "error calculating type of expression");
+      }
+   }
+   return tmp;
+}
+
+template<clef::astNode_ptr_t asT, clef::astNode_ptr_t T = asT, typename... Argv_t>
+asT clef::Parser::make(void (*onerr)(ErrCode), Argv_t... argv)
+requires requires {
+   tree.make<asT, T>(std::forward<Argv_t>(argv)...);
+} {
+   uint index = tree.nodeCount();
+   asT tmp = tree.make<asT, T>(std::forward<Argv_t>(argv)...);
+   if constexpr (mcsl::is_t<mcsl::remove_ptr<T>, Expr>) {
+      res<void> r = tree.updateEvalType(index);
+      if (r.is_err()) {
+         onerr(r.err());
+         UNREACHABLE;
+      }
+   }
+   return tmp;
+}
+
+template<clef::astNode_ptr_t newT, clef::astNode_t oldT, typename... Argv_t>
+newT clef::Parser::remake(void (*onerr)(ErrCode), index<oldT> i, Argv_t... argv)
+requires requires {
+   tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...);
+} {
+   assume(i);
+   newT tmp = tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...);
+   if constexpr (mcsl::is_t<mcsl::remove_ptr<newT>, Expr>) {
+      res<void> r = tree.updateEvalType(i);
+      if (r.is_err()) {
+         onerr(r.err());
+         UNREACHABLE;
       }
    }
    return tmp;
