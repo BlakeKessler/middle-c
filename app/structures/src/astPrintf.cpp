@@ -741,7 +741,6 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::StmtSeq> obj, char 
       }
       return charsPrinted;
    } else if ((mode | CASE_BIT) == 'b') {
-      auto span = obj->span();
       uint charsPrinted = 0;
       for (uint i = 0; i < span.size(); ++i) {
          charsPrinted += writef(file, TNB(span[i]), mode, fmt);
