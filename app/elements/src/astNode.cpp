@@ -12,7 +12,7 @@ void clef::astNode::downCast(NodeType newType) {
    if (canDownCastTo(_nodeType, newType)) {
       _nodeType = newType;
    } else {
-      throwError(ErrCode::BAD_NODE_CAST, mcsl::FMT("attempt to downcast from %s to %s"), toString(_nodeType), toString(newType));
+      internalError(ErrCode::BAD_NODE_CAST, mcsl::FMT("attempt to downcast from %s to %s"), toString(_nodeType), toString(newType));
    }
 }
 //base to derived
@@ -20,7 +20,7 @@ void clef::astNode::upCast(NodeType newType) {
    if (canDownCastTo(newType, _nodeType)) {
       _nodeType = newType;
    } else {
-      throwError(ErrCode::BAD_NODE_CAST, mcsl::FMT("attempt to upcast from %s to %s"), toString(_nodeType), toString(newType));
+      internalError(ErrCode::BAD_NODE_CAST, mcsl::FMT("attempt to upcast from %s to %s"), toString(_nodeType), toString(newType));
    }
 }
 //derived to base or base to derived
@@ -28,7 +28,7 @@ void clef::astNode::verticalCast(NodeType newType) {
    if (canDownCastTo(_nodeType, newType) || canDownCastTo(newType, _nodeType)) {
       _nodeType = newType;
    } else {
-      throwError(ErrCode::BAD_NODE_CAST, mcsl::FMT("attempt to vertical cast from %s to %s"), toString(_nodeType), toString(newType));
+      internalError(ErrCode::BAD_NODE_CAST, mcsl::FMT("attempt to vertical cast from %s to %s"), toString(_nodeType), toString(newType));
    }
 }
 //cast without type checking

@@ -50,7 +50,7 @@ mcsl::File& mcsl::write(File& file, const clef::Token& tok) {
             case PtxtType::STR            : file.printf(mcsl::FMT("%s"), tok.strVal()); break;
             case PtxtType::UNPROCESSED_STR: file.printf(mcsl::FMT("%s"), tok.unprocessedStrVal()); break;
 
-            default: throwError(clef::ErrCode::LEXER_NOT_IMPLEMENTED, mcsl::FMT("\033[35munimplemented plaintext segment type used (%s)\033[39m"), toString(tok.ptxtType()));
+            default: internalError(clef::ErrCode::LEXER_NOT_IMPLEMENTED, mcsl::FMT("\033[35munimplemented plaintext segment type used (%s)\033[39m"), toString(tok.ptxtType()));
          }
          break;
       
@@ -95,7 +95,7 @@ uint mcsl::writef(File& file, const clef::Token& tok, char mode, FmtArgs args) {
             case PtxtType::UNPROCESSED_STR:
                return writef(file, tok.unprocessedStrVal(), mode, args);
 
-            default: throwError(clef::ErrCode::LEXER_NOT_IMPLEMENTED, mcsl::FMT("\033[35munimplemented plaintext segment type used (%s)\033[39m"), toString(tok.ptxtType()));
+            default: internalError(clef::ErrCode::LEXER_NOT_IMPLEMENTED, mcsl::FMT("\033[35munimplemented plaintext segment type used (%s)\033[39m"), toString(tok.ptxtType()));
          }
       
       default: UNREACHABLE;

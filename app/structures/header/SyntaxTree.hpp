@@ -238,16 +238,9 @@ inline void clef::SyntaxTree::release() {
 }
 
 template<clef::astNode_ptr_t asT, clef::astNode_ptr_t T = asT, typename... Argv_t> asT clef::SyntaxTree::make(Argv_t... argv) requires mcsl::valid_ctor<mcsl::remove_ptr<T>, Argv_t...> {
-   uint index = _buf.size();
    astNode* tmp = _buf.emplace_back(std::move(mcsl::remove_ptr<T>{std::forward<Argv_t>(argv)...}));
    if constexpr (!mcsl::is_t<mcsl::remove_ptr<asT>, mcsl::remove_ptr<T>>) {
       tmp->anyCast(mcsl::remove_ptr<asT>::nodeType());
-   }
-   if constexpr (mcsl::is_t<mcsl::remove_ptr<T>, Expr>) {
-      res<void> r = updateEvalType(index);
-      if (r.is_err()) {
-         TODO; //maybe move this into Parser
-      }
    }
    return (asT)tmp;
 }

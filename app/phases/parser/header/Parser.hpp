@@ -112,7 +112,7 @@ class clef::Parser {
       }
       template<typename T> T unwrap(res<T> r) {
          if (r.is_ok()) { return r.ok(); }
-         else { TODO; }
+         else { logError(r.err(), "failed unwrap"); }
       }
       template<typename T> T unwrap(res<T> r, void(*onerr)(ErrCode)) {
          if (r.is_ok()) { return r.ok(); }
@@ -123,13 +123,11 @@ class clef::Parser {
       void getNextToken() { currTok = src.nextToken(); }
 
       //make an AST node
-      #define __DEF(expr) requires requires { expr; } { return expr; }
-      template<astNode_ptr_t asT, astNode_ptr_t T, typename... Argv_t> asT make(Argv_t... argv) __DEF((tree.make<asT, T>(std::forward<Argv_t>(argv)...)))
-      template<astNode_t asT, astNode_t T = asT, typename... Argv_t> index<asT> make(Argv_t... argv) __DEF((tree.make<asT, T>(std::forward<Argv_t>(argv)...)))
+      template<astNode_ptr_t asT, astNode_ptr_t T, typename... Argv_t> asT make(Argv_t... argv) requires requires { tree.make<asT, T>(std::forward<Argv_t>(argv)...); };
+      template<astNode_t asT, astNode_t T = asT, typename... Argv_t> index<asT> make(Argv_t... argv) requires requires { tree.make<asT, T>(std::forward<Argv_t>(argv)...); } { index<asT> index = tree.nodeCount(); make<asT*,T*>(std::forward<Argv_t>(argv)...); return index; }
 
-      template<astNode_ptr_t newT, astNode_t oldT, typename... Argv_t> newT remake(index<oldT> i, Argv_t... argv) __DEF((tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...)))
-      template<astNode_t newT, astNode_t oldT, typename... Argv_t> index<newT> remake(index<oldT> i, Argv_t... argv) __DEF((tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...)))
-      #undef __DEF
+      template<astNode_ptr_t newT, astNode_t oldT, typename... Argv_t> newT remake(index<oldT> i, Argv_t... argv) requires requires { tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...); };
+      template<astNode_t newT, astNode_t oldT, typename... Argv_t> index<newT> remake(index<oldT> i, Argv_t... argv) requires requires { tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...); } { remake<newT*>(i, std::forward<Argv_t>(argv)...); return +i; }
 
       //constructors
       Parser(Lexer& s, SyntaxTree& t):tree{t},src{s},currTok{src.nextToken()},scopeName{0},currScope{tree.globalScope()},_errno{} {}
@@ -138,5 +136,33 @@ class clef::Parser {
       static void parse(const mcsl::str_slice filePath, SyntaxTree& tree);
       static void parse(Lexer& src, SyntaxTree& tree);
 };
+
+#pragma region inlinesrc
+
+template<clef::astNode_ptr_t asT, clef::astNode_ptr_t T = asT, typename... Argv_t> asT clef::Parser::make(Argv_t... argv) requires requires { tree.make<asT, T>(std::forward<Argv_t>(argv)...); } {
+   uint index = tree.nodeCount();
+   asT tmp = tree.make<asT, T>(std::forward<Argv_t>(argv)...);
+   if constexpr (mcsl::is_t<mcsl::remove_ptr<T>, Expr>) {
+      res<void> r = tree.updateEvalType(index);
+      if (r.is_err()) {
+         logError(r.err(), "error calculating type of expression");
+      }
+   }
+   return tmp;
+}
+
+template<clef::astNode_ptr_t newT, clef::astNode_t oldT, typename... Argv_t> newT clef::Parser::remake(index<oldT> i, Argv_t... argv) requires requires { tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...); } {
+   assume(i);
+   newT tmp = tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...);
+   if constexpr (mcsl::is_t<mcsl::remove_ptr<newT>, Expr>) {
+      res<void> r = tree.updateEvalType(i);
+      if (r.is_err()) {
+         logError(r.err(), "error calculating type of expression");
+      }
+   }
+   return tmp;
+}
+
+#pragma endregion inlinesrc
 
 #endif //PARSER_HPP

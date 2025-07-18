@@ -46,7 +46,37 @@ class clef::Lexer {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-security"
 void clef::Lexer::logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, const mcsl::Printable auto&... args) {
-   clef::throwError(code, lineNum(), currLine(), prevTokStr(), path(), mcsl::FMT(formatStr), std::forward<decltype(args)>(args)...);
+   const mcsl::str_slice line = currLine();
+   const mcsl::str_slice tok = prevTokStr();
+
+   mcsl::stdout.flush();
+   
+   debug_assert(tok.begin() >= line.begin());
+   debug_assert(tok.end() <= line.end());
+   const mcsl::str_slice beforeTok = mcsl::str_slice::make(line.begin(), tok.begin());
+   const mcsl::str_slice afterTok = mcsl::str_slice::make(tok.end(), line.end());
+   
+   mcsl::err_printf(mcsl::FMT("\033[1m%s:%u:%u: \033[31mERROR:\033[39m "), path(), lineNum(), beforeTok.size() + 1);
+   mcsl::err_printf(mcsl::FMT(formatStr), args...);
+   mcsl::err_printf(mcsl::FMT(" [%s, %u]\033[22m\n"), ERR_MSG_ARR[+code], +code);
+   uint spaces = mcsl::err_printf(mcsl::FMT("    %u "), lineNum());
+   uint spaces2 = mcsl::err_printf(mcsl::FMT("| %s"), beforeTok) - 1;
+   mcsl::err_printf(mcsl::FMT("\033[4m%s\033[24m%s"), tok, afterTok);
+   if (afterTok.back() != '\n') {
+      mcsl::stderr.write('\n');
+   }
+   mcsl::stderr.write(' ', spaces);
+   mcsl::stderr.write('|');
+   mcsl::stderr.write(' ', spaces2);
+   mcsl::err_printf(mcsl::FMT("\033[1;32m^\033[22;39m\n"));
+
+   mcsl::stderr.flush();
+   
+   #ifdef NDEBUG
+      std::exit(EXIT_FAILURE);
+   #else
+      std::abort();
+   #endif
 }
 #pragma GCC diagnostic pop
 #pragma endregion inlinesrc

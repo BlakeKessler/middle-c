@@ -93,7 +93,7 @@ clef::SymbolNode* clef::SyntaxTree::registerAlias(SymbolNode* alias, SymbolNode*
    debug_assert(target);
 
    if (*alias) { //prevent illegal redeclarations from causing memory leaks
-      throwError(ErrCode::BAD_IDEN, FMT("identifier `%s` redefined as alias"), alias->name());
+      internalError(ErrCode::BAD_IDEN, FMT("identifier `%s` redefined as alias"), alias->name());
       //!TODO: maybe just return a nullptr and let the parser handle it
    }
 
@@ -221,7 +221,7 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
             debug_assert(canDownCastTo(expr.rhsType(), NodeType::ARG_LIST));
             auto tmp = deduceOverload(symbol, +expr.rhs());
             if (!std::get<0>(tmp)) {
-               throwError(ErrCode::TYPECHECK_ERR, FMT("no matching function signature found for func `%s(%s)`"), astTNB{self, (index<Identifier>)expr.lhs(), 0}, astTNB{self, (index<ArgList>)expr.rhs(), 0});
+               internalError(ErrCode::TYPECHECK_ERR, FMT("no matching function signature found for func `%s(%s)`"), astTNB{self, (index<Identifier>)expr.lhs(), 0}, astTNB{self, (index<ArgList>)expr.rhs(), 0});
             }
             lhs.overloadIndex() = std::get<1>(tmp);
             debug_assert(std::get<2>(tmp)->metaType() == TypeSpec::FUNC_SIG);
@@ -239,11 +239,7 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
 
    TypeSpec* __tmp;
    #define IS_PRIM(name) (!expr.name() || !(__tmp = evalType(+expr.name())) || __tmp->metaType() == TypeSpec::FUND_TYPE || (__tmp->metaType() == TypeSpec::INDIR && __tmp->indirTable().back().decaysToFund()))
-   bool isAllPrimitive =
-      IS_PRIM(lhs) &&
-      IS_PRIM(rhs) &&
-      IS_PRIM(extra) &&
-      IS_PRIM(extra2);
+   bool isAllPrimitive = IS_PRIM(lhs) && IS_PRIM(rhs) && IS_PRIM(extra) && IS_PRIM(extra2);
    #undef IS_PRIM
    bool lhsIsPtrlike = expr.lhs() && (__tmp = evalType(+expr.lhs())) && __tmp->metaType() == TypeSpec::INDIR && __tmp->indirTable().back().decaysToFund();
 
@@ -395,7 +391,7 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
          //invokes
          case OpID::LIST_INVOKE: [[fallthrough]];
          case OpID::SPECIALIZER_INVOKE: [[fallthrough]];
-         case OpID::INTERP_STR_INVOKE: throwError(ErrCode::BAD_EXPR, FMT("invalid operator for types (%s)"), toString(expr.opID()));
+         case OpID::INTERP_STR_INVOKE: internalError(ErrCode::BAD_EXPR, FMT("invalid operator for types (%s)"), toString(expr.opID()));
          #pragma endregion errs
 
          #pragma region unreachables

@@ -37,7 +37,7 @@ struct [[clang::trivial_abi]] clef::Literal {
          debug_assert(isChar(t));
          //check type
          if (_type != LitType::STRING && _type != LitType::INTERP_STR && _type != LitType::FORMAT && _type != LitType::REGEX) {
-            throwError(ErrCode::BAD_LITERAL, mcsl::FMT("attempt to construct string-like Literal node with non-string-like LitType"));
+            internalError(ErrCode::BAD_LITERAL, mcsl::FMT("attempt to construct string-like Literal node with non-string-like LitType"));
          }
       }
       Literal(TypeSpec* typeID):_typeid{typeID},_typeName{FundTypeID::null},_type{LitType::TYPEID} {}
@@ -55,7 +55,7 @@ struct [[clang::trivial_abi]] clef::Literal {
       LitType type() const { return _type; }
       FundTypeID typeName() const { return _typeName; }
 
-      [[noreturn]] void throwCastErr(LitType target) const { throwError(ErrCode::BAD_LIT_CAST, mcsl::FMT("%u to %u"), +_type, +target); }
+      [[noreturn]] void throwCastErr(LitType target) const { internalError(ErrCode::BAD_LIT_CAST, mcsl::FMT("%u to %u"), +_type, +target); }
 
       #pragma region cast
       operator ulong()        const { if (_type == LitType::UINT)   { return _uintLit;   } else { throwCastErr(LitType::UINT);   } }
