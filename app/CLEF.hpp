@@ -15,6 +15,8 @@ namespace clef {
 
    template<typename T> struct res;
 
+   typedef void(*ErrHandler)(ErrCode);
+
    //objects for encoding Middle C specification data
    struct OpData;
    template <uint _size> struct OpDecoder;
