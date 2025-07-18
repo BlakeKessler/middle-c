@@ -73,8 +73,6 @@ RESTART:
             logError(ErrCode::BAD_LITERAL, "identifier may not start with digit, and numeric literal must not be directly followed by identifier without separating whitespace");
          }
 
-         //!TODO: use kw
-
          //convert to number and push token to stream
          switch (val.val.type) {
             case mcsl::NumType::null: UNREACHABLE;

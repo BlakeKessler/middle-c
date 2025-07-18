@@ -334,7 +334,7 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
 
 #if !PARALLEL_COMPILE_FILES
    if (op == OpID::PREPROC_IMPORT) {
-      //!TODO: make this more robust
+      //!HACK: make this more robust
       mcsl::string fullPath = src.path();
       while (fullPath.size() && fullPath.back() != '/') {
          fullPath.pop_back();

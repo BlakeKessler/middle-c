@@ -255,8 +255,6 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
 
          case OpID::SCOPE_RESOLUTION: UNREACHABLE;
 
-            TODO;
-
          case OpID::RANGE: TODO;
          case OpID::SPREAD: TODO;
 
@@ -439,8 +437,6 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
 
 
       case OpID::PREPROCESSOR: TODO;
-
-         TODO;
 
       case OpID::MEMBER_ACCESS: [[fallthrough]];
       case OpID::PTR_MEMBER_ACCESS: [[fallthrough]];

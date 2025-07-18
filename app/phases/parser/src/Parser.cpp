@@ -471,7 +471,7 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
       //check for undeclared identifiers being used as scopes
       //deferred until later if files are compiled in parallel
       if constexpr (!PARALLEL_COMPILE_FILES) {
-         //!TODO: make this less janky
+         //!HACK: make this less janky
          if (symbol->symbolType() == SymbolType::EXTERN_IDEN || symbol->symbolType() == SymbolType::EXTERN_TYPE || (symbol->symbolType() == SymbolType::null && symbol != tree.globalScope())) {
             logError(ErrCode::BAD_IDEN, "undeclared identifier `%s`", astTNB(tree, name, 0));
          }
@@ -496,13 +496,13 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
 
    //check that the symbol has been declared if not parsing its declaration
    if constexpr (!PARALLEL_COMPILE_FILES) {
-      //!TODO: make this less janky
+      //!HACK: make this less janky
       if (!isDecl && (symbol->symbolType() == SymbolType::EXTERN_IDEN || symbol->symbolType() == SymbolType::EXTERN_TYPE)) {
          logError(ErrCode::BAD_IDEN, "undeclared identifier `%s`", astTNB(tree, name, 0));
       }
    }
    
-   //!TODO: make this less janky
+   //!HACK: make this less janky
    if (isDecl) {
       if (symbol->symbolType() == SymbolType::FUNC) {
          if (symbolType == SymbolType::FUNC || symbolType == SymbolType::null || symbolType == SymbolType::EXTERN_IDEN || symbolType == SymbolType::EXTERN_TYPE) { //define an overload
@@ -683,7 +683,7 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
    // symbol->setSymbolType(SymbolType::FUNC);
 
    //handle operator overloading
-   //!TODO: make this more efficient and less janky
+   //!HACK: make this more efficient and less janky
    //!TODO: maybe move this to the call site?
    if (index<Expr> opAttr = tree.findAttr(attrs, tree.findSymbol(FMT("op"))); opAttr) {
       index<ArgList> argsIndex = +tree[opAttr].rhs();

@@ -775,22 +775,22 @@ namespace clef {
       null = 0,
 
       CHAR = 1,
-      WCHAR,   //!TODO: currently unsupported
-      CHAR8,   //!TODO: currently unsupported
-      CHAR16,  //!TODO: currently unsupported
-      CHAR32,  //!TODO: currently unsupported
+      WCHAR,
+      CHAR8,
+      CHAR16,
+      CHAR32,
 
       STR = 9,
-      WSTR,    //!TODO: currently unsupported
-      STR8,    //!TODO: currently unsupported
-      STR16,   //!TODO: currently unsupported
-      STR32,   //!TODO: currently unsupported
+      WSTR,
+      STR8,
+      STR16,
+      STR32,
 
       UNPROCESSED_STR = 25,
-      UNPROCESSED_WSTR,    //!TODO: currently unsupported
-      UNPROCESSED_STR8,    //!TODO: currently unsupported
-      UNPROCESSED_STR16,   //!TODO: currently unsupported
-      UNPROCESSED_STR32,   //!TODO: currently unsupported
+      UNPROCESSED_WSTR,
+      UNPROCESSED_STR8,
+      UNPROCESSED_STR16,
+      UNPROCESSED_STR32,
 
       __STR_TYPE = 8,
    };
