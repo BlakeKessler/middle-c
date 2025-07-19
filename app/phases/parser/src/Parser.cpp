@@ -238,16 +238,31 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
          index<astNode> cond = operandStack.pop_back();
          operandStack.push_back(+make<Expr>(Expr::makeTernary(tree, cond, lhs, rhs)));
       }
+      // else if (op.opID() == OpID::SCOPE_RESOLUTION) {
+      //    TODO;
+      // }
+      // else if (op.opID() == OpID::MEMBER_ACCESS) {
+      //    TODO;
+      // }
+      // else if (op.opID() == OpID::PTR_MEMBER_ACCESS) {
+      //    TODO;
+      // }
+      // else if (op.opID() == OpID::METHOD_PTR) {
+      //    TODO;
+      // }
+      // else if (op.opID() == OpID::ARROW_METHOD_PTR) {
+      //    TODO;
+      // }
       else if (isBinary(op)) { //binary operator //!NOTE: PRIORITIZES BINARY OVER POSTFIX-UNARY
          if (!operandStack.size()) { logError(ErrCode::BAD_EXPR, "bad expression (missing LHS on stack)"); }
          lhs = operandStack.pop_back();
-         operandStack.push_back(+tree.makeExpr(op.opID(), lhs, rhs));
+         operandStack.push_back(+makeExpr(op.opID(), lhs, rhs));
       } else { //unary operator
          if (+(op & OpProps::CAN_BE_POSTFIX)) { //postfix unary operator
-            operandStack.push_back(+tree.makeExpr(op.opID(), rhs));
+            operandStack.push_back(+makeExpr(op.opID(), rhs));
          } else { //prefix unary operator
             debug_assert(+(op & OpProps::CAN_BE_PREFIX));
-            operandStack.push_back(+tree.makeExpr(op.opID(), 0, rhs));
+            operandStack.push_back(+makeExpr(op.opID(), 0, rhs));
          }
       }
    };
@@ -390,7 +405,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             if (prevTokIsOperand) { //function call, initializer list, subscript, or specializer
                debug_assert(operandStack.size());
                index<ArgList> args = parseArgList(blockType, false);
-               operandStack.push_back(+tree.makeExpr(getInvoker(blockType),operandStack.pop_back(),(index<astNode>)args));
+               operandStack.push_back(+makeExpr(getInvoker(blockType),operandStack.pop_back(),(index<astNode>)args));
             } else if (blockType == BlockType::INIT_LIST) { //tuple
                operandStack.push_back(+parseArgList(blockType, false));
             } else { //block subexpression

@@ -138,6 +138,23 @@ class clef::Parser {
       template<astNode_ptr_t newT, astNode_t oldT, typename... Argv_t> newT remake(ErrHandler onerr, index<oldT> i, Argv_t... argv) requires requires { tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...); };
       template<astNode_t newT, astNode_t oldT, typename... Argv_t> index<newT> remake(ErrHandler onerr, index<oldT> i, Argv_t... argv) requires requires { tree.remake<newT, oldT>(i, std::forward<Argv_t>(argv)...); } { remake<newT*>(onerr, i, std::forward<Argv_t>(argv)...); return +i; }
 
+      index<Expr> makeExpr(const OpID op, index<astNode> lhs) {
+         index<Expr> expr = tree.makeExpr(op, lhs);
+         res<void> r = tree.updateEvalType(expr);
+         if (r.is_err()) {
+            logError(r.err(), "error calculating type of expression");
+         }
+         return expr;
+      }
+      index<Expr> makeExpr(const OpID op, index<astNode> lhs, index<astNode> rhs) {
+         index<Expr> expr = tree.makeExpr(op, lhs, rhs);
+         res<void> r = tree.updateEvalType(expr);
+         if (r.is_err()) {
+            logError(r.err(), "error calculating type of expression");
+         }
+         return expr;
+      }
+
       //constructors
       Parser(Lexer& s, SyntaxTree& t):tree{t},src{s},currTok{src.nextToken()},scopeName{0},currScope{tree.globalScope()},_errno{} {}
    public:

@@ -20,16 +20,16 @@ clef::index<clef::astNode> clef::SyntaxTree::getValueKeyword(const KeywordID key
    }
 }
 
-clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode> index) {
-   if (!index) {
-      return make<Expr>(op, NodeType::NONE, index);
+clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode> lhs) {
+   if (!lhs) {
+      return make<Expr>(op, NodeType::NONE, lhs);
    }
-   astNode& node = self[index];
+   astNode& node = self[lhs];
    switch (node.nodeType()) {
       case RawIdentifier::nodeType():
       case Identifier::nodeType():
       case Literal::nodeType():
-         return make<Expr>(op, node.nodeType(), index);
+         return make<Expr>(op, node.nodeType(), lhs);
 
       case Expression::nodeType():
       case Declaration::nodeType():
@@ -45,7 +45,7 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
       case Switch::nodeType():
       case Match::nodeType():
       case Asm::nodeType():
-         return +index;
+         return +lhs;
 
 
       case Scope::nodeType():

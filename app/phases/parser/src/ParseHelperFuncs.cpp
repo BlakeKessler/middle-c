@@ -364,7 +364,7 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
 #endif
 
    //create statement node
-   return makeStmt(tree.makeExpr(op, +name, +pathLit));
+   return makeStmt(makeExpr(op, +name, +pathLit));
 }
 clef::index<clef::Expr> clef::Parser::parseCast(KeywordID castID) {
    debug_assert(isCast(castID));
@@ -441,7 +441,7 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
       case RawIdentifier::nodeType():
       case Identifier::nodeType():
       case Literal::nodeType():
-         return tree.makeExpr(OpID::NULL, index);
+         return makeExpr(OpID::NULL, index);
 
       //expressions - return the node unaltered
       case Expression::nodeType():
