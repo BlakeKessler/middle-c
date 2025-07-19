@@ -439,6 +439,8 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
    switch (node.nodeType()) {
       //value nodes - return an expression with no operator and the node as the only argument
       case RawIdentifier::nodeType():
+         toIden(+index);
+         [[fallthrough]];
       case Identifier::nodeType():
       case Literal::nodeType():
          return makeExpr(OpID::NULL, index);
@@ -476,6 +478,24 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
 clef::index<clef::Stmt> clef::Parser::makeStmt(index<Expr> expr) {
    tree[(index<astNode>)expr].anyCast(NodeType::STMT);
    return +expr;
+}
+
+clef::index<clef::Identifier> clef::Parser::toIden(index<RawIdentifier> i) {
+   RawIdentifier& asRaw = tree[(index<RawIdentifier>)i];
+   SymbolNode* symbol;
+   if (+asRaw.keywordID()) { //keyword
+      KeywordID kwid = asRaw.keywordID();
+      if (isType(kwid)) {
+         return remake<Identifier>((index<RawIdentifier>)i, tree.toFundTypeID(kwid), kwid, tree.getFundType(kwid), index<ArgList>{});
+      }
+      else if (kwid == KeywordID::THIS || kwid == KeywordID::SELF) {
+         return remake<Identifier>((index<RawIdentifier>)i, kwid, currScope); //!NOTE: this breaks in subscopes
+      }
+      logError(ErrCode::BAD_IDEN, "keyword `%s` may not name a symbol", currTok.keywordID());
+   } else { //standard identifier
+      symbol = tree.findSymbol(asRaw.name(), currScope);
+      return remake<Identifier>((index<RawIdentifier>)i, symbol, 0, asRaw.specializer());
+   }
 }
 
 #endif //PARSER_HELPERS_CPP

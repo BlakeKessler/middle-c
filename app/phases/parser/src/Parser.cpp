@@ -236,11 +236,44 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
          }
          lhs = operandStack.pop_back(); //value if true (value if false is in rhs)
          index<astNode> cond = operandStack.pop_back();
+         tryToIden(lhs);
+         tryToIden(rhs);
+         tryToIden(cond);
          operandStack.push_back(+make<Expr>(Expr::makeTernary(tree, cond, lhs, rhs)));
       }
-      // else if (op.opID() == OpID::SCOPE_RESOLUTION) {
-      //    TODO;
-      // }
+      else if (op.opID() == OpID::SCOPE_RESOLUTION) { // lhs::rhs
+         if (operandStack.size() < 2) {
+            logError(ErrCode::BAD_EXPR, "bad scope resolution expression");
+         }
+         //parent scope
+         lhs = operandStack.pop_back();
+         if (tree[lhs].nodeType() == NodeType::RAW_IDEN) {
+            toIden(+lhs);
+         }
+         else if (!canDownCastTo(tree[lhs].nodeType(), NodeType::IDEN)) {
+            logError(ErrCode::BAD_EXPR, "scope resolution can only be applied to identifiers");
+         }
+
+         //child entity
+         if (tree[rhs].nodeType() == NodeType::RAW_IDEN) {
+            if (!tree[(index<Identifier>)lhs].symbol()) {
+               TODO;
+            }
+            SymbolNode* symbol = tree[(index<Identifier>)lhs].symbol()->get(tree[(index<RawIdentifier>)rhs].name());
+            if (!symbol) {
+               TODO;
+            }
+            remake<Identifier>((index<RawIdentifier>)rhs, symbol, +lhs, tree[(index<RawIdentifier>)rhs].specializer());
+            operandStack.push_back(rhs);
+         }
+         else {
+            if (!canDownCastTo(tree[rhs].nodeType(), NodeType::IDEN)) {
+               logError(ErrCode::BAD_EXPR, "scope resolution can only be applied to identifiers");
+            }
+            tree[(index<Identifier>)rhs].scopeName() = +lhs;
+            operandStack.push_back(rhs);
+         }
+      }
       // else if (op.opID() == OpID::MEMBER_ACCESS) {
       //    TODO;
       // }
@@ -256,8 +289,11 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
       else if (isBinary(op)) { //binary operator //!NOTE: PRIORITIZES BINARY OVER POSTFIX-UNARY
          if (!operandStack.size()) { logError(ErrCode::BAD_EXPR, "bad expression (missing LHS on stack)"); }
          lhs = operandStack.pop_back();
+         tryToIden(lhs);
+         tryToIden(rhs);
          operandStack.push_back(+makeExpr(op.opID(), lhs, rhs));
       } else { //unary operator
+         tryToIden(rhs);
          if (+(op & OpProps::CAN_BE_POSTFIX)) { //postfix unary operator
             operandStack.push_back(+makeExpr(op.opID(), rhs));
          } else { //prefix unary operator
@@ -405,7 +441,14 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             if (prevTokIsOperand) { //function call, initializer list, subscript, or specializer
                debug_assert(operandStack.size());
                index<ArgList> args = parseArgList(blockType, false);
-               operandStack.push_back(+makeExpr(getInvoker(blockType),operandStack.pop_back(),(index<astNode>)args));
+               index<astNode> node = operandStack.pop_back();
+               if (tree[node].nodeType() == NodeType::RAW_IDEN) {
+                  toIden(+node);
+                  if (!tree[(index<Identifier>)node].symbol()) {
+                     TODO;
+                  }
+               }
+               operandStack.push_back(+makeExpr(getInvoker(blockType),node,(index<astNode>)args));
             } else if (blockType == BlockType::INIT_LIST) { //tuple
                operandStack.push_back(+parseArgList(blockType, false));
             } else { //block subexpression

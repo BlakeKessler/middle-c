@@ -154,6 +154,13 @@ class clef::Parser {
          }
          return expr;
       }
+      index<Identifier> toIden(index<RawIdentifier>);
+      inline index<Identifier> tryToIden(index<astNode> i) {
+         if (i && tree[i].nodeType() == NodeType::RAW_IDEN) {
+            return toIden(+i);
+         }
+         return 0;
+      }
 
       //constructors
       Parser(Lexer& s, SyntaxTree& t):tree{t},src{s},currTok{src.nextToken()},scopeName{0},currScope{tree.globalScope()},_errno{} {}

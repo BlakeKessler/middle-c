@@ -23,4 +23,8 @@ struct clef::RawIdentifier {
       index<const ArgList> specializer() const { return _specializer; }
 };
 
+namespace mcsl {
+   File& write(File&, const clef::RawIdentifier&);
+};
+
 #endif //RAW_IDENTIFIER_HPP
