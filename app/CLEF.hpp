@@ -28,6 +28,7 @@ namespace clef {
    //atomic compilation elements
    struct Token;
    struct astNode;
+      struct RawIdentifier;
       struct Identifier;
       struct Scope;
       struct Literal;
@@ -51,8 +52,8 @@ namespace clef {
       struct ArgumentList; using ArgList = ArgumentList;
       template<typename T> concept astNode_t = requires { {T::nodeType()} -> mcsl::same_t<NodeType>; };
       template<typename T> concept astNode_ptr_t = mcsl::ptr_t<T> && astNode_t<mcsl::remove_ptr<T>>;
-      template<typename T> concept operand_t = mcsl::is_t<T, clef::Identifier> || mcsl::is_t<T,Expression> || mcsl::is_t<T,Literal>;
-      #define CLEF_ALL_FUND_AST_NODE_T Expression, Literal, Scope, Identifier, Statement
+      template<typename T> concept operand_t = mcsl::is_t<T, RawIdentifier> || mcsl::is_t<T, Identifier> || mcsl::is_t<T, Expression> || mcsl::is_t<T, Literal>;
+      #define CLEF_ALL_FUND_AST_NODE_T Expression, Literal, Scope, RawIdentifier, Identifier, Statement
       #define CLEF_ALL_EXPR_AST_NODE_T Declaration, FuncDef, MacroDef, TypeDecl, If, ForLoop, ForeachLoop, WhileLoop, DoWhileLoop, Switch, Match, Asm
       #define CLEF_ALL_NODE_LIST_AST_NODE_T ArgumentList, MatchCases, StatementSequence, SwitchCases
       #define CLEF_ALL_AST_NODE_T CLEF_ALL_FUND_AST_NODE_T, CLEF_ALL_EXPR_AST_NODE_T, CLEF_ALL_NODE_LIST_AST_NODE_T

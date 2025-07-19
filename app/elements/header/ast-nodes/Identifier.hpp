@@ -30,7 +30,7 @@ struct clef::Identifier {
       Identifier(const FundTypeID id, const KeywordID kwid, SymbolNode* name, index<ArgList> specializer = {}, QualMask quals = {}):_name{name},_overloadIndex{},_scopeName{},_specializer{specializer},_keywordID{kwid},_id{id},_quals{quals} {}
 
       Identifier(const Identifier& other):_name{other._name},_scopeName{other._scopeName},_specializer{other._specializer},_keywordID{other._keywordID},_id{other._id},_quals{other._quals} {}
-      Identifier& operator=(const Identifier& other) { new (this) Identifier{other}; return self; }
+      Identifier& operator=(const Identifier& other) { return *new (this) Identifier{other}; }
 
       index<ArgList>& specializer() { return _specializer; }
       index<const ArgList> specializer() const { return _specializer; }

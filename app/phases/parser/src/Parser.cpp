@@ -95,7 +95,7 @@ START_PARSE_STMT:
                   return addAttrs(make<Stmt>(OpID::GOTO_CASE), attrs);
                }
                //goto
-               index<Identifier> label = parseIdentifier(SymbolType::LABEL, nullptr, false);
+               index<Identifier> label = parseSymbol(SymbolType::LABEL, nullptr, false);
                if (tree[label].scopeName()) { logError(ErrCode::BAD_IDEN, "label may not be scoped"); }
                consumeEOS("bad GOTO statement (missing EOS)");
                return addAttrs(make<Stmt>(OpID::GOTO, label), attrs);
@@ -134,7 +134,7 @@ START_PARSE_STMT:
 
             case KeywordID::ALIAS         : {
                getNextToken();
-               index<Identifier> alias = parseIdentifier(SymbolType::EXTERN_IDEN, nullptr, true);
+               index<Identifier> alias = parseSymbol(SymbolType::EXTERN_IDEN, nullptr, true);
                consumeOperator(OpID::ASSIGN, "alias definitions must use the assignment operator (and cannot be forward-declared)");
                index<Expr> valExpr = parseExpr();
                consumeEOS("invalid alias declaration");
@@ -160,9 +160,8 @@ START_PARSE_STMT:
             case KeywordID::DYN_CAST      : [[fallthrough]];
             case KeywordID::BIT_CAST      : [[fallthrough]];
             case KeywordID::CONST_CAST    : {
-               index<Expr> stmtContents = parseCast(currTok.keywordID());
-               getNextToken();
-               consumeEOS("bad cast statement");
+               index<Expr> stmtContents = parseExpr();
+               consumeEOS("invalid statement");
                return addAttrs(makeStmt(stmtContents), attrs);
             }
 
@@ -298,11 +297,11 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
                goto PARSE_EXPR_CONTINUE;
             }
             else if (isType(kw)) {
-               TODO;
-               // operandStack.push_back(+tree.getFundType(kw));
-               // getNextToken();
-               // prevTokIsOperand = true;
-               // goto PARSE_EXPR_CONTINUE;
+               //!NOTE: this might need to be handled differently somehow
+               operandStack.push_back(+make<Identifier>(tree.getFundType(kw)));
+               getNextToken();
+               prevTokIsOperand = true;
+               goto PARSE_EXPR_CONTINUE;
             }
             
             logError(ErrCode::BAD_KEYWORD, "bad keyword in expression");
@@ -310,7 +309,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
 
          case TokenType::MACRO_INVOKE: TODO;
          case TokenType::IDEN: //identifiers
-            operandStack.push_back(+parseIdentifier(SymbolType::EXTERN_IDEN, nullptr, false));
+            operandStack.push_back(+parseIdentifier());
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
          case TokenType::UINT_NUM: //uints
@@ -346,8 +345,8 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
          case TokenType::EOS: //end of statement token - end of expression
             goto END_OF_EXPR;
          case TokenType::OP:
-            if (currTok.opID() == OpID::SCOPE_RESOLUTION) {
-               operandStack.push_back(+parseIdentifier(SymbolType::EXTERN_IDEN, nullptr, false));
+            if (currTok.opID() == OpID::SCOPE_RESOLUTION && !prevTokIsOperand) {
+               operandStack.push_back(+parseSymbol(SymbolType::EXTERN_IDEN, nullptr, false));
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
@@ -429,20 +428,66 @@ clef::QualMask clef::Parser::parseQuals() {
    return quals;
 }
 
-//parse an identifier if one is present (returns 0 otherwise)
-clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbolType, SymbolNode* type, bool isDecl) {
+//parse an identifier (no scope resolution or the like) if one is present (returns 0 otherwise)
+clef::index<clef::RawIdentifier> clef::Parser::tryParseIdentifier() {
+   //handle keywords
+   if (currTok.type() == TokenType::KEYWORD) {
+      //make node
+      KeywordID kwid = currTok.keywordID();
+      getNextToken();
+      if (isCast(kwid)) {
+         logError(ErrCode::BAD_IDEN, "typecast keywords cannot be used as identifiers");
+      }
+      return make<RawIdentifier>(kwid, index<ArgList>{});
+   }
+   //not an identifier
+   else if (currTok.type() != TokenType::IDEN) {
+      return 0;
+   }
+
+   //standard identifiers
+   index<RawIdentifier> name = make<RawIdentifier>(currTok.name());
+   getNextToken();
+
+   //specializer
+   if (tryConsumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::OPEN)) {
+      parseSpecList(name);
+   }
+
+   //return
+   return name;
+}
+
+//parse an identifier (no scope resolution or the like)
+clef::index<clef::RawIdentifier> clef::Parser::parseIdentifier() {
+   index<RawIdentifier> name = tryParseIdentifier();
+   if (!name) {
+      logError(ErrCode::BAD_IDEN, "expected an identifier");
+   }
+   return name;
+}
+
+//parse a full identifier if one is present (returns 0 otherwise)
+clef::index<clef::Identifier> clef::Parser::tryParseSymbol(SymbolType symbolType, SymbolNode* type, bool isDecl) {
    //qualifiers
    QualMask quals = parseQuals();
 
    //handle keywords
    if (currTok.type() == TokenType::KEYWORD) {
-      index<Identifier> keyword = make<Identifier>(tree.toFundTypeID(currTok.keywordID()), currTok.keywordID(), tree.getFundType(currTok.keywordID()), index<ArgList>{}, quals);
-      getNextToken();
-      tree[keyword].addQuals(parseQuals());
-      if (tryConsumeOperator(OpID::SCOPE_RESOLUTION)) {
-         logError(ErrCode::BAD_KEYWORD, "keywords may not name scopes");
+      KeywordID kwid = currTok.keywordID();
+      if (isType(kwid)) {
+         index<Identifier> keyword = make<Identifier>(tree.toFundTypeID(kwid), kwid, tree.getFundType(kwid), index<ArgList>{}, quals);
+         getNextToken();
+         tree[keyword].addQuals(parseQuals());
+         if (tryConsumeOperator(OpID::SCOPE_RESOLUTION)) {
+            logError(ErrCode::BAD_KEYWORD, "keywords may not name scopes");
+         }
+         return keyword;
       }
-      return keyword;
+      else if (kwid == KeywordID::THIS || kwid == KeywordID::SELF) {
+         return make<Identifier>(kwid, currScope); //!NOTE: this breaks in subscopes
+      }
+      logError(ErrCode::BAD_IDEN, "keyword `%s` may not name a symbol", currTok.keywordID());
    }
 
    //preserve current scope data
@@ -550,8 +595,8 @@ clef::index<clef::Identifier> clef::Parser::tryParseIdentifier(SymbolType symbol
    return name;
 }
 //parse an identifier
-clef::index<clef::Identifier> clef::Parser::parseIdentifier(SymbolType symbolType, SymbolNode* type, bool isDecl) {
-   index<Identifier> name = tryParseIdentifier(symbolType, type, isDecl);
+clef::index<clef::Identifier> clef::Parser::parseSymbol(SymbolType symbolType, SymbolNode* type, bool isDecl) {
+   index<Identifier> name = tryParseSymbol(symbolType, type, isDecl);
    if (!name) {
       logError(ErrCode::BAD_IDEN, "expected an identifier");
    }
@@ -677,7 +722,7 @@ clef::index<clef::Match> clef::Parser::parseMatch() {
 //parse a function
 clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
    //parse function name
-   index<Identifier> name = parseIdentifier(SymbolType::FUNC, nullptr, true);
+   index<Identifier> name = parseSymbol(SymbolType::FUNC, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    debug_assert(symbol->symbolType() == SymbolType::FUNC);
    // symbol->setSymbolType(SymbolType::FUNC);
@@ -803,7 +848,7 @@ clef::index<clef::Asm> clef::Parser::parseASM(index<Expr> attrs) {
 
 //parse a single attribute (attribute operator must aleady be consumed)
 clef::index<clef::Expr> clef::Parser::parseAttr(index<Expr> prevAttrs) {
-   index<Identifier> name = parseIdentifier(SymbolType::ATTRIBUTE, nullptr, false);
+   index<Identifier> name = parseSymbol(SymbolType::ATTRIBUTE, nullptr, false);
    index<ArgList> args;
    if (tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN)) {
       args = parseArgList(BlockType::CALL, false);

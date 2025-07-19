@@ -88,6 +88,7 @@ namespace clef {
       ERROR = 0xFF,  //CLEF INTERNAL ERROR
       NONE = 0x00,   //to-be determined
 
+      RAW_IDEN,
       IDEN,
       SCOPE,
       LITERAL,
@@ -283,6 +284,12 @@ namespace clef {
 
       ALIAS,
 
+      CAST,
+      UP_CAST,
+      DYN_CAST,
+      BIT_CAST,
+      CONST_CAST,
+
       LET,
       MAKE_TYPE,
 
@@ -312,6 +319,8 @@ namespace clef {
       //helpers
       __FIRST_PSEUDO_OP = FOR,
       __LAST_PSEUDO_OP = PREPROC_EMBED,
+      __FIRST_CAST = CAST,
+      __LAST_CAST = CONST_CAST,
       __FIRST_PREPROC = PREPROC_IMPORT,
       __LAST_PREPROC = PREPROC_EMBED,
       __FIRST_LOOP = FOR,
@@ -340,6 +349,8 @@ namespace clef {
    constexpr bool isStringLike(const OpID op) { return op == OpID::STRING || op == OpID::CHAR; }
 
    constexpr bool isPreproc(const OpID op) { return op >= OpID::__FIRST_PREPROC && op <= OpID::__LAST_PREPROC; }
+
+   constexpr bool isCast(const OpID op) { return op >= OpID::__FIRST_CAST && op <= OpID::__LAST_CAST; }
 
    //operator properties bitmask
    enum class [[clang::flag_enum]] OpProps : uint8 {
@@ -637,6 +648,12 @@ namespace clef {
          case KeywordID::SIZEOF        : TODO;
          case KeywordID::ALIGNAS       : TODO;
          case KeywordID::ALIGNOF       : TODO;
+
+         case KeywordID::CAST          : return OpID::CAST;
+         case KeywordID::UP_CAST       : return OpID::UP_CAST;
+         case KeywordID::DYN_CAST      : return OpID::DYN_CAST;
+         case KeywordID::BIT_CAST      : return OpID::BIT_CAST;
+         case KeywordID::CONST_CAST    : return OpID::CONST_CAST;
 
          default: UNREACHABLE;
       }

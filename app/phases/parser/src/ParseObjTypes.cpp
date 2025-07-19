@@ -5,7 +5,7 @@
 
 //helper function used to implement parsing of classes and structs
 clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(index<Expr> attrs, clef::SymbolType symbolType, const mcsl::str_slice metatypeName) {
-   index<Identifier> name = tryParseIdentifier(symbolType, nullptr, true);
+   index<Identifier> name = tryParseSymbol(symbolType, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, symbolType);
    debug_assert(spec->canonName());
@@ -89,7 +89,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(index<Expr> attrs, 
 
 //parse a trait declaration/definition
 clef::index<clef::TypeDecl> clef::Parser::parseTrait(index<Expr> attrs) {
-   index<Identifier> name = parseIdentifier(SymbolType::TRAIT, nullptr, true);
+   index<Identifier> name = parseSymbol(SymbolType::TRAIT, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, SymbolType::TRAIT);
    if (spec->metaType() != TypeSpec::COMPOSITE) {
@@ -163,7 +163,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseTrait(index<Expr> attrs) {
 
 //parse a union declaration/definition
 clef::index<clef::TypeDecl> clef::Parser::parseUnion(index<Expr> attrs) {
-   index<Identifier> name = tryParseIdentifier(SymbolType::UNION, nullptr, true);
+   index<Identifier> name = tryParseSymbol(SymbolType::UNION, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, SymbolType::UNION);
    if (spec->metaType() != TypeSpec::COMPOSITE) {
@@ -203,7 +203,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion(index<Expr> attrs) {
 
 //helper function used to implement parsing of enums and masks
 clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(index<Expr> attrs, SymbolType symbolType, const mcsl::str_slice metatypeName) {
-   index<Identifier> name = tryParseIdentifier(symbolType, nullptr, true);
+   index<Identifier> name = tryParseSymbol(symbolType, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, symbolType);
    if (spec->metaType() != TypeSpec::COMPOSITE) {
@@ -229,7 +229,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(index<Expr> attrs,
    consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad enum/mask definition");
    if (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
       do {
-         index<Identifier> enumerator = parseIdentifier(SymbolType::VAR, symbol, true);
+         index<Identifier> enumerator = parseSymbol(SymbolType::VAR, symbol, true);
          index<Expr> val;
          if (tryConsumeOperator(OpID::ASSIGN)) {
             val = parseExprNoPrimaryComma();
@@ -257,7 +257,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseEnumUnion(index<Expr> attrs) {
 
 //parse a namespace declaration/definition
 clef::index<clef::TypeDecl> clef::Parser::parseNamespace(index<Expr> attrs) {
-   index<Identifier> name = tryParseIdentifier(SymbolType::NAMESPACE, nullptr, true);
+   index<Identifier> name = tryParseSymbol(SymbolType::NAMESPACE, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, SymbolType::NAMESPACE);
    if (spec->metaType() != TypeSpec::COMPOSITE) {

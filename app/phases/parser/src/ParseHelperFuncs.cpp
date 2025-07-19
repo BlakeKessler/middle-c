@@ -82,7 +82,7 @@ clef::index<clef::Scope> clef::Parser::parseProcedure() {
 //parse a typename
 //assumed to already be declared if !isDecl
 clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType, bool isDecl) {
-   index<Identifier> name = parseIdentifier(symbolType, nullptr, isDecl);
+   index<Identifier> name = parseSymbol(symbolType, nullptr, isDecl);
    Identifier& iden = tree[name];
    {
       SymbolNode* symbol = iden.symbol();
@@ -181,7 +181,7 @@ clef::index<clef::Decl> clef::Parser::parseDecl(index<Expr> attrs) {
    
    //declaration
    index<Identifier> type = parseTypename(SymbolType::EXTERN_TYPE, true);
-   index<Identifier> varName = parseIdentifier(SymbolType::VAR, tree[type].symbol(), true);
+   index<Identifier> varName = parseSymbol(SymbolType::VAR, tree[type].symbol(), true);
    SymbolNode* varSymbol = tree[varName].symbol();
    varSymbol->setSymbolType(SymbolType::VAR);
    varSymbol->setType(tree[type].symbol()->type());
@@ -219,7 +219,7 @@ clef::index<clef::Decl> clef::Parser::parseParam(index<Expr> attrs) {
    }
 
    index<Identifier> typeName = parseTypename(SymbolType::EXTERN_TYPE, true);
-   index<Identifier> varName = tryParseIdentifier(SymbolType::VAR, tree[typeName].symbol(), true);
+   index<Identifier> varName = tryParseSymbol(SymbolType::VAR, tree[typeName].symbol(), true);
    if (varName) {
       SymbolNode* varSymbol = tree[varName].symbol();
       varSymbol->setSymbolType(SymbolType::VAR);
@@ -294,6 +294,23 @@ clef::index<clef::ArgList> clef::Parser::parseSpecList(index<Identifier> target,
    tree[target].specializer() = args;
    return args;
 }
+//parse a specializer list
+clef::index<clef::ArgList> clef::Parser::parseSpecList(index<RawIdentifier> target) {
+   index<ArgList> args = make<ArgList>(&tree.allocBuf<index<Expr>>());
+   if (tryConsumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::CLOSE)) {
+      return args;
+   }
+   //templated entity
+   do {
+      index<Expr> arg = parseExpr();
+      tree[args].push_back(arg);
+   } while (tryConsumeOperator(OpID::COMMA));
+   //closing delimiter
+   consumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::CLOSE, "argument list must end with the correct closing delimiter");
+   //update AST and return
+   tree[target].specializer() = args;
+   return args;
+}
 
 //parse a preprocessor statement
 //!NOTE: currently supported directives: `import`, `link`, and `embed`
@@ -318,7 +335,7 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
       SymbolNode* byteType = tree.getFundType(KeywordID::UBYTE);
       index<Identifier> byteSpan = make<Identifier>(KeywordID::UBYTE, byteType);
       tree.makeIndirType(byteSpan, byteType->type(), QualMask::CONST, IndirTable(IndirTable::Entry(IndirTable::Entry::SLICE, true, false, false)));
-      name = parseIdentifier(SymbolType::VAR, tree[byteSpan].symbol(), true);
+      name = parseSymbol(SymbolType::VAR, tree[byteSpan].symbol(), true);
    } else {
       logError(ErrCode::BAD_PREPROC, "unrecognized directive");
       op = OpID::NULL;
@@ -352,13 +369,12 @@ clef::index<clef::Stmt> clef::Parser::parsePreprocStmt() {
 clef::index<clef::Expr> clef::Parser::parseCast(KeywordID castID) {
    debug_assert(isCast(castID));
    consumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::OPEN, "must specify type of cast");
-   index<ArgList> typeptr = parseArgList(BlockType::SPECIALIZER, false);
-   index<Identifier> castptr = make<Identifier>(castID, nullptr, typeptr);
-   //!TODO: validate cast specializer
+   index<Identifier> targetType = parseTypename(SymbolType::EXTERN_IDEN, false);
+   consumeBlockDelim(BlockType::SPECIALIZER, BlockDelimRole::CLOSE, "invalid cast target type");
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN, "typecasting uses function call syntax");
-   index<Expr> contents = parseExpr();
-   consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "typecasting uses function call syntax");
-   return tree.makeExpr(OpID::CALL_INVOKE, +castptr, +contents);
+   index<Expr> expr = parseExprNoPrimaryComma(0);
+   consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "bad typecast argument");
+   return tree.make<Expr>(toOpID(castID), targetType, expr);
 }
 
 //parse a string literal (adjacent string literals are concatenated, like in C)
@@ -422,6 +438,7 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
    astNode& node = tree[index];
    switch (node.nodeType()) {
       //value nodes - return an expression with no operator and the node as the only argument
+      case RawIdentifier::nodeType():
       case Identifier::nodeType():
       case Literal::nodeType():
          return tree.makeExpr(OpID::NULL, index);

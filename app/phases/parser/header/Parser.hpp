@@ -55,6 +55,7 @@ class clef::Parser {
       index<Scope> parseProcedure();
       index<ArgList> parseArgList(const BlockType closer, bool isDecl);
       index<ArgList> parseSpecList(index<Identifier> target, bool isDecl);
+      index<ArgList> parseSpecList(index<RawIdentifier> target);
 
       mcsl::str_slice parseStrLit();
 
@@ -70,8 +71,10 @@ class clef::Parser {
       void skipLineComment();
 
       QualMask parseQuals();
-      index<Identifier> tryParseIdentifier(SymbolType symbolType, SymbolNode* type, bool isDecl);
-      index<Identifier> parseIdentifier(SymbolType symbolType, SymbolNode* type, bool isDecl);
+      index<RawIdentifier> tryParseIdentifier();
+      index<RawIdentifier> parseIdentifier();
+      index<Identifier> tryParseSymbol(SymbolType symbolType, SymbolNode* type, bool isDecl);
+      index<Identifier> parseSymbol(SymbolType symbolType, SymbolNode* type, bool isDecl);
       index<Identifier> parseTypename(SymbolType symbolType, bool isDecl);
       index<Decl> parseDecl(index<Expr> attrs);
       index<Decl> parseParam(index<Expr> attrs);

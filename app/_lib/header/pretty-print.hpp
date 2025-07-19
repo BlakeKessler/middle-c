@@ -37,6 +37,7 @@ constexpr const mcsl::str_slice clef::toString(const NodeType type) {
       CASE(ERROR, "error");
       CASE(NONE, "none");
 
+      CASE(RAW_IDEN, "RAW_IDENTIFIER");
       CASE(IDEN, "IDENTIFIER");
       CASE(SCOPE, "SCOPE");
       CASE(LITERAL, "LITERAL");
@@ -216,6 +217,12 @@ constexpr const mcsl::str_slice clef::toString(const OpID op) {
       CASE(RETURN, "RETURN");
 
       CASE(ALIAS, "ALIAS");
+
+      CASE(CAST, "CAST");
+      CASE(UP_CAST, "UP_CAST");
+      CASE(DYN_CAST, "DYN_CAST");
+      CASE(BIT_CAST, "BIT_CAST");
+      CASE(CONST_CAST, "CONST_CAST");
 
 
       CASE(LET, "LET");

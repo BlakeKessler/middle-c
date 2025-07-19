@@ -395,7 +395,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
          case BLOCK_CMNT_CLOSE: UNREACHABLE;
 
          case ATTRIBUTE:
-            if (expr.extra2()) {
+            if (expr.extra()) {
                charsPrinted += file.printf(FMT("%s "), TNB_AST(expr.extra()));
             }
             charsPrinted += file.printf(FMT("@%s"), TNB_AST(expr.lhs()));
@@ -558,6 +558,14 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
             }
             break;
          
+         case CAST      : [[fallthrough]];
+         case UP_CAST   : [[fallthrough]];
+         case DYN_CAST  : [[fallthrough]];
+         case BIT_CAST  : [[fallthrough]];
+         case CONST_CAST: 
+            charsPrinted += file.printf(FMT("%s<%s>(%s)"), toString(expr.opID()), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
+            break;
+         
          case DEF_FUNC_PARAMS   : charsPrinted += writef(file, TNB_CAST(FuncDef), mode, fmt); break;
          case DEF_MACRO_PARAMS  : charsPrinted += writef(file, TNB_CAST(MacroDef), mode, fmt); break;
 
@@ -616,6 +624,40 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Scope> obj, char mo
       return writef(file, TNB_CAST(StmtSeq), mode, fmt);
    } else {
       __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<Scope>"), mode);
+   }
+   UNREACHABLE;
+}
+
+//print a raw identifier
+//padForPosSign: print a leading space for non-null nodes
+uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::RawIdentifier> obj, char mode, FmtArgs fmt) {
+   using namespace clef;
+   if (!obj) {
+      return 0;
+   }
+   const RawIdentifier iden = *obj;
+   if ((mode | CASE_BIT) == 's') {
+      uint charsPrinted = 0;
+      if (fmt.padForPosSign) {
+         charsPrinted += file.printf(FMT(" "));
+      }
+      //name
+      if (+iden.keywordID()) {
+         charsPrinted += writef(file, toString(iden.keywordID()), mode, fmt);
+      }
+      else {
+         charsPrinted += writef(file, iden.name(), mode, fmt);
+      }
+      //specializer
+      if (iden.specializer()) {
+         charsPrinted += file.printf(FMT("<:%s:>"), TNB_AST(iden.specializer()));
+      }
+      //return
+      return charsPrinted;
+   } else if ((mode | CASE_BIT) == 'b') {
+      TODO;
+   } else {
+      __throw(ErrCode::UNSPEC, FMT("unsupported format code (%%%c) for printing astTNB<RawIdentifier>"), mode);
    }
    UNREACHABLE;
 }

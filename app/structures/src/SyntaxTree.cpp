@@ -26,6 +26,7 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
    }
    astNode& node = self[index];
    switch (node.nodeType()) {
+      case RawIdentifier::nodeType():
       case Identifier::nodeType():
       case Literal::nodeType():
          return make<Expr>(op, node.nodeType(), index);
@@ -147,6 +148,9 @@ clef::TypeSpec* clef::SyntaxTree::evalType(index<astNode> i) {
       case NodeType::NONE: [[fallthrough]];
       case NodeType::ERROR:
          return nullptr;
+
+      case NodeType::RAW_IDEN:
+         TODO;
 
       case NodeType::IDEN:
          return self[(index<Identifier>)i].symbol()->type();
@@ -326,7 +330,13 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
          case OpID::AND_ASSIGN: [[fallthrough]];
          case OpID::XOR_ASSIGN: [[fallthrough]];
          case OpID::OR_ASSIGN: [[fallthrough]];
-         case OpID::COALESCE_ASSIGN:
+         case OpID::COALESCE_ASSIGN: [[fallthrough]];
+         //casts
+         case OpID::CAST: [[fallthrough]];
+         case OpID::UP_CAST: [[fallthrough]];
+         case OpID::DYN_CAST: [[fallthrough]];
+         case OpID::BIT_CAST: [[fallthrough]];
+         case OpID::CONST_CAST:
             expr.evalType() = evalType(+expr.lhs());
             return {};
          #pragma endregion lhss
@@ -501,23 +511,29 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
          TODO;
       #pragma endregion standards
 
-
-
-      case OpID::ASSIGN:
-      //case OpID::CONST_ASSIGN: TODO;
-         expr.evalType() = evalType(+expr.lhs());
-         return {};
-
       case OpID::COALESCE: TODO;
 
-      case OpID::COMMA:
-         expr.evalType() = evalType(+expr.rhs());
+      #pragma region lhss
+      //assignments
+      case OpID::ASSIGN: [[fallthrough]];
+      //case OpID::CONST_ASSIGN: TODO;
+      //casts
+      case OpID::CAST: [[fallthrough]];
+      case OpID::UP_CAST: [[fallthrough]];
+      case OpID::DYN_CAST: [[fallthrough]];
+      case OpID::BIT_CAST: [[fallthrough]];
+      case OpID::CONST_CAST:
+         expr.evalType() = evalType(+expr.lhs());
          return {};
+      #pragma endregion lhss
 
+      #pragma region rhss
+      case OpID::COMMA: [[fallthrough]];
       case OpID::LET: [[fallthrough]];
       case OpID::MAKE_TYPE:
          expr.evalType() = evalType(+expr.rhs());
          return {};
+      #pragma endregion rhss
 
 
       case OpID::PREPROC_IMPORT: TODO;
