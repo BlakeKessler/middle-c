@@ -322,10 +322,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
                goto PARSE_EXPR_CONTINUE;
             }
             else if (kw == KeywordID::LET) {
-               getNextToken();
-               operandStack.push_back(+parseDecl(0));
-               prevTokIsOperand = true;
-               goto PARSE_EXPR_CONTINUE;
+               logError(ErrCode::BAD_EXPR, "may not declare new variables in subexpressions");
             }
             else if (isValue(kw)) {
                operandStack.push_back(tree.getValueKeyword(kw));
