@@ -43,6 +43,9 @@ struct alignas(8) clef::OpData {
          _props = _props & ~props;
          return _props;
       }
+      constexpr void setProps(const OpProps props) {
+         _props = props;
+      }
       constexpr void setPrecedence(ubyte prec) {
          _prec = prec;
       }

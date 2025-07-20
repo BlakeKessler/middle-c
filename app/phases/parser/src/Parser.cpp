@@ -274,6 +274,19 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             operandStack.push_back(rhs);
          }
       }
+      else if (op.opID() == OpID::PTR_MEMBER_ACCESS) {
+         if (operandStack.size() < 1) {
+            logError(ErrCode::BAD_EXPR, "bad pointer member access expression");
+         }
+         //parent scope
+         lhs = operandStack.pop_back();
+         tryToIden(lhs);
+         
+         //make `x->y` act as an alias for `(*x).y`
+         lhs = +makeExpr(OpID::DEREF, 0, lhs);
+         op = OpData{FMT("."), OpID::MEMBER_ACCESS, OpProps::INFIX_LEFT, (ubyte)(~0), TokenType::OP};
+         goto MEMB_ACCESS_PROC_CHILD;
+      }
       else if (op.opID() == OpID::MEMBER_ACCESS) {
          if (operandStack.size() < 1) {
             logError(ErrCode::BAD_EXPR, "bad member access expression");
@@ -283,11 +296,12 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
          tryToIden(lhs);
 
          //child entity
+         MEMB_ACCESS_PROC_CHILD:
          if (tree[rhs].nodeType() == NodeType::RAW_IDEN) {
             if (canDownCastTo(tree[lhs].nodeType(), NodeType::IDEN) && !tree[(index<Identifier>)lhs].symbol()) {
                TODO;
             }
-            SymbolNode* symbol = tree[(index<Identifier>)lhs].symbol()->type()->canonName()->get(tree[(index<RawIdentifier>)rhs].name());
+            SymbolNode* symbol = tree.evalType(lhs)->canonName()->get(tree[(index<RawIdentifier>)rhs].name());
             if (!symbol) {
                TODO;
             }
@@ -296,15 +310,10 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             debug_assert(tree[(index<Identifier>)rhs].symbol()->type());
          }
          else {
-            if (!canDownCastTo(tree[rhs].nodeType(), NodeType::IDEN)) {
-               logError(ErrCode::BAD_EXPR, "scope resolution can only be applied to identifiers");
-            }
+            TODO;
          }
          operandStack.push_back(+makeExpr(op.opID(), lhs, rhs));
       }
-      // else if (op.opID() == OpID::PTR_MEMBER_ACCESS) {
-      //    TODO;
-      // }
       // else if (op.opID() == OpID::METHOD_PTR) {
       //    TODO;
       // }
@@ -455,8 +464,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
                operatorStack.push_back(op);
             } else { //prefix unary
                OpData op = currTok.op();
-               op.removeProps(OpProps::POSTFIX | OpProps::INFIX_LEFT | OpProps::INFIX_RIGHT);
-               debug_assert(+(op.props() & OpProps::PREFIX));
+               op.setProps(OpProps::PREFIX);
                op.setPrecedence(PRECS.get(op).first);
                operatorStack.push_back(op);
             }

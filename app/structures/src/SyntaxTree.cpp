@@ -482,6 +482,15 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
          return {};
 
       #pragma region standards
+      #pragma region mem
+      case OpID::BIT_AND: static_assert(OpID::BIT_AND == OpID::ADDRESS_OF);
+      case OpID::MUL: static_assert(OpID::MUL == OpID::DEREF);
+         if (!expr.lhs() && expr.rhs()) {
+            TODO;
+            return {};
+         }
+         [[fallthrough]];
+      #pragma endregion mem
       case OpID::CALL_INVOKE:
       case OpID::SUBSCRIPT_INVOKE:
 
@@ -492,7 +501,6 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
       case OpID::DEC:
       case OpID::BIT_NOT:
 
-      case OpID::BIT_AND:
       case OpID::BIT_OR:
       case OpID::BIT_XOR:
       case OpID::SHIFT_LEFT:
@@ -500,7 +508,6 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
 
       case OpID::ADD:
       case OpID::SUB:
-      case OpID::MUL:
       case OpID::DIV:
       case OpID::MOD:
       case OpID::EXP:

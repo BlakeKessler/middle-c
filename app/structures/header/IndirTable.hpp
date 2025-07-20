@@ -41,6 +41,7 @@ class clef::IndirTable {
             bool   isArr() const { return _type == ARR;   }
             
             bool decaysToFund() const { return _type != REF; } //!NOTE: check that this still works if new indirect types are added
+            bool decaysToPtr()  const { return _type != REF; } //!NOTE: check that this still works if new indirect types are added
 
             bool isConst() const { return _isConst && !isArr(); }
             bool isVolatile() const { return _isVol; }
