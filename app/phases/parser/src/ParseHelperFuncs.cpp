@@ -55,7 +55,7 @@
 }
 /*inline*/ bool clef::Parser::tryConsumeBlockDelim(BlockType type, BlockDelimRole role) {
    if (currTok.type() == TokenType::BLOCK_DELIM) {
-      if (currTok.blockType() == type && currTok.blockDelimRole() == role) {
+      if (currTok.block().type == type && currTok.block().role == role) {
          getNextToken();
          return true;
       }

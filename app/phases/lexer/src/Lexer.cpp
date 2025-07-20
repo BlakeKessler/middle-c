@@ -149,20 +149,20 @@ RESTART:
             case TokenType::BLOCK_DELIM:
                switch (op.opID()) {
                   case OpID::CALL_INVOKE: UNREACHABLE;
-                  case OpID::CALL_OPEN  : return {BlockType::CALL, BlockDelimRole::OPEN};
-                  case OpID::CALL_CLOSE : return {BlockType::CALL, BlockDelimRole::CLOSE};
+                  case OpID::CALL_OPEN  : return {BlockType::CALL, BlockDelimRole::OPEN, OpData{FMT("()"), OpID::CALL_INVOKE, OpProps::POSTFIX, PRECS.get(OpID::CALL_INVOKE,true,false).first, TokenType::BLOCK_DELIM}};
+                  case OpID::CALL_CLOSE : return {BlockType::CALL, BlockDelimRole::CLOSE, OpData{FMT("()"), OpID::CALL_INVOKE, OpProps::POSTFIX, PRECS.get(OpID::CALL_INVOKE,true,false).first, TokenType::BLOCK_DELIM}};
 
                   case OpID::SUBSCRIPT_INVOKE: UNREACHABLE;
-                  case OpID::SUBSCRIPT_OPEN  : return {BlockType::SUBSCRIPT, BlockDelimRole::OPEN};
-                  case OpID::SUBSCRIPT_CLOSE : return {BlockType::SUBSCRIPT, BlockDelimRole::CLOSE};
+                  case OpID::SUBSCRIPT_OPEN  : return {BlockType::SUBSCRIPT, BlockDelimRole::OPEN, OpData{FMT("[]"), OpID::SUBSCRIPT_INVOKE, OpProps::POSTFIX, PRECS.get(OpID::SUBSCRIPT_INVOKE,true,false).first, TokenType::BLOCK_DELIM}};
+                  case OpID::SUBSCRIPT_CLOSE : return {BlockType::SUBSCRIPT, BlockDelimRole::CLOSE, OpData{FMT("[]"), OpID::SUBSCRIPT_INVOKE, OpProps::POSTFIX, PRECS.get(OpID::SUBSCRIPT_INVOKE,true,false).first, TokenType::BLOCK_DELIM}};
                   
                   case OpID::LIST_INVOKE: UNREACHABLE;
-                  case OpID::LIST_OPEN  : return {BlockType::INIT_LIST, BlockDelimRole::OPEN};
-                  case OpID::LIST_CLOSE : return {BlockType::INIT_LIST, BlockDelimRole::CLOSE};
+                  case OpID::LIST_OPEN  : return {BlockType::INIT_LIST, BlockDelimRole::OPEN, OpData{FMT("{}"), OpID::LIST_INVOKE, OpProps::POSTFIX, PRECS.get(OpID::LIST_INVOKE,true,false).first, TokenType::BLOCK_DELIM}};
+                  case OpID::LIST_CLOSE : return {BlockType::INIT_LIST, BlockDelimRole::CLOSE, OpData{FMT("{}"), OpID::LIST_INVOKE, OpProps::POSTFIX, PRECS.get(OpID::LIST_INVOKE,true,false).first, TokenType::BLOCK_DELIM}};
 
                   case OpID::SPECIALIZER_INVOKE: UNREACHABLE;
-                  case OpID::SPECIALIZER_OPEN  : return {BlockType::SPECIALIZER, BlockDelimRole::OPEN};
-                  case OpID::SPECIALIZER_CLOSE : return {BlockType::SPECIALIZER, BlockDelimRole::CLOSE};
+                  case OpID::SPECIALIZER_OPEN  : return {BlockType::SPECIALIZER, BlockDelimRole::OPEN, OpData{FMT("<>"), OpID::SPECIALIZER_INVOKE, OpProps::POSTFIX, PRECS.get(OpID::SPECIALIZER_INVOKE,true,false).first, TokenType::BLOCK_DELIM}};
+                  case OpID::SPECIALIZER_CLOSE : return {BlockType::SPECIALIZER, BlockDelimRole::CLOSE, OpData{FMT("<>"), OpID::SPECIALIZER_INVOKE, OpProps::POSTFIX, PRECS.get(OpID::SPECIALIZER_INVOKE,true,false).first, TokenType::BLOCK_DELIM}};
 
 
                   case OpID::BLOCK_CMNT: UNREACHABLE;

@@ -20,6 +20,7 @@ constexpr ubyte clef::OpPrecs::makeFlags(OpProps props) {
       case     POSTFIX: return 0b01;
       case  INFIX_LEFT: [[fallthrough]];
       case INFIX_RIGHT: return 0b11;
+      case        null: return 0b00;
       default         : UNREACHABLE;
    }
 }
@@ -30,26 +31,34 @@ constexpr clef::OpPrecs clef::GetAllOpPrecsData() {
    using Type = TokenType;
    using _ = OpData;
    #define lit(str) mcsl::str_slice{}
-   ubyte prec = 16;
+   ubyte prec = ~0;
    return OpPrecs{
-      _(lit("@"),   Op::ATTRIBUTE,         Prop::PREFIX,      0,      Type::OP          ), //attribute
-      _(lit("++"),  Op::INC,               Prop::PREFIX,      0,      Type::OP          ), //pre-increment
-      _(lit("--"),  Op::DEC,               Prop::PREFIX,      0,      Type::OP          ), //pre-decrement
-      _(lit("."),   Op::MEMBER_ACCESS,     Prop::INFIX_LEFT,  0,      Type::OP          ), //element access
-      _(lit("->"),  Op::PTR_MEMBER_ACCESS, Prop::INFIX_LEFT,  0,      Type::OP          ), //element access
-      _(lit(".."),  Op::RANGE,             Prop::INFIX_LEFT,  0,      Type::OP          ), //range
-      _(lit("..."), Op::SPREAD,            Prop::INFIX_LEFT,  0,      Type::OP          ), //array spread
+      _(lit("::"),  Op::SCOPE_RESOLUTION,  Prop::INFIX_LEFT,    prec, Type::OP          ), //scope resolution
 
-      _(lit("++"),  Op::INC,               Prop::POSTFIX,     0,      Type::OP          ), //post-increment
-      _(lit("--"),  Op::DEC,               Prop::POSTFIX,     0,      Type::OP          ), //post-decrement
-      _(lit("+"),   Op::UNARY_PLUS,        Prop::PREFIX,      0,      Type::OP          ), //unary plus
-      _(lit("-"),   Op::UNARY_MINUS,       Prop::PREFIX,      0,      Type::OP          ), //integer negation
-      _(lit("!"),   Op::LOGICAL_NOT,       Prop::PREFIX,      0,      Type::OP          ), //logical negation
-      _(lit("~"),   Op::BIT_NOT,           Prop::PREFIX,      0,      Type::OP          ), //bitwise negation
-      _(lit("&"),   Op::ADDRESS_OF,        Prop::PREFIX,      0,      Type::OP          ), //reference/address of
-      _(lit("*"),   Op::DEREF,             Prop::PREFIX,      0,      Type::OP          ), //raw pointer/dereference
-      _(lit("&"),   Op::REFERENCE,         Prop::TYPE_MOD,    0,      Type::OP          ), //reference/address of
-      _(lit("*"),   Op::RAW_PTR,           Prop::TYPE_MOD,    0,      Type::OP          ), //raw pointer/dereference
+      _(lit("@"),   Op::ATTRIBUTE,         Prop::PREFIX,      --prec, Type::OP          ), //attribute
+      _(lit("++"),  Op::INC,               Prop::POSTFIX,       prec, Type::OP          ), //post-increment
+      _(lit("--"),  Op::DEC,               Prop::POSTFIX,       prec, Type::OP          ), //post-decrement
+      _(lit("()"),  Op::CALL_INVOKE,       Prop::POSTFIX,       prec, Type::OP          ), //function call
+      _(lit("{}"),  Op::LIST_INVOKE,       Prop::POSTFIX,       prec, Type::OP          ), //initializer list
+      _(lit("[]"),  Op::SUBSCRIPT_INVOKE,  Prop::POSTFIX,       prec, Type::OP          ), //subscript
+      _(lit("."),   Op::MEMBER_ACCESS,     Prop::INFIX_LEFT,    prec, Type::OP          ), //element access
+      _(lit("->"),  Op::PTR_MEMBER_ACCESS, Prop::INFIX_LEFT,    prec, Type::OP          ), //element access
+
+
+
+      _(lit("++"),  Op::INC,               Prop::PREFIX,      --prec, Type::OP          ), //pre-increment
+      _(lit("--"),  Op::DEC,               Prop::PREFIX,        prec, Type::OP          ), //pre-decrement
+      _(lit("..."), Op::SPREAD,            Prop::TYPE_MOD,      prec, Type::OP          ), //array spread
+      _(lit("+"),   Op::UNARY_PLUS,        Prop::PREFIX,        prec, Type::OP          ), //unary plus
+      _(lit("-"),   Op::UNARY_MINUS,       Prop::PREFIX,        prec, Type::OP          ), //integer negation
+      _(lit("!"),   Op::LOGICAL_NOT,       Prop::PREFIX,        prec, Type::OP          ), //logical negation
+      _(lit("~"),   Op::BIT_NOT,           Prop::PREFIX,        prec, Type::OP          ), //bitwise negation
+      _(lit("&"),   Op::ADDRESS_OF,        Prop::PREFIX,        prec, Type::OP          ), //reference/address of
+      _(lit("*"),   Op::DEREF,             Prop::PREFIX,        prec, Type::OP          ), //raw pointer/dereference
+      _(lit("&"),   Op::REFERENCE,         Prop::TYPE_MOD,      prec, Type::OP          ), //reference/address of
+      _(lit("*"),   Op::RAW_PTR,           Prop::TYPE_MOD,      prec, Type::OP          ), //raw pointer/dereference
+
+      _(lit(".."),  Op::RANGE,             Prop::INFIX_LEFT,  --prec, Type::OP          ), //range
 
       _(lit(".*"),  Op::METHOD_PTR,        Prop::INFIX_LEFT,  --prec, Type::OP          ), //pointer to member
       _(lit("->*"), Op::ARROW_METHOD_PTR,  Prop::INFIX_LEFT,    prec, Type::OP          ), //pointer to member
@@ -85,6 +94,7 @@ constexpr clef::OpPrecs clef::GetAllOpPrecsData() {
       _(lit("??"),  Op::COALESCE,          Prop::INFIX_RIGHT, --prec, Type::OP          ), //null coalescing
       _(lit("?"),   Op::INLINE_IF,         Prop::INFIX_RIGHT,   prec, Type::OP          ), //inline if
       _(lit(":"),   Op::INLINE_ELSE,       Prop::POSTFIX,       prec, Type::OP          ), //inline else
+      _(lit("?:"),  Op::TERNARY_INVOKE,    Prop::null,          prec, Type::OP          ), //ternary conditional
       _(lit("="),   Op::ASSIGN,            Prop::INFIX_RIGHT,   prec, Type::OP          ), //direct assignment
       _(lit("+="),  Op::ADD_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (add)
       _(lit("-="),  Op::SUB_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (sub)

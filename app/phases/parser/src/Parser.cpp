@@ -242,7 +242,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
          operandStack.push_back(+make<Expr>(Expr::makeTernary(tree, cond, lhs, rhs)));
       }
       else if (op.opID() == OpID::SCOPE_RESOLUTION) { // lhs::rhs
-         if (operandStack.size() < 2) {
+         if (operandStack.size() < 1) {
             logError(ErrCode::BAD_EXPR, "bad scope resolution expression");
          }
          //parent scope
@@ -274,9 +274,34 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             operandStack.push_back(rhs);
          }
       }
-      // else if (op.opID() == OpID::MEMBER_ACCESS) {
-      //    TODO;
-      // }
+      else if (op.opID() == OpID::MEMBER_ACCESS) {
+         if (operandStack.size() < 1) {
+            logError(ErrCode::BAD_EXPR, "bad member access expression");
+         }
+         //parent scope
+         lhs = operandStack.pop_back();
+         tryToIden(lhs);
+
+         //child entity
+         if (tree[rhs].nodeType() == NodeType::RAW_IDEN) {
+            if (canDownCastTo(tree[lhs].nodeType(), NodeType::IDEN) && !tree[(index<Identifier>)lhs].symbol()) {
+               TODO;
+            }
+            SymbolNode* symbol = tree[(index<Identifier>)lhs].symbol()->type()->canonName()->get(tree[(index<RawIdentifier>)rhs].name());
+            if (!symbol) {
+               TODO;
+            }
+            remake<Identifier>((index<RawIdentifier>)rhs, symbol, 0, tree[(index<RawIdentifier>)rhs].specializer());
+            debug_assert(tree[(index<Identifier>)rhs].symbol());
+            debug_assert(tree[(index<Identifier>)rhs].symbol()->type());
+         }
+         else {
+            if (!canDownCastTo(tree[rhs].nodeType(), NodeType::IDEN)) {
+               logError(ErrCode::BAD_EXPR, "scope resolution can only be applied to identifiers");
+            }
+         }
+         operandStack.push_back(+makeExpr(op.opID(), lhs, rhs));
+      }
       // else if (op.opID() == OpID::PTR_MEMBER_ACCESS) {
       //    TODO;
       // }
@@ -300,6 +325,16 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             debug_assert(+(op & OpProps::CAN_BE_PREFIX));
             operandStack.push_back(+makeExpr(op.opID(), 0, rhs));
          }
+      }
+   };
+
+   const auto evalUntilCanPush = [&](OpData op) {
+      while (operatorStack.size() && (
+         // (+(op.props() & OpProps::CAN_BE_BINARY) || !+(operatorStack.back().props() & OpProps::CAN_BE_BINARY)) &&
+            (operatorStack.back().precedence() > op.precedence() || (
+               (+(op.props() & (OpProps::IS_LEFT_ASSOC | OpProps::POSTFIX))) &&
+               operatorStack.back().precedence() == op.precedence())))) {
+               eval();
       }
    };
 
@@ -403,7 +438,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             }
             else if (currTok.opID() == OpID::INLINE_IF) { //special case for ternary expressions
                getNextToken();
-               operatorStack.emplace_back(FMT(""), OpID::TERNARY_INVOKE, OpProps::null, (ubyte)0, TokenType::OP);
+               operatorStack.emplace_back(FMT("?:"), OpID::TERNARY_INVOKE, OpProps::null, (ubyte)0, TokenType::OP);
                index<Expr> trueVal = parseExpr();
                operandStack.push_back(+trueVal);
                consumeOperator(OpID::INLINE_ELSE, "bad ternary conditional expression");
@@ -412,32 +447,31 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             }
             else if (prevTokIsOperand) { //binary or postfix unary
                OpData op = currTok.op();
-               while (operatorStack.size() && (
-                  operatorStack.back().precedence() > op.precedence() || (
-                     (+(op.props() & OpProps::IS_LEFT_ASSOC)) &&
-                     operatorStack.back().precedence() == op.precedence()))) {
-                        eval();
-               }
                op.removeProps(OpProps::PREFIX);
                debug_assert(+op.props());
+               debug_assert(!(+(op.props() & OpProps::CAN_BE_BINARY) && +(op.props() & OpProps::CAN_BE_POSTFIX)));
+               op.setPrecedence(PRECS.get(op).first);
+               evalUntilCanPush(op);
                operatorStack.push_back(op);
             } else { //prefix unary
                OpData op = currTok.op();
                op.removeProps(OpProps::POSTFIX | OpProps::INFIX_LEFT | OpProps::INFIX_RIGHT);
                debug_assert(+(op.props() & OpProps::PREFIX));
+               op.setPrecedence(PRECS.get(op).first);
                operatorStack.push_back(op);
             }
             prevTokIsOperand = false;
             getNextToken();
             goto PARSE_EXPR_CONTINUE;
          case TokenType::BLOCK_DELIM: {
-            BlockType blockType = currTok.blockType();
-            BlockDelimRole role = currTok.blockDelimRole();
-            if (!isOpener(role)) { goto END_OF_EXPR; }
+            auto block = currTok.block();
+            if (!isOpener(block.role)) { goto END_OF_EXPR; }
             getNextToken();
             if (prevTokIsOperand) { //function call, initializer list, subscript, or specializer
                debug_assert(operandStack.size());
-               index<ArgList> args = parseArgList(blockType, false);
+               OpData op = block.invoke;
+               evalUntilCanPush(op);
+               index<ArgList> args = parseArgList(block.type, false);
                index<astNode> node = operandStack.pop_back();
                if (tree[node].nodeType() == NodeType::RAW_IDEN) {
                   toIden(+node);
@@ -445,12 +479,12 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
                      TODO;
                   }
                }
-               operandStack.push_back(+makeExpr(getInvoker(blockType),node,(index<astNode>)args));
-            } else if (blockType == BlockType::INIT_LIST) { //tuple
-               operandStack.push_back(+parseArgList(blockType, false));
+               operandStack.push_back(+makeExpr(block.invoke,node,(index<astNode>)args));
+            } else if (block.type == BlockType::INIT_LIST) { //tuple
+               operandStack.push_back(+parseArgList(block.type, false));
             } else { //block subexpression
                operandStack.push_back(+parseExpr());
-               consumeBlockDelim(blockType, BlockDelimRole::CLOSE, "bad block subexpression");
+               consumeBlockDelim(block.type, BlockDelimRole::CLOSE, "bad block subexpression");
             }
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
@@ -887,7 +921,12 @@ mcsl::tuple<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*, clef::in
 
    //push to overload table
    auto [overloadIndex, isNew] = target->registerOverload(overload);
-   if (!isNew) {
+   if (isNew) {
+      tree.registerType(target, TypeSpec::FUNC, SymbolType::FUNC);
+      // target->setType(overload);
+      // TODO;
+   }
+   else {
       std::destroy_at(overload);
       tree.freeBuf(params);
    }

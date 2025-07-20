@@ -15,7 +15,8 @@ class clef::TypeSpec {
          FUND_TYPE,
          INDIR,
          COMPOSITE,
-         FUNC_SIG
+         FUNC_SIG,
+         FUNC
       };
       struct ScopedSymbol {
          SymbolNode* symbol;
@@ -65,8 +66,14 @@ class clef::TypeSpec {
 
       friend class SyntaxTree;
    private:
+      TypeSpec(SymbolNode* funcName):
+         _metatype{FUNC},
+         _canonName{funcName} {
+
+      }
       TypeSpec(TypeSpec* pointee, QualMask quals, IndirTable&& table):
          _metatype{INDIR},
+         _canonName{},
          _indir{
             .pointee = pointee,
             .pointeeQuals = quals,
@@ -76,6 +83,7 @@ class clef::TypeSpec {
       }
       TypeSpec(TypeSpec* pointee, QualMask quals, IndirTable::Entry firstEntry):
          _metatype{INDIR},
+         _canonName{},
          _indir{
             .pointee = pointee,
             .pointeeQuals = quals,
@@ -93,6 +101,9 @@ class clef::TypeSpec {
       }
       static TypeSpec makeIndir(TypeSpec* pointee, QualMask quals, IndirTable&& table) {
          return TypeSpec{pointee, quals, std::forward<IndirTable&&>(table)};
+      }
+      static TypeSpec makeFunc(SymbolNode* f) {
+         return TypeSpec{f};
       }
 
       ~TypeSpec();
@@ -115,10 +126,12 @@ class clef::TypeSpec {
       auto& fund() { return _fund; }
       auto& composite() { return _composite; }
       auto& funcSig() { return _funcSig; }
+      auto& func() { return _canonName; }
 
       const auto& fund() const { return _fund; }
       const auto& composite() const { return _composite; }
       const auto& funcSig() const { return _funcSig; }
+      const auto& func() const { return _canonName; }
 
       bool operator==(const TypeSpec& other) const;
 };

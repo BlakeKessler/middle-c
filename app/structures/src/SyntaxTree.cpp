@@ -235,7 +235,33 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
             TODO;
          }
          return {};
-      } else {
+      }
+      else if (canDownCastTo(expr.lhsType(), NodeType::EXPR)) {
+         Expr& lhs = self[(index<Expr>)expr.lhs()];
+         switch (lhs.evalType()->metaType()) {
+            case TypeSpec::null: UNREACHABLE;
+            case TypeSpec::FUND_TYPE: TODO;
+            case TypeSpec::INDIR: TODO;
+            case TypeSpec::COMPOSITE: TODO;
+            case TypeSpec::FUNC_SIG: TODO;
+            case TypeSpec::FUNC: {
+               debug_assert(canDownCastTo(expr.rhsType(), NodeType::ARG_LIST));
+               auto tmp = deduceOverload(lhs.evalType()->func(), +expr.rhs());
+               if (!std::get<0>(tmp)) {
+                  TODO;
+               }
+               debug_assert(std::get<2>(tmp)->metaType() == TypeSpec::FUNC_SIG);
+               expr.evalType() = std::get<2>(tmp)->funcSig().retType;
+               lhs.evalType() = std::get<2>(tmp); //!NOTE: might be a bad idea to alter another node's evalType
+               break;
+            }
+         }
+         return {};
+      }
+      else {
+         mcsl::printf(FMT("%s\n"), astTNB{self, i, 0});
+         mcsl::printf(FMT("op: %s   lhs: %s   rhs: %s"), toString(expr.opID()), toString(expr.lhsType()), toString(expr.rhsType()));
+         mcsl::flush();
          TODO;
       }
    }
@@ -379,7 +405,6 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
          #pragma endregion typelesses
 
          #pragma region indirOnly
-         case OpID::MEMBER_ACCESS: [[fallthrough]];
          case OpID::PTR_MEMBER_ACCESS: [[fallthrough]];
          case OpID::CALL_INVOKE: [[fallthrough]];
          case OpID::SUBSCRIPT_INVOKE:
@@ -393,6 +418,7 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
 
          #pragma region errs
          //dereferences
+         case OpID::MEMBER_ACCESS: [[fallthrough]];
          case OpID::METHOD_PTR: [[fallthrough]];
          case OpID::ARROW_METHOD_PTR: [[fallthrough]];
          //invokes
@@ -508,6 +534,8 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
       case OpID::XOR_ASSIGN:
       case OpID::OR_ASSIGN:
       case OpID::COALESCE_ASSIGN:
+         mcsl::printf(FMT("`%s`\n%s\n"), toString(expr.opID()), astTNB(self, i, 0));
+         mcsl::flush();
          TODO;
       #pragma endregion standards
 

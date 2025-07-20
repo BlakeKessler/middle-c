@@ -28,7 +28,11 @@ struct [[clang::trivial_abi]] clef::Token {
          };
 
          OpData _op;
-         mcsl::pair<BlockType,BlockDelimRole> _blockDelim;
+         struct {
+            OpData invoke;
+            BlockType type;
+            BlockDelimRole role;
+         } _blockDelim;
       };
       KeywordID _keyword;
       TokenType _type;
@@ -42,7 +46,7 @@ struct [[clang::trivial_abi]] clef::Token {
       Token(const slong val, const KeywordID t):_sintVal{val},_keyword{t == KeywordID::_NOT_A_KEYWORD ? KeywordID::SINT  : t},_type{TokenType::SINT_NUM} {}
       Token(const flong val, const KeywordID t):_realVal{val},_keyword{t == KeywordID::_NOT_A_KEYWORD ? KeywordID::FLOAT : t},_type{TokenType::REAL_NUM} {}
       Token(const OpData op):_op{op},_type{TokenType::OP} {}
-      Token(const BlockType type, const BlockDelimRole role):_blockDelim{mcsl::pair{type,role}},_type{TokenType::BLOCK_DELIM} {}
+      Token(const BlockType type, const BlockDelimRole role, const OpData op):_blockDelim{.invoke=op, .type=type, .role=role},_type{TokenType::BLOCK_DELIM} {}
       Token(const mcsl::str_slice val, const PtxtType type):_strVal{val},_ptxtType{type},_type{TokenType::PTXT_SEG} {}
       Token(const char c):_charVal{c},_ptxtType{PtxtType::CHAR},_keyword{KeywordID::CHAR},_type{TokenType::PTXT_SEG} {}
       Token(const char8 c):_char8Val{c},_ptxtType{PtxtType::CHAR},_keyword{KeywordID::CHAR_8},_type{TokenType::PTXT_SEG} {}
@@ -68,8 +72,7 @@ struct [[clang::trivial_abi]] clef::Token {
       OpData op() const { debug_assert(_type == TokenType::OP); return _op; }
       OpID opID() const { debug_assert(_type == TokenType::OP); return _op; }
       OpProps opProps() const { debug_assert(_type == TokenType::OP); return _op.props(); }
-      BlockType blockType() const { debug_assert(_type == TokenType::BLOCK_DELIM); return _blockDelim.first; }
-      BlockDelimRole blockDelimRole() const { debug_assert(_type == TokenType::BLOCK_DELIM); return _blockDelim.second; }
+      auto block() const { debug_assert(_type == TokenType::BLOCK_DELIM); return _blockDelim; }
       PtxtType ptxtType() const { debug_assert(_type == TokenType::PTXT_SEG); return _ptxtType; }
 };
 

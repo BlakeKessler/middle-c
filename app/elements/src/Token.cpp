@@ -41,7 +41,7 @@ mcsl::File& mcsl::write(File& file, const clef::Token& tok) {
          file.printf(mcsl::FMT("\033[35mESCAPE CHARACTER\033[39m"));
          break;
       case TokenType::BLOCK_DELIM:
-         file.printf(mcsl::FMT("\033[35mBLOCK DELIMITER:\033[39m %s \033[3m[%s]\033[23m"), toString(tok.blockType()), toString(tok.blockDelimRole()));
+         file.printf(mcsl::FMT("\033[35mBLOCK DELIMITER:\033[39m %s \033[3m[%s]\033[23m"), toString(tok.block().type), toString(tok.block().role));
          break;
       case TokenType::PTXT_SEG:
          file.printf(mcsl::FMT("\033[35mPLAINTEXT SEGMENT (\033[3m%s\033[23m):\033[39m "), toString(tok.ptxtType()));
@@ -85,7 +85,7 @@ uint mcsl::writef(File& file, const clef::Token& tok, char mode, FmtArgs args) {
       case TokenType::ESC:
          return file.write(ESCAPE_CHAR), 1;
       case TokenType::BLOCK_DELIM:
-         return writef(file, toString(tok.blockDelimRole()), mode, args) + writef(file, ' ', 'c', {}) + writef(file, toString(tok.blockType()), mode, args);
+         return writef(file, toString(tok.block().role), mode, args) + writef(file, ' ', 'c', {}) + writef(file, toString(tok.block().type), mode, args);
       case TokenType::PTXT_SEG:
          switch (tok.ptxtType()) {
             case PtxtType::CHAR:

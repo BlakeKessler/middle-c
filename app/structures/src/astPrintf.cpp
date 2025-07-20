@@ -915,6 +915,10 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
                charsPrinted += file.printf(FMT(") -> auto"));
             }
             return charsPrinted;
+         case TypeSpec::FUNC: //function type
+            debug_assert(spec.canonName());
+            charsPrinted += file.printf(FMT("%s"), TSB(spec.canonName()));
+            return charsPrinted;
       }
    } else if ((mode | CASE_BIT) == 'b') {
       TODO;

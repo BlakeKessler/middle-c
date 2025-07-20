@@ -43,6 +43,9 @@ struct alignas(8) clef::OpData {
          _props = _props & ~props;
          return _props;
       }
+      constexpr void setPrecedence(ubyte prec) {
+         _prec = prec;
+      }
 
       template<mcsl::str_t str_t> constexpr bool operator<=>(const str_t& str) { return _opStr <=> str; }
       template<mcsl::str_t str_t> constexpr bool operator==(const str_t& str) { return _opStr == str; }

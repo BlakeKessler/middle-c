@@ -20,6 +20,8 @@ clef::TypeSpec::TypeSpec(MetaType metatype):_metatype{metatype} {
       case FUNC_SIG:
          _funcSig = decltype(_funcSig){};
          break;
+      case FUNC:
+         break;
    }
 }
 clef::TypeSpec::TypeSpec(FundTypeID id):
@@ -67,7 +69,11 @@ clef::TypeSpec::TypeSpec(TypeSpec&& other) {
          new (&_funcSig.params) decltype(_funcSig.params)(std::move(other._funcSig.params));
          break;
          #undef __curr
+      
+      case FUNC:
+         break;
    }
+   #undef MOVE
 }
 
 clef::TypeSpec::~TypeSpec() {
@@ -94,6 +100,9 @@ clef::TypeSpec::~TypeSpec() {
 
       case FUNC_SIG:
          std::destroy_at(&_funcSig.params);
+         break;
+      
+      case FUNC:
          break;
    }
 }
@@ -138,6 +147,8 @@ clef::TypeSpec::TypeSpec(const TypeSpec& other):
             __cpy(params);
             #undef __curr
             break;
+         case FUNC:
+            break;
       }
       #undef __cpy
 }
@@ -146,7 +157,7 @@ bool clef::TypeSpec::operator==(const TypeSpec& other) const {
    if (this == &other) {
       return true;
    }
-   if (_metatype != other._metatype) {
+   if (_metatype != other._metatype || _canonName != other._canonName) {
       return false;
    }
    switch (_metatype) {
@@ -213,6 +224,8 @@ bool clef::TypeSpec::operator==(const TypeSpec& other) const {
                return false;
             }
          }
+         return true;
+      case FUNC:
          return true;
    }
 }
