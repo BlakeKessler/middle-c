@@ -33,7 +33,7 @@ constexpr clef::OpPrecs clef::GetAllOpPrecsData() {
    #define lit(str) mcsl::str_slice{}
    ubyte prec = ~0;
    return OpPrecs{
-      _(lit("::"),  Op::SCOPE_RESOLUTION,  Prop::INFIX_LEFT,    prec, Type::OP          ), //scope resolution
+      _(lit("::"),  Op::SCOPE_RESOLUTION,  Prop::INFIX_LEFT,  --prec, Type::OP          ), //scope resolution
 
       _(lit("@"),   Op::ATTRIBUTE,         Prop::PREFIX,      --prec, Type::OP          ), //attribute
       _(lit("++"),  Op::INC,               Prop::POSTFIX,       prec, Type::OP          ), //post-increment
