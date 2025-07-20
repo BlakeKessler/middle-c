@@ -17,7 +17,7 @@ clef::index<clef::ForLoop> clef::Parser::parseForLoop() {
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "FOR loop without closing parens for condition");
 
    //procedure
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad FOR block");
+   consumeBlockDelim(BlockType::LIST, BlockDelimRole::OPEN, "bad FOR block");
    index<Scope> proc = parseProcedure();
 
    //EOS
@@ -47,7 +47,7 @@ clef::index<clef::ForeachLoop> clef::Parser::parseForeachLoop() {
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "FOREACH loop without closing parens for condition");
 
    //procedure
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad FOREACH block");
+   consumeBlockDelim(BlockType::LIST, BlockDelimRole::OPEN, "bad FOREACH block");
    index<Scope> proc = parseProcedure();
 
    //EOS
@@ -71,7 +71,7 @@ clef::index<clef::WhileLoop> clef::Parser::parseWhileLoop() {
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "WHILE loop without closing parens for condition");
 
    //procedure
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad WHILE block");
+   consumeBlockDelim(BlockType::LIST, BlockDelimRole::OPEN, "bad WHILE block");
    index<Scope> proc = parseProcedure();
 
    //EOS
@@ -84,7 +84,7 @@ clef::index<clef::WhileLoop> clef::Parser::parseWhileLoop() {
 //parse a do-while loop (assumes `do` keyword has already been consumed)
 clef::index<clef::DoWhileLoop> clef::Parser::parseDoWhileLoop() {
    //procedure
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad DO WHILE block");
+   consumeBlockDelim(BlockType::LIST, BlockDelimRole::OPEN, "bad DO WHILE block");
    index<Scope> proc = parseProcedure();
 
    //WHILE keyword

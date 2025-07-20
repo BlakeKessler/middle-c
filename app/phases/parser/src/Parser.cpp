@@ -480,7 +480,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
                   }
                }
                operandStack.push_back(+makeExpr(block.invoke,node,(index<astNode>)args));
-            } else if (block.type == BlockType::INIT_LIST) { //tuple
+            } else if (block.type == BlockType::LIST) { //tuple
                operandStack.push_back(+parseArgList(block.type, false));
             } else { //block subexpression
                operandStack.push_back(+parseExpr());
@@ -700,7 +700,7 @@ clef::index<clef::If> clef::Parser::parseIf() {
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "IF statement without closing parens for condition");
 
    //procedure
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad IF block");
+   consumeBlockDelim(BlockType::LIST, BlockDelimRole::OPEN, "bad IF block");
    index<Scope> proc = parseProcedure();
 
    //EOS for if statement with no else
@@ -712,7 +712,7 @@ clef::index<clef::If> clef::Parser::parseIf() {
    consumeKeyword(KeywordID::ELSE, "IF statement without EOS token");
    switch (currTok.type()) {
       case TokenType::BLOCK_DELIM: { //basic ELSE
-         consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad ELSE block");
+         consumeBlockDelim(BlockType::LIST, BlockDelimRole::OPEN, "bad ELSE block");
          index<Scope> elseProc = parseProcedure();
          //EOS
          consumeEOS("DO WHILE statement without EOS token");
@@ -741,11 +741,11 @@ clef::index<clef::Switch> clef::Parser::parseSwitch() {
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "SWITCH without closing parens for condition");
 
    //procedure
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad SWITCH block");
+   consumeBlockDelim(BlockType::LIST, BlockDelimRole::OPEN, "bad SWITCH block");
    index<Scope> procedure = make<Scope>(&tree.allocBuf<index<Stmt>>());
    index<SwitchCases> cases = make<SwitchCases>(&tree.allocBuf<mcsl::pair<index<Expr>, index<Stmt>>>(), procedure);
 
-   while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
+   while (!tryConsumeBlockDelim(BlockType::LIST, BlockDelimRole::CLOSE)) {
       if (tryConsumeKeyword(KeywordID::CASE)) { //CASE
          index<Expr> caseExpr = parseExpr();
 
@@ -783,10 +783,10 @@ clef::index<clef::Match> clef::Parser::parseMatch() {
    consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE, "MATCH without closing parens for condition");
 
    //procedure
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad MATCH block");
+   consumeBlockDelim(BlockType::LIST, BlockDelimRole::OPEN, "bad MATCH block");
    index<MatchCases> cases = make<MatchCases>(&tree.allocBuf<mcsl::pair<index<Expr>, index<Scope>>>());
 
-   while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
+   while (!tryConsumeBlockDelim(BlockType::LIST, BlockDelimRole::CLOSE)) {
       index<Expr> caseExpr;
       if (tryConsumeKeyword(KeywordID::CASE)) { //case
          caseExpr = parseExpr();
@@ -795,7 +795,7 @@ clef::index<clef::Match> clef::Parser::parseMatch() {
          caseExpr = 0;   
       }
       consumeOperator(OpID::LABEL_DELIM, "bad CASE or DEFAULT in MATCH statement");
-      consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad CASE or DEFAULT procedure in MATCH statement");
+      consumeBlockDelim(BlockType::LIST, BlockDelimRole::OPEN, "bad CASE or DEFAULT procedure in MATCH statement");
       index<Scope> procedure = parseProcedure();
       
       tree[cases].emplace_back(caseExpr, procedure);
@@ -870,7 +870,7 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
    }
 
    //parse function definition
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad FUNC definition");
+   consumeBlockDelim(BlockType::LIST, BlockDelimRole::OPEN, "bad FUNC definition");
    index<Scope> procedure = parseProcedure();
 
    //EOS

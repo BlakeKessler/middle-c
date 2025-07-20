@@ -68,7 +68,7 @@ clef::index<clef::Scope> clef::Parser::parseProcedure() {
    index<Scope> scope = make<Scope>(&tree.allocBuf<index<Stmt>>());
 
    while (!src.done()) {
-      if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
+      if (tryConsumeBlockDelim(BlockType::LIST, BlockDelimRole::CLOSE)) {
          return scope;
       }
       index<Stmt> tmp = parseStmt();
@@ -190,8 +190,8 @@ clef::index<clef::Decl> clef::Parser::parseDecl(index<Expr> attrs) {
    if (tryConsumeOperator(OpID::ASSIGN)) {
       val = parseExpr();
    }
-   else if (tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN)) {
-      index<ArgList> args = parseArgList(BlockType::INIT_LIST, false);
+   else if (tryConsumeBlockDelim(BlockType::LIST, BlockDelimRole::OPEN)) {
+      index<ArgList> args = parseArgList(BlockType::LIST, false);
       val = make<Expr>(OpID::LIST_INVOKE, type, args);
    }
    else if (tryConsumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN)) {

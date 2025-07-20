@@ -20,10 +20,12 @@ struct clef::OpPrecs {
 
       constexpr mcsl::pair<ubyte, bool> get(OpID id, ubyte flags) const { return _precs[+id][flags]; }
       constexpr mcsl::pair<ubyte, bool> get(OpID id, bool hasLHS, bool hasRHS) const { return get(id, hasLHS | (hasRHS << 1)); }
+      constexpr mcsl::pair<ubyte, bool> get(OpID id, OpProps props) const { return get(id, makeFlags(props)); }
       constexpr mcsl::pair<ubyte, bool> get(OpData op) const { return get(op.opID(), makeFlags(op.props())); }
 
       constexpr mcsl::pair<ubyte, bool> operator()(OpID id, ubyte flags) const { return get(id, flags); }
       constexpr mcsl::pair<ubyte, bool> operator()(OpID id, bool hasLHS, bool hasRHS) const { return get(id, hasLHS, hasRHS); }
+      constexpr mcsl::pair<ubyte, bool> operator()(OpID id, OpProps props) const { return get(id, props); }
       constexpr mcsl::pair<ubyte, bool> operator()(OpData op) const { return get(op); }
 };
 

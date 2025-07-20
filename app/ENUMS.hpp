@@ -745,7 +745,7 @@ namespace clef {
 
       CALL = 3_m,       //PARENTHESES
       SUBSCRIPT,        //SQUARE BRACKETS
-      INIT_LIST,        //CURLY BRACKETS
+      LIST,        //CURLY BRACKETS
       SPECIALIZER,      //TRIANGLE BRACKETS
 
       QUOTES_CHAR,      //CHARACTER
@@ -763,7 +763,7 @@ namespace clef {
       switch (t) {
          case CALL         : return OpID::CALL_INVOKE;
          case SUBSCRIPT    : return OpID::SUBSCRIPT_INVOKE;
-         case INIT_LIST    : return OpID::LIST_INVOKE;
+         case LIST    : return OpID::LIST_INVOKE;
          case SPECIALIZER  : return OpID::SPECIALIZER_INVOKE;
 
          case QUOTES_CHAR  : return OpID::CHAR_INVOKE;

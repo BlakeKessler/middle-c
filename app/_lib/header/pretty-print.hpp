@@ -416,7 +416,7 @@ constexpr const mcsl::str_slice clef::toString(const BlockType type) {
 
       CASE(CALL, "CALL");
       CASE(SUBSCRIPT, "SUBSCRIPT");
-      CASE(INIT_LIST, "INITIALIZER_LIST");
+      CASE(LIST, "INITIALIZER_LIST");
       CASE(SPECIALIZER, "SPECIALIZER");
 
       CASE(QUOTES_CHAR, "CHARACTER_LITERAL");

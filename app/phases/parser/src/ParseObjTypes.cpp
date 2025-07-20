@@ -34,10 +34,10 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(index<Expr> attrs, 
    }
 
    //definition
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "class/struct definition");
+   consumeBlockDelim(BlockType::LIST, BlockDelimRole::OPEN, "class/struct definition");
    QualMask scope = QualMask::PRIVATE;
    index<Expr> fieldAttrs;
-   while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
+   while (!tryConsumeBlockDelim(BlockType::LIST, BlockDelimRole::CLOSE)) {
       //access modifiers
       if (tryConsumeKeyword(KeywordID::PUBLIC)) {
          scope = QualMask::PUBLIC;
@@ -114,10 +114,10 @@ clef::index<clef::TypeDecl> clef::Parser::parseTrait(index<Expr> attrs) {
    }
 
    //definition
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad TRAIT definition");
+   consumeBlockDelim(BlockType::LIST, BlockDelimRole::OPEN, "bad TRAIT definition");
    QualMask scope = QualMask::PUBLIC;
    index<Expr> fieldAttrs;
-   while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
+   while (!tryConsumeBlockDelim(BlockType::LIST, BlockDelimRole::CLOSE)) {
       //acess control
       if (tryConsumeKeyword(KeywordID::PUBLIC)) {
          scope = QualMask::PUBLIC;
@@ -181,9 +181,9 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion(index<Expr> attrs) {
    PUSH_SCOPE;
 
    //definition
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad union definition");
+   consumeBlockDelim(BlockType::LIST, BlockDelimRole::OPEN, "bad union definition");
    
-   while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
+   while (!tryConsumeBlockDelim(BlockType::LIST, BlockDelimRole::CLOSE)) {
       //parse member
       index<Decl> member = parseParam(tryParseAttrs());
       consumeEOS("bad union member");
@@ -226,8 +226,8 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(index<Expr> attrs,
    } else { baseType = 0; }
 
 
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "bad enum/mask definition");
-   if (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
+   consumeBlockDelim(BlockType::LIST, BlockDelimRole::OPEN, "bad enum/mask definition");
+   if (!tryConsumeBlockDelim(BlockType::LIST, BlockDelimRole::CLOSE)) {
       do {
          index<Identifier> enumerator = parseSymbol(SymbolType::VAR, symbol, true);
          index<Expr> val;
@@ -238,7 +238,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(index<Expr> attrs,
          spec->composite().staticMembs.push_back(tree[enumerator].symbol());
          symbol->insert(tree[enumerator].symbol());
       } while (tryConsumeOperator(OpID::COMMA));
-      consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE, "bad ENUM enumerator");
+      consumeBlockDelim(BlockType::LIST, BlockDelimRole::CLOSE, "bad ENUM enumerator");
    }
    
    //EOS
@@ -275,10 +275,10 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace(index<Expr> attrs) {
    PUSH_SCOPE;
 
    //definition
-   consumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::OPEN, "namespace definition");
+   consumeBlockDelim(BlockType::LIST, BlockDelimRole::OPEN, "namespace definition");
    QualMask scope = QualMask::PUBLIC;
    index<Expr> fieldAttrs;
-   while (!tryConsumeBlockDelim(BlockType::INIT_LIST, BlockDelimRole::CLOSE)) {
+   while (!tryConsumeBlockDelim(BlockType::LIST, BlockDelimRole::CLOSE)) {
       //access modifiers
       if (tryConsumeKeyword(KeywordID::PUBLIC)) {
          scope = QualMask::PUBLIC;
