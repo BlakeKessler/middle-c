@@ -76,6 +76,17 @@ clef::TypeSpec::TypeSpec(TypeSpec&& other) {
    #undef MOVE
 }
 
+clef::TypeSpec::TypeSpec(const decltype(_indir)& indir, IndirTable::Entry entry):
+   _metatype{INDIR},
+   _canonName{},
+   _indir{
+      .pointee = indir.pointee,
+      .pointeeQuals = indir.pointeeQuals,
+      .table = IndirTable{indir.table, entry}
+   } {
+
+}
+
 clef::TypeSpec::~TypeSpec() {
    switch (_metatype) {
       case null:

@@ -99,6 +99,8 @@ class clef::IndirTable {
       IndirTable(const IndirTable&);
       IndirTable(IndirTable&&);
 
+      IndirTable(const IndirTable&, Entry);
+
       IndirTable& operator=(const IndirTable&);
       IndirTable& operator=(IndirTable&&);
 

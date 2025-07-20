@@ -20,6 +20,11 @@ clef::IndirTable::IndirTable(IndirTable&& other):
       }
 }
 
+clef::IndirTable::IndirTable(const IndirTable& other, Entry entry):
+   IndirTable(other) {
+      append(entry);
+}
+
 clef::IndirTable& clef::IndirTable::operator=(const IndirTable& other) {
    return *new (this) IndirTable(other);
 }

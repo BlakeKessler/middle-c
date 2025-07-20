@@ -116,10 +116,13 @@ clef::TypeSpec* clef::SyntaxTree::registerType(SymbolNode* name, TypeSpec::MetaT
 }
 
 clef::TypeSpec* clef::SyntaxTree::makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable&& table) {
-   TypeSpec* spec = _indirTypes.get_or_insert(pointee, quals, std::forward<IndirTable&&>(table), _typeTable);
-   if (targetNode) { [[likely]];
-      SymbolNode* symbol = _symbolBuf.emplace_back(std::move(SymbolNode::makeIndir(self[targetNode].symbol(), spec)));
-      self[targetNode].symbol() = symbol;
+   auto [spec, isNew] = _indirTypes.get_or_insert(pointee, quals, std::forward<IndirTable&&>(table), _typeTable);
+   if (isNew) {
+      SymbolNode* symbol = _symbolBuf.emplace_back(std::move(SymbolNode::makeIndir(spec->pointee()->canonName(), spec)));
+      spec->canonName() = symbol;
+      if (targetNode) {
+         self[targetNode].symbol() = symbol;
+      }
 
       debug_assert(symbol->symbolType() == SymbolType::INDIR);
    }
@@ -266,6 +269,27 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
       }
    }
 
+   //memory-related operators
+   else if (!expr.lhs() && expr.rhs()) { //filter out non-prefix expressions
+      if (expr.opID() == OpID::ADDRESS_OF) { //address of
+         TypeSpec* pointee = evalType(+expr.rhs());
+         TypeSpec* indir;
+         if (pointee->metaType() == TypeSpec::INDIR) {
+            indir = makeIndirType(0, pointee->pointee(), pointee->pointeeQuals(), IndirTable{pointee->indirTable(), IndirTable::Entry{IndirTable::Entry::PTR, false, false, false}});
+         } else {
+            indir = makeIndirType(0, pointee, QualMask::_no_quals, IndirTable::Entry{IndirTable::Entry::PTR, false, false, false});
+         }
+         expr.evalType() = indir;
+         return {};
+      }
+      else if (expr.opID() == OpID::DEREF) { //dereference
+         TODO;
+         return {};
+      }
+   }
+   
+
+   //anything else
    TypeSpec* __tmp;
    #define IS_PRIM(name) (!expr.name() || !(__tmp = evalType(+expr.name())) || __tmp->metaType() == TypeSpec::FUND_TYPE || (__tmp->metaType() == TypeSpec::INDIR && __tmp->indirTable().back().decaysToFund()))
    bool isAllPrimitive = IS_PRIM(lhs) && IS_PRIM(rhs) && IS_PRIM(extra) && IS_PRIM(extra2);

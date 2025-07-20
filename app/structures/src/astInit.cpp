@@ -14,6 +14,7 @@ void clef::SyntaxTree::initTables() {
       mcsl::str_slice name = toString(type);
       TypeSpec* spec = _typeTable.emplace_back(type);
       SymbolNode* node = _symbolBuf.emplace_back(name, &_globalScope, spec, SymbolType::FUND_TYPE);
+      spec->canonName() = node;
       _globalScope[name] = node;
       _fundTypes.insert(type, node);
    };

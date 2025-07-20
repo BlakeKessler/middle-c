@@ -106,6 +106,8 @@ class clef::TypeSpec {
          return TypeSpec{f};
       }
 
+      TypeSpec(const decltype(_indir)& indir, IndirTable::Entry);
+
       ~TypeSpec();
 
       MetaType metaType() const { return _metatype; }
@@ -124,11 +126,13 @@ class clef::TypeSpec {
 
 
       auto& fund() { return _fund; }
+      auto& indir() { return _indir; }
       auto& composite() { return _composite; }
       auto& funcSig() { return _funcSig; }
       auto& func() { return _canonName; }
 
       const auto& fund() const { return _fund; }
+      const auto& indir() const { return _indir; }
       const auto& composite() const { return _composite; }
       const auto& funcSig() const { return _funcSig; }
       const auto& func() const { return _canonName; }

@@ -14,7 +14,7 @@ class clef::IndirTypeTable {
          using is_transparent = void;
          HashEntry() = default;
          static inline uint64 operator()(const mcsl::pair<QualMask, IndirTable*> pair) {
-            return pair.second->hash() ^ +pair.first;
+            return mcsl::hash_algos::rapid_mix(pair.second->hash(), +pair.first);
          }
       };
       struct CmpEntry {
@@ -28,7 +28,7 @@ class clef::IndirTypeTable {
       mcsl::map<TypeSpec*, SubTable> _table;
    public:
       IndirTypeTable():_table{} {}
-      TypeSpec* get_or_insert(TypeSpec* pointee, QualMask pointeeQuals, IndirTable&& table, mcsl::arr_list<TypeSpec>& typeTable);
+      mcsl::pair<TypeSpec*, bool> get_or_insert(TypeSpec* pointee, QualMask pointeeQuals, IndirTable&& table, mcsl::arr_list<TypeSpec>& typeTable);
       inline void release() { _table.release(); }
 };
 
