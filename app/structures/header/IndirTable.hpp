@@ -93,6 +93,12 @@ class clef::IndirTable {
       EntryBlock _block0;
       mcsl::dyn_arr<EntryBlock> _otherBlocks;
       ubyte _backExtraBytes;
+
+      enum __ctorNames {
+         MAKE_DEREF
+      };
+      template<__ctorNames ctorName> struct inPlace{};
+      template<__ctorNames ctorName> IndirTable(const IndirTable&, inPlace<ctorName>);
    public:
       // constexpr IndirTable():_size{0},_block0{},_otherBlocks{} {}
       constexpr IndirTable(Entry firstEntry):_size{1},_block0{firstEntry},_otherBlocks{},_backExtraBytes{0} {}
@@ -100,6 +106,10 @@ class clef::IndirTable {
       IndirTable(IndirTable&&);
 
       IndirTable(const IndirTable&, Entry);
+      static IndirTable makeAppended(const IndirTable& table, Entry entry) {
+         return IndirTable(table, entry);
+      }
+      static IndirTable makeDeref(const IndirTable& ptr);
 
       IndirTable& operator=(const IndirTable&);
       IndirTable& operator=(IndirTable&&);
@@ -125,6 +135,7 @@ class clef::IndirTable {
          }
       };
       ArrExt arrExtent(uint64 i) const;
+      uint entryByteCount(uint64 i) const;
 
       void appendArrExtent(uint64 extent, ubyte byteCount);
       void append(Entry entry);

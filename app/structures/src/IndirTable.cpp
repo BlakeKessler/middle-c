@@ -24,6 +24,26 @@ clef::IndirTable::IndirTable(const IndirTable& other, Entry entry):
    IndirTable(other) {
       append(entry);
 }
+template<> clef::IndirTable::IndirTable(const IndirTable& ptr, inPlace<MAKE_DEREF>): IndirTable(ptr) {
+   debug_assert(ptr.back().decaysToPtr());
+   //pop last entry
+   _size -= 1 + _backExtraBytes;
+   if (_size < sizeof(EntryBlock)) {
+      _otherBlocks.free();
+   }
+   //find beginning of new back entry
+   uint i = 0;
+   uint ext = 0;
+   debug_assert(i + ext < _size);
+   do {
+      i += ext;
+      ext = entryByteCount(i);
+   } while (i + ext < _size);
+   _backExtraBytes = ext - 1;
+}
+clef::IndirTable clef::IndirTable::makeDeref(const IndirTable& ptr) {
+   return IndirTable(ptr, inPlace<MAKE_DEREF>{});
+}
 
 clef::IndirTable& clef::IndirTable::operator=(const IndirTable& other) {
    return *new (this) IndirTable(other);
@@ -173,6 +193,15 @@ clef::IndirTable::ArrExt clef::IndirTable::arrExtent(uint64 i) const {
 
    //return
    return ArrExt::make(n, entry.extIsIndex());
+}
+//get the number of bytes used by the entry at index `i` and its continuation bytes
+uint clef::IndirTable::entryByteCount(uint64 i) const {
+   assume(i < _size);
+   Entry entry = self[i];
+   if (!entry.isArr()) {
+      return 1;
+   }
+   return 1 + (entry.extIsIndex() ? sizeof(index<Expr>) : entry.arrSizeBytes());
 }
 //append the extent of an array to the table
 void clef::IndirTable::appendArrExtent(uint64 ext, ubyte bytes) {

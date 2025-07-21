@@ -283,7 +283,21 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
          return {};
       }
       else if (expr.opID() == OpID::DEREF) { //dereference
-         TODO;
+         TypeSpec* ptr = evalType(+expr.rhs());
+         TypeSpec* type;
+         if (ptr->metaType() == TypeSpec::INDIR && ptr->indirTable().back().decaysToPtr()) {
+            debug_assert(ptr->indirTable().size());
+            if (ptr->indirTable().size() == ptr->indirTable().entryByteCount(0)) { //pointer to non-pointer type
+               type = ptr->pointee();
+            } else { //pointer to pointer-like type
+               type = makeIndirType(0, ptr->pointee(), ptr->pointeeQuals(), IndirTable::makeDeref(ptr->indirTable()));
+            }
+         } else {
+            //!TODO: references to pointers
+            //!TODO: use return type of overloaded dereference operator
+            TODO;
+         }
+         expr.evalType() = type;
          return {};
       }
    }
