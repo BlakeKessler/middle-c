@@ -262,6 +262,7 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
          return {};
       }
       else {
+         //!NOTE: these print statements all for debugging
          mcsl::printf(FMT("%s\n"), astTNB{self, i, 0});
          mcsl::printf(FMT("op: %s   lhs: %s   rhs: %s"), toString(expr.opID()), toString(expr.lhsType()), toString(expr.rhsType()));
          mcsl::flush();

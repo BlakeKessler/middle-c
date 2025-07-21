@@ -827,6 +827,7 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
    //handle operator overloading
    //!HACK: make this more efficient and less janky
    //!TODO: maybe move this to the call site?
+   //!TODO: prevent name conflicts between attributes and other symbols
    if (index<Expr> opAttr = tree.findAttr(attrs, tree.findSymbol(FMT("op"))); opAttr) {
       index<ArgList> argsIndex = +tree[opAttr].rhs();
       if (!argsIndex) {
@@ -862,6 +863,9 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
       } else if (+(op.props() & (OpProps::CAN_BE_POSTFIX)) && +(op.props() & OpProps::CAN_BE_PREFIX)) {
          op.removeProps(OpProps::CAN_BE_POSTFIX);
       }
+      
+      //register overload
+      TODO;
    }
    
    PUSH_SCOPE;

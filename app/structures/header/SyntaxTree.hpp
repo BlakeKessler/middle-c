@@ -72,6 +72,7 @@ class clef::SyntaxTree {
       TypeSpec* makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable&& table);
 
       mcsl::tuple<bool, index<void>, TypeSpec*> deduceOverload(SymbolNode*, index<ArgList>); //isValid, overload index, signature
+      TypeSpec* deduceOpOverload(SymbolNode* scope, OpID op, TypeSpec* lhs, TypeSpec* rhs);
 
       mcsl::str_slice extractStrLit(index<Expr> strLitExpr);
       index<Expr> findAttr(index<Expr> attrs, SymbolNode* name);

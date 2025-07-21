@@ -910,6 +910,7 @@ namespace clef {
    }
    
 
+   //!TODO: remove `INLINE`, `NOEXCEPT`, and `VIRTUAL` (maybe make a `FuncQualMask` enum?); add `STATIC`
    enum class [[clang::flag_enum]] QualMask : uint16 {
       _no_quals = 0,
 

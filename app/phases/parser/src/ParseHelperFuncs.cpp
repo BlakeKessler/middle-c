@@ -81,6 +81,7 @@ clef::index<clef::Scope> clef::Parser::parseProcedure() {
 
 //parse a typename
 //assumed to already be declared if !isDecl
+//!TODO: allow inline type definitions (EX: `let struct{let uint n;} var;`)
 clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType, bool isDecl) {
    index<Identifier> name = parseSymbol(symbolType, nullptr, isDecl);
    Identifier& iden = tree[name];
