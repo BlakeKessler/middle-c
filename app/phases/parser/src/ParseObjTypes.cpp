@@ -3,12 +3,27 @@
 
 #include "Parser.hpp"
 
+#define ACCESS_MOD(name) \
+   if (tryConsumeKeyword(KeywordID::name)) {                         \
+      scope = QualMask::name;                                        \
+      consumeOperator(OpID::LABEL_DELIM, "invalid " #name " label"); \
+      continue;                                                      \
+   } (void)0
+#define ACCESS_MODS \
+   ACCESS_MOD(PUBLIC);  \
+   ACCESS_MOD(PRIVATE); \
+   ACCESS_MOD(PROTECTED)
+
 //helper function used to implement parsing of classes and structs
 clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(index<Expr> attrs, clef::SymbolType symbolType, const mcsl::str_slice metatypeName) {
    index<Identifier> name = tryParseSymbol(symbolType, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    TypeSpec* spec = tree.registerType(symbol, TypeSpec::COMPOSITE, symbolType);
    debug_assert(spec->canonName());
+   if (spec->metaType() != TypeSpec::COMPOSITE) {
+      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of %s `%s`", metatypeName, astTSB{tree, symbol, 0});
+   }
+
    if (attrs) { TODO; }
    
    if (tryConsumeEOS()) { //forward declaration
@@ -17,17 +32,16 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(index<Expr> attrs, 
       }
       return make<TypeDecl>(name);
    }
+
+   auto& def = spec->composite();
    
-   if (spec->metaType() != TypeSpec::COMPOSITE) {
-      logError(ErrCode::BAD_TYPE_DECL, "redeclaration of %s `%s`", metatypeName, astTSB{tree, symbol, 0});
-   }
    PUSH_SCOPE;
 
    //implemented traits
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
       do {
          index<Identifier> parentType = parseTypename(SymbolType::TRAIT, false);
-         if (!spec->composite().impls.insert(tree[parentType].symbol())) {
+         if (!def.impls.insert(tree[parentType].symbol())) {
             logError(ErrCode::BAD_TYPE_DECL, "%s `%s` already implements trait `%s`", metatypeName, astTSB{tree, tree[parentType].symbol(), 0});
          }
       } while (tryConsumeOperator(OpID::COMMA));
@@ -39,21 +53,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(index<Expr> attrs, 
    index<Expr> fieldAttrs;
    while (!tryConsumeBlockDelim(BlockType::LIST, BlockDelimRole::CLOSE)) {
       //access modifiers
-      if (tryConsumeKeyword(KeywordID::PUBLIC)) {
-         scope = QualMask::PUBLIC;
-         consumeOperator(OpID::LABEL_DELIM, "invalid PUBLIC label");
-         continue;
-      }
-      if (tryConsumeKeyword(KeywordID::PRIVATE)) {
-         scope = QualMask::PRIVATE;
-         consumeOperator(OpID::LABEL_DELIM, "invalid PRIVATE label");
-         continue;
-      }
-      if (tryConsumeKeyword(KeywordID::PROTECTED)) {
-         scope = QualMask::PROTECTED;
-         consumeOperator(OpID::LABEL_DELIM, "invalid PROTECTED label");
-         continue;
-      }
+      ACCESS_MODS;
 
       fieldAttrs = tryParseAttrs();
       QualMask quals = parseQuals();
@@ -64,7 +64,20 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(index<Expr> attrs, 
          logError(ErrCode::BAD_STMT, "invalid statement in %s definition", metatypeName);
       }
       switch (currTok.keywordID()) {
-         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: getNextToken(); if (isStatic || +quals) { logError(ErrCode::BAD_KEYWORD, "cannot qualify a " #kw " as%s% s", isStatic ? FMT(" static") : FMT(""), quals); } { auto tmp = parsingFunc(fieldAttrs); tree[(index<Identifier>)tmp].addQuals(scope); spec->composite().subtypes.insert(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol()); } break
+         #define KW_CASE(kw, parsingFunc) \
+            case KeywordID::kw: {                               \
+               getNextToken();                                  \
+               if (isStatic || +quals) {                        \
+                  logError(ErrCode::BAD_KEYWORD,                \
+                     "cannot qualify a " #kw " as%s% s",        \
+                     FMT(isStatic ? " static" : ""), quals);    \
+               }                                                \
+               auto tmp = parsingFunc(fieldAttrs);              \
+               SymbolNode* s = tree[tree[tmp].name()].symbol(); \
+               tree[(index<Identifier>)tmp].addQuals(scope);    \
+               def.subtypes.insert(s);                          \
+               s->insert(s);                                    \
+            } break
          KW_CASE(CLASS, parseClass);
          KW_CASE(STRUCT, parseStruct);
          KW_CASE(TRAIT, parseTrait);
@@ -73,8 +86,20 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(index<Expr> attrs, 
          KW_CASE(MASK, parseMask);
          KW_CASE(NAMESPACE, parseNamespace);
          #undef KW_CASE
-         case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(fieldAttrs); (isStatic ? spec->composite().staticFuncs : spec->composite().methods).emplace(tree[tree[tmp].name()].symbol(), scope | quals); symbol->insert(tree[tree[tmp].name()].symbol());} break;
-         case KeywordID::LET : getNextToken(); {auto tmp = parseDecl(fieldAttrs); (isStatic ? spec->composite().staticMembs : spec->composite().dataMembs).emplace_back(tree[tree[tmp].name()].symbol(), scope | quals); symbol->insert(tree[tree[tmp].name()].symbol());} break;
+         case KeywordID::FUNC: getNextToken(); {
+            index<FuncDef> f = parseFunction(fieldAttrs);
+            SymbolNode* funcSymbol = tree[tree[f].name()].symbol();
+            tree[tree[f].name()].addQuals(scope);
+            (isStatic ? def.staticFuncs : def.methods).emplace(funcSymbol, scope | quals);
+            symbol->insert(funcSymbol);
+         } break;
+         case KeywordID::LET : getNextToken(); {
+            auto decl = parseDecl(fieldAttrs);
+            SymbolNode* declSymbol = tree[tree[decl].name()].symbol();
+            tree[tree[decl].name()].addQuals(scope);
+            (isStatic ? def.staticMembs : def.dataMembs).emplace_back(declSymbol, scope | quals);
+            symbol->insert(declSymbol);
+         } break;
          default: logError(ErrCode::BAD_STMT, "invalid statement in class/struct definition");
       }
    }
@@ -100,6 +125,8 @@ clef::index<clef::TypeDecl> clef::Parser::parseTrait(index<Expr> attrs) {
    if (tryConsumeEOS()) { //forward declaration
       return make<TypeDecl>(name);
    }
+
+   auto& def = spec->composite();
    
    PUSH_SCOPE;
    
@@ -107,7 +134,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseTrait(index<Expr> attrs) {
    if (tryConsumeOperator(OpID::LABEL_DELIM)) {
       do {
          index<Identifier> parentType = parseTypename(SymbolType::TRAIT, false);
-         if (!spec->composite().impls.insert(tree[parentType].symbol())) {
+         if (!def.impls.insert(tree[parentType].symbol())) {
             logError(ErrCode::BAD_TYPE_DECL, "trait `%s` already extends trait `%s`", astTSB{tree, tree[parentType].symbol(), 0});
          }
       } while (tryConsumeOperator(OpID::COMMA));
@@ -118,22 +145,9 @@ clef::index<clef::TypeDecl> clef::Parser::parseTrait(index<Expr> attrs) {
    QualMask scope = QualMask::PUBLIC;
    index<Expr> fieldAttrs;
    while (!tryConsumeBlockDelim(BlockType::LIST, BlockDelimRole::CLOSE)) {
-      //acess control
-      if (tryConsumeKeyword(KeywordID::PUBLIC)) {
-         scope = QualMask::PUBLIC;
-         consumeOperator(OpID::LABEL_DELIM, "invalid PUBLIC label");
-         continue;
-      }
-      if (tryConsumeKeyword(KeywordID::PRIVATE)) {
-         scope = QualMask::PRIVATE;
-         consumeOperator(OpID::LABEL_DELIM, "invalid PRIVATE label");
-         continue;
-      }
-      if (tryConsumeKeyword(KeywordID::PROTECTED)) {
-         scope = QualMask::PROTECTED;
-         consumeOperator(OpID::LABEL_DELIM, "invalid PROTECTED label");
-         continue;
-      }
+      //acess modifiers
+      ACCESS_MODS;
+
       //attributes
       fieldAttrs = tryParseAttrs();
       //qualifiers
@@ -144,13 +158,10 @@ clef::index<clef::TypeDecl> clef::Parser::parseTrait(index<Expr> attrs) {
       //function declaration
       consumeKeyword(KeywordID::FUNC, "traits can only contain functions and methods");
       index<Identifier> func = tree[parseFunction(fieldAttrs)].name(); //function definition (optional)
+      SymbolNode* funcSymbol = tree[func].symbol();
       tree[func].addQuals(scope);
-      if (isStatic) {
-         spec->composite().staticFuncs.emplace(tree[func].symbol(), scope | quals);
-      } else {
-         spec->composite().methods.emplace(tree[func].symbol(), scope | quals);
-      }
-      symbol->insert(tree[func].symbol());
+      (isStatic ? def.staticFuncs : def.methods).emplace(funcSymbol, scope | quals);
+      symbol->insert(funcSymbol);
    }
 
    //EOS
@@ -178,6 +189,8 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion(index<Expr> attrs) {
       return make<TypeDecl>(name);
    }
 
+   auto& def = spec->composite();
+
    PUSH_SCOPE;
 
    //definition
@@ -189,8 +202,9 @@ clef::index<clef::TypeDecl> clef::Parser::parseUnion(index<Expr> attrs) {
       consumeEOS("bad union member");
       
       //push to members list
-      spec->composite().dataMembs.push_back(tree[tree[member].name()].symbol());
-      symbol->insert(tree[tree[member].name()].symbol());
+      SymbolNode* memberSymbol = tree[tree[member].name()].symbol();
+      def.dataMembs.push_back(memberSymbol);
+      symbol->insert(memberSymbol);
    }
 
    //EOS
@@ -218,6 +232,8 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(index<Expr> attrs,
       return make<TypeDecl>(name);
    }
 
+   auto& def = spec->composite();
+
    PUSH_SCOPE;
 
    index<Identifier> baseType;
@@ -235,8 +251,9 @@ clef::index<clef::TypeDecl> clef::Parser::__parseEnumlikeImpl(index<Expr> attrs,
             val = parseExprNoPrimaryComma();
          } else { val = 0; }
 
-         spec->composite().staticMembs.push_back(tree[enumerator].symbol());
-         symbol->insert(tree[enumerator].symbol());
+         SymbolNode* enumeratorSymbol = tree[enumerator].symbol();
+         def.staticMembs.push_back(enumeratorSymbol);
+         symbol->insert(enumeratorSymbol);
       } while (tryConsumeOperator(OpID::COMMA));
       consumeBlockDelim(BlockType::LIST, BlockDelimRole::CLOSE, "bad ENUM enumerator");
    }
@@ -271,6 +288,8 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace(index<Expr> attrs) {
       }
       return make<TypeDecl>(name);
    }
+
+   auto& def = spec->composite();
    
    PUSH_SCOPE;
 
@@ -280,21 +299,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace(index<Expr> attrs) {
    index<Expr> fieldAttrs;
    while (!tryConsumeBlockDelim(BlockType::LIST, BlockDelimRole::CLOSE)) {
       //access modifiers
-      if (tryConsumeKeyword(KeywordID::PUBLIC)) {
-         scope = QualMask::PUBLIC;
-         consumeOperator(OpID::LABEL_DELIM, "invalid PUBLIC label");
-         continue;
-      }
-      if (tryConsumeKeyword(KeywordID::PRIVATE)) {
-         scope = QualMask::PRIVATE;
-         consumeOperator(OpID::LABEL_DELIM, "invalid PRIVATE label");
-         continue;
-      }
-      if (tryConsumeKeyword(KeywordID::PROTECTED)) {
-         scope = QualMask::PROTECTED;
-         consumeOperator(OpID::LABEL_DELIM, "invalid PROTECTED label");
-         continue;
-      }
+      ACCESS_MODS;
 
       //member attributes
       fieldAttrs = tryParseAttrs();
@@ -303,7 +308,15 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace(index<Expr> attrs) {
       }
       //parse member
       switch (currTok.keywordID()) {
-         #define KW_CASE(kw, parsingFunc) case KeywordID::kw: getNextToken(); { auto tmp = parsingFunc(fieldAttrs); tree[tree[tmp].name()].addQuals(scope); spec->composite().subtypes.insert(tree[tree[tmp].name()].symbol()); symbol->insert(tree[tree[tmp].name()].symbol()); } break
+         #define KW_CASE(kw, parsingFunc) \
+            case KeywordID::kw: {                               \
+               getNextToken();                                  \
+               auto tmp = parsingFunc(fieldAttrs);              \
+               SymbolNode* s = tree[tree[tmp].name()].symbol(); \
+               tree[tree[tmp].name()].addQuals(scope);          \
+               def.subtypes.insert(s);                          \
+               s->insert(s);                                    \
+            } break
          KW_CASE(CLASS, parseClass);
          KW_CASE(STRUCT, parseStruct);
          KW_CASE(TRAIT, parseTrait);
@@ -312,8 +325,20 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace(index<Expr> attrs) {
          KW_CASE(MASK, parseMask);
          KW_CASE(NAMESPACE, parseNamespace);
          #undef KW_CASE
-         case KeywordID::FUNC: getNextToken(); {auto tmp = parseFunction(fieldAttrs); spec->composite().staticFuncs.emplace(tree[tree[tmp].name()].symbol(), scope); symbol->insert(tree[tree[tmp].name()].symbol());} break;
-         case KeywordID::LET : getNextToken(); {auto tmp = parseDecl(fieldAttrs); spec->composite().staticMembs.emplace_back(tree[tree[tmp].name()].symbol(), scope); symbol->insert(tree[tree[tmp].name()].symbol());} break;
+         case KeywordID::FUNC: getNextToken(); {
+            index<FuncDef> f = parseFunction(fieldAttrs);
+            SymbolNode* funcSymbol = tree[tree[f].name()].symbol();
+            tree[tree[f].name()].addQuals(scope);
+            def.staticFuncs.emplace(funcSymbol, scope);
+            symbol->insert(funcSymbol);
+         } break;
+         case KeywordID::LET : getNextToken(); {
+            index<Decl> decl = parseDecl(fieldAttrs);
+            SymbolNode* declSymbol = tree[tree[decl].name()].symbol();
+            tree[tree[decl].name()].addQuals(scope);
+            def.staticMembs.emplace_back(declSymbol, scope);
+            symbol->insert(declSymbol);
+         } break;
          default: logError(ErrCode::BAD_STMT, "invalid statement in namespace definition");
       }
    }
@@ -325,5 +350,8 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace(index<Expr> attrs) {
    POP_SCOPE;
    return make<TypeDecl>(name, name);
 }
+
+#undef ACCESS_MODS
+#undef ACCESS_MOD
 
 #endif

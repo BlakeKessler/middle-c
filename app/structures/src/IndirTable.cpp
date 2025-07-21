@@ -122,7 +122,7 @@ void clef::IndirTable::append(Entry entry) {
 void clef::IndirTable::appendView(Entry entry) {
    debug_assert(_size);
    Entry& back = self.back();
-   if (back.isArr()) { TODO; }
+   if (_backExtraBytes) { TODO; }
    if (!back.isConst()) {
       if (back._rle != Entry::ONE_TOTAL_REPEAT) {
          --back._rle;
