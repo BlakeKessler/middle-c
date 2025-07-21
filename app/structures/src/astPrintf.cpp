@@ -317,7 +317,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Asm> obj, char mode
 #pragma endregion exprs
 
 //print a statement
-//delegates to Expression
+//delegates to Expr
 //ignores all format codes
 uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Stmt> obj, char mode, FmtArgs fmt) {
    if (!obj) {
@@ -1067,7 +1067,6 @@ uint mcsl::writef(mcsl::File& file, clef::QualMask quals, char mode, FmtArgs fmt
       case 's': {
          if (!+quals) { return 0; }
          uint charsPrinted = 0;
-         if (fmt.padForPosSign) { charsPrinted += file.printf(FMT(" ")); }
          for (uint16 bit = 1; +quals && bit; bit <<= 1) {
             QualMask qualbit = quals & (QualMask)bit;
             if (+qualbit) {
