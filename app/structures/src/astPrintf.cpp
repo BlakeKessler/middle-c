@@ -883,7 +883,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
             #define __print(field, prefix) \
                needsNewline = false; \
                for (auto symbol : spec.composite().field) { \
-                  charsPrinted += file.printf(FMT("%S%s " prefix "%#s;"), indents, toString(symbol.quals), TSB(symbol.symbol)); \
+                  charsPrinted += file.printf(FMT("%S% s" prefix "%#s;"), indents, symbol.quals, TSB(symbol.symbol)); \
                   needsNewline = true; \
                } \
                if (needsNewline) { charsPrinted += file.printf(FMT("%S"), obj.indents); }
@@ -1060,17 +1060,19 @@ uint mcsl::writef(mcsl::File& file, const clef::astTItB& obj, char mode, FmtArgs
 #undef TNB
 
 //print type qualifiers
+//padForPosSign: print *trailing* space for non-null masks
 uint mcsl::writef(mcsl::File& file, clef::QualMask quals, char mode, FmtArgs fmt) {
    using namespace clef;
    switch (mode | mcsl::CASE_BIT) {
       case 's': {
+         if (!+quals) { return 0; }
          uint charsPrinted = 0;
-         const str_slice fmtstr = FMT(fmt.padForPosSign ? " %s" : "%s ");
+         if (fmt.padForPosSign) { charsPrinted += file.printf(FMT(" ")); }
          for (uint16 bit = 1; +quals && bit; bit <<= 1) {
             QualMask qualbit = quals & (QualMask)bit;
             if (+qualbit) {
                quals &= ~qualbit;
-               charsPrinted += file.printf(fmtstr, toString(qualbit));
+               charsPrinted += file.printf(fmt.padForPosSign || +quals ? FMT("%s ") : FMT("%s"), toString(qualbit));
             }
          }
          return charsPrinted;
