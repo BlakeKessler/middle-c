@@ -3,17 +3,17 @@
 #define SCOPE_HPP
 
 #include "CLEF.hpp"
-#include "ast-nodes/node-lists/StatementSequence.hpp"
+#include "ast-nodes/node-lists/StmtSeq.hpp"
 
 #include "dyn_arr.hpp"
 
-struct clef::Scope : public clef::StatementSequence {
+struct clef::Scope : public clef::StmtSeq {
    private:
       //!TODO: SymbolNode* _symbolNode;
    public:
       static constexpr NodeType nodeType() { return NodeType::SCOPE; }
 
-      using StatementSequence::StatementSequence;
+      using StmtSeq::StmtSeq;
 };
 
 namespace mcsl {

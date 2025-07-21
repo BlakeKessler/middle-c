@@ -3,19 +3,19 @@
 #define FOREACH_LOOP_HPP
 
 #include "CLEF.hpp"
-#include "ast-nodes/Statement.hpp"
-#include "ast-nodes/exprs/Declaration.hpp"
+#include "ast-nodes/Stmt.hpp"
+#include "ast-nodes/exprs/Decl.hpp"
 #include "ast-nodes/Scope.hpp"
 
-struct clef::ForeachLoop : public clef::Statement {
+struct clef::ForeachLoop : public clef::Stmt {
    private:
    
    public:
       static constexpr NodeType nodeType() { return NodeType::FOREACH_LOOP; }
       static constexpr OpID pseudoOpID() { return OpID::FOREACH; }
 
-      ForeachLoop():Statement{} {}
-      ForeachLoop(index<Decl> iterator, index<Expr> target, index<Scope> procedure):Statement{OpID::FOREACH, iterator, target, procedure} {}
+      ForeachLoop():Stmt{} {}
+      ForeachLoop(index<Decl> iterator, index<Expr> target, index<Scope> procedure):Stmt{OpID::FOREACH, iterator, target, procedure} {}
 
       index<Decl>& iterator() { return reinterpret_cast<index<Decl>&>(_lhs); }
       index<const Decl> iterator() const { return _lhs; }

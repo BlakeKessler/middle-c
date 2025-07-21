@@ -1,7 +1,7 @@
 #ifndef STMT_SEQ_CPP
 #define STMT_SEQ_CPP
 
-#include "ast-nodes/node-lists/StatementSequence.hpp"
+#include "ast-nodes/node-lists/StmtSeq.hpp"
 
 #include "io.hpp"
 

@@ -1,14 +1,14 @@
 #ifndef EXPRESSION_CPP
 #define EXPRESSION_CPP
 
-#include "ast-nodes/Expression.hpp"
+#include "ast-nodes/Expr.hpp"
 #include "astNode.hpp"
 #include "SyntaxTree.hpp"
 #include "pretty-print.hpp"
 #include "io.hpp"
 
 clef::Expr clef::Expr::makeTernary(SyntaxTree& tree, index<astNode> cond, index<astNode> ifExpr, index<astNode> elseExpr) {
-   return Expression{
+   return Expr{
       OpID::TERNARY_INVOKE,
       tree[cond].nodeType(), tree[ifExpr].nodeType(), tree[elseExpr].nodeType(),
       +cond, +ifExpr, +elseExpr

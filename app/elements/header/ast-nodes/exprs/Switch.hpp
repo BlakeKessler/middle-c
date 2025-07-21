@@ -3,17 +3,17 @@
 #define SWITCH_HPP
 
 #include "CLEF.hpp"
-#include "ast-nodes/Statement.hpp"
+#include "ast-nodes/Stmt.hpp"
 
-struct clef::Switch : public clef::Statement {
+struct clef::Switch : public clef::Stmt {
    private:
 
    public:
       static constexpr NodeType nodeType() { return NodeType::SWITCH; }
       static constexpr OpID pseudoOpID() { return OpID::SWITCH; }
 
-      Switch():Statement{} {}
-      Switch(index<Expr> cond, index<SwitchCases> cases):Statement{OpID::SWITCH,NodeType::EXPR,NodeType::SWITCH_CASES,cond,cases} {}
+      Switch():Stmt{} {}
+      Switch(index<Expr> cond, index<SwitchCases> cases):Stmt{OpID::SWITCH,NodeType::EXPR,NodeType::SWITCH_CASES,cond,cases} {}
 
       index<Expr>& condition() { return reinterpret_cast<index<Expr>&>(_lhs); }
       index<const Expr> condition() const { return _lhs; }

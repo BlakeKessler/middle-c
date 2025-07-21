@@ -3,18 +3,18 @@
 #define FOR_LOOP_HPP
 
 #include "CLEF.hpp"
-#include "ast-nodes/Statement.hpp"
+#include "ast-nodes/Stmt.hpp"
 #include "ast-nodes/Scope.hpp"
 
-struct clef::ForLoop : public clef::Statement {
+struct clef::ForLoop : public clef::Stmt {
    private:
    
    public:
       static constexpr NodeType nodeType() { return NodeType::FOR_LOOP; }
       static constexpr OpID pseudoOpID() { return OpID::FOR; }
 
-      ForLoop():Statement{} {}
-      ForLoop(index<Expr> decl, index<Expr> cond, index<Expr> inc, index<Scope> procedure): Statement{OpID::FOR, decl, cond, inc, procedure} {}
+      ForLoop():Stmt{} {}
+      ForLoop(index<Expr> decl, index<Expr> cond, index<Expr> inc, index<Scope> procedure): Stmt{OpID::FOR, decl, cond, inc, procedure} {}
 
       index<Expr>& decl() { return reinterpret_cast<index<Expr>&>(_lhs); }
       index<const Expr> decl() const { return _lhs; }

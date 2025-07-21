@@ -1,7 +1,7 @@
 #ifndef FUNC_DEF_CPP
 #define FUNC_DEF_CPP
 
-#include "ast-nodes/exprs/MacroDefinition.hpp"
+#include "ast-nodes/exprs/MacroDef.hpp"
 
 #include "io.hpp"
 

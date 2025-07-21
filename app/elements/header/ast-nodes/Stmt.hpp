@@ -3,16 +3,16 @@
 #define STATEMENT_HPP
 
 #include "CLEF.hpp"
-#include "ast-nodes/Expression.hpp"
+#include "ast-nodes/Expr.hpp"
 
-struct clef::Statement : public clef::Expression {
+struct clef::Stmt : public clef::Expr {
    private:
 
    public:
       static constexpr NodeType nodeType() { return NodeType::STMT; }
 
-      using Expression::Expression;
-      Statement(const Expr& other):Expr(other) {}
+      using Expr::Expr;
+      Stmt(const Expr& other):Expr(other) {}
 };
 
 #endif //STATEMENT_HPP

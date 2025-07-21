@@ -447,11 +447,11 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
          return makeExpr(OpID::NULL, index);
 
       //expressions - return the node unaltered
-      case Expression::nodeType():
-      case Declaration::nodeType():
-      case FunctionDefinition::nodeType():
-      case MacroDefinition::nodeType():
-      case Statement::nodeType():
+      case Expr::nodeType():
+      case Decl::nodeType():
+      case FuncDef::nodeType():
+      case MacroDef::nodeType():
+      case Stmt::nodeType():
       case ForLoop::nodeType():
       case ForeachLoop::nodeType():
       case WhileLoop::nodeType():
@@ -466,8 +466,8 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
       case Scope::nodeType():
       case SwitchCases::nodeType():
       case MatchCases::nodeType():
-      case StatementSequence::nodeType():
-      case ArgumentList::nodeType():
+      case StmtSeq::nodeType():
+      case ArgList::nodeType():
       case NodeType::MAKE_TYPE:
       case NodeType::NONE:
       case NodeType::ERROR:

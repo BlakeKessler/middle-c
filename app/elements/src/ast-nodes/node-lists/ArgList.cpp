@@ -1,7 +1,7 @@
 #ifndef ARG_LIST_CPP
 #define ARG_LIST_CPP
 
-#include "ast-nodes/node-lists/ArgumentList.hpp"
+#include "ast-nodes/node-lists/ArgList.hpp"
 
 #include "io.hpp"
 

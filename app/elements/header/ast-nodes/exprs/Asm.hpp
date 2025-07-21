@@ -3,9 +3,9 @@
 #define ASM_HPP
 
 #include "CLEF.hpp"
-#include "ast-nodes/Statement.hpp"
+#include "ast-nodes/Stmt.hpp"
 
-struct clef::Asm : public clef::Statement {
+struct clef::Asm : public clef::Stmt {
    private:
 
    public:

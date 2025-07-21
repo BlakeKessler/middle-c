@@ -31,12 +31,12 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
       case Literal::nodeType():
          return make<Expr>(op, node.nodeType(), lhs);
 
-      case Expression::nodeType():
-      case Declaration::nodeType():
-      case FunctionDefinition::nodeType():
-      case MacroDefinition::nodeType():
-      case TypeDeclaration::nodeType():
-      case Statement::nodeType():
+      case Expr::nodeType():
+      case Decl::nodeType():
+      case FuncDef::nodeType():
+      case MacroDef::nodeType():
+      case TypeDecl::nodeType():
+      case Stmt::nodeType():
       case ForLoop::nodeType():
       case ForeachLoop::nodeType():
       case WhileLoop::nodeType():
@@ -51,8 +51,8 @@ clef::index<clef::Expr> clef::SyntaxTree::makeExpr(const OpID op, index<astNode>
       case Scope::nodeType():
       case SwitchCases::nodeType():
       case MatchCases::nodeType():
-      case StatementSequence::nodeType():
-      case ArgumentList::nodeType():
+      case StmtSeq::nodeType():
+      case ArgList::nodeType():
       case NodeType::NONE:
       case NodeType::ERROR:
          UNREACHABLE;

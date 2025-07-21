@@ -4,16 +4,16 @@
 
 #include "CLEF.hpp"
 
-#include "ast-nodes/Expression.hpp"
+#include "ast-nodes/Expr.hpp"
 #include "ast-nodes/Literal.hpp"
 #include "ast-nodes/Scope.hpp"
 #include "ast-nodes/RawIdentifier.hpp"
 #include "ast-nodes/Identifier.hpp"
-#include "ast-nodes/Statement.hpp"
-#include "ast-nodes/exprs/Declaration.hpp"
-#include "ast-nodes/exprs/FunctionDefinition.hpp"
-#include "ast-nodes/exprs/MacroDefinition.hpp"
-#include "ast-nodes/exprs/TypeDeclaration.hpp"
+#include "ast-nodes/Stmt.hpp"
+#include "ast-nodes/exprs/Decl.hpp"
+#include "ast-nodes/exprs/FuncDef.hpp"
+#include "ast-nodes/exprs/MacroDef.hpp"
+#include "ast-nodes/exprs/TypeDecl.hpp"
 #include "ast-nodes/exprs/If.hpp"
 #include "ast-nodes/exprs/ForLoop.hpp"
 #include "ast-nodes/exprs/ForeachLoop.hpp"
@@ -22,9 +22,9 @@
 #include "ast-nodes/exprs/Switch.hpp"
 #include "ast-nodes/exprs/Match.hpp"
 #include "ast-nodes/exprs/Asm.hpp"
-#include "ast-nodes/node-lists/ArgumentList.hpp"
+#include "ast-nodes/node-lists/ArgList.hpp"
 #include "ast-nodes/node-lists/MatchCases.hpp"
-#include "ast-nodes/node-lists/StatementSequence.hpp"
+#include "ast-nodes/node-lists/StmtSeq.hpp"
 #include "ast-nodes/node-lists/SwitchCases.hpp"
 
 
@@ -41,11 +41,11 @@ struct clef::astNode {
          Identifier _identifier;
          Scope _scope;
          Literal _literal;
-         Expression _expression;
-         Declaration _declaration;
-         FunctionDefinition _funcDef;
-         MacroDefinition _macroDef;
-         TypeDeclaration _typeDecl;
+         Expr _expression;
+         Decl _declaration;
+         FuncDef _funcDef;
+         MacroDef _macroDef;
+         TypeDecl _typeDecl;
          ForLoop _forLoop;
          ForeachLoop _foreachLoop;
          WhileLoop _whileLoop;
@@ -56,9 +56,9 @@ struct clef::astNode {
          Asm _asm;
          SwitchCases _switchCases;
          MatchCases _matchCases;
-         Statement _statement;
-         StatementSequence _statementSequence;
-         ArgumentList _argumentList;
+         Stmt _statement;
+         StmtSeq _statementSequence;
+         ArgList _argumentList;
       };
       NodeType _nodeType;
 

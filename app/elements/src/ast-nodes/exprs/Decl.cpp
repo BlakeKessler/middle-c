@@ -1,7 +1,7 @@
 #ifndef DECL_CPP
 #define DECL_CPP
 
-#include "ast-nodes/exprs/Declaration.hpp"
+#include "ast-nodes/exprs/Decl.hpp"
 
 #include "io.hpp"
 

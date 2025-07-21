@@ -3,20 +3,20 @@
 #define MACRO_DECL_HPP
 
 #include "CLEF.hpp"
-#include "ast-nodes/Expression.hpp"
+#include "ast-nodes/Expr.hpp"
 #include "ast-nodes/Identifier.hpp"
-#include "ast-nodes/node-lists/ArgumentList.hpp"
+#include "ast-nodes/node-lists/ArgList.hpp"
 
-struct clef::MacroDefinition : public clef::Expression {
+struct clef::MacroDef : public clef::Expr {
    private:
    
    public:
       static constexpr NodeType nodeType() { return NodeType::MACRO_DEF; }
       static constexpr OpID pseudoOpID() { return OpID::DEF_MACRO_PARAMS; }
 
-      MacroDefinition():Expression{} {}
-      MacroDefinition(index<Identifier> name, index<void> overloadIndex, index<ArgList> params):Expression{OpID::DEF_MACRO_PARAMS, NodeType::IDEN, NodeType::NONE, NodeType::ARG_LIST, name, overloadIndex, params} {}
-      MacroDefinition(index<Identifier> name, index<void> overloadIndex, index<ArgList> params, index<Scope> proc):Expression{OpID::DEF_MACRO_PARAMS, NodeType::IDEN, NodeType::NONE, NodeType::ARG_LIST, NodeType::SCOPE, name, overloadIndex, params, proc} {}
+      MacroDef():Expr{} {}
+      MacroDef(index<Identifier> name, index<void> overloadIndex, index<ArgList> params):Expr{OpID::DEF_MACRO_PARAMS, NodeType::IDEN, NodeType::NONE, NodeType::ARG_LIST, name, overloadIndex, params} {}
+      MacroDef(index<Identifier> name, index<void> overloadIndex, index<ArgList> params, index<Scope> proc):Expr{OpID::DEF_MACRO_PARAMS, NodeType::IDEN, NodeType::NONE, NodeType::ARG_LIST, NodeType::SCOPE, name, overloadIndex, params, proc} {}
 
 
       index<Identifier>& name() { return reinterpret_cast<index<Identifier>&>(_lhs); }

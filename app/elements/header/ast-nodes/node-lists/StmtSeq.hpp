@@ -6,13 +6,13 @@
 
 #include "dyn_arr.hpp"
 
-struct clef::StatementSequence : public mcsl::contig_base<index<Stmt>> {
+struct clef::StmtSeq : public mcsl::contig_base<index<Stmt>> {
    private:
       mcsl::dyn_arr<index<Stmt>>* _stmts;
    public:
       static constexpr NodeType nodeType() { return NodeType::STMT_SEQ; }
 
-      StatementSequence(mcsl::dyn_arr<index<Stmt>>* stmts):_stmts{stmts} {}
+      StmtSeq(mcsl::dyn_arr<index<Stmt>>* stmts):_stmts{stmts} {}
 
 
       #pragma region dyn_arr

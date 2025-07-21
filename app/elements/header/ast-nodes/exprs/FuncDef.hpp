@@ -3,23 +3,23 @@
 #define FUNC_DECL_HPP
 
 #include "CLEF.hpp"
-#include "ast-nodes/Expression.hpp"
+#include "ast-nodes/Expr.hpp"
 #include "ast-nodes/Identifier.hpp"
-#include "ast-nodes/node-lists/ArgumentList.hpp"
+#include "ast-nodes/node-lists/ArgList.hpp"
 #include "ast-nodes/Scope.hpp"
 
-struct clef::FunctionDefinition : public clef::Expression {
+struct clef::FuncDef : public clef::Expr {
    private:
    
    public:
       static constexpr NodeType nodeType() { return NodeType::FUNC_DEF; }
       static constexpr OpID pseudoOpID() { return OpID::DEF_FUNC_PARAMS; }
 
-      FunctionDefinition():Expression{} {}
-      FunctionDefinition(index<Identifier> name, index<ArgList> params):Expression{OpID::DEF_FUNC_PARAMS, name, params} {}
-      FunctionDefinition(index<Identifier> name, index<ArgList> params, index<Scope> proc):Expression{OpID::DEF_FUNC_PARAMS, name, params, proc} {}
-      FunctionDefinition(index<Identifier> name, index<ArgList> params, index<Expr> attrs):Expression{OpID::DEF_FUNC_PARAMS, name, params, index<Scope>(0), attrs} {}
-      FunctionDefinition(index<Identifier> name, index<ArgList> params, index<Scope> proc, index<Expr> attrs):Expression{OpID::DEF_FUNC_PARAMS, name, params, proc, attrs} {}
+      FuncDef():Expr{} {}
+      FuncDef(index<Identifier> name, index<ArgList> params):Expr{OpID::DEF_FUNC_PARAMS, name, params} {}
+      FuncDef(index<Identifier> name, index<ArgList> params, index<Scope> proc):Expr{OpID::DEF_FUNC_PARAMS, name, params, proc} {}
+      FuncDef(index<Identifier> name, index<ArgList> params, index<Expr> attrs):Expr{OpID::DEF_FUNC_PARAMS, name, params, index<Scope>(0), attrs} {}
+      FuncDef(index<Identifier> name, index<ArgList> params, index<Scope> proc, index<Expr> attrs):Expr{OpID::DEF_FUNC_PARAMS, name, params, proc, attrs} {}
 
 
       index<Identifier>& name() { return reinterpret_cast<index<Identifier>&>(_lhs); }

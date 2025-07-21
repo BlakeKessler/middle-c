@@ -3,18 +3,18 @@
 #define TYPE_DECL_HPP
 
 #include "CLEF.hpp"
-#include "ast-nodes/Statement.hpp"
+#include "ast-nodes/Stmt.hpp"
 
-struct clef::TypeDeclaration : public clef::Statement {
+struct clef::TypeDecl : public clef::Stmt {
    private:
    
    public:
       static constexpr NodeType nodeType() { return NodeType::MAKE_TYPE; }
       static constexpr OpID pseudoOpID() { return OpID::MAKE_TYPE; }
 
-      TypeDeclaration():Statement{} {}
-      TypeDeclaration(index<Identifier> name):Statement{OpID::MAKE_TYPE, name} {} //forward declaration
-      TypeDeclaration(index<Identifier> name, index<Identifier> decl):Statement{OpID::MAKE_TYPE, name, decl} {}
+      TypeDecl():Stmt{} {}
+      TypeDecl(index<Identifier> name):Stmt{OpID::MAKE_TYPE, name} {} //forward declaration
+      TypeDecl(index<Identifier> name, index<Identifier> decl):Stmt{OpID::MAKE_TYPE, name, decl} {}
 
 
       index<Identifier>& name() { return reinterpret_cast<index<Identifier>&>(_lhs); }
