@@ -30,9 +30,9 @@
 
 #include "MAP_MACRO.h"
 #define CLEF_ALL_AST_NODE_UNION_MEMBS \
-   _rawIden, _identifier, _scope, _literal, _expression, _declaration, _typeDecl, _funcDef, \
-   _macroDef, _forLoop, _foreachLoop, _whileLoop, _doWhileLoop, _if, _switch, _match, _asm, \
-   _switchCases, _matchCases, _statement, _statementSequence, _argumentList
+   _rawIden, _identifier, _scope, _literal, _expr, _decl, _typeDecl, _funcDef, \
+   _macroDef, _forLoop, _foreachLoop, _whileLoop, _doWhileLoop, _if, _switch, \
+   _match, _asm, _switchCases, _matchCases, _stmt, _stmtSeq, _argList
 
 struct clef::astNode {
    private:
@@ -41,8 +41,8 @@ struct clef::astNode {
          Identifier _identifier;
          Scope _scope;
          Literal _literal;
-         Expr _expression;
-         Decl _declaration;
+         Expr _expr;
+         Decl _decl;
          FuncDef _funcDef;
          MacroDef _macroDef;
          TypeDecl _typeDecl;
@@ -56,9 +56,9 @@ struct clef::astNode {
          Asm _asm;
          SwitchCases _switchCases;
          MatchCases _matchCases;
-         Stmt _statement;
-         StmtSeq _statementSequence;
-         ArgList _argumentList;
+         Stmt _stmt;
+         StmtSeq _stmtSeq;
+         ArgList _argList;
       };
       NodeType _nodeType;
 
