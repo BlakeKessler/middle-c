@@ -78,11 +78,17 @@ class clef::OpDefTable {
       };
 
    private:
-      mcsl::static_arr<mcsl::dyn_arr<entry>[4], __SIZE> _buf;
+      mcsl::static_arr<mcsl::dyn_arr<entry>[3], __SIZE> _buf;
+      static inline uint subtableIndex(TypeSpec* lhs, TypeSpec* rhs) {
+         debug_assert(lhs || rhs);
+         return ((!lhs) << 1) | (!rhs);
+      }
       
       /*unsafe*/ void insertUnchecked(SymbolNode*, index<void>, OpID op, TypeSpec* lhs, TypeSpec* rhs);
    public:
       OpDefTable():_buf{} {}
+
+      static Ops toIndex(OpID);
 
       entry get(OpID op, TypeSpec* lhs, TypeSpec* rhs);
       const_entry get(OpID op, TypeSpec* lhs, TypeSpec* rhs) const;

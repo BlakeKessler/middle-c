@@ -8,6 +8,7 @@
 #include "allocator.hpp"
 #include "DataModel.hpp"
 #include "IndirTypeTable.hpp"
+#include "OpDefTable.hpp"
 
 #include "dyn_arr.hpp"
 #include "arr_list.hpp"
