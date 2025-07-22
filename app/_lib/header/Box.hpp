@@ -16,6 +16,13 @@ template<typename T> class clef::Box {
    public:
       template<typename... Argv_t> requires mcsl::valid_ctor<T, Argv_t...> Box(Argv_t... argv):
          m{.ptr = new (mcsl::malloc<T>(1)) T(std::forward<Argv_t>(argv)...)} {}
+      Box(Box&& other): m{other.m} {
+         if (this != &other) {
+            other.release();
+         }
+      }
+      Box(const Box& other):
+         m{new (mcsl::malloc<T>(1)) T(*other.m.ptr)} {}
       static Box intoBox(T* p) { return __impl{p}; } //takes ownership of *p
 
       ~Box() { free(); }
