@@ -88,7 +88,7 @@ class clef::OpDefTable {
    public:
       OpDefTable():_buf{} {}
 
-      static Ops toIndex(OpID);
+      static Ops toIndex(OpID op) { return (Ops)(+op - 1); }
 
       entry get(OpID op, TypeSpec* lhs, TypeSpec* rhs);
       const_entry get(OpID op, TypeSpec* lhs, TypeSpec* rhs) const;

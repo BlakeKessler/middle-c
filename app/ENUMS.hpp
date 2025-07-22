@@ -152,56 +152,17 @@ namespace clef {
    constexpr bool isOperand(const TokenType t) { return !+(t & TokenType::__OPLIKE); }
       constexpr bool isNumber(const TokenType t) { return t == TokenType::UINT_NUM || t == TokenType::SINT_NUM || t == TokenType::REAL_NUM; }
    #pragma region ops
+   //!NOTE: OpDefTable relies on the order of many of the enumerators
    enum class OpID : uint8 {
       NULL = 0, //nop or not an operator
-
-      ESCAPE, //escape character
-      EOS,
-
-      STRING,
-      CHAR,
-      INTERP_STRING,
-
-      ATTRIBUTE, //@
-
-      LINE_CMNT,
-      BLOCK_CMNT,
-         BLOCK_CMNT_OPEN,
-         BLOCK_CMNT_CLOSE,
-
+      
       CALL_INVOKE, //parens
-         CALL_OPEN,
-         CALL_CLOSE,
       SUBSCRIPT_INVOKE, //square brackets
-         SUBSCRIPT_OPEN,
-         SUBSCRIPT_CLOSE,
-      LIST_INVOKE, //curly brackets
-         LIST_OPEN,
-         LIST_CLOSE,
-      SPECIALIZER_INVOKE, //triangle brackets
-         SPECIALIZER_OPEN,
-         SPECIALIZER_CLOSE,
-
-      CHAR_INVOKE,
-      STR_INVOKE,
-      INTERP_STR_INVOKE,
-      TERNARY_INVOKE,
-
-
-      PREPROCESSOR,
-
-      SCOPE_RESOLUTION,
 
       INC, //increment
       DEC, //decrement
 
-      MEMBER_ACCESS, // .
-      PTR_MEMBER_ACCESS, // ->
-      METHOD_PTR, // .*
-      ARROW_METHOD_PTR, // ->*
-
       RANGE,
-      SPREAD,
       
       ADD, //addition
       SUB, //subtraction
@@ -230,16 +191,9 @@ namespace clef {
 
       IS_EQUAL, //equality comparison
       IS_UNEQUAL, //inequality comparison
-      // IS_EQUAL_STRICT, //!NOTE: NOT USED BY MIDDLE C
-      // IS_UNEQUAL_STRICT, //!NOTE: NOT USED BY MIDDLE C
 
       COALESCE, //null coalescing
 
-      INLINE_IF, //ternary operator opener
-      INLINE_ELSE, //ternary operator closer
-
-      ASSIGN,
-      // CONST_ASSIGN, //!NOTE: NOT USED BY MIDDLE C
       ADD_ASSIGN, //compound assignment (addition)
       SUB_ASSIGN, //compound assignment (substraction)
       MUL_ASSIGN, //compound assignment (multiplication)
@@ -253,6 +207,54 @@ namespace clef {
       OR_ASSIGN, //compound assignment (bitwise or)
       COALESCE_ASSIGN, //compound assignment (null-coalescing)
 
+      ESCAPE, //escape character
+      EOS,
+
+      STRING,
+      CHAR,
+      INTERP_STRING,
+
+      ATTRIBUTE, //@
+
+      LINE_CMNT,
+      BLOCK_CMNT,
+         BLOCK_CMNT_OPEN,
+         BLOCK_CMNT_CLOSE,
+
+      //parens
+         CALL_OPEN,
+         CALL_CLOSE,
+      //square brackets
+         SUBSCRIPT_OPEN,
+         SUBSCRIPT_CLOSE,
+      LIST_INVOKE, //curly brackets
+         LIST_OPEN,
+         LIST_CLOSE,
+      SPECIALIZER_INVOKE, //triangle brackets
+         SPECIALIZER_OPEN,
+         SPECIALIZER_CLOSE,
+
+      CHAR_INVOKE,
+      STR_INVOKE,
+      INTERP_STR_INVOKE,
+      TERNARY_INVOKE,
+
+
+      PREPROCESSOR,
+
+      SCOPE_RESOLUTION,
+
+      MEMBER_ACCESS, // .
+      PTR_MEMBER_ACCESS, // ->
+      METHOD_PTR, // .*
+      ARROW_METHOD_PTR, // ->*
+
+      SPREAD,
+
+      INLINE_IF, //ternary operator opener
+      INLINE_ELSE, //ternary operator closer
+
+      ASSIGN,
       COMMA,
 
 
@@ -763,7 +765,7 @@ namespace clef {
       switch (t) {
          case CALL         : return OpID::CALL_INVOKE;
          case SUBSCRIPT    : return OpID::SUBSCRIPT_INVOKE;
-         case LIST    : return OpID::LIST_INVOKE;
+         case LIST         : return OpID::LIST_INVOKE;
          case SPECIALIZER  : return OpID::SPECIALIZER_INVOKE;
 
          case QUOTES_CHAR  : return OpID::CHAR_INVOKE;
