@@ -12,6 +12,7 @@
 #include "dyn_arr.hpp"
 #include "arr_list.hpp"
 #include "map.hpp"
+#include "Box.hpp"
 
 class clef::SyntaxTree {
    private:
@@ -23,6 +24,7 @@ class clef::SyntaxTree {
       //!TODO: global table of function signatures
       mcsl::arr_list<SymbolNode> _symbolBuf;
       mcsl::arr_list<TypeSpec> _typeTable;
+      mcsl::dyn_arr<Box<OpDefTable>> _opOverloads;
 
       allocator _alloc;
 
@@ -42,6 +44,7 @@ class clef::SyntaxTree {
          _fundTypes{std::move(other._fundTypes)},
          _symbolBuf{std::move(other._symbolBuf)},
          _typeTable{std::move(other._typeTable)},
+         _opOverloads(std::move(other._opOverloads)),
          _alloc{std::move(other._alloc)},
          _dataModel(other._dataModel),
          _strings(std::move(other._strings)) {

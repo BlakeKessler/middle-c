@@ -17,6 +17,8 @@ namespace clef {
 
    typedef void(*ErrHandler)(ErrCode);
 
+   template<typename T> class Box;
+
    //objects for encoding Middle C specification data
    struct OpData;
    template <uint _size> struct OpDecoder;
@@ -58,6 +60,7 @@ namespace clef {
       #define CLEF_ALL_NODE_LIST_AST_NODE_T ArgList, MatchCases, StmtSeq, SwitchCases
       #define CLEF_ALL_AST_NODE_T CLEF_ALL_FUND_AST_NODE_T, CLEF_ALL_EXPR_AST_NODE_T, CLEF_ALL_NODE_LIST_AST_NODE_T
    class TypeSpec;
+   class OpDefTable;
 
    //containers for atomic compilation elements
    class Source;
