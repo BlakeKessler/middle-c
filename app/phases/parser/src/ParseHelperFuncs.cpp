@@ -166,7 +166,7 @@ clef::index<clef::Identifier> clef::Parser::parseTypename(SymbolType symbolType,
 //parse a variable declaration (where required, it is assumed that the `let` keyword has already been consumed)
 clef::index<clef::Decl> clef::Parser::parseDecl(index<Expr> attrs) {
    if (tryConsumeKeyword(KeywordID::FUNC)) { [[unlikely]]; //handle functions separately
-      index<FuncDef> funcDef = parseFunction(attrs);
+      index<FuncDef> funcDef = parseFunction(attrs, false);
       index<Expr> val;
       if (tree[funcDef].procedure()) {
          val = toExpr(+tree[funcDef].name());
@@ -212,7 +212,7 @@ clef::index<clef::Decl> clef::Parser::parseDecl(index<Expr> attrs) {
 //parse a parameter
 clef::index<clef::Decl> clef::Parser::parseParam(index<Expr> attrs) {
    if (tryConsumeKeyword(KeywordID::FUNC)) { [[unlikely]];
-      index<FuncDef> funcDef = parseFunction(attrs);
+      index<FuncDef> funcDef = parseFunction(attrs, false);
       if (tree[funcDef].procedure()) {
          logError(ErrCode::BAD_DECL, "cannot inline define parameters of type func");
       }

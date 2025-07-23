@@ -63,7 +63,7 @@ START_PARSE_STMT:
             case KeywordID::ENUM          : getNextToken(); return parseEnum(attrs);
             case KeywordID::MASK          : getNextToken(); return parseMask(attrs);
             case KeywordID::NAMESPACE     : getNextToken(); return parseNamespace(attrs);
-            case KeywordID::FUNC          : getNextToken(); return makeStmt(parseFunction(attrs));
+            case KeywordID::FUNC          : getNextToken(); return makeStmt(parseFunction(attrs, false));
             case KeywordID::MACRO         : getNextToken(); return makeStmt(parseMacro(attrs));
 
             
@@ -361,7 +361,7 @@ clef::index<clef::Expr> clef::Parser::parseExprNoPrimaryComma(index<astNode> ini
             const KeywordID kw = currTok.keywordID();
             if (kw == KeywordID::FUNC) {
                getNextToken();
-               operandStack.push_back(+parseFunction(0));
+               operandStack.push_back(+parseFunction(0, false));
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
@@ -817,12 +817,17 @@ clef::index<clef::Match> clef::Parser::parseMatch() {
 }
 
 //parse a function
-clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
+clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs, bool isMethod) {
    //parse function name
    index<Identifier> name = parseSymbol(SymbolType::FUNC, nullptr, true);
    SymbolNode* symbol = tree[name].symbol(); debug_assert(symbol);
    debug_assert(symbol->symbolType() == SymbolType::FUNC);
-   // symbol->setSymbolType(SymbolType::FUNC);
+
+   PUSH_SCOPE;
+
+   //parse signature and update overload index
+   auto [overloadIndex, params, retType] = parseFuncSig(symbol);
+   tree[name].overloadIndex() = overloadIndex;
 
    //handle operator overloading
    //!HACK: make this more efficient and less janky
@@ -865,15 +870,48 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs) {
       }
       
       //register overload
-      TODO;
+      if (params->size() + isMethod == 2) { //binary operator
+         if (!(+(op.props() & OpProps::CAN_BE_BINARY) || overrideCanBeBinary(op.opID()))) {
+            logError(ErrCode::BAD_FUNC, "operator `%s` cannot be binary", toString(op.opID()));
+         }
+         TypeSpec* lhs;
+         TypeSpec* rhs;
+         if (isMethod) {
+            lhs = __prevScope->type();
+            rhs = tree.evalType(+(*params)[0]);
+         } else {
+            lhs = tree.evalType(+(*params)[0]);
+            rhs = tree.evalType(+(*params)[1]);
+         }
+         if (!__prevScope->hasOpDefs()) {
+            __prevScope->defineOpDefs(tree.allocOpDefs());
+         }
+         __prevScope->registerOpOverload(symbol, overloadIndex, op.opID(), lhs, rhs);
+      }
+      else if (params->size() + isMethod == 1) { //unary operator
+         if (!+(op.props() & (OpProps::CAN_BE_PREFIX | OpProps::CAN_BE_POSTFIX))) {
+            logError(ErrCode::BAD_FUNC, "operator `%s` cannot be unary", toString(op.opID()));
+         }
+         TypeSpec* lhs;
+         TypeSpec* rhs = nullptr;
+         if (isMethod) {
+            lhs = __prevScope->type();
+         } else {
+            lhs = tree.evalType(+(*params)[0]);
+         }
+         if (+(op.props() & OpProps::CAN_BE_POSTFIX)) {
+            rhs = lhs;
+            lhs = nullptr;
+         }
+         if (!__prevScope->hasOpDefs()) {
+            __prevScope->defineOpDefs(tree.allocOpDefs());
+         }
+         __prevScope->registerOpOverload(symbol, overloadIndex, op.opID(), lhs, rhs);
+      }
+      else {
+         logError(ErrCode::BAD_FUNC, "invalid parameter count (%u) for operator `%s`", params->size() + isMethod, toString(op.opID()));
+      }
    }
-   
-   PUSH_SCOPE;
-
-   //parse signature and update overload index
-   auto [overloadIndex, params, retType] = parseFuncSig(symbol);
-   tree[name].overloadIndex() = overloadIndex;
-   // symbol->registerOverload
 
    //check for forward declaration
    if (tryConsumeEOS()) {

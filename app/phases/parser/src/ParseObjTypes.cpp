@@ -87,7 +87,7 @@ clef::index<clef::TypeDecl> clef::Parser::__parseObjTypeImpl(index<Expr> attrs, 
          KW_CASE(NAMESPACE, parseNamespace);
          #undef KW_CASE
          case KeywordID::FUNC: getNextToken(); {
-            index<FuncDef> f = parseFunction(fieldAttrs);
+            index<FuncDef> f = parseFunction(fieldAttrs, !isStatic);
             SymbolNode* funcSymbol = tree[tree[f].name()].symbol();
             tree[tree[f].name()].addQuals(scope);
             (isStatic ? def.staticFuncs : def.methods).emplace(funcSymbol, scope | quals);
@@ -157,7 +157,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseTrait(index<Expr> attrs) {
       isStatic |= tryConsumeKeyword(KeywordID::STATIC);
       //function declaration
       consumeKeyword(KeywordID::FUNC, "traits can only contain functions and methods");
-      index<Identifier> func = tree[parseFunction(fieldAttrs)].name(); //function definition (optional)
+      index<Identifier> func = tree[parseFunction(fieldAttrs, !isStatic)].name(); //function definition (optional)
       SymbolNode* funcSymbol = tree[func].symbol();
       tree[func].addQuals(scope);
       (isStatic ? def.staticFuncs : def.methods).emplace(funcSymbol, scope | quals);
@@ -326,7 +326,7 @@ clef::index<clef::TypeDecl> clef::Parser::parseNamespace(index<Expr> attrs) {
          KW_CASE(NAMESPACE, parseNamespace);
          #undef KW_CASE
          case KeywordID::FUNC: getNextToken(); {
-            index<FuncDef> f = parseFunction(fieldAttrs);
+            index<FuncDef> f = parseFunction(fieldAttrs, false);
             SymbolNode* funcSymbol = tree[tree[f].name()].symbol();
             tree[tree[f].name()].addQuals(scope);
             def.staticFuncs.emplace(funcSymbol, scope);

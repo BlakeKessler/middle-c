@@ -3,9 +3,13 @@
 
 #include "SymbolNode.hpp"
 #include "TypeSpec.hpp"
+#include "OpDefTable.hpp"
 
 clef::SymbolNode::SymbolNode():
    _childSymbols(),
+   _anonChildren{},
+   _subScopes{},
+   _opOverloads{},
    _name{},
    _aliases{},
    _parentScope{},
@@ -16,6 +20,9 @@ clef::SymbolNode::SymbolNode():
 }
 clef::SymbolNode::SymbolNode(const mcsl::str_slice name, SymbolNode* parentScope, TypeSpec* typespec, SymbolType symbType):
    _childSymbols(),
+   _anonChildren{},
+   _subScopes{},
+   _opOverloads{},
    _name(name),
    _aliases{},
    _parentScope{parentScope},
@@ -26,6 +33,9 @@ clef::SymbolNode::SymbolNode(const mcsl::str_slice name, SymbolNode* parentScope
 }
 clef::SymbolNode::SymbolNode(mcsl::str_slice name, decltype(_aliases) aliases, SymbolNode* parentScope, SymbolType symbolType, TypeSpec* type, const decltype(_overloads)& overloads):
    _childSymbols(),
+   _anonChildren{},
+   _subScopes{},
+   _opOverloads{},
    _name{name},
    _aliases{aliases},
    _parentScope{parentScope},
@@ -36,6 +46,9 @@ clef::SymbolNode::SymbolNode(mcsl::str_slice name, decltype(_aliases) aliases, S
 }
 clef::SymbolNode::SymbolNode(mcsl::str_slice name, decltype(_aliases) aliases, SymbolNode* parentScope, SymbolType symbolType, TypeSpec* type, decltype(_overloads)&& overloads):
    _childSymbols(),
+   _anonChildren{},
+   _subScopes{},
+   _opOverloads{},
    _name{name},
    _aliases{aliases},
    _parentScope{parentScope},
@@ -145,6 +158,11 @@ clef::index<clef::FuncDef> clef::SymbolNode::defineOverload(index<void> i, index
    index<FuncDef> tmp = _overloads[i].second;
    _overloads[i].second = def;
    return tmp;
+}
+
+bool clef::SymbolNode::registerOpOverload(SymbolNode* f, index<void> i, OpID op, TypeSpec* lhs, TypeSpec* rhs) {
+   debug_assert(_opOverloads);
+   return _opOverloads->insert(f, i, op, lhs, rhs);
 }
 
 #endif //SYMBOL_NODE_CPP

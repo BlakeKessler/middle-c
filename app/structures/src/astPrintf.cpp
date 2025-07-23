@@ -691,7 +691,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Identifier> obj, ch
       // }
       // else { //NORMAL IDENTIFIER
          //qualifiers
-         charsPrinted += file.printf(FMT("%s"), iden.quals());
+         charsPrinted += file.printf(FMT("% s"), iden.quals());
          //parent scope
          if (iden.scopeName()) {
             charsPrinted += file.printf(FMT("%s::"), TNB(iden.scopeName()));
@@ -870,7 +870,7 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
             charsPrinted += file.printf(toString(spec.fund().id));
             return charsPrinted;
          case TypeSpec::INDIR: //indirect type (pointer, reference, slice, array)
-            charsPrinted += file.printf(FMT("%s%-s%s"), spec.pointeeQuals(), TTsB(spec.pointee()), TItB(&spec.indirTable()));
+            charsPrinted += file.printf(FMT("% s%-s%s"), spec.pointeeQuals(), TTsB(spec.pointee()), TItB(&spec.indirTable()));
             return charsPrinted;
          case TypeSpec::COMPOSITE: { //composite object type
             if (fmt.isLeftJust) {

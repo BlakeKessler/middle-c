@@ -40,6 +40,9 @@ template<typename T> class clef::Box {
       T* operator->() { return m.ptr; }
       const T& operator*() const { return *m.ptr; }
       const T* operator->() const { return m.ptr; }
+
+      operator T*() { return m.ptr; }
+      operator const T*() const { return m.ptr; }
 };
 
 #endif

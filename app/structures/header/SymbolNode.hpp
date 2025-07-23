@@ -12,6 +12,7 @@ class clef::SymbolNode {
       mcsl::map<mcsl::str_slice, SymbolNode*> _childSymbols;
       mcsl::dyn_arr<SymbolNode*> _anonChildren; //accessible anonymous children (subtypes)
       mcsl::dyn_arr<SymbolNode*> _subScopes; //inaccessible anonymous children (funcs, macros, conditionals, loops)
+      OpDefTable* _opOverloads; //!TODO: use this
 
       mcsl::str_slice _name;
       mcsl::dyn_arr<mcsl::pair<mcsl::str_slice, SymbolNode*>> _aliases; //pair of name and parent scope //!TODO: maybe make this a map
@@ -37,8 +38,9 @@ class clef::SymbolNode {
       SymbolNode& operator=(const SymbolNode& other) { return *new (this) SymbolNode(other); }
       SymbolNode& operator=(SymbolNode&& other) { return *new (this) SymbolNode(std::move(other)); }
 
+      void setOpDefs(OpDefTable* ops) { _opOverloads = ops; }
       void setSymbolType(SymbolType symbolType) { _symbolType = symbolType; }
-      void setType(TypeSpec* type) { _type = type;}
+      void setType(TypeSpec* type) { _type = type; }
 
       explicit operator bool() const; //if anything has been done with the node
 
@@ -69,6 +71,10 @@ class clef::SymbolNode {
       auto& getOverload(uint i) { return _overloads[i]; }
       mcsl::arr_span<mcsl::pair<TypeSpec*, index<FuncDef>>> overloads() { return _overloads.span(); }
       const mcsl::arr_span<mcsl::pair<TypeSpec*, index<FuncDef>>> overloads() const { return _overloads.span(); }
+
+      bool hasOpDefs() { return _opOverloads; }
+      void defineOpDefs(OpDefTable* defs) { _opOverloads = defs; }
+      bool registerOpOverload(SymbolNode*, index<void>, OpID op, TypeSpec* lhs, TypeSpec* rhs);
 };
 
 /* |===============|

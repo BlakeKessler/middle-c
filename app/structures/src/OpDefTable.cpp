@@ -35,6 +35,7 @@ clef::OpDefTable::const_entry clef::OpDefTable::get(OpID op, TypeSpec* lhs, Type
    return const_cast<OpDefTable*>(this)->get(op, lhs, rhs);
 }
 
+//returns whether a new element was inserted
 bool clef::OpDefTable::insert(SymbolNode* f, index<void> i, OpID op, TypeSpec* lhs, TypeSpec* rhs) {
    if (get(op, lhs, rhs)) {
       return false;

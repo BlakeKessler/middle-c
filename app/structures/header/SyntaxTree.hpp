@@ -75,6 +75,7 @@ class clef::SyntaxTree {
       // uint popNodesAfter(index<astNode>); //inclusive
       TypeSpec* makeIndirType(index<Identifier> targetNode, TypeSpec* pointee, QualMask quals, IndirTable&& table);
 
+      OpDefTable* allocOpDefs() { return *_opOverloads.emplace_back(); }
       mcsl::tuple<bool, index<void>, TypeSpec*> deduceOverload(SymbolNode*, index<ArgList>); //isValid, overload index, signature
       TypeSpec* deduceOpOverload(SymbolNode* scope, OpID op, TypeSpec* lhs, TypeSpec* rhs);
 
