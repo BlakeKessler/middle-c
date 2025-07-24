@@ -77,8 +77,7 @@ class clef::SyntaxTree {
 
       OpDefTable* allocOpDefs() { return *_opOverloads.emplace_back(); }
       mcsl::tuple<bool, index<void>, TypeSpec*> deduceOverload(SymbolNode*, index<ArgList>); //isValid, overload index, signature
-      TypeSpec* deduceOpOverload(SymbolNode* scope, OpID op, TypeSpec* lhs, TypeSpec* rhs);
-
+      
       mcsl::str_slice extractStrLit(index<Expr> strLitExpr);
       index<Expr> findAttr(index<Expr> attrs, SymbolNode* name);
 
@@ -119,7 +118,7 @@ class clef::SyntaxTree {
       TypeSpec* evalType(index<astNode>);
       TypeSpec* commonType(TypeSpec*, TypeSpec*);
       res<TypeSpec*> commonTypeOfOperands(index<Expr>);
-      res<void> updateEvalType(index<Expr>);
+      res<void> updateEvalType(index<Expr>, SymbolNode*);
 
       template<typename T> mcsl::dyn_arr<T>& allocBuf() { return _alloc.at(_alloc.alloc<T>()); }
       template<typename T> void freeBuf(mcsl::dyn_arr<T>& buf) { _alloc.freeBuf(buf); }

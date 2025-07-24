@@ -2,6 +2,7 @@
 #define SYMBOL_NODE_HPP
 
 #include "CLEF.hpp"
+#include "OpDefTable.hpp"
 
 #include "map.hpp"
 #include "dyn_arr.hpp"
@@ -75,6 +76,7 @@ class clef::SymbolNode {
       bool hasOpDefs() { return _opOverloads; }
       void defineOpDefs(OpDefTable* defs) { _opOverloads = defs; }
       bool registerOpOverload(SymbolNode*, index<void>, OpID op, TypeSpec* lhs, TypeSpec* rhs);
+      OpDefTable::entry deduceOpOverload(OpID op, TypeSpec* lhs, TypeSpec* rhs);
 };
 
 /* |===============|

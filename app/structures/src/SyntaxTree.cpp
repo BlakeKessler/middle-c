@@ -211,7 +211,7 @@ clef::TypeSpec* clef::SyntaxTree::evalType(index<astNode> i) {
       case NodeType::ARG_LIST: return nullptr;
    }
 }
-clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
+clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i, SymbolNode* currScope) {
    debug_assert(i);
 
    Expr& expr = self[i];
@@ -530,9 +530,6 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
          }
          [[fallthrough]];
       #pragma endregion mem
-      case OpID::CALL_INVOKE:
-      case OpID::SUBSCRIPT_INVOKE:
-
       case OpID::RANGE:
       case OpID::SPREAD:
 
@@ -568,6 +565,7 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
       //case OpID::IS_EQUAL_STRICT:
       //case OpID::IS_UNEQUAL_STRICT:
 
+      //compound assignment
       case OpID::ADD_ASSIGN:
       case OpID::SUB_ASSIGN:
       case OpID::MUL_ASSIGN:
@@ -580,12 +578,43 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i) {
       case OpID::XOR_ASSIGN:
       case OpID::OR_ASSIGN:
       case OpID::COALESCE_ASSIGN:
-         mcsl::printf(FMT("`%s`\n%s\n"), toString(expr.opID()), astTNB(self, i, 0));
-         mcsl::flush();
-         TODO;
-      #pragma endregion standards
 
-      case OpID::COALESCE: TODO;
+      //misc
+      case OpID::COALESCE: {
+         auto lhs = evalType(+expr.lhs());
+         auto rhs = evalType(+expr.rhs());
+         auto tmp = currScope->deduceOpOverload(expr.opID(), lhs, rhs);
+         if (!tmp) {
+            tmp = lhs->canonName()->deduceOpOverload(expr.opID(), lhs, rhs);
+         }
+         if (!tmp) {
+            return {ErrCode::TYPECHECK_ERR}; //!NOTE: error message: `operator \`%s\` is not defined for types \`%s\` and \`%s\``
+         }
+         expr.evalType() = tmp.function->getOverload(tmp.overload).first->funcSig().retType;
+         debug_assert(expr.evalType());
+         return {};
+      }
+      #pragma endregion standards
+      #pragma region invoke
+      case OpID::CALL_INVOKE:
+         TODO;
+      case OpID::SUBSCRIPT_INVOKE: {
+         //rhs is an ARG_LIST
+         auto lhs = evalType(+expr.lhs());
+         auto rhs = evalType(+self[(index<ArgList>)expr.rhs()][0]);
+         auto tmp = currScope->deduceOpOverload(expr.opID(), lhs, rhs);
+         if (!tmp) {
+            tmp = lhs->canonName()->deduceOpOverload(expr.opID(), lhs, rhs);
+         }
+         if (!tmp) {
+            return {ErrCode::TYPECHECK_ERR}; //!NOTE: error message: `operator \`%s\` is not defined for types \`%s\` and \`%s\``
+         }
+         expr.evalType() = tmp.function->getOverload(tmp.overload).first->funcSig().retType;
+         debug_assert(expr.evalType());
+         return {};
+      }
+         TODO;
+      #pragma endregion invoke
 
       #pragma region lhss
       //assignments

@@ -141,7 +141,7 @@ class clef::Parser {
 
       index<Expr> makeExpr(const OpID op, index<astNode> lhs) {
          index<Expr> expr = tree.makeExpr(op, lhs);
-         res<void> r = tree.updateEvalType(expr);
+         res<void> r = tree.updateEvalType(expr, currScope);
          if (r.is_err()) {
             logError(r.err(), "error calculating type of expression");
          }
@@ -149,7 +149,7 @@ class clef::Parser {
       }
       index<Expr> makeExpr(const OpID op, index<astNode> lhs, index<astNode> rhs) {
          index<Expr> expr = tree.makeExpr(op, lhs, rhs);
-         res<void> r = tree.updateEvalType(expr);
+         res<void> r = tree.updateEvalType(expr, currScope);
          if (r.is_err()) {
             logError(r.err(), "error calculating type of expression");
          }
@@ -181,7 +181,7 @@ requires requires {
    uint index = tree.nodeCount();
    asT tmp = tree.make<asT, T>(std::forward<Argv_t>(argv)...);
    if constexpr (mcsl::is_t<mcsl::remove_ptr<T>, Expr>) {
-      res<void> r = tree.updateEvalType(index);
+      res<void> r = tree.updateEvalType(index, currScope);
       if (r.is_err()) {
          logError(r.err(), "error calculating type of expression");
       }
@@ -213,7 +213,7 @@ requires requires {
    uint index = tree.nodeCount();
    asT tmp = tree.make<asT, T>(std::forward<Argv_t>(argv)...);
    if constexpr (mcsl::is_t<mcsl::remove_ptr<T>, Expr>) {
-      res<void> r = tree.updateEvalType(index);
+      res<void> r = tree.updateEvalType(index, currScope);
       if (r.is_err()) {
          onerr(r.err());
          UNREACHABLE;

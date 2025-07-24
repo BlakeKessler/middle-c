@@ -165,4 +165,19 @@ bool clef::SymbolNode::registerOpOverload(SymbolNode* f, index<void> i, OpID op,
    return _opOverloads->insert(f, i, op, lhs, rhs);
 }
 
+clef::OpDefTable::entry clef::SymbolNode::deduceOpOverload(OpID op, TypeSpec* lhs, TypeSpec* rhs) {
+   SymbolNode* obj = this;
+   do {
+      if (_opOverloads) {
+         OpDefTable::entry tmp = _opOverloads->get(op, lhs, rhs);
+         if (tmp) {
+            return tmp;
+         }
+      }
+      obj = obj->_parentScope;
+   } while (obj);
+   [[unlikely]];
+   return {};
+}
+
 #endif //SYMBOL_NODE_CPP
