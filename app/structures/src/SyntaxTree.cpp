@@ -583,6 +583,7 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i, SymbolNode* curr
       case OpID::COALESCE: {
          auto lhs = evalType(+expr.lhs());
          auto rhs = evalType(+expr.rhs());
+
          auto tmp = currScope->deduceOpOverload(expr.opID(), lhs, rhs);
          if (!tmp) {
             tmp = lhs->canonName()->deduceOpOverload(expr.opID(), lhs, rhs);
@@ -599,7 +600,6 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i, SymbolNode* curr
       case OpID::CALL_INVOKE:
          TODO;
       case OpID::SUBSCRIPT_INVOKE: {
-         //rhs is an ARG_LIST
          auto lhs = evalType(+expr.lhs());
          auto rhs = evalType(+self[(index<ArgList>)expr.rhs()][0]);
          auto tmp = currScope->deduceOpOverload(expr.opID(), lhs, rhs);

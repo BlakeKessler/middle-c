@@ -50,7 +50,7 @@ requires ( sizeof...(Argv_t) == _size )
    _firstCharBuckets[_opBuf[start].toString()[0] % _firstCharBuckets.size()] = {start, _opCount};
 }
 
-template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef::OpData clef::OpDecoder<_size>::operator[](const str_t& str) const {
+template <uint _size> [[gnu::const]] constexpr clef::OpData clef::OpDecoder<_size>::operator[](const mcsl::str_slice str) const {
    //check string size
    if (!str.size()) {
       return OpData{};
@@ -60,8 +60,10 @@ template <uint _size> template<mcsl::str_t str_t> [[gnu::const]] constexpr clef:
    const auto bucketBounds = self[str[0]];
    if (str[0] == _opBuf[bucketBounds.first].toString()[0]) { //check that the first character is correct
       for (uint i = bucketBounds.first; i < bucketBounds.second; ++i) {
-         if (!_opBuf[i].toString().substrcmp(str)) {
-            return _opBuf[i];
+         OpData op = _opBuf[i];
+         mcsl::str_slice opStr = op.toString();
+         if (str.size() >= opStr.size() && opStr == str.slice(opStr.size())) {
+            return op;
          }
       }
    }
