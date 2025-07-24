@@ -904,13 +904,13 @@ uint mcsl::writef(mcsl::File& file, const clef::astTTsB obj, char mode, FmtArgs 
          case TypeSpec::FUNC_SIG: //function signature type
             charsPrinted += file.printf(FMT("("));
             if (spec.funcSig().params.size()) {
-               charsPrinted += file.printf(FMT("%s% s"), TTsB(spec.funcSig().params[0].first), spec.funcSig().params[0].second);
+               charsPrinted += file.printf(FMT("%-s% s"), TTsB(spec.funcSig().params[0].first), spec.funcSig().params[0].second);
                for (uint i = 1; i < spec.funcSig().params.size(); ++i) {
-                  charsPrinted += file.printf(FMT(", %s% s"), TTsB(spec.funcSig().params[i].first), spec.funcSig().params[i].second);
+                  charsPrinted += file.printf(FMT(", %-s% s"), TTsB(spec.funcSig().params[i].first), spec.funcSig().params[i].second);
                }
             }
             if (spec.funcSig().retType) {
-               charsPrinted += file.printf(FMT(") -> %s"), TTsB(spec.funcSig().retType));
+               charsPrinted += file.printf(FMT(") -> %-s"), TTsB(spec.funcSig().retType));
             } else {
                charsPrinted += file.printf(FMT(") -> auto"));
             }
