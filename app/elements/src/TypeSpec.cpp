@@ -66,6 +66,7 @@ clef::TypeSpec::TypeSpec(TypeSpec&& other) {
       case FUNC_SIG:
          #define __curr _funcSig
          _funcSig.retType = other._funcSig.retType;
+         _funcSig.selfType = other._funcSig.selfType;
          new (&_funcSig.params) decltype(_funcSig.params)(std::move(other._funcSig.params));
          break;
          #undef __curr
@@ -225,6 +226,9 @@ bool clef::TypeSpec::operator==(const TypeSpec& other) const {
          return true;
       case FUNC_SIG:
          if (_funcSig.retType != other._funcSig.retType) {
+            return false;
+         }
+         if (_funcSig.selfType != other._funcSig.selfType) {
             return false;
          }
          if (_funcSig.params.size() != other._funcSig.params.size()) {

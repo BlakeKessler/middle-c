@@ -826,7 +826,7 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs, bool i
    PUSH_SCOPE;
 
    //parse signature and update overload index
-   auto [overloadIndex, params, retType] = parseFuncSig(symbol);
+   auto [overloadIndex, params, retType] = parseFuncSig(symbol, isMethod);
    tree[name].overloadIndex() = overloadIndex;
 
    //handle operator overloading
@@ -870,12 +870,12 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs, bool i
       }
       
       //register overload
+      TypeSpec* lhs;
+      TypeSpec* rhs;
       if (params->size() + isMethod == 2) { //binary operator
          if (!(+(op.props() & OpProps::CAN_BE_BINARY) || overrideCanBeBinary(op.opID()))) {
             logError(ErrCode::BAD_FUNC, "operator `%s` cannot be binary", toString(op.opID()));
          }
-         TypeSpec* lhs;
-         TypeSpec* rhs;
          if (isMethod) {
             lhs = __prevScope->type();
             rhs = tree.evalType(+(*params)[0]);
@@ -883,17 +883,12 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs, bool i
             lhs = tree.evalType(+(*params)[0]);
             rhs = tree.evalType(+(*params)[1]);
          }
-         if (!__prevScope->hasOpDefs()) {
-            __prevScope->defineOpDefs(tree.allocOpDefs());
-         }
-         __prevScope->registerOpOverload(symbol, overloadIndex, op.opID(), lhs, rhs);
       }
       else if (params->size() + isMethod == 1) { //unary operator
          if (!+(op.props() & (OpProps::CAN_BE_PREFIX | OpProps::CAN_BE_POSTFIX))) {
             logError(ErrCode::BAD_FUNC, "operator `%s` cannot be unary", toString(op.opID()));
          }
-         TypeSpec* lhs;
-         TypeSpec* rhs = nullptr;
+         
          if (isMethod) {
             lhs = __prevScope->type();
          } else {
@@ -902,15 +897,16 @@ clef::index<clef::FuncDef> clef::Parser::parseFunction(index<Expr> attrs, bool i
          if (+(op.props() & OpProps::CAN_BE_POSTFIX)) {
             rhs = lhs;
             lhs = nullptr;
-         }
-         if (!__prevScope->hasOpDefs()) {
-            __prevScope->defineOpDefs(tree.allocOpDefs());
-         }
-         __prevScope->registerOpOverload(symbol, overloadIndex, op.opID(), lhs, rhs);
+         } else { rhs = nullptr; }
       }
       else {
          logError(ErrCode::BAD_FUNC, "invalid parameter count (%u) for operator `%s`", params->size() + isMethod, toString(op.opID()));
       }
+      if (!__prevScope->hasOpDefs()) {
+         __prevScope->defineOpDefs(tree.allocOpDefs());
+      }
+      __prevScope->registerOpOverload(symbol, overloadIndex, op.opID(), lhs, rhs);
+      debug_assert(__prevScope->deduceOpOverload(op.opID(), lhs, rhs));
    }
 
    //check for forward declaration
@@ -943,7 +939,7 @@ clef::index<clef::MacroDef> clef::Parser::parseMacro(index<Expr> attrs) {
 }
 
 //parse a function signature (params and return type)
-mcsl::tuple<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*, clef::index<clef::Identifier>> clef::Parser::parseFuncSig(SymbolNode* target) {
+mcsl::tuple<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*, clef::index<clef::Identifier>> clef::Parser::parseFuncSig(SymbolNode* target, bool isMethod) {
    TypeSpec* overload = tree.registerType(nullptr, TypeSpec::FUNC_SIG, SymbolType::null);
    
    //parse parameters
@@ -967,6 +963,10 @@ mcsl::tuple<clef::index<void>, mcsl::dyn_arr<clef::index<clef::Expr>>*, clef::in
    } else { //no return type provided - assumed to be auto //!TODO: maybe add a warning for this
       retType = 0;
       overload->funcSig().retType = nullptr;
+   }
+   //self type
+   if (isMethod) {
+      overload->funcSig().selfType = currScope->parentScope()->type();
    }
 
    //push to overload table

@@ -91,7 +91,7 @@ class clef::Parser {
 
       index<FuncDef> parseFunction(index<Expr> attrs, bool isMethod); //function, signature
       index<MacroDef> parseMacro(index<Expr> attrs); //macro, signature
-      mcsl::tuple<index<void>, mcsl::dyn_arr<index<Expr>>*, index<Identifier>> parseFuncSig(SymbolNode* target);
+      mcsl::tuple<index<void>, mcsl::dyn_arr<index<Expr>>*, index<Identifier>> parseFuncSig(SymbolNode* target, bool isMethod);
       index<Asm> parseASM(index<Expr> attrs);
       
    private:

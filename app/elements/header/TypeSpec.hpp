@@ -60,6 +60,7 @@ class clef::TypeSpec {
          } _composite;
          struct { //FUNC_SIG
             TypeSpec* retType; //!retType -> auto
+            TypeSpec* selfType;
             mcsl::dyn_arr<mcsl::pair<TypeSpec*, QualMask>> params;
          } _funcSig;
       };
