@@ -120,6 +120,8 @@ class clef::SyntaxTree {
       res<TypeSpec*> commonTypeOfOperands(index<Expr>);
       res<void> updateEvalType(index<Expr>, SymbolNode*);
 
+      auto allTypes() { return decltype(_typeTable)::span(_typeTable); }
+
       template<typename T> mcsl::dyn_arr<T>& allocBuf() { return _alloc.at(_alloc.alloc<T>()); }
       template<typename T> void freeBuf(mcsl::dyn_arr<T>& buf) { _alloc.freeBuf(buf); }
 
@@ -130,12 +132,12 @@ class clef::SyntaxTree {
          mcsl::dyn_arr<SymbolNode*> substitutions;
          uint charsPrinted;
 
-         sint subIndex(SymbolNode*) { TODO; }
+         sint subIndex(SymbolNode*);
       };
       static void __mangleSpecializerImpl(mcsl::File& file, SyntaxTree& tree, Identifier& name, __MangleData& data) { TODO; (void)(file); (void)(tree); (void)(name); (void)(data); }
-      static void __mangleImpl(mcsl::File& file, SyntaxTree& tree, Identifier& name, __MangleData& data);
+      static void __mangleImpl(mcsl::File& file, SyntaxTree& tree, SymbolNode* name, __MangleData& data, uint depth);
    public:
-      static uint manglePrint(mcsl::File& file, SyntaxTree& tree, index<Identifier> name) { TODO; (void)(file); (void)(tree); (void)(name); }
+      static uint manglePrint(mcsl::File& file, SyntaxTree& tree, SymbolNode* name);
 };
 
 //!quick little struct to indent when printing newlines in a `printf` call

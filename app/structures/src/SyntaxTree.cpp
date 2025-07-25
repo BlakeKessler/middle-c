@@ -521,63 +521,56 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i, SymbolNode* curr
          return {};
 
       #pragma region standards
-      #pragma region mem
-      case OpID::BIT_AND: static_assert(OpID::BIT_AND == OpID::ADDRESS_OF);
-      case OpID::MUL: static_assert(OpID::MUL == OpID::DEREF);
-         if (!expr.lhs() && expr.rhs()) {
-            TODO;
-            return {};
-         }
-         [[fallthrough]];
-      #pragma endregion mem
-      case OpID::RANGE:
-      case OpID::SPREAD:
+      case OpID::RANGE: [[fallthrough]];
+      case OpID::SPREAD: [[fallthrough]];
 
-      case OpID::INC:
-      case OpID::DEC:
-      case OpID::BIT_NOT:
+      case OpID::INC: [[fallthrough]];
+      case OpID::DEC: [[fallthrough]];
+      case OpID::BIT_NOT: [[fallthrough]];
 
-      case OpID::BIT_OR:
-      case OpID::BIT_XOR:
-      case OpID::SHIFT_LEFT:
-      case OpID::SHIFT_RIGHT:
+      case OpID::BIT_AND: [[fallthrough]];
+      case OpID::BIT_OR: [[fallthrough]];
+      case OpID::BIT_XOR: [[fallthrough]];
+      case OpID::SHIFT_LEFT: [[fallthrough]];
+      case OpID::SHIFT_RIGHT: [[fallthrough]];
 
-      case OpID::ADD:
-      case OpID::SUB:
-      case OpID::DIV:
-      case OpID::MOD:
-      case OpID::EXP:
+      case OpID::ADD: [[fallthrough]];
+      case OpID::SUB: [[fallthrough]];
+      case OpID::MUL: [[fallthrough]];
+      case OpID::DIV: [[fallthrough]];
+      case OpID::MOD: [[fallthrough]];
+      case OpID::EXP: [[fallthrough]];
 
-      case OpID::THREE_WAY_COMP:
+      case OpID::THREE_WAY_COMP: [[fallthrough]];
 
       //unary boolean
-      case OpID::LOGICAL_NOT:
+      case OpID::LOGICAL_NOT: [[fallthrough]];
 
       //binary boolean
-      case OpID::LOGICAL_AND:
-      case OpID::LOGICAL_OR:
-      case OpID::LESSER:
-      case OpID::GREATER:
-      case OpID::LESSER_OR_EQ:
-      case OpID::GREATER_OR_EQ:
-      case OpID::IS_EQUAL:
-      case OpID::IS_UNEQUAL:
-      //case OpID::IS_EQUAL_STRICT:
-      //case OpID::IS_UNEQUAL_STRICT:
+      case OpID::LOGICAL_AND: [[fallthrough]];
+      case OpID::LOGICAL_OR: [[fallthrough]];
+      case OpID::LESSER: [[fallthrough]];
+      case OpID::GREATER: [[fallthrough]];
+      case OpID::LESSER_OR_EQ: [[fallthrough]];
+      case OpID::GREATER_OR_EQ: [[fallthrough]];
+      case OpID::IS_EQUAL: [[fallthrough]];
+      case OpID::IS_UNEQUAL: [[fallthrough]];
+      //case OpID::IS_EQUAL_STRICT: [[fallthrough]];
+      //case OpID::IS_UNEQUAL_STRICT: [[fallthrough]];
 
       //compound assignment
-      case OpID::ADD_ASSIGN:
-      case OpID::SUB_ASSIGN:
-      case OpID::MUL_ASSIGN:
-      case OpID::DIV_ASSIGN:
-      case OpID::MOD_ASSIGN:
-      case OpID::EXP_ASSIGN:
-      case OpID::SHL_ASSIGN:
-      case OpID::SHR_ASSIGN:
-      case OpID::AND_ASSIGN:
-      case OpID::XOR_ASSIGN:
-      case OpID::OR_ASSIGN:
-      case OpID::COALESCE_ASSIGN:
+      case OpID::ADD_ASSIGN: [[fallthrough]];
+      case OpID::SUB_ASSIGN: [[fallthrough]];
+      case OpID::MUL_ASSIGN: [[fallthrough]];
+      case OpID::DIV_ASSIGN: [[fallthrough]];
+      case OpID::MOD_ASSIGN: [[fallthrough]];
+      case OpID::EXP_ASSIGN: [[fallthrough]];
+      case OpID::SHL_ASSIGN: [[fallthrough]];
+      case OpID::SHR_ASSIGN: [[fallthrough]];
+      case OpID::AND_ASSIGN: [[fallthrough]];
+      case OpID::XOR_ASSIGN: [[fallthrough]];
+      case OpID::OR_ASSIGN: [[fallthrough]];
+      case OpID::COALESCE_ASSIGN: [[fallthrough]];
 
       //misc
       case OpID::COALESCE: {
