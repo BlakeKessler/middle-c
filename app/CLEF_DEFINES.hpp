@@ -15,6 +15,8 @@
 #define EST_NODES_FROM_TOKS(toks) toks
 
 #define MANGLE_PREFIX "_M"
+#define MANGLE_NAMESPACE_OPEN "N"
+#define MANGLE_NAMESPACE_CLOSE "E"
 
 //language parameters
 #define MAX_BIN_CHAR_LIT_DIGITS 8

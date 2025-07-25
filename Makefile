@@ -1,4 +1,4 @@
-default: Parser
+default: Codegen
 
 #directories and files
 MODULES := mcsl app frozen
@@ -14,7 +14,7 @@ ALL_OBJ_FILES := $(ALL_SRC_FILES:%.cpp=_build/%.o)
 
 #compiler
 COMPILER := clang++ -std=c++23
-FLAGS := -g -Wall -Wextra -Wshadow-all -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name -Wno-gcc-compat -Wno-trigraphs -Wno-pessimizing-move -Wno-dtor-name -Wno-nested-anon-types -Wno-gnu-anonymous-struct
+FLAGS := -g -Wall -Wextra -Wshadow-all -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name -Wno-gcc-compat -Wno-trigraphs -Wno-pessimizing-move -Wno-dtor-name -Wno-nested-anon-types -Wno-gnu-anonymous-struct -Wno-c23-extensions
 # FLAGS := -g -Wall -Wextra -Wshadow-all -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -fdiagnostics-show-category=name -Wno-gcc-compat -Wno-trigraphs -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
 # COMPILER := g++ -std=c++23
 # FLAGS := -g -Wall -Wextra -Wshadow-all -pedantic -pedantic-errors -ftemplate-backtrace-limit=4 -Wno-trigraphs -Wno-attributes -Wno-parentheses -Wno-class-memaccess -Wno-pessimizing-move
@@ -28,7 +28,11 @@ COMPILE := $(COMPILER) $(FLAGS) $(addprefix -I, $(MODULES) $(filter %/header, $(
 clean:
 	rm -rf _build
 
+
 #set up directory structure
+app/embeds/out/%.txt : app/embeds/src/%.c
+	xxd -i $< | grep "^ " > $@
+
 .PHONY: setup
 setup:
 	mkdir -p $(addprefix _build/,$(ALL_CODE_DIRS)) _build/test/src _build/out
@@ -58,6 +62,9 @@ Lexer: _build/test/src/TestLexer.mk test/src/TestLexer.cpp | $(ALL_OBJ_FILES) se
 .PHONY: Parser
 Parser: _build/test/src/TestParser.mk test/src/TestParser.cpp | $(ALL_OBJ_FILES) setup
 	$(COMPILE) test/src/TestParser.cpp $(shell find _build -name *.o) -o _build/out/$@.out
+.PHONY: Codegen
+Codegen: _build/test/src/TestCodegen.mk test/src/TestCodegen.cpp | $(ALL_OBJ_FILES) setup
+	$(COMPILE) test/src/TestCodegen.cpp $(shell find _build -name *.o) -o _build/out/$@.out
 
 .PHONY: StrToNum
 StrToNum: _build/test/src/TestStrToNum.mk test/src/TestStrToNum.cpp | $(ALL_OBJ_FILES) setup
