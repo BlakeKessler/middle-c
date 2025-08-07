@@ -6,7 +6,7 @@
 #include "io.hpp"
 
 mcsl::File& mcsl::write(File& file, const clef::StmtSeq& obj) {
-   file.printf(mcsl::FMT("statements:"));
+   file.write(mcsl::FMT("statements:"));
    for (uint i = 0; i < obj.size(); ++i) {
       file.printf(FMT(" id=%u;"), +obj[i]);
    }

@@ -6,7 +6,7 @@
 #include "io.hpp"
 
 mcsl::File& mcsl::write(File& file, const clef::Asm& obj) {
-   file.printf(FMT("ASM (not implemented)"));
+   file.write(FMT("ASM (not implemented)"));
    return file;
    (void)obj;
 }

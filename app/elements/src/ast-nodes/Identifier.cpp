@@ -14,13 +14,13 @@ bool clef::Identifier::operator==(const Identifier& other) const {
 }
 
 void clef::Identifier::__printName(mcsl::File& file) const {
-   file.printf(mcsl::FMT("\033[4m"));
+   file.write(mcsl::FMT("\033[4m"));
    if (+_keywordID) {
       file.printf(mcsl::FMT("%s"), toString(_keywordID));
    } else {
       file.printf(mcsl::FMT("%s"), name());
    }
-   file.printf(mcsl::FMT("\033[24m"));
+   file.write(mcsl::FMT("\033[24m"));
 }
 void clef::Identifier::printAs(mcsl::File& file, const mcsl::str_slice nodetype) const {
    file.printf(mcsl::FMT("%s: "), nodetype);

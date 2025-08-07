@@ -22,12 +22,12 @@ mcsl::File& mcsl::write(File& file, const clef::Expr& expr) {
    if (+expr.lhsType() || expr.lhs()) {
       file.printf(mcsl::FMT("lhs: %s{id=%u}"), toString(expr.lhsType()), +expr.lhs());
 
-      if (+expr.rhsType() || +expr.extraType()) { file.printf(mcsl::FMT(", ")); }
+      if (+expr.rhsType() || +expr.extraType()) { file.write(mcsl::FMT(", ")); }
    }
    if (+expr.rhsType() || expr.rhs()) {
       file.printf(mcsl::FMT("rhs: %s{id=%u}"), toString(expr.rhsType()), +expr.rhs());
 
-      if (+expr.extraType()) { file.printf(mcsl::FMT(", ")); }
+      if (+expr.extraType()) { file.write(mcsl::FMT(", ")); }
    }
    if (+expr.extraType() || expr.extra()) {
       file.printf(mcsl::FMT("extra: %s{id=%u}"), toString(expr.extraType()), +expr.extra());
@@ -35,7 +35,7 @@ mcsl::File& mcsl::write(File& file, const clef::Expr& expr) {
    if (+expr.extraType2() || expr.extra2()) {
       file.printf(mcsl::FMT("extra: %s{id=%u}"), toString(expr.extraType2()), +expr.extra2());
    }
-   file.printf(mcsl::FMT(")"));
+   file.write(')');
    return file;
 }
 

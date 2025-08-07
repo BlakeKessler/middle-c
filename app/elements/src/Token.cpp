@@ -11,7 +11,7 @@ mcsl::File& mcsl::write(File& file, const clef::Token& tok) {
    using namespace clef;
    switch (tok.type()) {
       case TokenType::NONE:
-         file.printf(mcsl::FMT("\033[31mNULL TOKEN\033[39m"));
+         file.write(mcsl::FMT("\033[31mNULL TOKEN\033[39m"));
          break;
       case TokenType::IDEN:
          file.printf(mcsl::FMT("\033[35mIDENTIFIER:\033[39m %s"), tok.name());
@@ -29,16 +29,16 @@ mcsl::File& mcsl::write(File& file, const clef::Token& tok) {
          file.printf(mcsl::FMT("\033[35mOPERATOR:\033[39;1m \033[34m%s\033[39;22m \033[3m[%s]\033[23m"), toString(tok.opID()), toString(tok.opProps()));
          break;
       case TokenType::PREPROC_INIT:
-         file.printf(mcsl::FMT("\033[35mINVOKE PREPROCESSOR\033[39m"));
+         file.write(mcsl::FMT("\033[35mINVOKE PREPROCESSOR\033[39m"));
          break;
       case TokenType::PREPROC_EOS:
-         file.printf(mcsl::FMT("\033[35mEXIT PREPROCESSOR\033[39m"));
+         file.write(mcsl::FMT("\033[35mEXIT PREPROCESSOR\033[39m"));
          break;
       case TokenType::EOS:
-         file.printf(mcsl::FMT("\033[35mEND OF STATEMENT\033[39m"));
+         file.write(mcsl::FMT("\033[35mEND OF STATEMENT\033[39m"));
          break;
       case TokenType::ESC:
-         file.printf(mcsl::FMT("\033[35mESCAPE CHARACTER\033[39m"));
+         file.write(mcsl::FMT("\033[35mESCAPE CHARACTER\033[39m"));
          break;
       case TokenType::BLOCK_DELIM:
          file.printf(mcsl::FMT("\033[35mBLOCK DELIMITER:\033[39m %s \033[3m[%s]\033[23m"), toString(tok.block().type), toString(tok.block().role));

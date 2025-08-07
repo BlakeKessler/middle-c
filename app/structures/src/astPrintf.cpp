@@ -21,7 +21,7 @@ uint mcsl::writef(File& file, const clef::SyntaxTree& tree, char mode, FmtArgs a
 uint mcsl::writef(mcsl::File& file, const clef::indenter i, char mode, FmtArgs fmt) {
    assume((mode | CASE_BIT) == 's');
    file.write('\n');
-   uint charCount = i.indents * i.indentSize;
+   uint charCount = i.indents * TAB_SIZE;
    file.write(mcsl::PAD_CHAR, charCount);
    return charCount + 1;
 }

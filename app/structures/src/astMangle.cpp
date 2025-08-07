@@ -4,7 +4,7 @@
 #include "SyntaxTree.hpp"
 #include "pretty-print.hpp"
 
-sint clef::SyntaxTree::__MangleData::subIndex(SymbolNode* symbol) {
+sint clef::SyntaxTree::__MangleData::substIndex(SymbolNode* symbol) {
    for (uint i = 0; i < substitutions.size(); ++i) {
       if (substitutions[i] == symbol) {
          return i;
@@ -14,80 +14,89 @@ sint clef::SyntaxTree::__MangleData::subIndex(SymbolNode* symbol) {
    return -1;
 }
 
-uint clef::SyntaxTree::manglePrint(mcsl::File& file, SyntaxTree& tree, SymbolNode* name) {
+uint clef::SyntaxTree::manglePrint(mcsl::File& file, SyntaxTree& tree, index<Identifier> i) {
+   if (!i) {
+      TODO;
+   }
+   Identifier& name = tree[i];
+   SymbolNode* symbol = name.symbol();
+
    __MangleData data;
-   __mangleImpl(file, tree, name, data, 0);
+   data.charsPrinted += file.printf(FMT(MANGLE_PREFIX));
+   
+   //name
+   if (symbol->parentScope() != tree.globalScope()) {
+      data.charsPrinted += file.printf(FMT(MANGLE_NAMESPACE_OPEN));
+      __mangleImpl(file, tree, name, data, 0);
+      data.charsPrinted += file.printf(FMT(MANGLE_NAMESPACE_CLOSE));
+   } else {
+      __mangleImpl(file, tree, name, data, 0);
+   }
+   
+   //function signature
+   if (symbol->symbolType() == SymbolType::FUNC) {
+      __mangleFuncSigImpl(file, tree, symbol->getOverload(name.overloadIndex()).first, false, data);
+   }
+
+   //return
    return data.charsPrinted;
 }
 
-void clef::SyntaxTree::__mangleImpl(mcsl::File& file, SyntaxTree& tree, SymbolNode* symbol, __MangleData& data, uint depth) {
-   //fundamental type
-   if (symbol->symbolType() == SymbolType::FUND_TYPE) {
-      mcsl::writef(file, symbol->name(), 's', {});
-      data.charsPrinted += symbol->name().size();
-      return;
+void clef::SyntaxTree::__mangleImpl(mcsl::File& file, SyntaxTree& tree, Identifier& name, __MangleData& data, uint depth) {
+   SymbolNode* symbol = name.symbol();
+   debug_assert(symbol);
+   if (symbol->parentScope() != tree.globalScope()) {
+      __mangleImpl(file, tree, tree[name.scopeName()], data, depth + 1);
    }
-   //indirect type
-   else if (symbol->symbolType() == SymbolType::INDIR) {
-      debug_assert(symbol->type()->pointee()->canonName());
-      __mangleImpl(file, tree, symbol->type()->pointee()->canonName(), data, 0);
-      file.write('*', symbol->type()->indirTable().size());
-      data.charsPrinted += symbol->type()->indirTable().size();
-      //!TODO: actually accurate implementation (based on the printf implementation for IndirTable)
-      //!TODO: pointeeQuals
-      return;
+
+   if (+name.fundTypeID()) {
+      __mangleFund(file, name.fundTypeID(), data);
+   } else {
+      //!TODO: substitutions
+      //!TODO: function pointers
+      data.charsPrinted += file.printf(FMT("%u%s"), symbol->name().size(), symbol->name());
    }
-   else if (symbol->symbolType() == SymbolType::GENERIC) {
-      data.charsPrinted += file.printf(FMT("T_"));
-      return;
-      //!TODO: do this accurately
+   
+   if (name.specializer()) {
+      __mangleSpecializerImpl(file, tree, name, data);
    }
-   else if (symbol->symbolType() == SymbolType::EXTERN_TYPE) {
+}
+
+void clef::SyntaxTree::__mangleFund(mcsl::File& file, FundTypeID fund, __MangleData& data) {
+   if (fund == FundTypeID::null || fund == FundTypeID::FUNCTION_SIGNATURE) {
       TODO;
    }
-   //composite type
-   else if (isType(symbol->symbolType()) || symbol->symbolType() == SymbolType::VAR) {
-      //name
-      if (symbol->parentScope() == tree.globalScope()) {
-         if (depth == 0) { //global symbols
-            file.printf(symbol->name());
-         } else { //global parent for non-global symbol
-            // debug_assert(data.charsPrinted == 0);
-            data.charsPrinted += file.printf(FMT(MANGLE_PREFIX MANGLE_NAMESPACE_OPEN "%u%s"), symbol->name().size(), symbol->name());
+   data.charsPrinted += file.printf(toString(fund));
+}
+
+void clef::SyntaxTree::__mangleFuncSigImpl(mcsl::File& file, SyntaxTree& tree, TypeSpec* sig, bool printRetType, __MangleData& data) {
+   TODO;
+}
+
+void clef::SyntaxTree::__mangleSpecializerImpl(mcsl::File& file, SyntaxTree& tree, Identifier& name, __MangleData& data) {
+   debug_assert(name.specializer());
+
+   data.charsPrinted += file.printf(FMT(MANGLE_SPECIALIZER_OPEN));
+   
+   auto span = tree[name.specializer()].span();
+   for (index<Expr> i : span) {
+      debug_assert(i);
+      Expr& expr = tree[i];
+      if (expr.opID() == OpID::NULL && expr.lhs() && canDownCastTo(expr.lhsType(), NodeType::EXPR) && !expr.rhs() && !expr.extra() && !expr.extra2()) {
+         Identifier& iden = tree[(index<Identifier>)expr.lhs()];
+         if (iden.scopeName()) {
+            data.charsPrinted += file.printf(FMT(MANGLE_NAMESPACE_OPEN));
+            __mangleImpl(file, tree, iden, data, 0);
+            data.charsPrinted += file.printf(FMT(MANGLE_NAMESPACE_CLOSE));
+         } else {
+            __mangleImpl(file, tree, iden, data, 0);
          }
       } else {
-         //mangle parent scope
-         __mangleImpl(file, tree, symbol->parentScope(), data, depth + 1);
-
-         //print name itself
-         sint subIndex = data.subIndex(symbol);
-         if (subIndex == 0) {
-            data.charsPrinted += file.printf(FMT("S_"));
-         } else if(subIndex > 0) {
-            data.charsPrinted += file.printf(FMT("S%,36u_"), subIndex - 1);
-         } else {
-            data.charsPrinted += file.printf(FMT("%u%s"), symbol->name().size(), symbol->name());
-         }
-
-         //namespace closer
-         if (depth == 0) {
-            file.write(FMT(MANGLE_NAMESPACE_CLOSE));
-            data.charsPrinted++;
-         }
+         TODO;
       }
-
-      // //specializer
-      // if (name.specializer()) {
-      //    __mangleSpecializerImpl(file, tree, name, data);
-      // }
-      // TODO;
-      return;
-   } else {
-      TODO;
    }
 
-
-   
+   data.charsPrinted += file.printf(FMT(MANGLE_SPECIALIZER_CLOSE));
 }
 
 #endif //AST_MANGLE_CPP

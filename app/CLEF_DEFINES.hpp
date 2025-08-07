@@ -4,6 +4,9 @@
 
 #include "MCSL_DEFINES.hpp"
 
+//stylistic parameters
+#define TAB_SIZE 3
+
 //compiler parameters
 #define PARALLEL_COMPILE_FILES false
 
@@ -17,6 +20,8 @@
 #define MANGLE_PREFIX "_M"
 #define MANGLE_NAMESPACE_OPEN "N"
 #define MANGLE_NAMESPACE_CLOSE "E"
+#define MANGLE_SPECIALIZER_OPEN "I"
+#define MANGLE_SPECIALIZER_CLOSE "E"
 
 //language parameters
 #define MAX_BIN_CHAR_LIT_DIGITS 8

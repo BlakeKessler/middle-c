@@ -132,18 +132,19 @@ class clef::SyntaxTree {
          mcsl::dyn_arr<SymbolNode*> substitutions;
          uint charsPrinted;
 
-         sint subIndex(SymbolNode*);
+         sint substIndex(SymbolNode*);
       };
-      static void __mangleSpecializerImpl(mcsl::File& file, SyntaxTree& tree, Identifier& name, __MangleData& data) { TODO; (void)(file); (void)(tree); (void)(name); (void)(data); }
-      static void __mangleImpl(mcsl::File& file, SyntaxTree& tree, SymbolNode* name, __MangleData& data, uint depth);
+      static void __mangleFund(mcsl::File& file, FundTypeID fund, __MangleData& data);
+      static void __mangleFuncSigImpl(mcsl::File& file, SyntaxTree& tree, TypeSpec* sig, bool printRetType, __MangleData& data);
+      static void __mangleSpecializerImpl(mcsl::File& file, SyntaxTree& tree, Identifier& name, __MangleData& data);
+      static void __mangleExprImpl(mcsl::File& file, SyntaxTree& tree, Expr& name, __MangleData& data);
+      static void __mangleImpl(mcsl::File& file, SyntaxTree& tree, Identifier& name, __MangleData& data, uint depth);
    public:
-      static uint manglePrint(mcsl::File& file, SyntaxTree& tree, SymbolNode* name);
+      static uint manglePrint(mcsl::File& file, SyntaxTree& tree, index<Identifier> name);
 };
 
 //!quick little struct to indent when printing newlines in a `printf` call
 struct clef::indenter {
-   static constexpr uint indentSize = 3;
-   
    uint indents;
 
    indenter(uint i): indents{i} {}

@@ -155,10 +155,4 @@ class clef::IndirTable {
       }
 };
 
-template<> struct std::hash<clef::IndirTable> {
-   static inline auto operator()(const clef::IndirTable& table) {
-      return table.hash();
-   }
-};
-
 #endif //INDIR_TABLE_HPP

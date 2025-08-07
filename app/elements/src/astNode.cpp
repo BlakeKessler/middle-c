@@ -66,8 +66,8 @@ void clef::astNode::print() const {
 void clef::astNode::writeTo(mcsl::File& file) const {
    using namespace clef;
    switch (nodeType()) {
-      case NodeType::NONE: file.printf(mcsl::FMT("NULL NODE")); break;
-      case NodeType::ERROR: file.printf(mcsl::FMT("ERORR NODE")); break;
+      case NodeType::NONE: file.write(mcsl::FMT("NULL NODE")); break;
+      case NodeType::ERROR: file.write(mcsl::FMT("ERORR NODE")); break;
       
       MCSL_MAP(CASE, CLEF_ALL_AST_NODE_UNION_MEMBS)
    }

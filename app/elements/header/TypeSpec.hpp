@@ -31,10 +31,7 @@ class clef::TypeSpec {
 
          operator SymbolNode*() const { return symbol; }
 
-         struct hash {
-            using is_transparent = void;
-            static ulong operator()(const ScopedSymbol& obj) { return std::hash<SymbolNode*>()(obj.symbol); }
-         };
+         uint64 hash(uint64 seed = mcsl::RAPIDHASH_RHS_DEFAULT) const { return mcsl::hash_algos::rapid_mix((uint64)symbol, seed); }
       };
    private:
       MetaType _metatype;
@@ -50,13 +47,13 @@ class clef::TypeSpec {
          } _indir;
          struct { //COMPOSITE
             mcsl::dyn_arr<SymbolNode*> tpltParams;
-            mcsl::set<ScopedSymbol, ScopedSymbol::hash> impls; //implemented traits
+            mcsl::set<ScopedSymbol> impls; //implemented traits
             mcsl::dyn_arr<ScopedSymbol> dataMembs;
-            mcsl::set<ScopedSymbol, ScopedSymbol::hash> methods;
+            mcsl::set<ScopedSymbol> methods;
             mcsl::map<OpID, mcsl::map<mcsl::pair<TypeSpec*, TypeSpec*>, mcsl::pair<ScopedSymbol, index<void>>>> ops;
             mcsl::dyn_arr<ScopedSymbol> staticMembs;
-            mcsl::set<ScopedSymbol, ScopedSymbol::hash> staticFuncs;
-            mcsl::set<ScopedSymbol, ScopedSymbol::hash> subtypes;
+            mcsl::set<ScopedSymbol> staticFuncs;
+            mcsl::set<ScopedSymbol> subtypes;
          } _composite;
          struct { //FUNC_SIG
             TypeSpec* retType; //!retType -> auto
@@ -139,13 +136,6 @@ class clef::TypeSpec {
       const auto& func() const { return _canonName; }
 
       bool operator==(const TypeSpec& other) const;
-};
-
-
-template<> struct std::hash<clef::TypeSpec::ScopedSymbol> {
-   using is_transparent = void;
-   clef::TypeSpec::ScopedSymbol::hash hash;
-   auto operator()(const clef::TypeSpec::ScopedSymbol& obj) const { return hash(obj); }
 };
 
 /* |===============|
