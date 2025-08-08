@@ -95,9 +95,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Literal> obj, char 
 
          //text
          case LitType::CHAR: return file.printf(FMT("\'%c\'"), (char)lit);
-         case LitType::STRING: [[fallthrough]];
-         case LitType::INTERP_STR: [[fallthrough]];
-         case LitType::FORMAT: [[fallthrough]];
+         case LitType::STRING: fthru;
+         case LitType::INTERP_STR: fthru;
+         case LitType::FORMAT: fthru;
          case LitType::REGEX: return file.printf(FMT("\"%#s\""), (const str_slice)lit);
 
          //type
@@ -116,9 +116,9 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Literal> obj, char 
 
          case LitType::BOOL: charsPrinted += writef(file, (bool)lit, 'b', fmt); break;
          case LitType::CHAR: charsPrinted += writef(file, (char)lit, 'b', fmt); break;
-         case LitType::STRING: [[fallthrough]];
-         case LitType::INTERP_STR: [[fallthrough]];
-         case LitType::FORMAT: [[fallthrough]];
+         case LitType::STRING: fthru;
+         case LitType::INTERP_STR: fthru;
+         case LitType::FORMAT: fthru;
          case LitType::REGEX: charsPrinted += writef(file, (const str_slice)lit, 'b', fmt); break;
 
          case LitType::TYPEID: TODO; //charsPrinted += writef(file, TNB((clef::index<const Type>)lit), 'b', fmt);
@@ -558,10 +558,10 @@ uint mcsl::writef(mcsl::File& file, const clef::astTNB<clef::Expr> obj, char mod
             }
             break;
          
-         case CAST      : [[fallthrough]];
-         case UP_CAST   : [[fallthrough]];
-         case DYN_CAST  : [[fallthrough]];
-         case BIT_CAST  : [[fallthrough]];
+         case CAST      : fthru;
+         case UP_CAST   : fthru;
+         case DYN_CAST  : fthru;
+         case BIT_CAST  : fthru;
          case CONST_CAST: 
             charsPrinted += file.printf(FMT("%s<%s>(%s)"), toString(expr.opID()), TNB_AST(expr.lhs()), TNB_AST(expr.rhs()));
             break;

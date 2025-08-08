@@ -409,7 +409,7 @@ mcsl::str_slice clef::Parser::parseStrLit() {
 
                      default:
                         TODO; //!TODO: warning for invalid escape sequence
-                        [[fallthrough]];
+                        fthru;
                      case '\"':
                      case '\'':
                         str.push_back(raw[i]);
@@ -441,7 +441,7 @@ clef::index<clef::Expr> clef::Parser::toExpr(index<astNode> index) {
       //value nodes - return an expression with no operator and the node as the only argument
       case RawIdentifier::nodeType():
          toIden(+index);
-         [[fallthrough]];
+         fthru;
       case Identifier::nodeType():
       case Literal::nodeType():
          return makeExpr(OpID::NULL, index);

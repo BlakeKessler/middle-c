@@ -148,7 +148,7 @@ clef::TypeSpec* clef::SyntaxTree::evalType(index<astNode> i) {
       return nullptr;
    }
    switch (self[i].nodeType()) {
-      case NodeType::NONE: [[fallthrough]];
+      case NodeType::NONE: fthru;
       case NodeType::ERROR:
          return nullptr;
 
@@ -167,11 +167,11 @@ clef::TypeSpec* clef::SyntaxTree::evalType(index<astNode> i) {
             
             case LitType::POINTER: TODO;
 
-            case LitType::UINT: [[fallthrough]];
-            case LitType::SINT: [[fallthrough]];
-            case LitType::FLOAT: [[fallthrough]];
+            case LitType::UINT: fthru;
+            case LitType::SINT: fthru;
+            case LitType::FLOAT: fthru;
 
-            case LitType::BOOL: [[fallthrough]];
+            case LitType::BOOL: fthru;
             case LitType::CHAR: return getFundType(lit.typeName())->type();
 
             case LitType::STRING: { //const char[]
@@ -188,26 +188,26 @@ clef::TypeSpec* clef::SyntaxTree::evalType(index<astNode> i) {
       }
 
       #pragma region exprs
-      case NodeType::EXPR: [[fallthrough]];
-      case NodeType::STMT: [[fallthrough]];
-      case NodeType::DECL: [[fallthrough]];
-      case NodeType::FUNC_DEF: [[fallthrough]];
-      case NodeType::MACRO_DEF: [[fallthrough]];
-      case NodeType::MAKE_TYPE: [[fallthrough]];
-      case NodeType::FOR_LOOP: [[fallthrough]];
-      case NodeType::FOREACH_LOOP: [[fallthrough]];
-      case NodeType::WHILE_LOOP: [[fallthrough]];
-      case NodeType::DO_WHILE_LOOP: [[fallthrough]];
-      case NodeType::IF: [[fallthrough]];
-      case NodeType::SWITCH: [[fallthrough]];
-      case NodeType::MATCH: [[fallthrough]];
+      case NodeType::EXPR: fthru;
+      case NodeType::STMT: fthru;
+      case NodeType::DECL: fthru;
+      case NodeType::FUNC_DEF: fthru;
+      case NodeType::MACRO_DEF: fthru;
+      case NodeType::MAKE_TYPE: fthru;
+      case NodeType::FOR_LOOP: fthru;
+      case NodeType::FOREACH_LOOP: fthru;
+      case NodeType::WHILE_LOOP: fthru;
+      case NodeType::DO_WHILE_LOOP: fthru;
+      case NodeType::IF: fthru;
+      case NodeType::SWITCH: fthru;
+      case NodeType::MATCH: fthru;
       case NodeType::ASM:
          return self[(index<Expr>)i].evalType();
       #pragma endregion exprs
 
-      case NodeType::SWITCH_CASES: [[fallthrough]];
-      case NodeType::MATCH_CASES: [[fallthrough]];
-      case NodeType::STMT_SEQ: [[fallthrough]];
+      case NodeType::SWITCH_CASES: fthru;
+      case NodeType::MATCH_CASES: fthru;
+      case NodeType::STMT_SEQ: fthru;
       case NodeType::ARG_LIST: return nullptr;
    }
 }
@@ -333,22 +333,22 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i, SymbolNode* curr
 
          #pragma region commons
          //unary identity
-         case OpID::INC: [[fallthrough]];
-         case OpID::DEC: [[fallthrough]];
-         case OpID::BIT_NOT: [[fallthrough]];
+         case OpID::INC: fthru;
+         case OpID::DEC: fthru;
+         case OpID::BIT_NOT: fthru;
          //bitwise binary identity
-         case OpID::BIT_AND: [[fallthrough]];
-         case OpID::BIT_OR: [[fallthrough]];
-         case OpID::BIT_XOR: [[fallthrough]];
-         case OpID::SHIFT_LEFT: [[fallthrough]];
-         case OpID::SHIFT_RIGHT: [[fallthrough]];
+         case OpID::BIT_AND: fthru;
+         case OpID::BIT_OR: fthru;
+         case OpID::BIT_XOR: fthru;
+         case OpID::SHIFT_LEFT: fthru;
+         case OpID::SHIFT_RIGHT: fthru;
          //binary identity
-         case OpID::ADD: [[fallthrough]];
-         case OpID::SUB: [[fallthrough]];
-         case OpID::MUL: [[fallthrough]];
-         case OpID::DIV: [[fallthrough]];
-         case OpID::MOD: [[fallthrough]];
-         case OpID::EXP: [[fallthrough]];
+         case OpID::ADD: fthru;
+         case OpID::SUB: fthru;
+         case OpID::MUL: fthru;
+         case OpID::DIV: fthru;
+         case OpID::MOD: fthru;
+         case OpID::EXP: fthru;
          case OpID::COALESCE: {
             res<TypeSpec*> tmp = commonTypeOfOperands(i);
             if (tmp.is_err()) {
@@ -361,18 +361,18 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i, SymbolNode* curr
 
          #pragma region bools
          //unary boolean
-         case OpID::LOGICAL_NOT: [[fallthrough]];
+         case OpID::LOGICAL_NOT: fthru;
          //binary boolean
-         case OpID::LOGICAL_AND: [[fallthrough]];
-         case OpID::LOGICAL_OR: [[fallthrough]];
-         case OpID::LESSER: [[fallthrough]];
-         case OpID::GREATER: [[fallthrough]];
-         case OpID::LESSER_OR_EQ: [[fallthrough]];
-         case OpID::GREATER_OR_EQ: [[fallthrough]];
-         case OpID::IS_EQUAL: [[fallthrough]];
-         case OpID::IS_UNEQUAL: [[fallthrough]];
-         //case OpID::IS_EQUAL_STRICT: [[fallthrough]];
-         //case OpID::IS_UNEQUAL_STRICT: [[fallthrough]];
+         case OpID::LOGICAL_AND: fthru;
+         case OpID::LOGICAL_OR: fthru;
+         case OpID::LESSER: fthru;
+         case OpID::GREATER: fthru;
+         case OpID::LESSER_OR_EQ: fthru;
+         case OpID::GREATER_OR_EQ: fthru;
+         case OpID::IS_EQUAL: fthru;
+         case OpID::IS_UNEQUAL: fthru;
+         //case OpID::IS_EQUAL_STRICT: fthru;
+         //case OpID::IS_UNEQUAL_STRICT: fthru;
          case OpID::THREE_WAY_COMP:
             expr.evalType() = getFundType(KeywordID::BOOL)->type();
             return {};
@@ -382,33 +382,33 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i, SymbolNode* curr
          //null
          case OpID::NULL:
          //assignments
-         case OpID::ASSIGN: [[fallthrough]];
-         //case OpID::CONST_ASSIGN: [[fallthrough]];
-         case OpID::ADD_ASSIGN: [[fallthrough]];
-         case OpID::SUB_ASSIGN: [[fallthrough]];
-         case OpID::MUL_ASSIGN: [[fallthrough]];
-         case OpID::DIV_ASSIGN: [[fallthrough]];
-         case OpID::MOD_ASSIGN: [[fallthrough]];
-         case OpID::EXP_ASSIGN: [[fallthrough]];
-         case OpID::SHL_ASSIGN: [[fallthrough]];
-         case OpID::SHR_ASSIGN: [[fallthrough]];
-         case OpID::AND_ASSIGN: [[fallthrough]];
-         case OpID::XOR_ASSIGN: [[fallthrough]];
-         case OpID::OR_ASSIGN: [[fallthrough]];
-         case OpID::COALESCE_ASSIGN: [[fallthrough]];
+         case OpID::ASSIGN: fthru;
+         //case OpID::CONST_ASSIGN: fthru;
+         case OpID::ADD_ASSIGN: fthru;
+         case OpID::SUB_ASSIGN: fthru;
+         case OpID::MUL_ASSIGN: fthru;
+         case OpID::DIV_ASSIGN: fthru;
+         case OpID::MOD_ASSIGN: fthru;
+         case OpID::EXP_ASSIGN: fthru;
+         case OpID::SHL_ASSIGN: fthru;
+         case OpID::SHR_ASSIGN: fthru;
+         case OpID::AND_ASSIGN: fthru;
+         case OpID::XOR_ASSIGN: fthru;
+         case OpID::OR_ASSIGN: fthru;
+         case OpID::COALESCE_ASSIGN: fthru;
          //casts
-         case OpID::CAST: [[fallthrough]];
-         case OpID::UP_CAST: [[fallthrough]];
-         case OpID::DYN_CAST: [[fallthrough]];
-         case OpID::BIT_CAST: [[fallthrough]];
+         case OpID::CAST: fthru;
+         case OpID::UP_CAST: fthru;
+         case OpID::DYN_CAST: fthru;
+         case OpID::BIT_CAST: fthru;
          case OpID::CONST_CAST:
             expr.evalType() = evalType(+expr.lhs());
             return {};
          #pragma endregion lhss
 
          #pragma region rhss
-         case OpID::COMMA: [[fallthrough]];
-         case OpID::LET: [[fallthrough]];
+         case OpID::COMMA: fthru;
+         case OpID::LET: fthru;
          case OpID::MAKE_TYPE:
             expr.evalType() = evalType(+expr.rhs());
             return {};
@@ -416,27 +416,27 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i, SymbolNode* curr
 
          #pragma region typelesses
          //pseudo-operators
-         case OpID::FOR: [[fallthrough]];
-         case OpID::FOREACH: [[fallthrough]];
-         case OpID::WHILE: [[fallthrough]];
-         case OpID::DO_WHILE: [[fallthrough]];
-         case OpID::GOTO: [[fallthrough]];
-         case OpID::GOTO_CASE: [[fallthrough]];
-         case OpID::IF: [[fallthrough]];
-         case OpID::SWITCH: [[fallthrough]];
-         case OpID::MATCH: [[fallthrough]];
-         case OpID::ASM: [[fallthrough]];
-         case OpID::BREAK: [[fallthrough]];
-         case OpID::CONTINUE: [[fallthrough]];
-         case OpID::THROW: [[fallthrough]];
-         case OpID::ASSERT: [[fallthrough]];
-         case OpID::DEBUG_ASSERT: [[fallthrough]];
-         case OpID::STATIC_ASSERT: [[fallthrough]];
-         case OpID::ASSUME: [[fallthrough]];
-         case OpID::RETURN: [[fallthrough]];
-         case OpID::ALIAS: [[fallthrough]];
-         case OpID::DEF_FUNC_PARAMS: [[fallthrough]];
-         case OpID::DEF_MACRO_PARAMS: [[fallthrough]];
+         case OpID::FOR: fthru;
+         case OpID::FOREACH: fthru;
+         case OpID::WHILE: fthru;
+         case OpID::DO_WHILE: fthru;
+         case OpID::GOTO: fthru;
+         case OpID::GOTO_CASE: fthru;
+         case OpID::IF: fthru;
+         case OpID::SWITCH: fthru;
+         case OpID::MATCH: fthru;
+         case OpID::ASM: fthru;
+         case OpID::BREAK: fthru;
+         case OpID::CONTINUE: fthru;
+         case OpID::THROW: fthru;
+         case OpID::ASSERT: fthru;
+         case OpID::DEBUG_ASSERT: fthru;
+         case OpID::STATIC_ASSERT: fthru;
+         case OpID::ASSUME: fthru;
+         case OpID::RETURN: fthru;
+         case OpID::ALIAS: fthru;
+         case OpID::DEF_FUNC_PARAMS: fthru;
+         case OpID::DEF_MACRO_PARAMS: fthru;
          //labels
          case OpID::LABEL_DELIM:
             expr.evalType() = nullptr;
@@ -444,51 +444,51 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i, SymbolNode* curr
          #pragma endregion typelesses
 
          #pragma region indirOnly
-         case OpID::PTR_MEMBER_ACCESS: [[fallthrough]];
-         case OpID::CALL_INVOKE: [[fallthrough]];
+         case OpID::PTR_MEMBER_ACCESS: fthru;
+         case OpID::CALL_INVOKE: fthru;
          case OpID::SUBSCRIPT_INVOKE:
             if (lhsIsPtrlike) {
                expr.evalType() = evalType(+expr.lhs())->pointee();
                return {};
             }
-            [[fallthrough]];
+            fthru;
          
          #pragma endregion indirOnly
 
          #pragma region errs
          //dereferences
-         case OpID::MEMBER_ACCESS: [[fallthrough]];
-         case OpID::METHOD_PTR: [[fallthrough]];
-         case OpID::ARROW_METHOD_PTR: [[fallthrough]];
+         case OpID::MEMBER_ACCESS: fthru;
+         case OpID::METHOD_PTR: fthru;
+         case OpID::ARROW_METHOD_PTR: fthru;
          //invokes
-         case OpID::LIST_INVOKE: [[fallthrough]];
-         case OpID::SPECIALIZER_INVOKE: [[fallthrough]];
+         case OpID::LIST_INVOKE: fthru;
+         case OpID::SPECIALIZER_INVOKE: fthru;
          case OpID::INTERP_STR_INVOKE: internalError(ErrCode::BAD_EXPR, FMT("invalid operator for types (%s)"), toString(expr.opID())); //!NOTE: should return a res
          #pragma endregion errs
 
          #pragma region unreachables
-         case OpID::INLINE_IF: [[fallthrough]];
-         case OpID::PREPROC_IMPORT: [[fallthrough]];
-         case OpID::PREPROC_LINK: [[fallthrough]];
-         case OpID::PREPROC_EMBED: [[fallthrough]];
-         case OpID::ESCAPE: [[fallthrough]];
-         case OpID::EOS: [[fallthrough]];
-         case OpID::STRING: [[fallthrough]];
-         case OpID::CHAR: [[fallthrough]];
-         case OpID::INTERP_STRING: [[fallthrough]];
-         case OpID::LINE_CMNT: [[fallthrough]];
-         case OpID::BLOCK_CMNT: [[fallthrough]];
-         case OpID::BLOCK_CMNT_OPEN: [[fallthrough]];
-         case OpID::BLOCK_CMNT_CLOSE: [[fallthrough]];
-         case OpID::CALL_OPEN: [[fallthrough]];
-         case OpID::CALL_CLOSE: [[fallthrough]];
-         case OpID::SUBSCRIPT_OPEN: [[fallthrough]];
-         case OpID::SUBSCRIPT_CLOSE: [[fallthrough]];
-         case OpID::LIST_OPEN: [[fallthrough]];
-         case OpID::LIST_CLOSE: [[fallthrough]];
-         case OpID::SPECIALIZER_OPEN: [[fallthrough]];
-         case OpID::SPECIALIZER_CLOSE: [[fallthrough]];
-         case OpID::CHAR_INVOKE: [[fallthrough]];
+         case OpID::INLINE_IF: fthru;
+         case OpID::PREPROC_IMPORT: fthru;
+         case OpID::PREPROC_LINK: fthru;
+         case OpID::PREPROC_EMBED: fthru;
+         case OpID::ESCAPE: fthru;
+         case OpID::EOS: fthru;
+         case OpID::STRING: fthru;
+         case OpID::CHAR: fthru;
+         case OpID::INTERP_STRING: fthru;
+         case OpID::LINE_CMNT: fthru;
+         case OpID::BLOCK_CMNT: fthru;
+         case OpID::BLOCK_CMNT_OPEN: fthru;
+         case OpID::BLOCK_CMNT_CLOSE: fthru;
+         case OpID::CALL_OPEN: fthru;
+         case OpID::CALL_CLOSE: fthru;
+         case OpID::SUBSCRIPT_OPEN: fthru;
+         case OpID::SUBSCRIPT_CLOSE: fthru;
+         case OpID::LIST_OPEN: fthru;
+         case OpID::LIST_CLOSE: fthru;
+         case OpID::SPECIALIZER_OPEN: fthru;
+         case OpID::SPECIALIZER_CLOSE: fthru;
+         case OpID::CHAR_INVOKE: fthru;
          case OpID::STR_INVOKE: UNREACHABLE;
          #pragma endregion unreachables
       }
@@ -513,64 +513,64 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i, SymbolNode* curr
 
       case OpID::PREPROCESSOR: TODO;
 
-      case OpID::MEMBER_ACCESS: [[fallthrough]];
-      case OpID::PTR_MEMBER_ACCESS: [[fallthrough]];
-      case OpID::METHOD_PTR: [[fallthrough]];
+      case OpID::MEMBER_ACCESS: fthru;
+      case OpID::PTR_MEMBER_ACCESS: fthru;
+      case OpID::METHOD_PTR: fthru;
       case OpID::ARROW_METHOD_PTR:
          expr.evalType() = evalType(+expr.rhs());
          return {};
 
       #pragma region standards
-      case OpID::RANGE: [[fallthrough]];
-      case OpID::SPREAD: [[fallthrough]];
+      case OpID::RANGE: fthru;
+      case OpID::SPREAD: fthru;
 
-      case OpID::INC: [[fallthrough]];
-      case OpID::DEC: [[fallthrough]];
-      case OpID::BIT_NOT: [[fallthrough]];
+      case OpID::INC: fthru;
+      case OpID::DEC: fthru;
+      case OpID::BIT_NOT: fthru;
 
-      case OpID::BIT_AND: [[fallthrough]];
-      case OpID::BIT_OR: [[fallthrough]];
-      case OpID::BIT_XOR: [[fallthrough]];
-      case OpID::SHIFT_LEFT: [[fallthrough]];
-      case OpID::SHIFT_RIGHT: [[fallthrough]];
+      case OpID::BIT_AND: fthru;
+      case OpID::BIT_OR: fthru;
+      case OpID::BIT_XOR: fthru;
+      case OpID::SHIFT_LEFT: fthru;
+      case OpID::SHIFT_RIGHT: fthru;
 
-      case OpID::ADD: [[fallthrough]];
-      case OpID::SUB: [[fallthrough]];
-      case OpID::MUL: [[fallthrough]];
-      case OpID::DIV: [[fallthrough]];
-      case OpID::MOD: [[fallthrough]];
-      case OpID::EXP: [[fallthrough]];
+      case OpID::ADD: fthru;
+      case OpID::SUB: fthru;
+      case OpID::MUL: fthru;
+      case OpID::DIV: fthru;
+      case OpID::MOD: fthru;
+      case OpID::EXP: fthru;
 
-      case OpID::THREE_WAY_COMP: [[fallthrough]];
+      case OpID::THREE_WAY_COMP: fthru;
 
       //unary boolean
-      case OpID::LOGICAL_NOT: [[fallthrough]];
+      case OpID::LOGICAL_NOT: fthru;
 
       //binary boolean
-      case OpID::LOGICAL_AND: [[fallthrough]];
-      case OpID::LOGICAL_OR: [[fallthrough]];
-      case OpID::LESSER: [[fallthrough]];
-      case OpID::GREATER: [[fallthrough]];
-      case OpID::LESSER_OR_EQ: [[fallthrough]];
-      case OpID::GREATER_OR_EQ: [[fallthrough]];
-      case OpID::IS_EQUAL: [[fallthrough]];
-      case OpID::IS_UNEQUAL: [[fallthrough]];
-      //case OpID::IS_EQUAL_STRICT: [[fallthrough]];
-      //case OpID::IS_UNEQUAL_STRICT: [[fallthrough]];
+      case OpID::LOGICAL_AND: fthru;
+      case OpID::LOGICAL_OR: fthru;
+      case OpID::LESSER: fthru;
+      case OpID::GREATER: fthru;
+      case OpID::LESSER_OR_EQ: fthru;
+      case OpID::GREATER_OR_EQ: fthru;
+      case OpID::IS_EQUAL: fthru;
+      case OpID::IS_UNEQUAL: fthru;
+      //case OpID::IS_EQUAL_STRICT: fthru;
+      //case OpID::IS_UNEQUAL_STRICT: fthru;
 
       //compound assignment
-      case OpID::ADD_ASSIGN: [[fallthrough]];
-      case OpID::SUB_ASSIGN: [[fallthrough]];
-      case OpID::MUL_ASSIGN: [[fallthrough]];
-      case OpID::DIV_ASSIGN: [[fallthrough]];
-      case OpID::MOD_ASSIGN: [[fallthrough]];
-      case OpID::EXP_ASSIGN: [[fallthrough]];
-      case OpID::SHL_ASSIGN: [[fallthrough]];
-      case OpID::SHR_ASSIGN: [[fallthrough]];
-      case OpID::AND_ASSIGN: [[fallthrough]];
-      case OpID::XOR_ASSIGN: [[fallthrough]];
-      case OpID::OR_ASSIGN: [[fallthrough]];
-      case OpID::COALESCE_ASSIGN: [[fallthrough]];
+      case OpID::ADD_ASSIGN: fthru;
+      case OpID::SUB_ASSIGN: fthru;
+      case OpID::MUL_ASSIGN: fthru;
+      case OpID::DIV_ASSIGN: fthru;
+      case OpID::MOD_ASSIGN: fthru;
+      case OpID::EXP_ASSIGN: fthru;
+      case OpID::SHL_ASSIGN: fthru;
+      case OpID::SHR_ASSIGN: fthru;
+      case OpID::AND_ASSIGN: fthru;
+      case OpID::XOR_ASSIGN: fthru;
+      case OpID::OR_ASSIGN: fthru;
+      case OpID::COALESCE_ASSIGN: fthru;
 
       //misc
       case OpID::COALESCE: {
@@ -611,21 +611,21 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i, SymbolNode* curr
 
       #pragma region lhss
       //assignments
-      case OpID::ASSIGN: [[fallthrough]];
+      case OpID::ASSIGN: fthru;
       //case OpID::CONST_ASSIGN: TODO;
       //casts
-      case OpID::CAST: [[fallthrough]];
-      case OpID::UP_CAST: [[fallthrough]];
-      case OpID::DYN_CAST: [[fallthrough]];
-      case OpID::BIT_CAST: [[fallthrough]];
+      case OpID::CAST: fthru;
+      case OpID::UP_CAST: fthru;
+      case OpID::DYN_CAST: fthru;
+      case OpID::BIT_CAST: fthru;
       case OpID::CONST_CAST:
          expr.evalType() = evalType(+expr.lhs());
          return {};
       #pragma endregion lhss
 
       #pragma region rhss
-      case OpID::COMMA: [[fallthrough]];
-      case OpID::LET: [[fallthrough]];
+      case OpID::COMMA: fthru;
+      case OpID::LET: fthru;
       case OpID::MAKE_TYPE:
          expr.evalType() = evalType(+expr.rhs());
          return {};
@@ -637,35 +637,35 @@ clef::res<void> clef::SyntaxTree::updateEvalType(index<Expr> i, SymbolNode* curr
       case OpID::PREPROC_EMBED: TODO;
          
       #pragma region typelesses
-      case OpID::LABEL_DELIM: [[fallthrough]];
-      case OpID::FOR: [[fallthrough]];
-      case OpID::FOREACH: [[fallthrough]];
-      case OpID::WHILE: [[fallthrough]];
-      case OpID::DO_WHILE: [[fallthrough]];
+      case OpID::LABEL_DELIM: fthru;
+      case OpID::FOR: fthru;
+      case OpID::FOREACH: fthru;
+      case OpID::WHILE: fthru;
+      case OpID::DO_WHILE: fthru;
 
-      case OpID::GOTO: [[fallthrough]];
-      case OpID::GOTO_CASE: [[fallthrough]];
+      case OpID::GOTO: fthru;
+      case OpID::GOTO_CASE: fthru;
 
-      case OpID::IF: [[fallthrough]];
+      case OpID::IF: fthru;
 
-      case OpID::SWITCH: [[fallthrough]];
-      case OpID::MATCH: [[fallthrough]];
+      case OpID::SWITCH: fthru;
+      case OpID::MATCH: fthru;
 
-      case OpID::ASM: [[fallthrough]];
+      case OpID::ASM: fthru;
 
-      case OpID::BREAK: [[fallthrough]];
-      case OpID::CONTINUE: [[fallthrough]];
+      case OpID::BREAK: fthru;
+      case OpID::CONTINUE: fthru;
 
-      case OpID::THROW: [[fallthrough]];
-      case OpID::ASSERT: [[fallthrough]];
-      case OpID::DEBUG_ASSERT: [[fallthrough]];
-      case OpID::STATIC_ASSERT: [[fallthrough]];
-      case OpID::ASSUME: [[fallthrough]];
-      case OpID::RETURN: [[fallthrough]];
+      case OpID::THROW: fthru;
+      case OpID::ASSERT: fthru;
+      case OpID::DEBUG_ASSERT: fthru;
+      case OpID::STATIC_ASSERT: fthru;
+      case OpID::ASSUME: fthru;
+      case OpID::RETURN: fthru;
 
-      case OpID::ALIAS:[[fallthrough]];
+      case OpID::ALIAS:fthru;
 
-      case OpID::DEF_FUNC_PARAMS: [[fallthrough]];
+      case OpID::DEF_FUNC_PARAMS: fthru;
       case OpID::DEF_MACRO_PARAMS: __TYPELESS;
       #pragma endregion typelesses
 

@@ -36,8 +36,8 @@ START_PARSE_STMT:
       
       case TokenType::KEYWORD     :
          switch (currTok.keywordID()) {
-            case KeywordID::VOID    : [[fallthrough]];
-            case KeywordID::AUTO    : [[fallthrough]];
+            case KeywordID::VOID    : fthru;
+            case KeywordID::AUTO    : fthru;
             default:
                debug_assert(isType(currTok.keywordID()));
                logError(ErrCode::BAD_KEYWORD, "floating typename (declarations must use the `let` keyword)");
@@ -47,10 +47,10 @@ START_PARSE_STMT:
                return makeStmt(parseDecl(attrs));
             } break;
 
-            case KeywordID::NULLPTR : [[fallthrough]];
-            case KeywordID::THIS    : [[fallthrough]];
-            case KeywordID::SELF    : [[fallthrough]];
-            case KeywordID::TRUE    : [[fallthrough]];
+            case KeywordID::NULLPTR : fthru;
+            case KeywordID::THIS    : fthru;
+            case KeywordID::SELF    : fthru;
+            case KeywordID::TRUE    : fthru;
             case KeywordID::FALSE   :
                goto STMT_STARTS_WITH_VALUE;
 
@@ -110,10 +110,10 @@ START_PARSE_STMT:
                consumeEOS("bad CONTINUE");
                return addAttrs(make<Stmt>(KeywordID::CONTINUE), attrs);
 
-            case KeywordID::THROW         : [[fallthrough]];
-            case KeywordID::ASSERT        : [[fallthrough]];
-            case KeywordID::DEBUG_ASSERT  : [[fallthrough]];
-            case KeywordID::STATIC_ASSERT : [[fallthrough]];
+            case KeywordID::THROW         : fthru;
+            case KeywordID::ASSERT        : fthru;
+            case KeywordID::DEBUG_ASSERT  : fthru;
+            case KeywordID::STATIC_ASSERT : fthru;
             case KeywordID::ASSUME        : {
                KeywordID kw = currTok.keywordID();
                getNextToken();
@@ -155,10 +155,10 @@ START_PARSE_STMT:
 
             UNREACHABLE;
 
-            case KeywordID::CAST          : [[fallthrough]];
-            case KeywordID::UP_CAST       : [[fallthrough]];
-            case KeywordID::DYN_CAST      : [[fallthrough]];
-            case KeywordID::BIT_CAST      : [[fallthrough]];
+            case KeywordID::CAST          : fthru;
+            case KeywordID::UP_CAST       : fthru;
+            case KeywordID::DYN_CAST      : fthru;
+            case KeywordID::BIT_CAST      : fthru;
             case KeywordID::CONST_CAST    : {
                index<Expr> stmtContents = parseExpr();
                consumeEOS("invalid statement");
@@ -177,11 +177,11 @@ START_PARSE_STMT:
       }
       UNREACHABLE;
 
-      case TokenType::OP          : if (currTok.opID() == OpID::SCOPE_RESOLUTION) { goto PARSE_IDEN; } [[fallthrough]];
-      case TokenType::UINT_NUM    : [[fallthrough]];
-      case TokenType::SINT_NUM    : [[fallthrough]];
-      case TokenType::REAL_NUM    : [[fallthrough]];
-      case TokenType::BLOCK_DELIM : [[fallthrough]];
+      case TokenType::OP          : if (currTok.opID() == OpID::SCOPE_RESOLUTION) { goto PARSE_IDEN; } fthru;
+      case TokenType::UINT_NUM    : fthru;
+      case TokenType::SINT_NUM    : fthru;
+      case TokenType::REAL_NUM    : fthru;
+      case TokenType::BLOCK_DELIM : fthru;
       case TokenType::PTXT_SEG    : STMT_STARTS_WITH_VALUE: {
          index<Expr> stmtContents = parseExpr();
          consumeEOS("statement must end with EOS token");

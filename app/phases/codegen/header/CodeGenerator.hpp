@@ -45,6 +45,7 @@ class clef::CodeGenerator {
       void initFile();
 
       void writeIden(index<Identifier>, bool);
+      void writeTypeDef(index<TypeDecl>);
 
       void writeExpr(index<Expr>);
       void writeStmt(index<Stmt>);

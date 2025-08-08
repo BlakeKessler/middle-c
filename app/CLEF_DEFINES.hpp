@@ -46,4 +46,7 @@
 #define PTR_LIT_CHAR 'p'
 #define WORD_LIT_CHAR 'w'
 
+//utils
+#define fthru [[fallthrough]]
+
 #endif //CLEF_DEFINES_HPP

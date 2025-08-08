@@ -56,6 +56,77 @@ void clef::CodeGenerator::writeIden(index<Identifier> i, bool doMangle) {
    }
 }
 
+void clef::CodeGenerator::writeTypeDef(index<TypeDecl> defIndex) {
+   debug_assert(defIndex);
+   TypeDecl& def = tree[defIndex];
+   if (!def.decl()) {
+      TODO;
+   }
+   Identifier& decl = tree[def.decl()];
+   SymbolNode* symbol = decl.symbol();
+   debug_assert(symbol);
+   TypeSpec* spec = symbol->type();
+   debug_assert(spec);
+
+   if (spec->metaType() != TypeSpec::COMPOSITE) {
+      TODO;
+   }
+
+   const mcsl::str_slice cMetaType = [](SymbolType t) -> const mcsl::str_slice {
+      using enum SymbolType;
+      switch (t) {
+         case STRUCT: fthru;
+         case CLASS: fthru;
+         case ENUM_UNION: return FMT("struct");
+
+         case UNION: return FMT("union");
+         
+         case MASK: fthru;
+         case ENUM: return FMT("enum");
+
+         case TRAIT: return {(char*)(-1), ~0u};
+         case NAMESPACE: return {};
+
+         case GENERIC: TODO;
+         case EXTERN_TYPE: TODO;
+
+         case FUND_TYPE: fthru;
+         case INDIR: UNREACHABLE;
+
+         case VAR: fthru;
+         case FUNC: fthru;
+         case MACRO: fthru;
+         case ATTRIBUTE: fthru;
+         case LABEL: fthru;
+         case EXTERN_IDEN: fthru;
+         case null: UNREACHABLE;
+         case __TYPE_BIT: UNREACHABLE;
+      }
+   }(symbol->symbolType());
+
+   //filter out compile-time constructs
+   if (!~(uptr)cMetaType.data()) {
+      return;
+   }
+
+   //!forward-declare type
+   out.write(cMetaType);
+   out.write(' ');
+   SyntaxTree::manglePrint(out, tree, def.decl());
+   out.write(';');
+   nl();
+
+   //!define subtypes
+
+   //!struct for type (member names not mangled)
+
+   //!forward-declare functions and methods
+
+   //!define functions and methods (parameter names not mangled)
+
+   // TODO;
+}
+
 void clef::CodeGenerator::writeStmt(index<Stmt> stmt) {
    writeExpr(stmt);
    out.write(';');
@@ -155,7 +226,7 @@ void clef::CodeGenerator::writeExpr(index<Expr> i) {
          }
       } break;
       case MAKE_TYPE: {
-         TODO;
+         writeTypeDef(+i);
       } break;
 
       case RETURN   : {
@@ -170,47 +241,47 @@ void clef::CodeGenerator::writeExpr(index<Expr> i) {
       } break;
 
       #pragma region normalops
-      case INC: [[fallthrough]];
-      case DEC: [[fallthrough]];
-      case BIT_NOT: [[fallthrough]];
+      case INC: fthru;
+      case DEC: fthru;
+      case BIT_NOT: fthru;
       
-      case BIT_AND: [[fallthrough]];
-      case BIT_OR: [[fallthrough]];
-      case BIT_XOR: [[fallthrough]];
-      case SHIFT_LEFT: [[fallthrough]];
-      case SHIFT_RIGHT: [[fallthrough]];
+      case BIT_AND: fthru;
+      case BIT_OR: fthru;
+      case BIT_XOR: fthru;
+      case SHIFT_LEFT: fthru;
+      case SHIFT_RIGHT: fthru;
       
-      case ADD: [[fallthrough]];
-      case SUB: [[fallthrough]];
-      case MUL: [[fallthrough]];
-      case DIV: [[fallthrough]];
-      case MOD: [[fallthrough]];
-      case EXP: [[fallthrough]];
-      case COALESCE: [[fallthrough]];
+      case ADD: fthru;
+      case SUB: fthru;
+      case MUL: fthru;
+      case DIV: fthru;
+      case MOD: fthru;
+      case EXP: fthru;
+      case COALESCE: fthru;
 
-      case LOGICAL_NOT: [[fallthrough]];
-      case LOGICAL_AND: [[fallthrough]];
-      case LOGICAL_OR: [[fallthrough]];
-      case LESSER: [[fallthrough]];
-      case GREATER: [[fallthrough]];
-      case LESSER_OR_EQ: [[fallthrough]];
-      case GREATER_OR_EQ: [[fallthrough]];
-      case IS_EQUAL: [[fallthrough]];
-      case IS_UNEQUAL: [[fallthrough]];
-      case THREE_WAY_COMP: [[fallthrough]];
+      case LOGICAL_NOT: fthru;
+      case LOGICAL_AND: fthru;
+      case LOGICAL_OR: fthru;
+      case LESSER: fthru;
+      case GREATER: fthru;
+      case LESSER_OR_EQ: fthru;
+      case GREATER_OR_EQ: fthru;
+      case IS_EQUAL: fthru;
+      case IS_UNEQUAL: fthru;
+      case THREE_WAY_COMP: fthru;
 
-      case ASSIGN: [[fallthrough]];
-      case ADD_ASSIGN: [[fallthrough]];
-      case SUB_ASSIGN: [[fallthrough]];
-      case MUL_ASSIGN: [[fallthrough]];
-      case DIV_ASSIGN: [[fallthrough]];
-      case MOD_ASSIGN: [[fallthrough]];
-      case EXP_ASSIGN: [[fallthrough]];
-      case SHL_ASSIGN: [[fallthrough]];
-      case SHR_ASSIGN: [[fallthrough]];
-      case AND_ASSIGN: [[fallthrough]];
-      case XOR_ASSIGN: [[fallthrough]];
-      case OR_ASSIGN: [[fallthrough]];
+      case ASSIGN: fthru;
+      case ADD_ASSIGN: fthru;
+      case SUB_ASSIGN: fthru;
+      case MUL_ASSIGN: fthru;
+      case DIV_ASSIGN: fthru;
+      case MOD_ASSIGN: fthru;
+      case EXP_ASSIGN: fthru;
+      case SHL_ASSIGN: fthru;
+      case SHR_ASSIGN: fthru;
+      case AND_ASSIGN: fthru;
+      case XOR_ASSIGN: fthru;
+      case OR_ASSIGN: fthru;
       case COALESCE_ASSIGN: {
          debug_assert(!expr.extra() && !expr.extra2());
          debug_assert(expr.lhs() || expr.rhs());
@@ -241,7 +312,7 @@ void clef::CodeGenerator::writeExpr(index<Expr> i) {
       } break;
       #pragma endregion normalops
 
-      case CALL_INVOKE: [[fallthrough]];
+      case CALL_INVOKE: fthru;
       case SUBSCRIPT_INVOKE: TODO;
 
       case COMMA: TODO;
@@ -257,6 +328,7 @@ void clef::CodeGenerator::writeExpr(index<Expr> i) {
             }
          }
 
+      case DEF_FUNC_PARAMS: fthru;
       case ALIAS:
          return; //!NOTE: not sure that this works
 

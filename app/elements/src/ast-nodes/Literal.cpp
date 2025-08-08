@@ -20,9 +20,9 @@ mcsl::File& mcsl::write(mcsl::File& file, const clef::Literal& obj) {
 
       case LitType::BOOL: file.printf(mcsl::FMT("%s"), (bool)obj); break;
       case LitType::CHAR: file.printf(mcsl::FMT("%c"), (char)obj); break;
-      case LitType::STRING: [[fallthrough]];
-      case LitType::INTERP_STR: [[fallthrough]];
-      case LitType::FORMAT: [[fallthrough]];
+      case LitType::STRING: fthru;
+      case LitType::INTERP_STR: fthru;
+      case LitType::FORMAT: fthru;
       case LitType::REGEX: file.printf(mcsl::FMT("%s"), (const str_slice&)obj); break;
 
       case LitType::TYPEID: TODO; //file.printf(mcsl::FMT("%u"), (clef::index<const Type>)obj); break;

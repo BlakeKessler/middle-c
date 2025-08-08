@@ -320,9 +320,9 @@ char clef::Lexer::parseChar() {
 
             default: if (*curr < 32 || *curr > 126) { logError(ErrCode::BAD_LITERAL, "unprintable escaped character literal (%u)", *curr); }
                //!TODO: warning for unrecognized escape sequence
-               [[fallthrough]];
-            case '\'': [[fallthrough]];
-            case '\"': [[fallthrough]];
+               fthru;
+            case '\'': fthru;
+            case '\"': fthru;
             case '\\':
                ch = *curr;
                ++curr;

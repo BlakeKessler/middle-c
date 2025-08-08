@@ -15,10 +15,10 @@ template <mcsl::is_t<clef::OpData>... Argv_t> constexpr clef::OpPrecs::OpPrecs(c
 constexpr ubyte clef::OpPrecs::makeFlags(OpProps props) {
    using enum OpProps;
    switch (props) {
-      case    TYPE_MOD: [[fallthrough]];
+      case    TYPE_MOD: fthru;
       case      PREFIX: return 0b10;
       case     POSTFIX: return 0b01;
-      case  INFIX_LEFT: [[fallthrough]];
+      case  INFIX_LEFT: fthru;
       case INFIX_RIGHT: return 0b11;
       case        null: return 0b00;
       default         : UNREACHABLE;

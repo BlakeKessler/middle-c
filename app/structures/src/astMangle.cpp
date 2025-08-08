@@ -82,7 +82,7 @@ void clef::SyntaxTree::__mangleSpecializerImpl(mcsl::File& file, SyntaxTree& tre
    for (index<Expr> i : span) {
       debug_assert(i);
       Expr& expr = tree[i];
-      if (expr.opID() == OpID::NULL && expr.lhs() && canDownCastTo(expr.lhsType(), NodeType::EXPR) && !expr.rhs() && !expr.extra() && !expr.extra2()) {
+      if (expr.opID() == OpID::NULL && expr.lhs() && canDownCastTo(expr.lhsType(), NodeType::IDEN) && !expr.rhs() && !expr.extra() && !expr.extra2()) {
          Identifier& iden = tree[(index<Identifier>)expr.lhs()];
          if (iden.scopeName()) {
             data.charsPrinted += file.printf(FMT(MANGLE_NAMESPACE_OPEN));
@@ -97,6 +97,89 @@ void clef::SyntaxTree::__mangleSpecializerImpl(mcsl::File& file, SyntaxTree& tre
    }
 
    data.charsPrinted += file.printf(FMT(MANGLE_SPECIALIZER_CLOSE));
+}
+
+const mcsl::str_slice clef::SyntaxTree::mangleOp(OpID op, bool hasLHS, bool hasRHS) {
+   using enum OpID;
+   
+   //!TODO: make a single static character blob instead of the switch statement (will improve all performance metrics)
+   //       - begin: `2 * INDEX(op, hasLHS, hasRHS)`
+   //       - size: 2
+   //       - first char ==  0 --> error, second char will have the responsible operator
+   //       - first char == -1 --> special case (intended for `??` and `??=`), second char will have the responsible operator
+   
+   #define INDEX(op, lhs, rhs) ((+op << 2) | (((bool)lhs) << 1) | ((bool)rhs))
+   #define CASE(op, lhs, rhs, str) case INDEX(op, lhs, rhs): return FMT(str)
+   #define STD_BIN(op, binstr, assignstr) \
+      CASE(op, true, true, binstr); \
+      CASE(op##_ASSIGN, true, true, assignstr)
+   #define STD_UN_BIN(op, unstr, binstr, assignstr) \
+      CASE(op, false, true, unstr); \
+      STD_BIN(op, binstr, assignstr)
+
+   #define BIT_AND_ASSIGN AND_ASSIGN
+   #define BIT_OR_ASSIGN OR_ASSIGN
+   #define BIT_XOR_ASSIGN XOR_ASSIGN
+   #define SHIFT_LEFT_ASSIGN SHL_ASSIGN
+   #define SHIFT_RIGHT_ASSIGN SHR_ASSIGN
+
+   switch (INDEX(op, hasLHS, hasRHS)) {
+      STD_UN_BIN(ADD, "ps", "pl", "pL"); //positive, plus
+      STD_UN_BIN(SUB, "ng", "mi", "mI"); //negate, minus
+      STD_UN_BIN(MUL, "de", "ml", "mL"); //deref, multiply
+      STD_UN_BIN(BIT_AND, "ad", "an", "aN"); //address, and
+
+      STD_BIN(DIV, "dv", "dV"); //divide
+      STD_BIN(MOD, "rm", "rM"); //remainder
+      STD_BIN(BIT_OR, "or", "oR"); //or
+      STD_BIN(BIT_XOR, "eo", "eO"); //exclusive or
+      STD_BIN(SHIFT_LEFT, "ls", "lS"); //left shift
+      STD_BIN(SHIFT_RIGHT, "rs", "rS"); //right shift
+
+      CASE(ASSIGN, true, true, "aS"); //assign
+
+      CASE(BIT_NOT, false, true, "co"); //complement
+
+      CASE(LESSER, true, true, "lt"); //less than
+      CASE(GREATER, true, true, "gt"); //greater than
+      CASE(LESSER_OR_EQ, true, true, "le"); //less than
+      CASE(GREATER_OR_EQ, true, true, "ge"); //greater than
+      CASE(THREE_WAY_COMP, true, true, "ss"); //spaceship
+
+      CASE(LOGICAL_AND, true, true, "aa"); //and and
+      CASE(LOGICAL_OR, true, true, "oo"); //or or
+      CASE(LOGICAL_NOT, false, true, "nt"); //not
+
+      CASE(IS_EQUAL, true, true, "eq"); //equal
+      CASE(IS_UNEQUAL, true, true, "ne"); //not equal
+
+      CASE(INC, true, false, "pp"); //plus plus
+      CASE(DEC, true, false, "mm"); //minus minus
+
+      CASE(PTR_MEMBER_ACCESS, true, true, "pt"); //pointer
+      CASE(ARROW_METHOD_PTR, true, true, "pm"); //pointer to member
+
+      CASE(COMMA, true, true, "cm"); //comma
+
+      CASE(CALL_INVOKE, true, true, "cl"); //call
+      CASE(SUBSCRIPT_INVOKE, true, true, "ix"); //index
+      
+      case INDEX(COALESCE, true, true): TODO;
+      case INDEX(COALESCE_ASSIGN, true, true): TODO;
+
+      default: UNREACHABLE;
+   }
+
+   #undef SHR
+   #undef SHL
+   #undef BIT_XOR_ASSIGN
+   #undef BIT_OR_ASSIGN
+   #undef BIT_AND_ASSIGN
+
+   #undef STD_UN_BIN
+   #undef STD_BIN
+   #undef CASE
+   #undef INDEX
 }
 
 #endif //AST_MANGLE_CPP

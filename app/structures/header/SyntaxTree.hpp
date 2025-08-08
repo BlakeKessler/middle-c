@@ -141,6 +141,7 @@ class clef::SyntaxTree {
       static void __mangleImpl(mcsl::File& file, SyntaxTree& tree, Identifier& name, __MangleData& data, uint depth);
    public:
       static uint manglePrint(mcsl::File& file, SyntaxTree& tree, index<Identifier> name);
+      static const mcsl::str_slice mangleOp(OpID op, bool hasLHS, bool hasRHS);
 };
 
 //!quick little struct to indent when printing newlines in a `printf` call
