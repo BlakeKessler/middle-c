@@ -299,8 +299,54 @@ void clef::CodeGenerator::writeTypeDef(SymbolNode* symbol) {
          nl();
       }
    }
-   
-   //!TODO
+
+   for (auto elem : spec->composite().staticFuncs) {
+      auto overloads = elem.symbol->overloads().span();
+      for (auto [sigType, defIndex] : overloads) {
+         if (!defIndex) { //function is only forward-declared
+            continue;
+         }
+
+         debug_assert(sigType->metaType() == TypeSpec::FUNC_SIG);
+         auto& sig = sigType->funcSig();
+         writeTypename(sig.retType);
+         out.write(' ');
+         SyntaxTree::manglePrint(out, tree, elem.symbol, {}, sigType); //!TODO: specializer
+         out.write('(');
+
+         debug_assert(!sig.selfType);
+
+         FuncDef def = tree[defIndex];
+         auto params = tree[def.params()].span();
+         {
+            Expr& expr = tree[params[0]];
+            debug_assert(expr.opID() == OpID::LET);
+            Decl& decl = tree[(index<Decl>)params[0]];
+
+            writeTypename(tree[decl.type()].symbol()->type()); //!TODO: specializer
+            // writeIden(decl.type(), true);
+            out.write(' ');
+            out.write(tree[decl.name()].symbol()->name());
+            //!TODO: default value
+         }
+         for (index<Expr> exprIndex : params.span(1, params.size())) {
+            out.write(',').write(' ');
+            Expr& expr = tree[exprIndex];
+            debug_assert(expr.opID() == OpID::LET);
+            Decl& decl = tree[(index<Decl>)exprIndex];
+
+            writeTypename(tree[decl.type()].symbol()->type()); //!TODO: specializer
+            // writeIden(decl.type(), true);
+            out.write(' ');
+            out.write(tree[decl.name()].symbol()->name());
+            //!TODO: default value
+         }
+
+         out.write(FMT(") "));
+         writeProc(def.procedure());
+         nl();
+      }
+   }
 }
 
 void clef::CodeGenerator::writeStmt(index<Stmt> stmt) {
