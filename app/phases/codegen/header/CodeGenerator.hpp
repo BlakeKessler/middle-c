@@ -45,10 +45,13 @@ class clef::CodeGenerator {
       void initFile();
 
       void writeIden(index<Identifier>, bool);
-      void writeTypeDef(index<TypeDecl>);
+      void writeTypename(TypeSpec*);
+      void writeTypeDef(SymbolNode*);
 
       void writeExpr(index<Expr>);
       void writeStmt(index<Stmt>);
+
+      void writeValue(index<astNode>);
       
       void writeStmtSeq(index<StmtSeq>);
       void writeProc(index<Scope>);

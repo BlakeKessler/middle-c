@@ -39,6 +39,8 @@ void clef::CodeGenerator::gen(SyntaxTree& tree, mcsl::File& file) {
 
    debug_assert(tree[(index<astNode>)1].nodeType() == NodeType::STMT_SEQ);
    generator.writeStmtSeq(1);
+
+   generator.nl();
 }
 
 void clef::CodeGenerator::writeIden(index<Identifier> i, bool doMangle) {
@@ -55,22 +57,8 @@ void clef::CodeGenerator::writeIden(index<Identifier> i, bool doMangle) {
       out.write(iden.name());
    }
 }
-
-void clef::CodeGenerator::writeTypeDef(index<TypeDecl> defIndex) {
-   debug_assert(defIndex);
-   TypeDecl& def = tree[defIndex];
-   if (!def.decl()) {
-      TODO;
-   }
-   Identifier& decl = tree[def.decl()];
-   SymbolNode* symbol = decl.symbol();
-   debug_assert(symbol);
-   TypeSpec* spec = symbol->type();
+void clef::CodeGenerator::writeTypename(TypeSpec* spec) {
    debug_assert(spec);
-
-   if (spec->metaType() != TypeSpec::COMPOSITE) {
-      TODO;
-   }
 
    const mcsl::str_slice cMetaType = [](SymbolType t) -> const mcsl::str_slice {
       using enum SymbolType;
@@ -91,7 +79,7 @@ void clef::CodeGenerator::writeTypeDef(index<TypeDecl> defIndex) {
          case EXTERN_TYPE: TODO;
 
          case FUND_TYPE: fthru;
-         case INDIR: UNREACHABLE;
+         case INDIR: return {};
 
          case VAR: fthru;
          case FUNC: fthru;
@@ -102,35 +90,223 @@ void clef::CodeGenerator::writeTypeDef(index<TypeDecl> defIndex) {
          case null: UNREACHABLE;
          case __TYPE_BIT: UNREACHABLE;
       }
-   }(symbol->symbolType());
+   }(spec->canonName()->symbolType());
 
-   //filter out compile-time constructs
-   if (!~(uptr)cMetaType.data()) {
-      return;
+   if (cMetaType.data() && ~(uptr)cMetaType.data()) {
+      out.writeln(cMetaType, ' ');
+   }
+
+   //!TODO: specializer
+   SyntaxTree::manglePrint(out, tree, spec->canonName(), {});
+}
+
+void clef::CodeGenerator::writeTypeDef(SymbolNode* symbol) {
+   debug_assert(symbol);
+   TypeSpec* spec = symbol->type();
+   debug_assert(spec);
+
+   if (spec->metaType() != TypeSpec::COMPOSITE) {
+      TODO;
+   }
+
+   bool isObjType;
+   bool isEnumLike;
+   switch (symbol->symbolType()) {
+      using enum SymbolType;
+      #include "MAP_MACRO.h"
+
+      CASES(MASK, ENUM):
+         isObjType = false;
+         isEnumLike = true;
+         break;
+      CASES(STRUCT, CLASS, ENUM_UNION, UNION):
+         isObjType = true;
+         isEnumLike = false;
+         break;
+
+      case NAMESPACE:
+         isObjType = false;
+         isEnumLike = false;
+         break;
+      
+      case TRAIT: return; //traits only exist at compile-time, so do not need to be represented in the executable
+
+      case GENERIC: TODO;
+      case EXTERN_TYPE: TODO;
+
+      CASES(FUND_TYPE, INDIR): 
+         UNREACHABLE;
+
+      CASES(VAR, FUNC, MACRO, ATTRIBUTE, LABEL, EXTERN_IDEN, null):
+         UNREACHABLE;
+      case __TYPE_BIT:
+         UNREACHABLE;
+
+      #include "MAP_MACRO_UNDEF.h"
    }
 
    //!forward-declare type
-   out.write(cMetaType);
-   out.write(' ');
-   SyntaxTree::manglePrint(out, tree, def.decl());
-   out.write(';');
-   nl();
+   if (isObjType) {
+      writeTypename(symbol->type()); //!TODO: specializer
+      out.write(';');
+      nl();
+   }
 
    //!define subtypes
+   for (auto subtype : spec->composite().subtypes) {
+      writeTypeDef(subtype.symbol);
+      nl();
+   }
 
    //!struct for type (member names not mangled)
+   if (isObjType) {
+      writeTypename(symbol->type()); //!TODO: specializer
+      out.write(FMT(" {"));
+
+      auto span = spec->composite().dataMembs.span();
+      if (span.size()) {
+         ++indents;
+         for (auto elem : span) {
+            nl();
+            writeTypename(elem.symbol->type());
+            out.write(' ');
+            out.write(elem.symbol->name());
+            //!TODO: value
+            out.write(';');
+         }
+         --indents;
+         nl();
+      }
+      
+      out.write(FMT("};"));
+      nl();
+   }
+
+   //!static members
+   if (isEnumLike) {
+      auto span = spec->composite().staticMembs.span();
+      writeTypename(symbol->type()); //!TODO: specializer
+      out.write(FMT(" {"));
+      if (span.size()) {
+         ++indents;
+         for (auto elem : span) {
+            nl();
+            out.write(elem.symbol->name());
+            //!TODO: value
+            out.write(',');
+         }
+         --indents;
+         nl();
+      }
+      out.write(FMT("};"));
+   } else {
+      auto span = spec->composite().staticMembs.span();
+      for (auto elem : span) {
+         writeTypename(elem.symbol->type());
+         out.write(' ');
+         SyntaxTree::manglePrint(out, tree, elem.symbol, {});
+         //!TODO: value
+         out.write(';');
+         nl();
+      }
+   }
 
    //!forward-declare functions and methods
+   for (auto elem : spec->composite().methods) {
+      auto overloads = elem.symbol->overloads().span();
+      for (auto [sigType, defIndex] : overloads) {
+         debug_assert(sigType->metaType() == TypeSpec::FUNC_SIG);
+         auto& sig = sigType->funcSig();
+         writeTypename(sig.retType);
+         out.write(' ');
+         SyntaxTree::manglePrint(out, tree, elem.symbol, {}, sigType); //!TODO: specializer
+         out.write('(');
+
+         writeTypename(sig.selfType);
+         out.write('*');
+
+         for (auto [paramSpec, paramQuals] : sig.params.span()) {
+            out.write(',').write(' ');
+            //!TODO: quals
+            writeTypename(paramSpec);
+         }
+
+         out.write(')').write(';');
+         nl();
+      }
+   }
+
+   for (auto elem : spec->composite().staticFuncs) {
+      auto overloads = elem.symbol->overloads().span();
+      for (auto [sigType, defIndex] : overloads) {
+         debug_assert(sigType->metaType() == TypeSpec::FUNC_SIG);
+         auto& sig = sigType->funcSig();
+         writeTypename(sig.retType);
+         out.write(' ');
+         SyntaxTree::manglePrint(out, tree, elem.symbol, {}, sigType); //!TODO: specializer
+         out.write('(');
+
+         if (sig.params.size()) {
+            //!TODO: quals
+            writeTypename(sig.params[0].first);
+            for (auto [paramSpec, paramQuals] : sig.params.span(1, sig.params.size())) {
+               out.write(',').write(' ');
+               //!TODO: quals
+               writeTypename(paramSpec);
+            }
+         }
+
+         out.write(')').write(';');
+         nl();
+      }
+   }
 
    //!define functions and methods (parameter names not mangled)
+   for (auto elem : spec->composite().methods) {
+      auto overloads = elem.symbol->overloads().span();
+      for (auto [sigType, defIndex] : overloads) {
+         if (!defIndex) { //function is only forward-declared
+            continue;
+         }
 
-   // TODO;
+         debug_assert(sigType->metaType() == TypeSpec::FUNC_SIG);
+         auto& sig = sigType->funcSig();
+         writeTypename(sig.retType);
+         out.write(' ');
+         SyntaxTree::manglePrint(out, tree, elem.symbol, {}, sigType); //!TODO: specializer
+         out.write('(');
+
+         writeTypename(sig.selfType);
+         out.write(FMT("* this"));
+
+         FuncDef def = tree[defIndex];
+         auto params = tree[def.params()].span();
+         for (index<Expr> exprIndex : params) {
+            out.write(',').write(' ');
+            Expr& expr = tree[exprIndex];
+            debug_assert(expr.opID() == OpID::LET);
+            Decl& decl = tree[(index<Decl>)exprIndex];
+
+            writeTypename(tree[decl.type()].symbol()->type()); //!TODO: specializer
+            // writeIden(decl.type(), true);
+            out.write(' ');
+            out.write(tree[decl.name()].symbol()->name());
+            //!TODO: default value
+         }
+
+         out.write(FMT(") "));
+         writeProc(def.procedure());
+         nl();
+      }
+   }
+   
+   //!TODO
 }
 
 void clef::CodeGenerator::writeStmt(index<Stmt> stmt) {
+   nl();
    writeExpr(stmt);
    out.write(';');
-   out.write('\n');
 }
 void clef::CodeGenerator::writeExpr(index<Expr> i) {
    debug_assert(i);
@@ -149,7 +325,7 @@ void clef::CodeGenerator::writeExpr(index<Expr> i) {
          writeExpr(forLoop.condition()); //!TODO: cast to bool
          out.write(';');
          writeExpr(forLoop.increment());
-         out.write(FMT(")"));
+         out.write(FMT(") "));
          //procedure
          writeProc(+forLoop.procedure());
       } break;
@@ -164,7 +340,7 @@ void clef::CodeGenerator::writeExpr(index<Expr> i) {
          out.write(FMT("while ("));
          //condition
          writeExpr(whileLoop.condition()); //!TODO: cast to bool
-         out.write(FMT(")"));
+         out.write(FMT(") "));
          //procedure
          writeProc(+whileLoop.procedure());
       } break;
@@ -177,17 +353,26 @@ void clef::CodeGenerator::writeExpr(index<Expr> i) {
          //condition
          out.write(FMT(" while ("));
          writeExpr(whileLoop.condition()); //!TODO: cast to bool
-         out.write(FMT(")"));
+         out.write(')');
       } break;
-      case IF       : {
-         If& whileLoop = tree[(index<If>)i];
-         //while
-         out.write(FMT("if ("));
-         //condition
-         writeExpr(whileLoop.condition()); //!TODO: cast to bool
-         out.write(FMT(")"));
+      case IF       : { //!TODO: else
+         If& ifStmt = tree[(index<If>)i];
+         if (ifStmt.condition()) {
+            //if
+            out.write(FMT("if ("));
+            //condition
+            writeExpr(ifStmt.condition()); //!TODO: cast to bool
+            out.write(FMT(") "));
+         }
          //procedure
-         writeProc(+whileLoop.procedure());
+         writeProc(+ifStmt.procedure());
+         //else
+         if (ifStmt.elseStmt()) {
+            nl();
+            out.write(FMT("else "));
+            writeExpr(ifStmt.elseStmt());
+         }
+
       } break;
       case SWITCH   : {
          TODO;
@@ -215,7 +400,7 @@ void clef::CodeGenerator::writeExpr(index<Expr> i) {
          //!NOTE: if `typedef struct` and `typedef union` are not used when MAKE_TYPE is implemented, `struct`/`union` will need to be printed for object types
          Decl& decl = tree[(index<Decl>)i];
          //type
-         writeIden(decl.type(), true);
+         writeTypename(tree[decl.type()].symbol()->type());
          out.write(' ');
          //name
          writeIden(decl.name(), false);
@@ -226,12 +411,16 @@ void clef::CodeGenerator::writeExpr(index<Expr> i) {
          }
       } break;
       case MAKE_TYPE: {
-         writeTypeDef(+i);
+         TypeDecl& decl = tree[(index<TypeDecl>)i];
+         if (!decl.decl()) {
+            TODO;
+         }
+         writeTypeDef(tree[decl.decl()].symbol());
       } break;
 
       case RETURN   : {
          out.write(FMT("return "));
-         writeExpr(+expr.lhs());
+         writeValue(+expr.lhs());
       } break;
       case BREAK    : {
          out.write(FMT("break"));
@@ -296,13 +485,13 @@ void clef::CodeGenerator::writeExpr(index<Expr> i) {
             out.write('(');
             //lhs
             if (expr.lhs()) {
-               writeExpr(+expr.lhs());
+               writeValue(+expr.lhs());
             }
             //operator
             out.write(toString(expr.opID()));
             //rhs
             if (expr.rhs()) {
-               writeExpr(+expr.rhs());
+               writeValue(+expr.rhs());
             }
             //closing paren
             out.write(')');
@@ -319,7 +508,11 @@ void clef::CodeGenerator::writeExpr(index<Expr> i) {
 
       case NULL:
          if ((bool)(expr.lhs()) != (bool)(expr.rhs())) {
-            TODO;
+            if (expr.lhs()) {
+               writeValue(+expr.lhs());
+            } else {
+               writeValue(+expr.rhs());
+            }
          } else {
             if (expr.lhs() || expr.rhs() || expr.extra() || expr.extra2()) {
                TODO;
@@ -327,25 +520,47 @@ void clef::CodeGenerator::writeExpr(index<Expr> i) {
                TODO;
             }
          }
+         break;
 
       case DEF_FUNC_PARAMS: fthru;
       case ALIAS:
          return; //!NOTE: not sure that this works
+
+      case MEMBER_ACCESS:
+         writeValue(+expr.lhs());
+         out.write('.');
+         writeValue(+expr.rhs());
+         break;
 
       default:
          internalError(ErrCode::BAD_EXPR, FMT("unhandled operator `%s` reached"), toString(expr.opID()));
    }
 }
 
+void clef::CodeGenerator::writeValue(index<astNode> i) {
+   debug_assert(i);
+   astNode& node = tree[i];
+   if (canDownCastTo(node.nodeType(), NodeType::EXPR)) {
+      writeExpr(+i);
+      return;
+   } else if (canDownCastTo(node.nodeType(), NodeType::IDEN)) {
+      writeIden(+i, false);
+      return;
+   } else {
+      TODO;
+   }
+}
+
 void clef::CodeGenerator::writeProc(index<Scope> i) {
    debug_assert(i);
 
-   out.write(FMT(" {"));
+   out.write('{');
    ++indents;
-   nl();
    writeStmtSeq(i);
    --indents;
-   nl();
+   if (tree[i].size()) {
+      nl();
+   }
    out.write('}');
 }
 void clef::CodeGenerator::writeStmtSeq(index<StmtSeq> i) {

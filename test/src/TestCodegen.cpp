@@ -7,6 +7,9 @@
 #include "dyn_arr.hpp"
 #include "io.hpp"
 
+// static const auto BIG_HEADER = mcsl::FMT("\033[;1m==============================================\n\033[0m");
+// static const auto SMALL_HEADER = mcsl::FMT("\033[;1m----------------------------------------------\n\033[0m");
+
 int main(const int argc, char** argv) {
    if (argc == 1) {
       mcsl::printf(FMT("No paths to files to parse provided."));
@@ -15,7 +18,10 @@ int main(const int argc, char** argv) {
    //parse
    clef::SyntaxTree tree{};
    clef::Parser::parse(mcsl::str_slice::make_from_cstr(argv[1]), tree);
-   //output generated code to stdout
+   // mcsl::err_printf(mcsl::FMT("\033[1m%s:\033[22m\n%s%s\n%s\n\n"), FMT(argv[1]), SMALL_HEADER, tree, BIG_HEADER);
+   // mcsl::stderr.flush();
+
+   //run codegen and print it to stdout
    clef::CodeGenerator::gen(tree, mcsl::stdout);
 
    return EXIT_SUCCESS;

@@ -22,6 +22,12 @@ uint clef::SyntaxTree::manglePrint(mcsl::File& file, SyntaxTree& tree, index<Ide
    SymbolNode* symbol = name.symbol();
 
    __MangleData data;
+
+   if (symbol->symbolType() == SymbolType::FUND_TYPE) {
+      __mangleFund(file, symbol->type()->fund().id,  data);
+      return data.charsPrinted;
+   }
+
    data.charsPrinted += file.printf(FMT(MANGLE_PREFIX));
    
    //name
@@ -36,6 +42,68 @@ uint clef::SyntaxTree::manglePrint(mcsl::File& file, SyntaxTree& tree, index<Ide
    //function signature
    if (symbol->symbolType() == SymbolType::FUNC) {
       __mangleFuncSigImpl(file, tree, symbol->getOverload(name.overloadIndex()).first, false, data);
+   }
+
+   //return
+   return data.charsPrinted;
+}
+
+uint clef::SyntaxTree::manglePrint(mcsl::File& file, SyntaxTree& tree, SymbolNode* symbol, mcsl::arr_span<index<Expr>> specializer) {
+   debug_assert(symbol->symbolType() != SymbolType::FUNC);
+   
+   __MangleData data;
+
+   if (symbol->symbolType() == SymbolType::FUND_TYPE) {
+      __mangleFund(file, symbol->type()->fund().id,  data);
+      return data.charsPrinted;
+   }
+
+   data.charsPrinted += file.printf(FMT(MANGLE_PREFIX));
+   
+   //name
+   if (symbol->parentScope() != tree.globalScope()) {
+      data.charsPrinted += file.printf(FMT(MANGLE_NAMESPACE_OPEN));
+      __mangleImpl(file, tree, symbol, specializer, data, 0);
+      data.charsPrinted += file.printf(FMT(MANGLE_NAMESPACE_CLOSE));
+   } else {
+      __mangleImpl(file, tree, symbol, specializer, data, 0);
+   }
+
+   //return
+   return data.charsPrinted;
+}
+uint clef::SyntaxTree::manglePrint(mcsl::File& file, SyntaxTree& tree, SymbolNode* funcSymbol, mcsl::arr_span<index<Expr>> specializer, TypeSpec* sigSpec) {
+   debug_assert(funcSymbol->symbolType() == SymbolType::FUNC);
+   
+   __MangleData data;
+
+   data.charsPrinted += file.printf(FMT(MANGLE_PREFIX));
+   
+   //name
+   if (funcSymbol->parentScope() != tree.globalScope()) {
+      data.charsPrinted += file.printf(FMT(MANGLE_NAMESPACE_OPEN));
+      __mangleImpl(file, tree, funcSymbol, specializer, data, 0);
+      data.charsPrinted += file.printf(FMT(MANGLE_NAMESPACE_CLOSE));
+   } else {
+      __mangleImpl(file, tree, funcSymbol, specializer, data, 0);
+   }
+   
+   //function signature
+   auto& sig = sigSpec->funcSig();
+   if (specializer.size()) { //return type (only for templated functions)
+      if (sig.retType->metaType() == TypeSpec::FUNC_SIG) {
+         TODO;
+      } else {
+         __mangleImpl(file, tree, sig.retType->canonName(), {}, data, 0); //!TODO: specializer
+      }
+   }
+   for (auto [paramSpec, quals] : sig.params.span()) {
+      //!TODO: quals
+      if (paramSpec->metaType() == TypeSpec::FUNC_SIG) {
+         TODO;
+      } else {
+         __mangleImpl(file, tree, paramSpec->canonName(), {}, data, 0); //!TODO: specializer
+      }
    }
 
    //return
@@ -58,7 +126,27 @@ void clef::SyntaxTree::__mangleImpl(mcsl::File& file, SyntaxTree& tree, Identifi
    }
    
    if (name.specializer()) {
-      __mangleSpecializerImpl(file, tree, name, data);
+      __mangleSpecializerImpl(file, tree, tree[name.specializer()].span(), data);
+   }
+}
+
+void clef::SyntaxTree::__mangleImpl(mcsl::File& file, SyntaxTree& tree, SymbolNode* symbol, mcsl::arr_span<index<Expr>> specializer, __MangleData& data, uint depth) {
+   debug_assert(symbol);
+   if (symbol->parentScope() != tree.globalScope()) {
+      //!TODO: parent scope specializer
+      __mangleImpl(file, tree, symbol->parentScope(), {}, data, depth + 1);
+   }
+
+   if (symbol->symbolType() == SymbolType::FUND_TYPE) {
+      __mangleFund(file, symbol->type()->fund().id, data);
+   } else {
+      //!TODO: substitutions
+      //!TODO: function pointers
+      data.charsPrinted += file.printf(FMT("%u%s"), symbol->name().size(), symbol->name());
+   }
+   
+   if (specializer.size()) {
+      __mangleSpecializerImpl(file, tree, specializer, data);
    }
 }
 
@@ -66,6 +154,7 @@ void clef::SyntaxTree::__mangleFund(mcsl::File& file, FundTypeID fund, __MangleD
    if (fund == FundTypeID::null || fund == FundTypeID::FUNCTION_SIGNATURE) {
       TODO;
    }
+   //!TODO: abbreviations for func sigs
    data.charsPrinted += file.printf(toString(fund));
 }
 
@@ -73,13 +162,10 @@ void clef::SyntaxTree::__mangleFuncSigImpl(mcsl::File& file, SyntaxTree& tree, T
    TODO;
 }
 
-void clef::SyntaxTree::__mangleSpecializerImpl(mcsl::File& file, SyntaxTree& tree, Identifier& name, __MangleData& data) {
-   debug_assert(name.specializer());
-
+void clef::SyntaxTree::__mangleSpecializerImpl(mcsl::File& file, SyntaxTree& tree, mcsl::arr_span<index<Expr>> spec, __MangleData& data) {
    data.charsPrinted += file.printf(FMT(MANGLE_SPECIALIZER_OPEN));
    
-   auto span = tree[name.specializer()].span();
-   for (index<Expr> i : span) {
+   for (index<Expr> i : spec) {
       debug_assert(i);
       Expr& expr = tree[i];
       if (expr.opID() == OpID::NULL && expr.lhs() && canDownCastTo(expr.lhsType(), NodeType::IDEN) && !expr.rhs() && !expr.extra() && !expr.extra2()) {

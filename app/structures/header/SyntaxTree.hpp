@@ -136,11 +136,14 @@ class clef::SyntaxTree {
       };
       static void __mangleFund(mcsl::File& file, FundTypeID fund, __MangleData& data);
       static void __mangleFuncSigImpl(mcsl::File& file, SyntaxTree& tree, TypeSpec* sig, bool printRetType, __MangleData& data);
-      static void __mangleSpecializerImpl(mcsl::File& file, SyntaxTree& tree, Identifier& name, __MangleData& data);
+      static void __mangleSpecializerImpl(mcsl::File& file, SyntaxTree& tree, mcsl::arr_span<index<Expr>> spec, __MangleData& data);
       static void __mangleExprImpl(mcsl::File& file, SyntaxTree& tree, Expr& name, __MangleData& data);
       static void __mangleImpl(mcsl::File& file, SyntaxTree& tree, Identifier& name, __MangleData& data, uint depth);
+      static void __mangleImpl(mcsl::File& file, SyntaxTree& tree, SymbolNode* symbol, mcsl::arr_span<index<Expr>> specializer, __MangleData& data, uint depth);
    public:
       static uint manglePrint(mcsl::File& file, SyntaxTree& tree, index<Identifier> name);
+      static uint manglePrint(mcsl::File& file, SyntaxTree& tree, SymbolNode* symbol, mcsl::arr_span<index<Expr>> specializer);
+      static uint manglePrint(mcsl::File& file, SyntaxTree& tree, SymbolNode* funcSymbol, mcsl::arr_span<index<Expr>> specializer, TypeSpec* sigSpec);
       static const mcsl::str_slice mangleOp(OpID op, bool hasLHS, bool hasRHS);
 };
 

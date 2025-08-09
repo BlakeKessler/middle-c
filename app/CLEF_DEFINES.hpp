@@ -48,5 +48,7 @@
 
 //utils
 #define fthru [[fallthrough]]
+#define __CASE(val) case val: fthru;
+#define CASES(case0, ...) MCSL_MAP(__CASE, __VA_ARGS__) case case0
 
 #endif //CLEF_DEFINES_HPP
