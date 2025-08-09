@@ -1,4 +1,4 @@
-default: Codegen
+default: Lexer
 
 #directories and files
 MODULES := mcsl app frozen

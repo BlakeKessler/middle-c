@@ -342,7 +342,8 @@ clef::Token clef::Lexer::lexChar() {
    const char tmp = parseChar();
    if (curr >= end || *curr != CHAR_DELIM) { logError(ErrCode::BAD_LITERAL, "character literal may only contain a single character/escape sequence"); }
    ++curr; //skip closing quote
-   return {tmp};
+   // return {tmp};
+   TODO;
 }
 clef::Token clef::Lexer::lexStr() {
    while (++curr < end && *curr != STR_DELIM) {
@@ -354,7 +355,8 @@ clef::Token clef::Lexer::lexStr() {
       logError(ErrCode::BAD_LITERAL, "unclosed string literal");
    }
    ++curr;
-   return {mcsl::str_slice{tokBegin+1,curr-1}, PtxtType::UNPROCESSED_STR};
+   // return {mcsl::str_slice{tokBegin+1,curr-1}, PtxtType::UNPROCESSED_STR};
+   TODO;
 }
 clef::Token clef::Lexer::lexInterpStr() {
    TODO;

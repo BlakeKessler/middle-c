@@ -49,81 +49,6 @@ namespace clef {
    };
    constexpr auto      operator+(const ErrCode t) noexcept { return std::to_underlying(t); }
    
-   //!enum of symbol type codes
-   enum class SymbolType : uint8 {
-      null = 0,
-
-      EXTERN_IDEN,
-
-      VAR,
-      FUNC,
-      MACRO,
-
-      ATTRIBUTE,
-
-      LABEL,
-      
-      __TYPE_BIT = 8_m,
-         EXTERN_TYPE,
-         FUND_TYPE,
-         CLASS,
-         STRUCT,
-         TRAIT,
-         UNION,
-         ENUM,
-         ENUM_UNION,
-         MASK,
-         NAMESPACE,
-
-         GENERIC,
-
-         INDIR,
-   };
-   constexpr auto operator+(const SymbolType t) noexcept { return std::to_underlying(t); }
-   constexpr bool isType(SymbolType t) noexcept { return +t & +SymbolType::__TYPE_BIT; }
-   constexpr bool isNonType(SymbolType t) noexcept { return t != SymbolType::null && !isType(t); }
-
-   //!enum of AST node type codes
-   enum class NodeType : uint8 {
-      ERROR = 0xFF,  //CLEF INTERNAL ERROR
-      NONE = 0x00,   //to-be determined
-
-      RAW_IDEN,
-      IDEN,
-      SCOPE,
-      LITERAL,
-      EXPR,
-         STMT,
-            DECL,
-            FUNC_DEF,
-            MACRO_DEF,
-            MAKE_TYPE,
-            FOR_LOOP,
-            FOREACH_LOOP,
-            WHILE_LOOP,
-            DO_WHILE_LOOP,
-            IF,
-            SWITCH,
-            MATCH,
-            ASM,
-      SWITCH_CASES,
-      MATCH_CASES,
-      STMT_SEQ,
-      ARG_LIST,
-   };
-   constexpr auto operator+(const NodeType t) noexcept { return std::to_underlying(t); }
-   constexpr bool canDownCastTo(const NodeType from, const NodeType to) {
-      switch (to) {
-         case NodeType::EXPR:
-            return from >= NodeType::EXPR && from <= NodeType::ASM;
-         case NodeType::STMT:
-            return from >= NodeType::STMT && from <= NodeType::ASM;
-         
-         default:
-            return from == to;
-      };
-   }
-   
    //!token types bitmask
    enum class TokenType : uint8 {
       NONE = 0,
@@ -143,6 +68,7 @@ namespace clef {
       ESC,
       BLOCK_DELIM,
       PTXT_SEG,
+      ATTR,
    };
    constexpr auto      operator+(const TokenType t) noexcept { return std::to_underlying(t); }
    constexpr TokenType operator&(const TokenType lhs, const TokenType rhs) noexcept { return (TokenType)((+lhs) & (+rhs)); }
@@ -788,56 +714,6 @@ namespace clef {
    constexpr auto operator+(const BlockDelimRole t) noexcept { return std::to_underlying(t); } 
    constexpr bool isOpener(const BlockDelimRole t) { return +t & +BlockDelimRole::OPEN; }
    constexpr bool isCloser(const BlockDelimRole t) { return +t & +BlockDelimRole::CLOSE; }
-
-   //plaintext segment type
-   enum class PtxtType : uint8 {
-      null = 0,
-
-      CHAR = 1,
-      WCHAR,
-      CHAR8,
-      CHAR16,
-      CHAR32,
-
-      STR = 9,
-      WSTR,
-      STR8,
-      STR16,
-      STR32,
-
-      UNPROCESSED_STR = 25,
-      UNPROCESSED_WSTR,
-      UNPROCESSED_STR8,
-      UNPROCESSED_STR16,
-      UNPROCESSED_STR32,
-
-      __STR_TYPE = 8,
-   };
-   constexpr auto operator+(const PtxtType t) noexcept { return std::to_underlying(t); }
-   constexpr bool isChar(const PtxtType t) { return +t && !(+t & +PtxtType::__STR_TYPE); }
-   constexpr bool isString(const PtxtType t) { return +t & +PtxtType::__STR_TYPE; }
-   
-   //!literal type specification
-   enum class LitType : uint8 {
-      NONE = 0,
-      
-      POINTER,
-
-      UINT,
-      SINT,
-      FLOAT,
-
-      BOOL,
-      CHAR,
-      STRING,
-      INTERP_STR,
-      FORMAT,
-      REGEX,
-
-      TYPEID,
-   };
-   constexpr auto operator+(const LitType t) noexcept { return std::to_underlying(t); }
-
 
    enum class FundTypeID : uint8 {
       null,

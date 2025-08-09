@@ -8,7 +8,6 @@
 #undef NULL
 
 namespace clef {
-   constexpr const mcsl::str_slice toString(const NodeType);
    constexpr const mcsl::str_slice toString(const TokenType);
    constexpr const mcsl::str_slice toString(const TokenType);
    constexpr const mcsl::str_slice toString(const OpID);
@@ -16,11 +15,8 @@ namespace clef {
    constexpr const mcsl::str_slice toString(const KeywordID);
    constexpr const mcsl::str_slice toString(const BlockType);
    constexpr const mcsl::str_slice toString(const BlockDelimRole);
-   constexpr const mcsl::str_slice toString(const PtxtType);
-   constexpr const mcsl::str_slice toString(const LitType);
    constexpr const mcsl::str_slice toString(const FundTypeID);
    constexpr const mcsl::str_slice toString(const QualMask);
-   constexpr const mcsl::str_slice toString(const SymbolType);
 
    constexpr const mcsl::str_slice getSuffix(const FundTypeID);
 };
@@ -30,38 +26,6 @@ namespace clef {
 #pragma region inlinesrc
 
 #define CASE(enumerator, name) case enumerator: return mcsl::str_slice::make_from_cstr(name)
-
-constexpr const mcsl::str_slice clef::toString(const NodeType type) {
-   using enum NodeType;
-   switch (type) {
-      CASE(ERROR, "error");
-      CASE(NONE, "none");
-
-      CASE(RAW_IDEN, "RAW_IDENTIFIER");
-      CASE(IDEN, "IDENTIFIER");
-      CASE(SCOPE, "SCOPE");
-      CASE(LITERAL, "LITERAL");
-      CASE(EXPR, "EXPRESSION");
-      CASE(STMT, "STATEMENT");
-      CASE(DECL, "DECLARATION");
-      CASE(FUNC_DEF, "FUNCTION_DEFINITION");
-      CASE(MACRO_DEF, "MACRO_DEFINITION");
-      CASE(FOR_LOOP, "FOR_LOOP");
-      CASE(FOREACH_LOOP, "FOREACH_LOOP");
-      CASE(WHILE_LOOP, "WHILE_LOOP");
-      CASE(DO_WHILE_LOOP, "DO_WHILE_LOOP");
-      CASE(IF, "IF");
-      CASE(SWITCH, "SWITCH");
-      CASE(MATCH, "MATCH");
-      CASE(ASM, "ASM");
-      CASE(SWITCH_CASES, "SWITCH_CASES");
-      CASE(MATCH_CASES, "MATCH_CASES");
-      CASE(STMT_SEQ, "STATEMENT_SEQUENCE");
-      CASE(ARG_LIST, "ARGUMENT_LIST");
-      CASE(MAKE_TYPE, "MAKE_TYPE");
-   }
-   UNREACHABLE;
-}
 
 constexpr const mcsl::str_slice clef::toString(const TokenType type) {
    using enum TokenType;
@@ -442,57 +406,6 @@ constexpr const mcsl::str_slice clef::toString(const BlockDelimRole role) {
    UNREACHABLE;
 }
 
-constexpr const mcsl::str_slice clef::toString(const PtxtType type) {
-   using enum PtxtType;
-   switch (type) {
-      CASE(null, "NULL");
-
-      CASE(CHAR, "CHAR");
-      CASE(WCHAR, "WCHAR");
-      CASE(CHAR8, "CHAR8");
-      CASE(CHAR16, "CHAR16");
-      CASE(CHAR32, "CHAR32");
-
-      CASE(STR, "STR");
-      CASE(WSTR, "WSTR");
-      CASE(STR8, "STR8");
-      CASE(STR16, "STR16");
-      CASE(STR32, "STR32");
-
-      CASE(UNPROCESSED_STR, "UNPROCESSED_STR");
-      CASE(UNPROCESSED_WSTR, "UNPROCESSED_WSTR");
-      CASE(UNPROCESSED_STR8, "UNPROCESSED_STR8");
-      CASE(UNPROCESSED_STR16, "UNPROCESSED_STR16");
-      CASE(UNPROCESSED_STR32, "UNPROCESSED_STR32");
-
-      case __STR_TYPE: UNREACHABLE;
-   }
-   UNREACHABLE;
-}
-
-constexpr const mcsl::str_slice clef::toString(const LitType type) {
-   using enum LitType;
-   switch (type) {
-      CASE(NONE, "none");
-
-      CASE(POINTER, "POINTER");
-
-      CASE(UINT, "UNSIGNED_INT");
-      CASE(SINT, "SIGNED_INT");
-      CASE(FLOAT, "FLOATING_POINT");
-
-      CASE(BOOL, "BOOLEAN");
-      CASE(CHAR, "CHARACTER");
-      CASE(STRING, "STRING");
-      CASE(INTERP_STR, "INTERPOLATED_STRING");
-      CASE(FORMAT, "FORMAT");
-      CASE(REGEX, "REGEX");
-
-      CASE(TYPEID, "TYPEID");
-   }
-   UNREACHABLE;
-}
-
 constexpr const mcsl::str_slice clef::toString(const FundTypeID type) {
    using enum FundTypeID;
    switch (type) {
@@ -567,38 +480,6 @@ constexpr const mcsl::str_slice clef::toString(const QualMask quals) {
       default: TODO;
    }
    UNREACHABLE;
-}
-
-constexpr const mcsl::str_slice clef::toString(const SymbolType type) {
-   using enum SymbolType;
-   switch (type) {
-      CASE(EXTERN_IDEN, "external identifier");
-      CASE(VAR, "variable");
-      CASE(FUNC, "func");
-      CASE(MACRO, "macro");
-      
-      CASE(LABEL, "label");
-
-      CASE(ATTRIBUTE, "attribute");
-      
-      CASE(EXTERN_TYPE, "external type");
-      CASE(FUND_TYPE, "fundamental type");
-      CASE(CLASS, "class");
-      CASE(STRUCT, "struct");
-      CASE(TRAIT, "trait");
-      CASE(UNION, "union");
-      CASE(ENUM, "enum");
-      CASE(ENUM_UNION, "enumunion");
-      CASE(MASK, "mask");
-      CASE(NAMESPACE, "namespace");
-
-      CASE(GENERIC, "type");
-      
-      CASE(INDIR, "indirect");
-
-      case __TYPE_BIT: UNREACHABLE;
-      case null: UNREACHABLE;
-   }
 }
 
 constexpr const mcsl::str_slice clef::getSuffix(const FundTypeID id) {

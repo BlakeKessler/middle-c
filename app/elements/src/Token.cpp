@@ -43,16 +43,6 @@ mcsl::File& mcsl::write(File& file, const clef::Token& tok) {
       case TokenType::BLOCK_DELIM:
          file.printf(mcsl::FMT("\033[35mBLOCK DELIMITER:\033[39m %s \033[3m[%s]\033[23m"), toString(tok.block().type), toString(tok.block().role));
          break;
-      case TokenType::PTXT_SEG:
-         file.printf(mcsl::FMT("\033[35mPLAINTEXT SEGMENT (\033[3m%s\033[23m):\033[39m "), toString(tok.ptxtType()));
-         switch (tok.ptxtType()) {
-            case PtxtType::CHAR           : file.printf(mcsl::FMT("%c"), tok.charVal()); break;
-            case PtxtType::STR            : file.printf(mcsl::FMT("%s"), tok.strVal()); break;
-            case PtxtType::UNPROCESSED_STR: file.printf(mcsl::FMT("%s"), tok.unprocessedStrVal()); break;
-
-            default: internalError(clef::ErrCode::LEXER_NOT_IMPLEMENTED, mcsl::FMT("\033[35munimplemented plaintext segment type used (%s)\033[39m"), toString(tok.ptxtType()));
-         }
-         break;
       
       default: UNREACHABLE;
    }
@@ -86,17 +76,6 @@ uint mcsl::writef(File& file, const clef::Token& tok, char mode, FmtArgs args) {
          return file.write(ESCAPE_CHAR), 1;
       case TokenType::BLOCK_DELIM:
          return writef(file, toString(tok.block().role), mode, args) + writef(file, ' ', 'c', {}) + writef(file, toString(tok.block().type), mode, args);
-      case TokenType::PTXT_SEG:
-         switch (tok.ptxtType()) {
-            case PtxtType::CHAR:
-               return file.write(tok.charVal()), 1;
-            case PtxtType::STR:
-               return writef(file, tok.strVal(), mode, args);
-            case PtxtType::UNPROCESSED_STR:
-               return writef(file, tok.unprocessedStrVal(), mode, args);
-
-            default: internalError(clef::ErrCode::LEXER_NOT_IMPLEMENTED, mcsl::FMT("\033[35munimplemented plaintext segment type used (%s)\033[39m"), toString(tok.ptxtType()));
-         }
       
       default: UNREACHABLE;
    }

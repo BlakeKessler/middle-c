@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
    }
 
    //read file
-   clef::Source src = clef::Source::readFile(argv[1]);
+   clef::Source src = clef::Source::readFile(FMT(argv[1]));
 
    //print file contents
    const mcsl::str_slice fileDelim = FMT("----------------------\n");
