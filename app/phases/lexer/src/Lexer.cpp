@@ -78,11 +78,11 @@ RESTART:
             case mcsl::NumType::null: UNREACHABLE;
             case mcsl::NumType::UINT:
                if (kw == KeywordID::_NOT_A_KEYWORD || isUint(kw)) {
-                  return {val.val.u, kw};
+                  return Token::makeUint(val.val.u, kw);
                } else if (isSint(kw)) {
-                  return {(slong)val.val.u, kw};
+                  return Token::makeSint(val.val.u, kw);
                } else if (isFloatingPoint(kw)) {
-                  return {(flong)val.val.u, kw};
+                  return Token::makeReal(val.val.u, kw);
                } else { [[unlikely]];
                   debug_assert(isText(kw));
                   TODO;
@@ -90,7 +90,7 @@ RESTART:
             case mcsl::NumType::SINT: UNREACHABLE;
             case mcsl::NumType::REAL:
                if (kw == KeywordID::_NOT_A_KEYWORD || isFloatingPoint(kw)) {
-                  return {val.val.f, kw};
+                  return Token::makeReal(val.val.f, kw);
                } else { [[unlikely]];
                   logError(ErrCode::BAD_LITERAL, "cannot narrow floating point literal to integer type `%s`", toString(kw));
                }
@@ -99,7 +99,8 @@ RESTART:
 
       //ATTRIBUTES
       case '@':
-         TODO;
+         ++curr;
+         fthru;
 
       //IDENTIFIERS
       case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'X': case 'o': case 'G': case 'H': case 'I': case 'J': case 'K': case 'L': case 'M': case 'N': case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V': case 'W': case 'Y': case 'Z':
@@ -115,11 +116,11 @@ RESTART:
          KeywordID id = decodeKeyword(name);
          if (+id) {
             if (id == KeywordID::TRUE || id == KeywordID::FALSE) {
-               return {id == KeywordID::TRUE};
+               return Token::makeBool(id == KeywordID::TRUE);
             }
-            return {id};
+            return Token::makeKeyword(id);
          } else {
-            return {name, isMacroInvoke};
+            return Token::makeIden(name, isMacroInvoke);
          }
       }
       UNREACHABLE;
@@ -128,7 +129,7 @@ RESTART:
       //EOS
       case EOS:
          ++curr;
-         return {TokenType::EOS};
+         return Token::makeEOS();
 
       //ESCAPE CHAR
       case ESCAPE_CHAR:
@@ -138,7 +139,7 @@ RESTART:
       //PREPROCESSOR
       case PREPROC_INIT:
          ++curr;
-         return {TokenType::PREPROC_INIT};
+         return Token::makePreprocInit();
       //WHITESPACE
       case '\n':
          ++lineIndex;
@@ -152,15 +153,16 @@ RESTART:
          debug_assert(op);
          curr += op.size();
          switch (op.tokType()) {
-            case TokenType::OP: return {op};
+            case TokenType::OP: return Token::makeOp(op);
             case TokenType::BLOCK_DELIM:
                switch (op.op()) {
-                  #define __DEF_IMPL(type, role)          \
-                     case Oplike::type##_##role: return { \
-                        BlockType::type,                  \
-                        BlockDelimRole::role,             \
-                        op                                \
-                     }
+                  #define __DEF_IMPL(type, role) \
+                     case Oplike::type##_##role: \
+                        return Token::makeBlock( \
+                           BlockType::type,      \
+                           BlockDelimRole::role, \
+                           op                    \
+                        )
                   #define __DEF_BLOCK(type)  \
                      __DEF_IMPL(type, OPEN); \
                      __DEF_IMPL(type, CLOSE)
@@ -338,7 +340,7 @@ clef::Token clef::Lexer::lexChar() {
    const char tmp = parseChar();
    if (curr >= end || *curr != CHAR_DELIM) { logError(ErrCode::BAD_LITERAL, "character literal may only contain a single character/escape sequence"); }
    ++curr; //skip closing quote
-   return {tmp};
+   return Token::makeChar(tmp);
 }
 clef::Token clef::Lexer::lexStr() {
    while (++curr < end && *curr != STR_DELIM) {
@@ -350,8 +352,7 @@ clef::Token clef::Lexer::lexStr() {
       logError(ErrCode::BAD_LITERAL, "unclosed string literal");
    }
    ++curr;
-   // return {mcsl::str_slice{tokBegin+1,curr-1}, PtxtType::UNPROCESSED_STR};
-   TODO;
+   return Token::makeStr(mcsl::str_slice{tokBegin+1,curr-1});
 }
 clef::Token clef::Lexer::lexInterpStr() {
    TODO;

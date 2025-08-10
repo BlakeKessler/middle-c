@@ -52,6 +52,7 @@ uint mcsl::writef(File& file, const clef::Token& tok, char mode, FmtArgs args) {
    switch (tok.type()) {
       case TokenType::NONE:
          UNREACHABLE;
+      case TokenType::ATTR: fthru;
       case TokenType::IDEN:
          return writef(file, tok.name(), mode, args);
       case TokenType::KEYWORD:
