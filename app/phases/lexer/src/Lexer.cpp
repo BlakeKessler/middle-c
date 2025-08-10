@@ -38,7 +38,7 @@ RESTART:
          if (curr < end && mcsl::is_letter(*curr)) {
             //uint, sint, or float
             char type = *curr++ | mcsl::CASE_BIT;
-            switch (type) {
+            switch (type) { //!TODO: use size specifiers
                case UINT_LIT_CHAR: kw = KeywordID::UINT; break;
                case SINT_LIT_CHAR: kw = KeywordID::SINT; break;
                case REAL_LIT_CHAR: kw = KeywordID::FLOAT; break;
@@ -97,6 +97,10 @@ RESTART:
          }
       UNREACHABLE;
 
+      //ATTRIBUTES
+      case '@':
+         TODO;
+
       //IDENTIFIERS
       case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'X': case 'o': case 'G': case 'H': case 'I': case 'J': case 'K': case 'L': case 'M': case 'N': case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V': case 'W': case 'Y': case 'Z':
       case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'x': case 'O': case 'g': case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'y': case 'z':
@@ -110,6 +114,9 @@ RESTART:
          mcsl::str_slice name{tokBegin,curr};
          KeywordID id = decodeKeyword(name);
          if (+id) {
+            if (id == KeywordID::TRUE || id == KeywordID::FALSE) {
+               return {id == KeywordID::TRUE};
+            }
             return {id};
          } else {
             return {name, isMacroInvoke};
@@ -140,52 +147,43 @@ RESTART:
          goto RESTART;
       
       //OPERATORS
-      case '!': case '$': case '%': case '&': case '+': case ',': case '-': case '.': case '=': case '?': case '@': case '^': case '|': case '~': case '(': case ')': case '[': case ']': case '{': case '}': case '*': case '/': case '<': case '>': case ':': {
+      case '!': case '$': case '%': case '&': case '+': case ',': case '-': case '.': case '=': case '?': case '^': case '|': case '~': case '(': case ')': case '[': case ']': case '{': case '}': case '*': case '/': case '<': case '>': case ':': {
          OpData op = OPERATORS[mcsl::str_slice{curr, end}];
          debug_assert(op);
          curr += op.size();
          switch (op.tokType()) {
             case TokenType::OP: return {op};
             case TokenType::BLOCK_DELIM:
-               switch (op.opID()) {
-                  #define __DEF_IMPL(type, role, str)                         \
-                     case OpID::type##_##role: return {                       \
-                        BlockType::type,                                      \
-                        BlockDelimRole::role,                                 \
-                        OpData{                                               \
-                           FMT(str),                                          \
-                           OpID::type##_INVOKE,                               \
-                           OpProps::POSTFIX,                                  \
-                           PRECS(OpID::type##_INVOKE,OpProps::POSTFIX).first, \
-                           TokenType::BLOCK_DELIM                             \
-                        }                                                     \
+               switch (op.op()) {
+                  #define __DEF_IMPL(type, role)          \
+                     case Oplike::type##_##role: return { \
+                        BlockType::type,                  \
+                        BlockDelimRole::role,             \
+                        op                                \
                      }
+                  #define __DEF_BLOCK(type)  \
+                     __DEF_IMPL(type, OPEN); \
+                     __DEF_IMPL(type, CLOSE)
 
-                  #define __DEF_BLOCK(type, str)         \
-                  case OpID::type##_INVOKE: UNREACHABLE; \
-                  __DEF_IMPL(type, OPEN, str);           \
-                  __DEF_IMPL(type, CLOSE, str)
-
-                  __DEF_BLOCK(CALL, "()");
-                  __DEF_BLOCK(LIST, "{}");
-                  __DEF_BLOCK(SUBSCRIPT, "[]");
-                  __DEF_BLOCK(SPECIALIZER, "<>");
+                  __DEF_BLOCK(CALL);
+                  __DEF_BLOCK(INDEX);
+                  __DEF_BLOCK(LIST);
+                  __DEF_BLOCK(SPECIALIZER);
                   
                   #undef __DEF_BLOCK
                   #undef __DEF_IMPL
 
-                  case OpID::BLOCK_CMNT: UNREACHABLE;
-                  case OpID::BLOCK_CMNT_OPEN: 
+                  case Oplike::BLOCK_CMNT_OPEN: 
                      do {
                         if (curr >= end) { logError(ErrCode::BAD_CMNT, "unclosed block comment"); }
                         OpData tmp = OPERATORS[mcsl::str_slice{curr,end}];
-                        if (tmp == OpID::BLOCK_CMNT_CLOSE) { curr += tmp.size(); break; }
+                        if (tmp == Oplike::BLOCK_CMNT_CLOSE) { curr += tmp.size(); break; }
                         ++curr;
                      } while (true);
                      goto RESTART;
-                  case OpID::BLOCK_CMNT_CLOSE: logError(ErrCode::BAD_CMNT, "floating block comment closing delimiter");
+                  case Oplike::BLOCK_CMNT_CLOSE: logError(ErrCode::BAD_CMNT, "floating block comment closing delimiter");
 
-                  case OpID::LINE_CMNT:
+                  case Oplike::LINE_CMNT:
                      while (curr < end) {
                         if (*curr == '\n') { ++lineIndex; ++curr; break; }
                         if (*curr == '\\') { ++curr; }
@@ -196,8 +194,6 @@ RESTART:
                   default: UNREACHABLE;
                }
                UNREACHABLE;
-
-            case TokenType::PTXT_SEG: UNREACHABLE;
 
             default: UNREACHABLE;
          }
@@ -342,8 +338,7 @@ clef::Token clef::Lexer::lexChar() {
    const char tmp = parseChar();
    if (curr >= end || *curr != CHAR_DELIM) { logError(ErrCode::BAD_LITERAL, "character literal may only contain a single character/escape sequence"); }
    ++curr; //skip closing quote
-   // return {tmp};
-   TODO;
+   return {tmp};
 }
 clef::Token clef::Lexer::lexStr() {
    while (++curr < end && *curr != STR_DELIM) {

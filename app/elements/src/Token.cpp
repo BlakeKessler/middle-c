@@ -31,14 +31,8 @@ mcsl::File& mcsl::write(File& file, const clef::Token& tok) {
       case TokenType::PREPROC_INIT:
          file.write(mcsl::FMT("\033[35mINVOKE PREPROCESSOR\033[39m"));
          break;
-      case TokenType::PREPROC_EOS:
-         file.write(mcsl::FMT("\033[35mEXIT PREPROCESSOR\033[39m"));
-         break;
       case TokenType::EOS:
          file.write(mcsl::FMT("\033[35mEND OF STATEMENT\033[39m"));
-         break;
-      case TokenType::ESC:
-         file.write(mcsl::FMT("\033[35mESCAPE CHARACTER\033[39m"));
          break;
       case TokenType::BLOCK_DELIM:
          file.printf(mcsl::FMT("\033[35mBLOCK DELIMITER:\033[39m %s \033[3m[%s]\033[23m"), toString(tok.block().type), toString(tok.block().role));
@@ -53,6 +47,8 @@ uint mcsl::writef(File& file, const clef::Token& tok, char mode, FmtArgs args) {
    using namespace clef;
    const char intMode = (mode | CASE_BIT) == 'b' ? mode : ('i' | (mode & CASE_BIT));
    const char fltMode = (mode | CASE_BIT) == 'b' ? mode : ('f' | (mode & CASE_BIT));
+   const char strMode = (mode | CASE_BIT) == 'b' ? mode : ('s' | (mode & CASE_BIT));
+   const char charMode = (mode | CASE_BIT) == 'b' ? mode : ('c' | (mode & CASE_BIT));
    switch (tok.type()) {
       case TokenType::NONE:
          UNREACHABLE;
@@ -64,16 +60,18 @@ uint mcsl::writef(File& file, const clef::Token& tok, char mode, FmtArgs args) {
          return writef(file, tok.uintVal(), intMode, args);
       case TokenType::REAL_NUM:
          return writef(file, tok.realVal(), fltMode, args);
+      case TokenType::BOOL_LIT:
+         return writef(file, tok.realVal(), strMode, args);
+      case TokenType::CHAR_LIT:
+         return writef(file, tok.charVal(), charMode, args);
+      case TokenType::STR_LIT:
+         return writef(file, tok.strVal(), strMode, args);
       case TokenType::OP:
          return writef(file, toString(tok.opID()), mode, args);
       case TokenType::PREPROC_INIT:
          return file.write(PREPROC_INIT), 1;
-      case TokenType::PREPROC_EOS:
-         return file.write('\n'), 1;
       case TokenType::EOS:
          return file.write(EOS), 1;
-      case TokenType::ESC:
-         return file.write(ESCAPE_CHAR), 1;
       case TokenType::BLOCK_DELIM:
          return writef(file, toString(tok.block().role), mode, args) + writef(file, ' ', 'c', {}) + writef(file, toString(tok.block().type), mode, args);
       

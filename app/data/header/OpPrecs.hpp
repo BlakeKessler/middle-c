@@ -16,7 +16,12 @@ struct clef::OpPrecs {
 
       static constexpr ubyte makeFlags(OpProps props);
    public:
-      template <mcsl::is_t<clef::OpData>... Argv_t> constexpr OpPrecs(const Argv_t... initList);
+      struct OpPrecData {
+         OpID id;
+         OpProps props;
+         ubyte prec;
+      };
+      template <mcsl::is_t<OpPrecData>... Argv_t> constexpr OpPrecs(const Argv_t... initList);
 
       constexpr mcsl::pair<ubyte, bool> get(OpID id, ubyte flags) const { return _precs[+id][flags]; }
       constexpr mcsl::pair<ubyte, bool> get(OpID id, bool hasLHS, bool hasRHS) const { return get(id, hasLHS | (hasRHS << 1)); }

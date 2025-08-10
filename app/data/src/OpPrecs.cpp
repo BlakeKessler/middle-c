@@ -6,9 +6,9 @@
 #pragma region inlinesrc
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-value"
-template <mcsl::is_t<clef::OpData>... Argv_t> constexpr clef::OpPrecs::OpPrecs(const Argv_t... initList):
+template <mcsl::is_t<clef::OpPrecs::OpPrecData>... Argv_t> constexpr clef::OpPrecs::OpPrecs(const Argv_t... initList):
    _precs{} {
-      ((_precs[+initList.opID()][makeFlags(initList.props())] = mcsl::pair{initList.precedence(), (bool)(initList.props() & OpProps::IS_LEFT_ASSOC)}), ...);
+      ((_precs[+initList.id][makeFlags(initList.props)] = mcsl::pair{initList.prec, (bool)(initList.props & OpProps::IS_LEFT_ASSOC)}), ...);
 }
 #pragma GCC diagnostic pop
 
@@ -28,88 +28,84 @@ constexpr ubyte clef::OpPrecs::makeFlags(OpProps props) {
 constexpr clef::OpPrecs clef::GetAllOpPrecsData() {
    using Op = OpID;
    using Prop = OpProps;
-   using Type = TokenType;
-   using _ = OpData;
-   #define lit(str) mcsl::str_slice{}
+   using _ = OpPrecs::OpPrecData;
    ubyte prec = ~0;
    return OpPrecs{
-      _(lit("::"),  Op::SCOPE_RESOLUTION,  Prop::INFIX_LEFT,  --prec, Type::OP          ), //scope resolution
+      _(Op::SCOPE_RESOLUTION,  Prop::INFIX_LEFT,  --prec), //scope resolution
 
-      _(lit("@"),   Op::ATTRIBUTE,         Prop::PREFIX,      --prec, Type::OP          ), //attribute
-      _(lit("++"),  Op::INC,               Prop::POSTFIX,       prec, Type::OP          ), //post-increment
-      _(lit("--"),  Op::DEC,               Prop::POSTFIX,       prec, Type::OP          ), //post-decrement
-      _(lit("()"),  Op::CALL_INVOKE,       Prop::POSTFIX,       prec, Type::OP          ), //function call
-      _(lit("{}"),  Op::LIST_INVOKE,       Prop::POSTFIX,       prec, Type::OP          ), //initializer list
-      _(lit("[]"),  Op::SUBSCRIPT_INVOKE,  Prop::POSTFIX,       prec, Type::OP          ), //subscript
-      _(lit("."),   Op::MEMBER_ACCESS,     Prop::INFIX_LEFT,    prec, Type::OP          ), //element access
-      _(lit("->"),  Op::PTR_MEMBER_ACCESS, Prop::INFIX_LEFT,    prec, Type::OP          ), //element access
-
+      _(Op::INC,               Prop::POSTFIX,       prec), //post-increment
+      _(Op::DEC,               Prop::POSTFIX,       prec), //post-decrement
+      _(Op::CALL,              Prop::POSTFIX,       prec), //function call
+      _(Op::INIT_LIST,         Prop::POSTFIX,       prec), //initializer list
+      _(Op::INDEX,             Prop::POSTFIX,       prec), //subscript
+      _(Op::MEMBER_ACCESS,     Prop::INFIX_LEFT,    prec), //element access
+      _(Op::PTR_MEMBER_ACCESS, Prop::INFIX_LEFT,    prec), //element access
 
 
-      _(lit("++"),  Op::INC,               Prop::PREFIX,      --prec, Type::OP          ), //pre-increment
-      _(lit("--"),  Op::DEC,               Prop::PREFIX,        prec, Type::OP          ), //pre-decrement
-      _(lit("..."), Op::SPREAD,            Prop::TYPE_MOD,      prec, Type::OP          ), //array spread
-      _(lit("+"),   Op::UNARY_PLUS,        Prop::PREFIX,        prec, Type::OP          ), //unary plus
-      _(lit("-"),   Op::UNARY_MINUS,       Prop::PREFIX,        prec, Type::OP          ), //integer negation
-      _(lit("!"),   Op::LOGICAL_NOT,       Prop::PREFIX,        prec, Type::OP          ), //logical negation
-      _(lit("~"),   Op::BIT_NOT,           Prop::PREFIX,        prec, Type::OP          ), //bitwise negation
-      _(lit("&"),   Op::ADDRESS_OF,        Prop::PREFIX,        prec, Type::OP          ), //reference/address of
-      _(lit("*"),   Op::DEREF,             Prop::PREFIX,        prec, Type::OP          ), //raw pointer/dereference
-      _(lit("&"),   Op::REFERENCE,         Prop::TYPE_MOD,      prec, Type::OP          ), //reference/address of
-      _(lit("*"),   Op::RAW_PTR,           Prop::TYPE_MOD,      prec, Type::OP          ), //raw pointer/dereference
 
-      _(lit(".."),  Op::RANGE,             Prop::INFIX_LEFT,  --prec, Type::OP          ), //range
+      _(Op::INC,               Prop::PREFIX,      --prec), //pre-increment
+      _(Op::DEC,               Prop::PREFIX,        prec), //pre-decrement
+      _(Op::SPREAD,            Prop::TYPE_MOD,      prec), //array spread
+      _(Op::UNARY_PLUS,        Prop::PREFIX,        prec), //unary plus
+      _(Op::UNARY_MINUS,       Prop::PREFIX,        prec), //integer negation
+      _(Op::LOGICAL_NOT,       Prop::PREFIX,        prec), //logical negation
+      _(Op::BIT_NOT,           Prop::PREFIX,        prec), //bitwise negation
+      _(Op::ADDRESS_OF,        Prop::PREFIX,        prec), //reference/address of
+      _(Op::DEREF,             Prop::PREFIX,        prec), //raw pointer/dereference
+      _(Op::REFERENCE,         Prop::TYPE_MOD,      prec), //reference/address of
+      _(Op::RAW_PTR,           Prop::TYPE_MOD,      prec), //raw pointer/dereference
 
-      _(lit(".*"),  Op::METHOD_PTR,        Prop::INFIX_LEFT,  --prec, Type::OP          ), //pointer to member
-      _(lit("->*"), Op::ARROW_METHOD_PTR,  Prop::INFIX_LEFT,    prec, Type::OP          ), //pointer to member
+      _(Op::RANGE,             Prop::INFIX_LEFT,  --prec), //range
 
-      _(lit("^^"),  Op::EXP,               Prop::INFIX_LEFT,  --prec, Type::OP          ), //exponentiation
+      _(Op::METHOD_PTR,        Prop::INFIX_LEFT,  --prec), //pointer to member
+      _(Op::ARROW_METHOD_PTR,  Prop::INFIX_LEFT,    prec), //pointer to member
 
-      _(lit("*"),   Op::MUL,               Prop::INFIX_LEFT,  --prec, Type::OP          ), //multiplication
-      _(lit("/"),   Op::DIV,               Prop::INFIX_LEFT,    prec, Type::OP          ), //division
-      _(lit("%"),   Op::MOD,               Prop::INFIX_LEFT,    prec, Type::OP          ), //modulo
+      _(Op::EXP,               Prop::INFIX_LEFT,  --prec), //exponentiation
 
-      _(lit("+"),   Op::ADD,               Prop::INFIX_LEFT,  --prec, Type::OP          ), //addition
-      _(lit("-"),   Op::SUB,               Prop::INFIX_LEFT,    prec, Type::OP          ), //subtraction
+      _(Op::MUL,               Prop::INFIX_LEFT,  --prec), //multiplication
+      _(Op::DIV,               Prop::INFIX_LEFT,    prec), //division
+      _(Op::MOD,               Prop::INFIX_LEFT,    prec), //modulo
 
-      _(lit("<<"),  Op::SHIFT_LEFT,        Prop::INFIX_LEFT,  --prec, Type::OP          ), //left bit-shift
-      _(lit(">>"),  Op::SHIFT_RIGHT,       Prop::INFIX_LEFT,    prec, Type::OP          ), //right bit-shift
+      _(Op::ADD,               Prop::INFIX_LEFT,  --prec), //addition
+      _(Op::SUB,               Prop::INFIX_LEFT,    prec), //subtraction
 
-      _(lit("<=>"), Op::THREE_WAY_COMP,    Prop::INFIX_LEFT,  --prec, Type::OP          ), //three-way comparison
+      _(Op::SHL,               Prop::INFIX_LEFT,  --prec), //left bit-shift
+      _(Op::SHR,               Prop::INFIX_LEFT,    prec), //right bit-shift
 
-      _(lit("<"),   Op::LESSER,            Prop::INFIX_LEFT,  --prec, Type::OP          ), //less than
-      _(lit(">"),   Op::GREATER,           Prop::INFIX_LEFT,    prec, Type::OP          ), //greater than
-      _(lit("<="),  Op::LESSER_OR_EQ,      Prop::INFIX_LEFT,    prec, Type::OP          ), //less than or equal to
-      _(lit(">="),  Op::GREATER_OR_EQ,     Prop::INFIX_LEFT,    prec, Type::OP          ), //greather than or equal to
+      _(Op::THREE_WAY_COMP,    Prop::INFIX_LEFT,  --prec), //three-way comparison
 
-      _(lit("=="),  Op::IS_EQUAL,          Prop::INFIX_LEFT,  --prec, Type::OP          ), //equality
-      _(lit("!="),  Op::IS_UNEQUAL,        Prop::INFIX_LEFT,    prec, Type::OP          ), //inequality
+      _(Op::LESSER,            Prop::INFIX_LEFT,  --prec), //less than
+      _(Op::GREATER,           Prop::INFIX_LEFT,    prec), //greater than
+      _(Op::LESSER_OR_EQ,      Prop::INFIX_LEFT,    prec), //less than or equal to
+      _(Op::GREATER_OR_EQ,     Prop::INFIX_LEFT,    prec), //greather than or equal to
 
-      _(lit("&"),   Op::BIT_AND,           Prop::INFIX_LEFT,  --prec, Type::OP          ), //bitwise AND
-      _(lit("^"),   Op::BIT_XOR,           Prop::INFIX_LEFT,  --prec, Type::OP          ), //bitwise XOR
-      _(lit("|"),   Op::BIT_OR,            Prop::INFIX_LEFT,  --prec, Type::OP          ), //bitwise OR
-      _(lit("&&"),  Op::LOGICAL_AND,       Prop::INFIX_LEFT,  --prec, Type::OP          ), //logical AND
-      _(lit("||"),  Op::LOGICAL_OR,        Prop::INFIX_LEFT,  --prec, Type::OP          ), //logical OR
+      _(Op::IS_EQUAL,          Prop::INFIX_LEFT,  --prec), //equality
+      _(Op::IS_UNEQUAL,        Prop::INFIX_LEFT,    prec), //inequality
 
-      _(lit("??"),  Op::COALESCE,          Prop::INFIX_RIGHT, --prec, Type::OP          ), //null coalescing
-      _(lit("?"),   Op::INLINE_IF,         Prop::INFIX_RIGHT,   prec, Type::OP          ), //inline if
-      _(lit(":"),   Op::INLINE_ELSE,       Prop::POSTFIX,       prec, Type::OP          ), //inline else
-      _(lit("?:"),  Op::TERNARY_INVOKE,    Prop::null,          prec, Type::OP          ), //ternary conditional
-      _(lit("="),   Op::ASSIGN,            Prop::INFIX_RIGHT,   prec, Type::OP          ), //direct assignment
-      _(lit("+="),  Op::ADD_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (add)
-      _(lit("-="),  Op::SUB_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (sub)
-      _(lit("*="),  Op::MUL_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (mul)
-      _(lit("/="),  Op::DIV_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (div)
-      _(lit("%="),  Op::MOD_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (mod)
-      _(lit("^^="), Op::EXP_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (exp)
-      _(lit("<<="), Op::SHL_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (shl)
-      _(lit(">>="), Op::SHR_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (shr)
-      _(lit("&="),  Op::AND_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (AND)
-      _(lit("^="),  Op::XOR_ASSIGN,        Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (XOR)
-      _(lit("|="),  Op::OR_ASSIGN,         Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (OR)
-      _(lit("??="), Op::COALESCE_ASSIGN,   Prop::INFIX_RIGHT,   prec, Type::OP          ), //compound assignment (null coalescing)
+      _(Op::BIT_AND,           Prop::INFIX_LEFT,  --prec), //bitwise AND
+      _(Op::BIT_XOR,           Prop::INFIX_LEFT,  --prec), //bitwise XOR
+      _(Op::BIT_OR,            Prop::INFIX_LEFT,  --prec), //bitwise OR
+      _(Op::LOGICAL_AND,       Prop::INFIX_LEFT,  --prec), //logical AND
+      _(Op::LOGICAL_OR,        Prop::INFIX_LEFT,  --prec), //logical OR
 
-      _(lit(","),   Op::COMMA,             Prop::INFIX_LEFT,  --prec, Type::OP          )  //comma
+      _(Op::COALESCE,          Prop::INFIX_RIGHT, --prec), //null coalescing
+      _(Op::INLINE_IF,         Prop::INFIX_RIGHT,   prec), //inline if
+      _(Op::INLINE_ELSE,       Prop::POSTFIX,       prec), //inline else
+      _(Op::ASSIGN,            Prop::INFIX_RIGHT,   prec), //direct assignment
+      _(Op::ADD_ASSIGN,        Prop::INFIX_RIGHT,   prec), //compound assignment (add)
+      _(Op::SUB_ASSIGN,        Prop::INFIX_RIGHT,   prec), //compound assignment (sub)
+      _(Op::MUL_ASSIGN,        Prop::INFIX_RIGHT,   prec), //compound assignment (mul)
+      _(Op::DIV_ASSIGN,        Prop::INFIX_RIGHT,   prec), //compound assignment (div)
+      _(Op::MOD_ASSIGN,        Prop::INFIX_RIGHT,   prec), //compound assignment (mod)
+      _(Op::EXP_ASSIGN,        Prop::INFIX_RIGHT,   prec), //compound assignment (exp)
+      _(Op::SHL_ASSIGN,        Prop::INFIX_RIGHT,   prec), //compound assignment (shl)
+      _(Op::SHR_ASSIGN,        Prop::INFIX_RIGHT,   prec), //compound assignment (shr)
+      _(Op::AND_ASSIGN,        Prop::INFIX_RIGHT,   prec), //compound assignment (AND)
+      _(Op::XOR_ASSIGN,        Prop::INFIX_RIGHT,   prec), //compound assignment (XOR)
+      _(Op::OR_ASSIGN,         Prop::INFIX_RIGHT,   prec), //compound assignment (OR)
+      _(Op::COALESCE_ASSIGN,   Prop::INFIX_RIGHT,   prec), //compound assignment (null coalescing)
+
+      _(Op::COMMA,             Prop::INFIX_LEFT,  --prec)  //comma
    };
    #undef lit
 }

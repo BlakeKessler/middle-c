@@ -85,13 +85,14 @@ class clef::KeywordDecoder {
          {"static", KeywordID::STATIC},
          {"cast", KeywordID::CAST},
          {"up_cast", KeywordID::UP_CAST},
-         {"dyn_cast", KeywordID::DYN_CAST},
          {"bit_cast", KeywordID::BIT_CAST},
          {"const_cast", KeywordID::CONST_CAST},
          {"typeof", KeywordID::TYPEOF},
          {"sizeof", KeywordID::SIZEOF},
          {"alignas", KeywordID::ALIGNAS},
          {"alignof", KeywordID::ALIGNOF},
+         {"strideas", KeywordID::STRIDEAS},
+         {"strideof", KeywordID::STRIDEOF},
          {"goto", KeywordID::GOTO},
          {"return", KeywordID::RETURN},
          {"if", KeywordID::IF},
@@ -115,10 +116,8 @@ class clef::KeywordDecoder {
          {"null", KeywordID::NULLPTR},
          {"assert", KeywordID::ASSERT},
          {"static_assert", KeywordID::STATIC_ASSERT},
-         {"debug_assert", KeywordID::DEBUG_ASSERT},
          {"assume", KeywordID::ASSUME},
          {"let", KeywordID::LET},
-         {"using", KeywordID::ALIAS},
          {"asm", KeywordID::ASM}
       };
 

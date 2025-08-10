@@ -9,7 +9,6 @@
 
 namespace clef {
    constexpr const mcsl::str_slice toString(const TokenType);
-   constexpr const mcsl::str_slice toString(const TokenType);
    constexpr const mcsl::str_slice toString(const OpID);
    constexpr const mcsl::str_slice toString(const OpProps);
    constexpr const mcsl::str_slice toString(const KeywordID);
@@ -38,14 +37,17 @@ constexpr const mcsl::str_slice clef::toString(const TokenType type) {
       CASE(UINT_NUM, "UNSIGNED_INTEGER");
       CASE(SINT_NUM, "SIGNED_INTEGER");
       CASE(REAL_NUM, "REAL_NUMBER");
+      CASE(BOOL_LIT, "BOOLEAN");
+      CASE(CHAR_LIT, "CHAR");
+      CASE(STR_LIT, "STRING");
       
       CASE(OP, "OPERATOR");
-      CASE(PREPROC_INIT, "PREPROCESSOR_OPEN");
-      CASE(PREPROC_EOS, "PREPROCESSOR_CLOSE");
       CASE(EOS, "END OF STATEMENT");
-      CASE(ESC, "ESCAPE_CHARACTER");
       CASE(BLOCK_DELIM, "BLOCK_DELIMITER");
-      CASE(PTXT_SEG, "PLAINTEXT_SEGMENT");
+
+      CASE(ATTR, "ATTRIBUTE");
+
+      CASE(PREPROC_INIT, "PREPROCESSOR");
 
       case __OPLIKE: UNREACHABLE;
    }
@@ -55,42 +57,15 @@ constexpr const mcsl::str_slice clef::toString(const TokenType type) {
 constexpr const mcsl::str_slice clef::toString(const OpID op) {
    using enum OpID;
    switch (op) {
-      CASE(NULL, "null");
+      CASE(null, "null");
 
-      CASE(ESCAPE, "\\");
-      CASE(EOS, ";");
+      CASE(CALL, "()");
+      CASE(INDEX, "[]");
+      CASE(INIT_LIST, "{}");
+      CASE(SPECIALIZER, "<::>");
 
-      CASE(CHAR, "\'");
-      CASE(STRING, "\"");
-      CASE(INTERP_STRING, "`");
-
-      CASE(ATTRIBUTE, "@");
-
-      CASE(LINE_CMNT, "//");
-      CASE(BLOCK_CMNT, "/**/");
-      CASE(BLOCK_CMNT_OPEN, "/*");
-      CASE(BLOCK_CMNT_CLOSE, "*/");
-
-      CASE(CALL_INVOKE, "()");
-      CASE(CALL_OPEN, "(");
-      CASE(CALL_CLOSE, ")");
-      CASE(SUBSCRIPT_INVOKE, "[]");
-      CASE(SUBSCRIPT_OPEN, "[");
-      CASE(SUBSCRIPT_CLOSE, "]");
-      CASE(LIST_INVOKE, "{}");
-      CASE(LIST_OPEN, "{");
-      CASE(LIST_CLOSE, "}");
-      CASE(SPECIALIZER_INVOKE, "<::>");
-      CASE(SPECIALIZER_OPEN, "<:");
-      CASE(SPECIALIZER_CLOSE, ":>");
-
-      CASE(CHAR_INVOKE, "\'\'");
-      CASE(STR_INVOKE, "\"\"");
-      CASE(INTERP_STR_INVOKE, "``");
-      CASE(TERNARY_INVOKE, "?:");
-
-
-      CASE(PREPROCESSOR, "#");
+      CASE(INLINE_IF, "?");
+      CASE(INLINE_ELSE, ":");
 
       CASE(SCOPE_RESOLUTION, "::");
 
@@ -101,6 +76,8 @@ constexpr const mcsl::str_slice clef::toString(const OpID op) {
       CASE(PTR_MEMBER_ACCESS, "->");
       CASE(METHOD_PTR, ".*");
       CASE(ARROW_METHOD_PTR, "->*");
+
+      CASE(SLICE, "[]");
 
       CASE(RANGE, "..");
       CASE(SPREAD, "...");
@@ -120,8 +97,8 @@ constexpr const mcsl::str_slice clef::toString(const OpID op) {
       CASE(BIT_AND, "&");
       CASE(BIT_OR, "|");
       CASE(BIT_XOR, "^");
-      CASE(SHIFT_LEFT, "<<");
-      CASE(SHIFT_RIGHT, ">>");
+      CASE(SHL, "<<");
+      CASE(SHR, ">>");
 
 
       CASE(THREE_WAY_COMP, "<=>");
@@ -134,9 +111,6 @@ constexpr const mcsl::str_slice clef::toString(const OpID op) {
       CASE(IS_UNEQUAL, "!=");
 
       CASE(COALESCE, "??");
-
-      CASE(INLINE_IF, "?");
-      CASE(INLINE_ELSE, ":");
 
       CASE(ASSIGN, "=");
       CASE(ADD_ASSIGN, "+=");
@@ -173,31 +147,27 @@ constexpr const mcsl::str_slice clef::toString(const OpID op) {
       CASE(BREAK, "BREAK");
       CASE(CONTINUE, "CONTINUE");
 
-      CASE(THROW, "THROW");
       CASE(ASSERT, "ASSERT");
-      CASE(DEBUG_ASSERT, "DEBUG_ASSERT");
       CASE(STATIC_ASSERT, "STATIC_ASSERT");
       CASE(ASSUME, "ASSUME");
-      CASE(RETURN, "RETURN");
 
-      CASE(ALIAS, "ALIAS");
+      CASE(RETURN, "RETURN");
 
       CASE(CAST, "CAST");
       CASE(UP_CAST, "UP_CAST");
-      CASE(DYN_CAST, "DYN_CAST");
       CASE(BIT_CAST, "BIT_CAST");
       CASE(CONST_CAST, "CONST_CAST");
+
+      CASE(TYPEOF, "TYPEOF");
+      CASE(SIZEOF, "SIZEOF");
+      CASE(ALIGNOF, "ALIGNOF");
+      CASE(STRIDEOF, "STRIDEOF");
+      CASE(ALIGNAS, "ALIGNAS");
+      CASE(STRIDEAS, "STRIDEAS");
 
 
       CASE(LET, "LET");
       CASE(MAKE_TYPE, "MAKE_TYPE");
-
-      CASE(DEF_FUNC_PARAMS, "DEF_FUNC_PARAMS");
-      CASE(DEF_MACRO_PARAMS, "DEF_MACRO_PARAMS");
-
-      CASE(PREPROC_IMPORT, "PREPROCESSOR_IMPORT");
-      CASE(PREPROC_LINK, "PREPROCESSOR_LINK");
-      CASE(PREPROC_EMBED, "PREPROCESSOR_EMBED");
    }
    UNREACHABLE;
 }
@@ -301,6 +271,7 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(ENUM_UNION, "enumunion");
       CASE(MASK, "mask");
       CASE(NAMESPACE, "namespace");
+      CASE(TUPLE, "tuple");
       CASE(FUNC, "func");
       CASE(MACRO, "macro");
 
@@ -327,7 +298,6 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
 
       CASE(CAST, "cast");
       CASE(UP_CAST, "up_cast");
-      CASE(DYN_CAST, "dyn_cast");
       CASE(BIT_CAST, "bit_cast");
       CASE(CONST_CAST, "const_cast");
 
@@ -335,6 +305,8 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(SIZEOF, "sizeof");
       CASE(ALIGNAS, "alignas");
       CASE(ALIGNOF, "alignof");
+      CASE(STRIDEAS, "strideas");
+      CASE(STRIDEOF, "strideof");
 
       CASE(GOTO, "goto");
       CASE(RETURN, "return");
@@ -363,11 +335,10 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
 
       CASE(ASSERT, "assert");
       CASE(STATIC_ASSERT, "static_assert");
-      CASE(DEBUG_ASSERT, "debug_assert");
       CASE(ASSUME, "assume");
 
       CASE(LET, "let");
-      CASE(ALIAS, "using");
+      CASE(USING, "using");
       CASE(ASM, "asm");
    }
    UNREACHABLE;
@@ -379,18 +350,11 @@ constexpr const mcsl::str_slice clef::toString(const BlockType type) {
       CASE(NONE, "none");
 
       CASE(CALL, "CALL");
-      CASE(SUBSCRIPT, "SUBSCRIPT");
+      CASE(INDEX, "INDEX");
       CASE(LIST, "INITIALIZER_LIST");
       CASE(SPECIALIZER, "SPECIALIZER");
 
-      CASE(QUOTES_CHAR, "CHARACTER_LITERAL");
-      CASE(QUOTES_STR, "STRING_LITERAL");
-      CASE(QUOTES_INTERP, "INTERPOLATED_STRING_LITERAL");
-
       CASE(TERNARY, "TERNARY_STATEMENT");
-
-      CASE(COMMENT_BLOCK, "BLOCK_COMMENT");
-      CASE(COMMENT_LINE, "LINE_COMMENT");
    }
    UNREACHABLE;
 }

@@ -59,16 +59,16 @@ namespace clef {
       UINT_NUM,
       SINT_NUM,
       REAL_NUM,
+      BOOL_LIT,
+      CHAR_LIT,
+      STR_LIT,
 
       __OPLIKE = 0x80,
       OP = 0x81,
-      PREPROC_INIT,
-      PREPROC_EOS,
       EOS,
-      ESC,
       BLOCK_DELIM,
-      PTXT_SEG,
       ATTR,
+      PREPROC_INIT,
    };
    constexpr auto      operator+(const TokenType t) noexcept { return std::to_underlying(t); }
    constexpr TokenType operator&(const TokenType lhs, const TokenType rhs) noexcept { return (TokenType)((+lhs) & (+rhs)); }
@@ -78,17 +78,11 @@ namespace clef {
    constexpr bool isOperand(const TokenType t) { return !+(t & TokenType::__OPLIKE); }
       constexpr bool isNumber(const TokenType t) { return t == TokenType::UINT_NUM || t == TokenType::SINT_NUM || t == TokenType::REAL_NUM; }
    #pragma region ops
-   //!NOTE: OpDefTable relies on the order of many of the enumerators
    enum class OpID : uint8 {
-      NULL = 0, //nop or not an operator
-      
-      CALL_INVOKE, //parens
-      SUBSCRIPT_INVOKE, //square brackets
+      null = 0, //nop or not an operator
 
       INC, //increment
       DEC, //decrement
-
-      RANGE,
       
       ADD, //addition
       SUB, //subtraction
@@ -105,8 +99,8 @@ namespace clef {
       BIT_AND,
       BIT_OR,
       BIT_XOR,
-      SHIFT_LEFT,
-      SHIFT_RIGHT,
+      SHL,
+      SHR,
       
 
       THREE_WAY_COMP, //AKA spaceship
@@ -120,6 +114,7 @@ namespace clef {
 
       COALESCE, //null coalescing
 
+      ASSIGN,
       ADD_ASSIGN, //compound assignment (addition)
       SUB_ASSIGN, //compound assignment (substraction)
       MUL_ASSIGN, //compound assignment (multiplication)
@@ -132,41 +127,16 @@ namespace clef {
       XOR_ASSIGN, //compound assignment (bitwise exclusive or)
       OR_ASSIGN, //compound assignment (bitwise or)
       COALESCE_ASSIGN, //compound assignment (null-coalescing)
+      
+      CALL, //parens
+      INDEX, //square brackets
+      INIT_LIST, //curly brackets
+      SPECIALIZER, //triangle brackets
 
-      ESCAPE, //escape character
-      EOS,
+      SLICE,
 
-      STRING,
-      CHAR,
-      INTERP_STRING,
-
-      ATTRIBUTE, //@
-
-      LINE_CMNT,
-      BLOCK_CMNT,
-         BLOCK_CMNT_OPEN,
-         BLOCK_CMNT_CLOSE,
-
-      //parens
-         CALL_OPEN,
-         CALL_CLOSE,
-      //square brackets
-         SUBSCRIPT_OPEN,
-         SUBSCRIPT_CLOSE,
-      LIST_INVOKE, //curly brackets
-         LIST_OPEN,
-         LIST_CLOSE,
-      SPECIALIZER_INVOKE, //triangle brackets
-         SPECIALIZER_OPEN,
-         SPECIALIZER_CLOSE,
-
-      CHAR_INVOKE,
-      STR_INVOKE,
-      INTERP_STR_INVOKE,
-      TERNARY_INVOKE,
-
-
-      PREPROCESSOR,
+      INLINE_IF,
+      INLINE_ELSE,
 
       SCOPE_RESOLUTION,
 
@@ -175,12 +145,9 @@ namespace clef {
       METHOD_PTR, // .*
       ARROW_METHOD_PTR, // ->*
 
+      RANGE,
       SPREAD,
 
-      INLINE_IF, //ternary operator opener
-      INLINE_ELSE, //ternary operator closer
-
-      ASSIGN,
       COMMA,
 
 
@@ -203,41 +170,36 @@ namespace clef {
       BREAK,
       CONTINUE,
       
-      THROW,
       ASSERT,
-      DEBUG_ASSERT,
       STATIC_ASSERT,
       ASSUME,
-      RETURN,
 
-      ALIAS,
+      RETURN,
 
       CAST,
       UP_CAST,
-      DYN_CAST,
       BIT_CAST,
       CONST_CAST,
 
       LET,
       MAKE_TYPE,
+      
 
-      DEF_FUNC_PARAMS,
-      DEF_MACRO_PARAMS,
-
-      //preprocessor directive operators
-      PREPROC_IMPORT,
-      PREPROC_LINK,
-      PREPROC_EMBED,
+      TYPEOF,
+      SIZEOF,
+      ALIGNOF,
+      ALIGNAS,
+      STRIDEOF,
+      STRIDEAS,
 
       //aliases
-      LABEL_DELIM = INLINE_ELSE,
+      LABEL_DELIM = INLINE_IF,
       EACH_OF = LABEL_DELIM,
       EXTENDS = LABEL_DELIM,
       ADDRESS_OF = BIT_AND,
       REFERENCE = ADDRESS_OF,
       RAW_PTR = MUL,
       DEREF = RAW_PTR,
-      SLICE = SUBSCRIPT_INVOKE,
       VARIADIC_PARAM = SPREAD,
       ARROW = PTR_MEMBER_ACCESS,
       UNARY_PLUS = ADD,
@@ -246,11 +208,9 @@ namespace clef {
 
       //helpers
       __FIRST_PSEUDO_OP = FOR,
-      __LAST_PSEUDO_OP = PREPROC_EMBED,
+      __LAST_PSEUDO_OP = STRIDEAS,
       __FIRST_CAST = CAST,
       __LAST_CAST = CONST_CAST,
-      __FIRST_PREPROC = PREPROC_IMPORT,
-      __LAST_PREPROC = PREPROC_EMBED,
       __FIRST_LOOP = FOR,
       __LAST_LOOP = DO_WHILE,
    };
@@ -273,10 +233,6 @@ namespace clef {
    constexpr bool isIf(const OpID op) { return op == OpID::IF; }
    constexpr bool isSwitch(const OpID op) { return op == OpID::SWITCH; }
    constexpr bool isMatch(const OpID op) { return op == OpID::MATCH; }
-
-   constexpr bool isStringLike(const OpID op) { return op == OpID::STRING || op == OpID::CHAR; }
-
-   constexpr bool isPreproc(const OpID op) { return op >= OpID::__FIRST_PREPROC && op <= OpID::__LAST_PREPROC; }
 
    constexpr bool isCast(const OpID op) { return op >= OpID::__FIRST_CAST && op <= OpID::__LAST_CAST; }
 
@@ -317,6 +273,200 @@ namespace clef {
       OpProps left  = (isLeftAssoc && canBeBinary) ? OpProps::IS_LEFT_ASSOC : OpProps::null;
       return post | pre | bin | mod | open | close | left;
    }
+
+   enum class Oplike : uint8 {
+      null = 0, //nop or not an operator
+
+      INC, //increment
+      DEC, //decrement
+      
+      ADD, //addition
+      SUB, //subtraction
+      MUL, //multiplication
+      DIV, //division
+      MOD, //modulo
+      EXP, //exponentation
+      
+      LOGICAL_NOT,
+      LOGICAL_AND,
+      LOGICAL_OR,
+
+      BIT_NOT,
+      BIT_AND,
+      BIT_OR,
+      BIT_XOR,
+      SHL,
+      SHR,
+      
+
+      THREE_WAY_COMP, //AKA spaceship
+      LESSER, //less than
+      GREATER, //greater than
+      LESSER_OR_EQ, //less than or equal to
+      GREATER_OR_EQ, //greater than or equal to
+
+      IS_EQUAL, //equality comparison
+      IS_UNEQUAL, //inequality comparison
+
+      COALESCE, //null coalescing
+
+      ASSIGN,
+      ADD_ASSIGN, //compound assignment (addition)
+      SUB_ASSIGN, //compound assignment (substraction)
+      MUL_ASSIGN, //compound assignment (multiplication)
+      DIV_ASSIGN, //compound assignment (division)
+      MOD_ASSIGN, //compound assignment (modulo)
+      EXP_ASSIGN, //compound assignment (exponentiation)
+      SHL_ASSIGN, //compound assignment (left-shift)
+      SHR_ASSIGN, //compound assignment (right-shift)
+      AND_ASSIGN, //compound assignment (bitwise and)
+      XOR_ASSIGN, //compound assignment (bitwise exclusive or)
+      OR_ASSIGN, //compound assignment (bitwise or)
+      COALESCE_ASSIGN, //compound assignment (null-coalescing)
+      
+      //parens
+      CALL_OPEN,
+      CALL_CLOSE,
+      //square brackets
+      INDEX_OPEN,
+      INDEX_CLOSE,
+      //curly brackets
+      LIST_OPEN,
+      LIST_CLOSE,
+      //triangle brackets
+      SPECIALIZER_OPEN,
+      SPECIALIZER_CLOSE,
+
+      SLICE,
+
+      INLINE_IF,
+      INLINE_ELSE,
+
+      SCOPE_RESOLUTION,
+
+      MEMBER_ACCESS, // .
+      PTR_MEMBER_ACCESS, // ->
+      METHOD_PTR, // .*
+      ARROW_METHOD_PTR, // ->*
+
+      RANGE,
+      SPREAD,
+
+      COMMA,
+
+      LINE_CMNT,
+      BLOCK_CMNT_OPEN,
+      BLOCK_CMNT_CLOSE,
+
+      ESC,
+
+      PREPROC,
+      EOS,
+      CHAR,
+      STRING,
+      ATTR,
+
+      //aliases
+      LABEL_DELIM = INLINE_IF,
+      EACH_OF = LABEL_DELIM,
+      EXTENDS = LABEL_DELIM,
+      ADDRESS_OF = BIT_AND,
+      REFERENCE = ADDRESS_OF,
+      RAW_PTR = MUL,
+      DEREF = RAW_PTR,
+      VARIADIC_PARAM = SPREAD,
+      ARROW = PTR_MEMBER_ACCESS,
+      UNARY_PLUS = ADD,
+      UNARY_MINUS = SUB,
+      RADIX_POINT = MEMBER_ACCESS,
+   };
+   constexpr auto operator+(const Oplike op) { return std::to_underlying(op); }
+
+   constexpr OpID toOpID(const Oplike op) {
+      switch (op) {
+         case Oplike::null: return OpID::null;
+
+         case Oplike::INC: return OpID::INC;
+         case Oplike::DEC: return OpID::DEC;
+
+         case Oplike::ADD: return OpID::ADD;
+         case Oplike::SUB: return OpID::SUB;
+         case Oplike::MUL: return OpID::MUL;
+         case Oplike::DIV: return OpID::DIV;
+         case Oplike::MOD: return OpID::MOD;
+         case Oplike::EXP: return OpID::EXP;
+
+         case Oplike::LOGICAL_NOT: return OpID::LOGICAL_NOT;
+         case Oplike::LOGICAL_AND: return OpID::LOGICAL_AND;
+         case Oplike::LOGICAL_OR: return OpID::LOGICAL_OR;
+
+         case Oplike::BIT_NOT: return OpID::BIT_NOT;
+         case Oplike::BIT_AND: return OpID::BIT_AND;
+         case Oplike::BIT_OR: return OpID::BIT_OR;
+         case Oplike::BIT_XOR: return OpID::BIT_XOR;
+         case Oplike::SHL: return OpID::SHL;
+         case Oplike::SHR: return OpID::SHR;
+
+
+         case Oplike::THREE_WAY_COMP: return OpID::THREE_WAY_COMP;
+         case Oplike::LESSER: return OpID::LESSER;
+         case Oplike::GREATER: return OpID::GREATER;
+         case Oplike::LESSER_OR_EQ: return OpID::LESSER_OR_EQ;
+         case Oplike::GREATER_OR_EQ: return OpID::GREATER_OR_EQ;
+
+         case Oplike::IS_EQUAL: return OpID::IS_EQUAL;
+         case Oplike::IS_UNEQUAL: return OpID::IS_UNEQUAL;
+
+         case Oplike::COALESCE: return OpID::COALESCE;
+
+         case Oplike::ASSIGN: return OpID::ASSIGN;
+         case Oplike::ADD_ASSIGN: return OpID::ADD_ASSIGN;
+         case Oplike::SUB_ASSIGN: return OpID::SUB_ASSIGN;
+         case Oplike::MUL_ASSIGN: return OpID::MUL_ASSIGN;
+         case Oplike::DIV_ASSIGN: return OpID::DIV_ASSIGN;
+         case Oplike::MOD_ASSIGN: return OpID::MOD_ASSIGN;
+         case Oplike::EXP_ASSIGN: return OpID::EXP_ASSIGN;
+         case Oplike::SHL_ASSIGN: return OpID::SHL_ASSIGN;
+         case Oplike::SHR_ASSIGN: return OpID::SHR_ASSIGN;
+         case Oplike::AND_ASSIGN: return OpID::AND_ASSIGN;
+         case Oplike::XOR_ASSIGN: return OpID::XOR_ASSIGN;
+         case Oplike::OR_ASSIGN: return OpID::OR_ASSIGN;
+         case Oplike::COALESCE_ASSIGN: return OpID::COALESCE_ASSIGN;
+
+         case Oplike::SLICE: return OpID::SLICE;
+
+         case Oplike::INLINE_IF: return OpID::INLINE_IF;
+         case Oplike::INLINE_ELSE: return OpID::INLINE_ELSE;
+         case Oplike::SCOPE_RESOLUTION: return OpID::SCOPE_RESOLUTION;
+         case Oplike::MEMBER_ACCESS: return OpID::MEMBER_ACCESS;
+         case Oplike::PTR_MEMBER_ACCESS: return OpID::PTR_MEMBER_ACCESS;
+         case Oplike::METHOD_PTR: return OpID::METHOD_PTR;
+         case Oplike::ARROW_METHOD_PTR: return OpID::ARROW_METHOD_PTR;
+         case Oplike::RANGE: return OpID::RANGE;
+         case Oplike::SPREAD: return OpID::SPREAD;
+         case Oplike::COMMA: return OpID::COMMA;
+
+         case Oplike::LINE_CMNT: fthru;
+         case Oplike::BLOCK_CMNT_OPEN: fthru;
+         case Oplike::BLOCK_CMNT_CLOSE: fthru;
+         case Oplike::ESC: fthru;
+         case Oplike::CALL_OPEN: fthru;
+         case Oplike::CALL_CLOSE: fthru;
+         case Oplike::INDEX_OPEN: fthru;
+         case Oplike::INDEX_CLOSE: fthru;
+         case Oplike::LIST_OPEN: fthru;
+         case Oplike::LIST_CLOSE: fthru;
+         case Oplike::SPECIALIZER_OPEN: fthru;
+         case Oplike::SPECIALIZER_CLOSE: fthru;
+         case Oplike::PREPROC: fthru;
+         case Oplike::EOS: fthru;
+         case Oplike::CHAR: fthru;
+         case Oplike::STRING: fthru;
+         case Oplike::ATTR: return OpID::null;
+      }
+      UNREACHABLE;
+   }
+
    #pragma endregion ops
    #pragma region keyword
    enum class KeywordID : uint8 {
@@ -415,6 +565,7 @@ namespace clef {
       ENUM_UNION,
       MASK,
       NAMESPACE,
+      TUPLE,
       FUNC,
       MACRO,
 
@@ -450,7 +601,6 @@ namespace clef {
 
       CAST,
       UP_CAST,
-      DYN_CAST,
       BIT_CAST,
       CONST_CAST,
 
@@ -459,11 +609,13 @@ namespace clef {
 
       TYPEOF,
       SIZEOF,
-      ALIGNAS,
       ALIGNOF,
+      ALIGNAS,
+      STRIDEOF,
+      STRIDEAS,
 
       __FIRST_TYPE_ASSESSMENT = TYPEOF,
-      __LAST_TYPE_ASSESSMENT = ALIGNOF,
+      __LAST_TYPE_ASSESSMENT = STRIDEAS,
       
 
       GOTO,
@@ -502,14 +654,13 @@ namespace clef {
 
       ASSERT,
       STATIC_ASSERT,
-      DEBUG_ASSERT,
       ASSUME,
 
       __FIRST_ASSERT = ASSERT,
       __LAST_ASSERT = ASSUME,
 
       LET,
-      ALIAS,
+      USING,
 
       ASM,
 
@@ -541,7 +692,6 @@ namespace clef {
       using enum KeywordID;
       switch (id) {
          case ASSERT:
-         case DEBUG_ASSERT:
          case STATIC_ASSERT:
          case ASSUME:
          
@@ -563,23 +713,20 @@ namespace clef {
          case KeywordID::BREAK         : return OpID::BREAK;
          case KeywordID::CONTINUE      : return OpID::CONTINUE;
          
-         case KeywordID::THROW         : return OpID::THROW;
          case KeywordID::ASSERT        : return OpID::ASSERT;
-         case KeywordID::DEBUG_ASSERT  : return OpID::DEBUG_ASSERT;
          case KeywordID::ASSUME        : return OpID::ASSUME;
          case KeywordID::STATIC_ASSERT : return OpID::STATIC_ASSERT;
          case KeywordID::RETURN        : return OpID::RETURN;
-
-         case KeywordID::ALIAS         : return OpID::ALIAS;
          
-         case KeywordID::TYPEOF        : TODO;
-         case KeywordID::SIZEOF        : TODO;
-         case KeywordID::ALIGNAS       : TODO;
-         case KeywordID::ALIGNOF       : TODO;
+         case KeywordID::TYPEOF        : return OpID::TYPEOF;
+         case KeywordID::SIZEOF        : return OpID::SIZEOF;
+         case KeywordID::ALIGNAS       : return OpID::ALIGNAS;
+         case KeywordID::ALIGNOF       : return OpID::ALIGNOF;
+         case KeywordID::STRIDEAS      : return OpID::STRIDEAS;
+         case KeywordID::STRIDEOF      : return OpID::STRIDEOF;
 
          case KeywordID::CAST          : return OpID::CAST;
          case KeywordID::UP_CAST       : return OpID::UP_CAST;
-         case KeywordID::DYN_CAST      : return OpID::DYN_CAST;
          case KeywordID::BIT_CAST      : return OpID::BIT_CAST;
          case KeywordID::CONST_CAST    : return OpID::CONST_CAST;
 
@@ -672,33 +819,22 @@ namespace clef {
       NONE = 0,      //not a block type
 
       CALL = 3_m,       //PARENTHESES
-      SUBSCRIPT,        //SQUARE BRACKETS
-      LIST,        //CURLY BRACKETS
+      INDEX,        //SQUARE BRACKETS
+      LIST,             //CURLY BRACKETS
       SPECIALIZER,      //TRIANGLE BRACKETS
 
-      QUOTES_CHAR,      //CHARACTER
-      QUOTES_STR,       //STRING
-      QUOTES_INTERP,    //INTERPOLATED STRING
-
       TERNARY,          //ternary statement
-
-      COMMENT_BLOCK,    //COMMENTED-OUT CODE
-      COMMENT_LINE,     //COMMENTED OUT CODE
    };
    constexpr auto operator+(const BlockType t) noexcept { return std::to_underlying(t); }
    constexpr OpID getInvoker(const BlockType t) {
       using enum BlockType;
       switch (t) {
-         case CALL         : return OpID::CALL_INVOKE;
-         case SUBSCRIPT    : return OpID::SUBSCRIPT_INVOKE;
-         case LIST         : return OpID::LIST_INVOKE;
-         case SPECIALIZER  : return OpID::SPECIALIZER_INVOKE;
+         case CALL         : return OpID::CALL;
+         case INDEX    : return OpID::INDEX;
+         case LIST         : return OpID::INIT_LIST;
+         case SPECIALIZER  : return OpID::SPECIALIZER;
 
-         case QUOTES_CHAR  : return OpID::CHAR_INVOKE;
-         case QUOTES_STR   : return OpID::STR_INVOKE;
-         case QUOTES_INTERP: return OpID::INTERP_STR_INVOKE;
-
-         case TERNARY      : return OpID::TERNARY_INVOKE;
+         case TERNARY      : return OpID::INLINE_IF;
 
          default: UNREACHABLE;
       }
