@@ -44,7 +44,7 @@ RESTART:
                case REAL_LIT_CHAR: kw = KeywordID::FLOAT; break;
                case CHAR_LIT_CHAR: kw = KeywordID::CHAR; break;
 
-               default: logError(ErrCode::BAD_LITERAL, "invalid literal type specifier `%c`", type);
+               default: logError(ErrCode::BAD_LIT, "invalid literal type specifier `%c`", type);
             }
             if (curr < end) {
                //architecture-dependant types
@@ -52,7 +52,7 @@ RESTART:
                   char size = *curr++ | mcsl::CASE_BIT;
                   kw = makeSized_c(kw, size);
                   if (kw == KeywordID::_NOT_A_KEYWORD) {
-                     logError(ErrCode::BAD_LITERAL, "invalid literal type specifier `%c%c`", type, size);
+                     logError(ErrCode::BAD_LIT, "invalid literal type specifier `%c%c`", type, size);
                   }
                }
                //explicitly sized types
@@ -62,7 +62,7 @@ RESTART:
                   curr += typeSize.len;
                   kw = makeSized_n(kw, typeSize.val);
                   if (kw == KeywordID::_NOT_A_KEYWORD) {
-                     logError(ErrCode::BAD_LITERAL, "invalid literal type specifier `%c%u`", type, typeSize.val);
+                     logError(ErrCode::BAD_LIT, "invalid literal type specifier `%c%u`", type, typeSize.val);
                   }
                }
             }
@@ -70,7 +70,7 @@ RESTART:
             kw = KeywordID::_NOT_A_KEYWORD;
          }
          if (curr < end && mcsl::is_letter(*curr)) {
-            logError(ErrCode::BAD_LITERAL, "identifier may not start with digit, and numeric literal must not be directly followed by identifier without separating whitespace");
+            logError(ErrCode::BAD_LIT, "identifier may not start with digit, and numeric literal must not be directly followed by identifier without separating whitespace");
          }
 
          //convert to number and push token to stream
@@ -92,7 +92,7 @@ RESTART:
                if (kw == KeywordID::_NOT_A_KEYWORD || isFloatingPoint(kw)) {
                   return Token::makeReal(val.val.f, kw);
                } else { [[unlikely]];
-                  logError(ErrCode::BAD_LITERAL, "cannot narrow floating point literal to integer type `%s`", toString(kw));
+                  logError(ErrCode::BAD_LIT, "cannot narrow floating point literal to integer type `%s`", toString(kw));
                }
          }
       UNREACHABLE;
@@ -217,7 +217,7 @@ RESTART:
       //UNPRINTABLE CHAR (illegal)
       default:
          debug_assert(*curr < 32 || *curr > 126);
-         logError(ErrCode::LEXER_UNSPEC, "invalid character (%u)", *curr);
+         logError(ErrCode::UNREC_SRC_CHAR, "invalid character (%u)", *curr);
    }
 
    UNREACHABLE;
@@ -229,7 +229,7 @@ char clef::Lexer::parseChar() {
    char ch;
    if (*curr >= 32 && *curr <= 126) {
       if (*curr == ESCAPE_CHAR) {
-         if (++curr >= end) { logError(ErrCode::BAD_LITERAL, "incomplete character literal"); }
+         if (++curr >= end) { logError(ErrCode::BAD_LIT, "incomplete character literal"); }
          switch (*curr) {
             #pragma region numescseq
             case 'b': case 'B': { //1-8 binary digits
@@ -243,7 +243,7 @@ char clef::Lexer::parseChar() {
                   ++curr;
                }
                if (curr == numBegin) { ch = '\b'; }
-               else if (numEnd != curr) { logError(ErrCode::BAD_LITERAL, "bad binary numeric escape sequence"); }
+               else if (numEnd != curr) { logError(ErrCode::BAD_LIT, "bad binary numeric escape sequence"); }
                else { ch = (char)mcsl::str_to_uint(numBegin, numEnd, 2); }
                break;
             }
@@ -258,7 +258,7 @@ char clef::Lexer::parseChar() {
                   }
                   ++curr;
                }
-               if (numEnd != curr) { logError(ErrCode::BAD_LITERAL, "bad octal numeric escape sequence"); }
+               if (numEnd != curr) { logError(ErrCode::BAD_LIT, "bad octal numeric escape sequence"); }
                //parse digit sequence
                do { //!NOTE: kinda unsafe, but should always work if implemented correctly
                   debug_assert(numEnd > numBegin);
@@ -280,7 +280,7 @@ char clef::Lexer::parseChar() {
                   }
                   ++curr;
                }
-               if (numEnd != curr) { logError(ErrCode::BAD_LITERAL, "bad decimal numeric escape sequence"); }
+               if (numEnd != curr) { logError(ErrCode::BAD_LIT, "bad decimal numeric escape sequence"); }
                //parse digit sequence
                do { //!NOTE: kinda unsafe, but should always work if implemented correctly
                   debug_assert(numEnd > numBegin);
@@ -301,7 +301,7 @@ char clef::Lexer::parseChar() {
                   }
                   ++curr;
                }
-               if (numEnd != curr) { logError(ErrCode::BAD_LITERAL, "bad hexidecimal numeric escape sequence"); }
+               if (numEnd != curr) { logError(ErrCode::BAD_LIT, "bad hexidecimal numeric escape sequence"); }
                ch = (char)mcsl::str_to_uint(numBegin, numEnd, 16);
                break;
             }
@@ -316,7 +316,7 @@ char clef::Lexer::parseChar() {
             case 't': ch = '\t'; ++curr; break;
             case 'v': ch = '\v'; ++curr; break;
 
-            default: if (*curr < 32 || *curr > 126) { logError(ErrCode::BAD_LITERAL, "unprintable escaped character literal (%u)", *curr); }
+            default: if (*curr < 32 || *curr > 126) { logError(ErrCode::BAD_LIT, "unprintable escaped character literal (%u)", *curr); }
                //!TODO: warning for unrecognized escape sequence
                fthru;
             case '\'': fthru;
@@ -330,7 +330,7 @@ char clef::Lexer::parseChar() {
          ch = *curr;
          ++curr;
       }
-   } else { logError(ErrCode::BAD_LITERAL, "unprintable character literal (%u)", *curr); }
+   } else { logError(ErrCode::BAD_LIT, "unprintable character literal (%u)", *curr); }
 
    return ch;
 }
@@ -338,7 +338,7 @@ char clef::Lexer::parseChar() {
 clef::Token clef::Lexer::lexChar() {
    ++curr; //skip opening quote
    const char tmp = parseChar();
-   if (curr >= end || *curr != CHAR_DELIM) { logError(ErrCode::BAD_LITERAL, "character literal may only contain a single character/escape sequence"); }
+   if (curr >= end || *curr != CHAR_DELIM) { logError(ErrCode::BAD_LIT, "character literal may only contain a single character/escape sequence"); }
    ++curr; //skip closing quote
    return Token::makeChar(tmp);
 }
@@ -349,7 +349,7 @@ clef::Token clef::Lexer::lexStr() {
       }
    }
    if (curr >= end || *curr != STR_DELIM) {
-      logError(ErrCode::BAD_LITERAL, "unclosed string literal");
+      logError(ErrCode::BAD_LIT, "unclosed string literal");
    }
    ++curr;
    return Token::makeStr(mcsl::str_slice{tokBegin+1,curr-1});

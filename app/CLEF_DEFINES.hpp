@@ -8,6 +8,8 @@
 #define TAB_SIZE 3
 
 //compiler parameters
+#define ARR_LIST_BUF_SIZE 256
+
 #define PARALLEL_COMPILE_FILES false
 
 #define MAX_OP_LEN 3

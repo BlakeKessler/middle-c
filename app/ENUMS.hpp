@@ -12,40 +12,16 @@ namespace clef {
    enum class ErrCode {
       UNSPEC = 0,
 
-      LEXER_UNSPEC,
-      LEXER_NOT_IMPLEMENTED,
-
-      PARSER_UNSPEC,
-      PARSER_NOT_IMPLEMENTED,
-      //syntax errors
-      BAD_PARAM_BLOCK,
-      BAD_LITERAL,
+      //lexer
       BAD_CMNT,
-      BAD_IDEN,
-      BAD_KEYWORD,
-
-      MISSING_KEYWORD,
-      MISSING_OPERATOR,
-      MISSING_BLOCK_DELIM,
-      MISSING_EOS,
+      BAD_LIT,
+      UNREC_SRC_CHAR,
       
-      BAD_STMT,
-      BAD_EXPR,
-      BAD_BLOCK_DELIM,
-      UNCLOSED_BLOCK,
-      BAD_FUNC,
-      BAD_DECL,
-      BAD_TYPE_DECL,
-
-      BAD_PREPROC,
-
-      BAD_ATTR,
-      //ast/ast node errors
-      BAD_LIT_CAST,
-      BAD_NODE_CAST,
-
-      //typechecking errors
-      TYPECHECK_ERR,
+      //parser
+      MISSING_KW,
+      BAD_KW,
+      MISSING_OP,
+      BAD_OP,
    };
    constexpr auto      operator+(const ErrCode t) noexcept { return std::to_underlying(t); }
    
