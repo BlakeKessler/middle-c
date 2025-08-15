@@ -49,7 +49,7 @@ namespace clef {
    class Macro;
    struct Overload;
 
-   template<typename T> concept SyntaxNode_t = requires { {T::SyntaxNode_t} -> mcsl::same_t<void>; };
+   template<typename T> concept SyntaxNode_t = mcsl::same_t<typename T::SyntaxNode_t, void>;
 
    //containers for atomic compilation elements
    class Source;

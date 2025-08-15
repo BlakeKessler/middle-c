@@ -22,6 +22,11 @@ namespace clef {
       BAD_KW,
       MISSING_OP,
       BAD_OP,
+      MISSING_BLOCK_DELIM,
+      BAD_BLOCK_DELIM,
+      MISSING_EOS,
+      MISSING_LABEL,
+      BAD_EXPR,
    };
    constexpr auto      operator+(const ErrCode t) noexcept { return std::to_underlying(t); }
    
@@ -239,6 +244,7 @@ namespace clef {
    constexpr OpProps operator^(const OpProps lhs, const OpProps rhs) noexcept { return (OpProps)((+lhs) ^ (+rhs)); }
    constexpr OpProps operator|(const OpProps lhs, const OpProps rhs) noexcept { return (OpProps)((+lhs) | (+rhs)); }
    constexpr bool isBinary(const OpProps x) { return +(x & OpProps::CAN_BE_BINARY); }
+   constexpr bool isUnary(const OpProps x) { return +(x & (OpProps::CAN_BE_PREFIX | OpProps::CAN_BE_POSTFIX)); }
    constexpr OpProps makeOpProps(const bool canBePostfix, const bool canBePrefix, const bool canBeBinary, const bool canBeTypeMod, const bool canBeOpen, const bool canBeClose, const bool isLeftAssoc) {
       OpProps post  = canBePostfix ? OpProps::CAN_BE_POSTFIX : OpProps::null;
       OpProps pre   = canBePrefix  ? OpProps::CAN_BE_PREFIX  : OpProps::null;

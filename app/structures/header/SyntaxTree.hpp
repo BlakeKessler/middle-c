@@ -30,10 +30,10 @@ class clef::SyntaxTree {
    public:
       SyntaxTree(DataModel);
 
-      template<SyntaxNode_t T, typename... Argv_t> requires valid_ctor<T, Argv_t...> T* make(Argv_t... argv) {
+      template<SyntaxNode_t T, typename... Argv_t> requires mcsl::valid_ctor<T, Argv_t...> T* make(Argv_t... argv) {
          #define PUSH(T2, buf) \
             if constexpr (mcsl::same_t<T, T2>) {                          \
-               return buf.emplace_back(std::forward<Argv_t...>(argv)...); \
+               return buf.emplace_back(std::forward<Argv_t>(argv)...); \
             }
          PUSH(Expr   , _exprs    ) else
          PUSH(Args   , _args     ) else

@@ -2,20 +2,30 @@
 #define PARSER_HPP
 
 #include "CLEF.hpp"
+
+#include "Lexer.hpp"
 #include "SyntaxTree.hpp"
+#include "Token.hpp"
 
 class clef::Parser {
    private:
       SyntaxTree& _tree;
       Lexer& _toks;
+      Token _currTok;
 
       Parser(SyntaxTree& tree, Lexer& toks):_tree{tree},_toks{toks} {}
    protected:
+      [[gnu::noreturn]] void logError(Token, ErrCode, const mcsl::str_slice, mcsl::Printable auto...);
+
+      void nextToken() { _currTok = _toks.nextToken(); }
+
       res<void> consumeKeyword(KeywordID kw);
       res<void> consumeOp(OpID);
+      res<void> consumeBlockDelim(BlockType, BlockDelimRole);
+      res<void> consumeEOS();
       
       res<Expr*> parseExpr();
-      res<Expr*> parseExprImpl(ubyte prec, bool isLeftAssoc);
+      res<Expr*> parseCoreExpr();
 
       res<Attr*> parseAttr();
       res<Attr*> parseAttrs();
@@ -39,11 +49,11 @@ class clef::Parser {
       res<mcsl::pair<Method*, Overload*>> parseMethod();
       res<mcsl::pair<Macro*, Overload*>> parseMacro();
 
-      template<typename T> T expect(res<T> val, Token badTok, const mcsl::str_slice fmt, mcsl::Printable auto... argv) {
+      template<typename T> T expect(res<T> val, Token badTok, ErrCode code, const mcsl::str_slice fmt, mcsl::Printable auto... argv) {
          if (val.is_ok()) {
             return val.ok();
          } else {
-            TODO;
+            logError(badTok, code, fmt, std::forward<decltype(argv)>(argv)...);
          }
       }
    public:
