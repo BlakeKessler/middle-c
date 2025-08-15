@@ -15,7 +15,9 @@ class clef::Parser {
 
       Parser(SyntaxTree& tree, Lexer& toks):_tree{tree},_toks{toks} {}
    protected:
-      [[gnu::noreturn]] void logError(Token, ErrCode, const mcsl::str_slice, mcsl::Printable auto...);
+      [[gnu::noreturn]] void logError(Token tok, ErrCode code, const mcsl::str_slice fmt, mcsl::Printable auto... argv) {
+         _toks.logError(tok, code, fmt, std::forward<decltype(argv)>(argv)...);
+      }
 
       void nextToken() { _currTok = _toks.nextToken(); }
 
@@ -57,8 +59,9 @@ class clef::Parser {
          }
       }
    public:
-      static Parser parseSource(Source&&);
-      static Parser parseFile(mcsl::File&);
+      static Parser parseSource(Source&&, SyntaxTree&);
+      static Parser parseFile(mcsl::File&, SyntaxTree&);
+      static Parser parseFile(const mcsl::str_slice, SyntaxTree&);
 };
 
 #endif

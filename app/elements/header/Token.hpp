@@ -36,103 +36,104 @@ struct [[clang::trivial_abi]] clef::Token {
          KeywordID _keyword;
          TokenType _type;
       } m;
-      Token(M _): m{_} {}
+      const mcsl::str_slice _tokstr;
+      Token(M _, const mcsl::str_slice tokstr): m{_},_tokstr{tokstr} {}
    public:
       //constructors
-      Token(): m{._name={},._keyword={}, ._type=TokenType::NONE} {}
-      Token(const Token& other): m{} { mcsl::memcpy((ubyte*)this, (ubyte*)&other, sizeof(Token)); }
+      Token(const mcsl::str_slice tokstr = {}): m{._name={},._keyword={}, ._type=TokenType::NONE},_tokstr{tokstr} {}
+      Token(const Token& other): m{},_tokstr{other._tokstr} { mcsl::memcpy((ubyte*)this, (ubyte*)&other, sizeof(Token)); }
       Token& operator=(const Token& other) { return *new (this) Token(other); }
 
-      static Token makeIden(const mcsl::str_slice name) {
-         return M{
+      static Token makeIden(const mcsl::str_slice name, const mcsl::str_slice tokstr) {
+         return {M{
             ._name = name,
             ._keyword = {},
             ._type = name.size() && name[0] == '@' ? TokenType::ATTR : TokenType::IDEN
-         };
+         }, tokstr};
       }
-      static Token makeIden(const mcsl::str_slice name, bool isMacro) {
-         return M{
+      static Token makeIden(const mcsl::str_slice name, bool isMacro, const mcsl::str_slice tokstr) {
+         return {M{
             ._name = name,
             ._keyword = {},
             ._type = isMacro ? TokenType::MACRO_INVOKE : (name.size() && name[0] == '@' ? TokenType::ATTR : TokenType::IDEN)
-         };
+         }, tokstr};
       }
-      static Token makeKeyword(const KeywordID id) {
-         return M{
+      static Token makeKeyword(const KeywordID id, const mcsl::str_slice tokstr) {
+         return {M{
             ._name = {},
             ._keyword = id,
             ._type = +id ? TokenType::KEYWORD : TokenType::IDEN
-         };
+         }, tokstr};
       }
-      static Token makeBool(const bool val) {
-         return M{
+      static Token makeBool(const bool val, const mcsl::str_slice tokstr) {
+         return {M{
             ._boolVal = val,
             ._keyword = val ? KeywordID::TRUE : KeywordID::FALSE,
             ._type = TokenType::BOOL_LIT
-         };
+         }, tokstr};
       }
-      static Token makeUint(const ulong val, const KeywordID t) {
-         return M{
+      static Token makeUint(const ulong val, const KeywordID t, const mcsl::str_slice tokstr) {
+         return {M{
             ._uintVal = val,
             ._keyword = t == KeywordID::_NOT_A_KEYWORD ? KeywordID::UINT : t,
             ._type = TokenType::UINT_NUM
-         };
+         }, tokstr};
       }
-      static Token makeSint(const slong val, const KeywordID t) {
-         return M{
+      static Token makeSint(const slong val, const KeywordID t, const mcsl::str_slice tokstr) {
+         return {M{
             ._sintVal = val,
             ._keyword = t == KeywordID::_NOT_A_KEYWORD ? KeywordID::SINT : t,
             ._type = TokenType::SINT_NUM
-         };
+         }, tokstr};
       }
-      static Token makeReal(const flong val, const KeywordID t) {
-         return M{
+      static Token makeReal(const flong val, const KeywordID t, const mcsl::str_slice tokstr) {
+         return {M{
             ._realVal = val,
             ._keyword = t == KeywordID::_NOT_A_KEYWORD ? KeywordID::FLOAT : t,
             ._type = TokenType::REAL_NUM
-         };
+         }, tokstr};
       }
-      static Token makeChar(const char val) {
-         return M{
+      static Token makeChar(const char val, const mcsl::str_slice tokstr) {
+         return {M{
             ._charVal = val,
             ._keyword = {},
             ._type = TokenType::BOOL_LIT
-         };
+         }, tokstr};
       }
-      static Token makeStr(const mcsl::str_slice str) {
-         return M{
+      static Token makeStr(const mcsl::str_slice str, const mcsl::str_slice tokstr) {
+         return {M{
             ._strVal = str,
             ._keyword = KeywordID::_NOT_A_KEYWORD,
             ._type = TokenType::STR_LIT
-         };
+         }, tokstr};
       }
-      static Token makeOp(const OpData op) {
-         return M{
+      static Token makeOp(const OpData op, const mcsl::str_slice tokstr) {
+         return {M{
             ._op = op,
             ._keyword = {},
             ._type = TokenType::OP
-         };
+         }, tokstr};
       }
-      static Token makeBlock(const BlockType type, const BlockDelimRole role, const OpData op) {
-         return M{
+      static Token makeBlock(const BlockType type, const BlockDelimRole role, const OpData op, const mcsl::str_slice tokstr) {
+         return {M{
             ._blockDelim = {.invoke=op, .type=type, .role=role},
             ._keyword = {},
             ._type = TokenType::BLOCK_DELIM
-         };
+         }, tokstr};
       }
-      static Token makeEOS() {
-         return M{
+      static Token makeEOS(const mcsl::str_slice tokstr) {
+         return {M{
             ._name = {},
             ._keyword = {},
             ._type = TokenType::EOS
-         };
+         }, tokstr};
       }
-      static Token makePreprocInit() {
-         return M{
+      static Token makePreprocInit(const mcsl::str_slice tokstr) {
+         return {M{
             ._name = {},
             ._keyword = {},
             ._type = TokenType::PREPROC_INIT
-         };
+         }, tokstr};
       }
 
       //getters
@@ -151,6 +152,8 @@ struct [[clang::trivial_abi]] clef::Token {
       OpID opID() const { debug_assert(m._type == TokenType::OP); return m._op.opID(); }
       OpProps opProps() const { debug_assert(m._type == TokenType::OP); return m._op.props(); }
       auto block() const { debug_assert(m._type == TokenType::BLOCK_DELIM); return m._blockDelim; }
+
+      const mcsl::str_slice tokStr() const { return _tokstr; }
 };
 
 namespace mcsl {

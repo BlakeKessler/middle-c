@@ -16,8 +16,8 @@ int main(const int argc, char** argv) {
    mcsl::printf(BIG_HEADER);
    for (int i = 1; i < argc; ++i) {
       //abstract syntax tree
-      clef::SyntaxTree tree{};
-      clef::Parser::parse(mcsl::str_slice::make_from_cstr(argv[i]), tree);
+      clef::SyntaxTree tree{clef::DataModel::LP64};
+      clef::Parser::parseFile(mcsl::str_slice::make_from_cstr(argv[i]), tree);
       mcsl::printf(mcsl::FMT("\033[1m%s:\033[22m\n%s%s\n%s"), FMT(argv[i]), SMALL_HEADER, tree, BIG_HEADER);
    }
 

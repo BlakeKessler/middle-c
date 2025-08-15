@@ -2,8 +2,10 @@
 #define AST_HPP
 
 #include "CLEF.hpp"
-#include "ast-nodes/Expr.hpp"
 #include "DataModel.hpp"
+#include "ast-nodes/Expr.hpp"
+#include "Symbol.hpp"
+#include "TypeSpec.hpp"
 
 class clef::SyntaxTree {
    private:
@@ -51,5 +53,12 @@ class clef::SyntaxTree {
 
       inline Proc* globalScope() { return &_globalScope; }
 };
+
+#pragma region io
+#include "io.hpp"
+namespace mcsl {
+   uint writef(File&, const clef::SyntaxTree&, char, FmtArgs);
+};
+#pragma endregion io
 
 #endif

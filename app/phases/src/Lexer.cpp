@@ -44,7 +44,7 @@ RESTART:
                case REAL_LIT_CHAR: kw = KeywordID::FLOAT; break;
                case CHAR_LIT_CHAR: kw = KeywordID::CHAR; break;
 
-               default: logError(ErrCode::BAD_LIT, "invalid literal type specifier `%c`", type);
+               default: logError({{tokBegin, curr}}, ErrCode::BAD_LIT, FMT("invalid literal type specifier `%c`"), type);
             }
             if (curr < end) {
                //architecture-dependant types
@@ -52,7 +52,7 @@ RESTART:
                   char size = *curr++ | mcsl::CASE_BIT;
                   kw = makeSized_c(kw, size);
                   if (kw == KeywordID::_NOT_A_KEYWORD) {
-                     logError(ErrCode::BAD_LIT, "invalid literal type specifier `%c%c`", type, size);
+                     logError({{tokBegin, curr}}, ErrCode::BAD_LIT, FMT("invalid literal type specifier `%c%c`"), type, size);
                   }
                }
                //explicitly sized types
@@ -62,7 +62,7 @@ RESTART:
                   curr += typeSize.len;
                   kw = makeSized_n(kw, typeSize.val);
                   if (kw == KeywordID::_NOT_A_KEYWORD) {
-                     logError(ErrCode::BAD_LIT, "invalid literal type specifier `%c%u`", type, typeSize.val);
+                     logError({{tokBegin, curr}}, ErrCode::BAD_LIT, FMT("invalid literal type specifier `%c%u`"), type, typeSize.val);
                   }
                }
             }
@@ -70,7 +70,7 @@ RESTART:
             kw = KeywordID::_NOT_A_KEYWORD;
          }
          if (curr < end && mcsl::is_letter(*curr)) {
-            logError(ErrCode::BAD_LIT, "identifier may not start with digit, and numeric literal must not be directly followed by identifier without separating whitespace");
+            logError({{tokBegin, curr}}, ErrCode::BAD_LIT, FMT("identifier may not start with digit, and numeric literal must not be directly followed by identifier without separating whitespace"));
          }
 
          //convert to number and push token to stream
@@ -78,11 +78,11 @@ RESTART:
             case mcsl::NumType::null: UNREACHABLE;
             case mcsl::NumType::UINT:
                if (kw == KeywordID::_NOT_A_KEYWORD || isUint(kw)) {
-                  return Token::makeUint(val.val.u, kw);
+                  return Token::makeUint(val.val.u, kw, {tokBegin, curr});
                } else if (isSint(kw)) {
-                  return Token::makeSint(val.val.u, kw);
+                  return Token::makeSint(val.val.u, kw, {tokBegin, curr});
                } else if (isFloatingPoint(kw)) {
-                  return Token::makeReal(val.val.u, kw);
+                  return Token::makeReal(val.val.u, kw, {tokBegin, curr});
                } else { [[unlikely]];
                   debug_assert(isText(kw));
                   TODO;
@@ -90,9 +90,9 @@ RESTART:
             case mcsl::NumType::SINT: UNREACHABLE;
             case mcsl::NumType::REAL:
                if (kw == KeywordID::_NOT_A_KEYWORD || isFloatingPoint(kw)) {
-                  return Token::makeReal(val.val.f, kw);
+                  return Token::makeReal(val.val.f, kw, {tokBegin, curr});
                } else { [[unlikely]];
-                  logError(ErrCode::BAD_LIT, "cannot narrow floating point literal to integer type `%s`", toString(kw));
+                  logError({{tokBegin, curr}}, ErrCode::BAD_LIT, FMT("cannot narrow floating point literal to integer type `%s`"), toString(kw));
                }
          }
       UNREACHABLE;
@@ -116,11 +116,11 @@ RESTART:
          KeywordID id = decodeKeyword(name);
          if (+id) {
             if (id == KeywordID::TRUE || id == KeywordID::FALSE) {
-               return Token::makeBool(id == KeywordID::TRUE);
+               return Token::makeBool(id == KeywordID::TRUE, {tokBegin, curr});
             }
-            return Token::makeKeyword(id);
+            return Token::makeKeyword(id, {tokBegin, curr});
          } else {
-            return Token::makeIden(name, isMacroInvoke);
+            return Token::makeIden(name, isMacroInvoke, {tokBegin, curr});
          }
       }
       UNREACHABLE;
@@ -129,7 +129,7 @@ RESTART:
       //EOS
       case EOS:
          ++curr;
-         return Token::makeEOS();
+         return Token::makeEOS({tokBegin, curr});
 
       //ESCAPE CHAR
       case ESCAPE_CHAR:
@@ -139,7 +139,7 @@ RESTART:
       //PREPROCESSOR
       case PREPROC_INIT:
          ++curr;
-         return Token::makePreprocInit();
+         return Token::makePreprocInit({tokBegin, curr});
       //WHITESPACE
       case '\n':
          ++lineIndex;
@@ -153,7 +153,7 @@ RESTART:
          debug_assert(op);
          curr += op.size();
          switch (op.tokType()) {
-            case TokenType::OP: return Token::makeOp(op);
+            case TokenType::OP: return Token::makeOp(op, {tokBegin, curr});
             case TokenType::BLOCK_DELIM:
                switch (op.op()) {
                   #define __DEF_IMPL(type, role) \
@@ -161,7 +161,7 @@ RESTART:
                         return Token::makeBlock( \
                            BlockType::type,      \
                            BlockDelimRole::role, \
-                           op                    \
+                           op, {tokBegin, curr}  \
                         )
                   #define __DEF_BLOCK(type)  \
                      __DEF_IMPL(type, OPEN); \
@@ -177,13 +177,13 @@ RESTART:
 
                   case Oplike::BLOCK_CMNT_OPEN: 
                      do {
-                        if (curr >= end) { logError(ErrCode::BAD_CMNT, "unclosed block comment"); }
+                        if (curr >= end) { logError({{tokBegin, curr}}, ErrCode::BAD_CMNT, FMT("unclosed block comment")); }
                         OpData tmp = OPERATORS[mcsl::str_slice{curr,end}];
                         if (tmp == Oplike::BLOCK_CMNT_CLOSE) { curr += tmp.size(); break; }
                         ++curr;
                      } while (true);
                      goto RESTART;
-                  case Oplike::BLOCK_CMNT_CLOSE: logError(ErrCode::BAD_CMNT, "floating block comment closing delimiter");
+                  case Oplike::BLOCK_CMNT_CLOSE: logError({{tokBegin, curr}}, ErrCode::BAD_CMNT, FMT("floating block comment closing delimiter"));
 
                   case Oplike::LINE_CMNT:
                      while (curr < end) {
@@ -217,7 +217,7 @@ RESTART:
       //UNPRINTABLE CHAR (illegal)
       default:
          debug_assert(*curr < 32 || *curr > 126);
-         logError(ErrCode::UNREC_SRC_CHAR, "invalid character (%u)", *curr);
+         logError({{tokBegin, curr}}, ErrCode::UNREC_SRC_CHAR, FMT("invalid character (%u)"), *curr);
    }
 
    UNREACHABLE;
@@ -229,7 +229,7 @@ char clef::Lexer::parseChar() {
    char ch;
    if (*curr >= 32 && *curr <= 126) {
       if (*curr == ESCAPE_CHAR) {
-         if (++curr >= end) { logError(ErrCode::BAD_LIT, "incomplete character literal"); }
+         if (++curr >= end) { logError({{tokBegin, curr}}, ErrCode::BAD_LIT, FMT("incomplete character literal")); }
          switch (*curr) {
             #pragma region numescseq
             case 'b': case 'B': { //1-8 binary digits
@@ -243,7 +243,7 @@ char clef::Lexer::parseChar() {
                   ++curr;
                }
                if (curr == numBegin) { ch = '\b'; }
-               else if (numEnd != curr) { logError(ErrCode::BAD_LIT, "bad binary numeric escape sequence"); }
+               else if (numEnd != curr) { logError({{tokBegin, curr}}, ErrCode::BAD_LIT, FMT("bad binary numeric escape sequence")); }
                else { ch = (char)mcsl::str_to_uint(numBegin, numEnd, 2); }
                break;
             }
@@ -258,7 +258,7 @@ char clef::Lexer::parseChar() {
                   }
                   ++curr;
                }
-               if (numEnd != curr) { logError(ErrCode::BAD_LIT, "bad octal numeric escape sequence"); }
+               if (numEnd != curr) { logError({{tokBegin, curr}}, ErrCode::BAD_LIT, FMT("bad octal numeric escape sequence")); }
                //parse digit sequence
                do { //!NOTE: kinda unsafe, but should always work if implemented correctly
                   debug_assert(numEnd > numBegin);
@@ -280,7 +280,7 @@ char clef::Lexer::parseChar() {
                   }
                   ++curr;
                }
-               if (numEnd != curr) { logError(ErrCode::BAD_LIT, "bad decimal numeric escape sequence"); }
+               if (numEnd != curr) { logError({{tokBegin, curr}}, ErrCode::BAD_LIT, FMT("bad decimal numeric escape sequence")); }
                //parse digit sequence
                do { //!NOTE: kinda unsafe, but should always work if implemented correctly
                   debug_assert(numEnd > numBegin);
@@ -301,7 +301,7 @@ char clef::Lexer::parseChar() {
                   }
                   ++curr;
                }
-               if (numEnd != curr) { logError(ErrCode::BAD_LIT, "bad hexidecimal numeric escape sequence"); }
+               if (numEnd != curr) { logError({{tokBegin, curr}}, ErrCode::BAD_LIT, FMT("bad hexidecimal numeric escape sequence")); }
                ch = (char)mcsl::str_to_uint(numBegin, numEnd, 16);
                break;
             }
@@ -316,7 +316,7 @@ char clef::Lexer::parseChar() {
             case 't': ch = '\t'; ++curr; break;
             case 'v': ch = '\v'; ++curr; break;
 
-            default: if (*curr < 32 || *curr > 126) { logError(ErrCode::BAD_LIT, "unprintable escaped character literal (%u)", *curr); }
+            default: if (*curr < 32 || *curr > 126) { logError({{tokBegin, curr}}, ErrCode::BAD_LIT, FMT("unprintable escaped character literal (%u)"), *curr); }
                //!TODO: warning for unrecognized escape sequence
                fthru;
             case '\'': fthru;
@@ -330,7 +330,7 @@ char clef::Lexer::parseChar() {
          ch = *curr;
          ++curr;
       }
-   } else { logError(ErrCode::BAD_LIT, "unprintable character literal (%u)", *curr); }
+   } else { logError({{tokBegin, curr}}, ErrCode::BAD_LIT, FMT("unprintable character literal (%u)"), *curr); }
 
    return ch;
 }
@@ -338,9 +338,9 @@ char clef::Lexer::parseChar() {
 clef::Token clef::Lexer::lexChar() {
    ++curr; //skip opening quote
    const char tmp = parseChar();
-   if (curr >= end || *curr != CHAR_DELIM) { logError(ErrCode::BAD_LIT, "character literal may only contain a single character/escape sequence"); }
+   if (curr >= end || *curr != CHAR_DELIM) { logError({{tokBegin, curr}}, ErrCode::BAD_LIT, FMT("character literal may only contain a single character/escape sequence")); }
    ++curr; //skip closing quote
-   return Token::makeChar(tmp);
+   return Token::makeChar(tmp, {tokBegin, curr});
 }
 clef::Token clef::Lexer::lexStr() {
    while (++curr < end && *curr != STR_DELIM) {
@@ -349,10 +349,10 @@ clef::Token clef::Lexer::lexStr() {
       }
    }
    if (curr >= end || *curr != STR_DELIM) {
-      logError(ErrCode::BAD_LIT, "unclosed string literal");
+      logError({{tokBegin, curr}}, ErrCode::BAD_LIT, FMT("unclosed string literal"));
    }
    ++curr;
-   return Token::makeStr(mcsl::str_slice{tokBegin+1,curr-1});
+   return Token::makeStr(mcsl::str_slice{tokBegin+1,curr-1}, {tokBegin, curr});
 }
 clef::Token clef::Lexer::lexInterpStr() {
    TODO;

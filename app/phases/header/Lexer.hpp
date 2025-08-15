@@ -38,30 +38,40 @@ class clef::Lexer {
       const mcsl::str_slice path() const { return src.path(); }
 
       //error logging
-      void logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, const mcsl::Printable auto&... args);
+      void logError [[noreturn]] (Token tok, const clef::ErrCode code, const mcsl::str_slice formatStr, const mcsl::Printable auto&... args);
 };
 
 
 #pragma region inlinesrc
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-security"
-void clef::Lexer::logError [[noreturn]] (const clef::ErrCode code, const char* formatStr, const mcsl::Printable auto&... args) {
-   const mcsl::str_slice line = currLine();
-   const mcsl::str_slice tok = prevTokStr();
+void clef::Lexer::logError [[noreturn]] (Token tok, const clef::ErrCode code, const mcsl::str_slice formatStr, const mcsl::Printable auto&... args) {
+   const mcsl::str_slice tokStr = tok.tokStr();
+
+   uint i = lineIndex;
+   do {
+      const mcsl::str_slice tmp = src.line(i);
+      if (tokStr.begin() >= tmp.begin()) {
+         debug_assert(tokStr.end() <= tmp.end());
+         break;
+      }
+      --i;
+   } while (--i);
+   const mcsl::str_slice line = src.line(i);
+   debug_assert(tokStr.begin() >= line.begin());
+   debug_assert(tokStr.end() <= line.end());
 
    mcsl::stdout.flush();
    
-   debug_assert(tok.begin() >= line.begin());
-   debug_assert(tok.end() <= line.end());
-   const mcsl::str_slice beforeTok = mcsl::str_slice::make(line.begin(), tok.begin());
-   const mcsl::str_slice afterTok = mcsl::str_slice::make(tok.end(), line.end());
+   const mcsl::str_slice beforeTok = mcsl::str_slice::make(line.begin(), tokStr.begin());
+   const mcsl::str_slice afterTok = mcsl::str_slice::make(tokStr.end(), line.end());
    
    mcsl::err_printf(mcsl::FMT("\033[1m%s:%u:%u: \033[31mERROR:\033[39m "), path(), lineNum(), beforeTok.size() + 1);
-   mcsl::err_printf(mcsl::FMT(formatStr), args...);
+   mcsl::err_printf(formatStr, args...);
    mcsl::err_printf(mcsl::FMT(" [%s, %u]\033[22m\n"), ERR_MSG_ARR[+code], +code);
    uint spaces = mcsl::err_printf(mcsl::FMT("    %u "), lineNum());
    uint spaces2 = mcsl::err_printf(mcsl::FMT("| %s"), beforeTok) - 1;
-   mcsl::err_printf(mcsl::FMT("\033[4m%s\033[24m%s"), tok, afterTok);
+   mcsl::err_printf(mcsl::FMT("\033[4m%s\033[24m%s"), tokStr, afterTok);
    if (afterTok.back() != '\n') {
       mcsl::stderr.write('\n');
    }
