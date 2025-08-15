@@ -139,9 +139,7 @@ struct clef::Expr {
          Foreach* foreachExpr;
          Switch* switchExpr;
          Match* matchExpr;
-
-         M() { memset(this, 0, sizeof(M)); }
-      } m;
+      } m = {.expr = {}}; static_assert(sizeof(m.expr) == sizeof(m));
       Attr* _attrs;
       Type _type;
    public:

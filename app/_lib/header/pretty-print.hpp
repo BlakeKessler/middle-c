@@ -9,6 +9,7 @@
 
 namespace clef {
    constexpr const mcsl::str_slice toString(const TokenType);
+   constexpr const mcsl::str_slice toString(const Oplike);
    constexpr const mcsl::str_slice toString(const OpID);
    constexpr const mcsl::str_slice toString(const OpProps);
    constexpr const mcsl::str_slice toString(const KeywordID);
@@ -129,21 +130,9 @@ constexpr const mcsl::str_slice clef::toString(const OpID op) {
       CASE(COMMA, ",");
 
 
-      CASE(FOR, "FOR");
-      CASE(FOREACH, "FOREACH");
-      CASE(WHILE, "WHILE");
-      CASE(DO_WHILE, "DO_WHILE");
-
       CASE(GOTO, "GOTO");
       CASE(GOTO_CASE, "GOTO_CASE");
-
-      CASE(IF, "IF");
-
-      CASE(SWITCH, "SWITCH");
-      CASE(MATCH, "MATCH");
-
-      CASE(ASM, "ASM");
-
+      
       CASE(BREAK, "BREAK");
       CASE(CONTINUE, "CONTINUE");
 
@@ -168,6 +157,118 @@ constexpr const mcsl::str_slice clef::toString(const OpID op) {
 
       CASE(LET, "LET");
       CASE(MAKE_TYPE, "MAKE_TYPE");
+   }
+   UNREACHABLE;
+}
+constexpr const mcsl::str_slice clef::toString(const Oplike op) {
+   using enum Oplike;
+   switch (op) {
+      CASE(null, "null");
+
+      CASE(CALL_OPEN, "(");
+      CASE(INDEX_OPEN, "[");
+      CASE(LIST_OPEN, "{");
+      CASE(SPECIALIZER_OPEN, "<:");
+
+      CASE(CALL_CLOSE, ")");
+      CASE(INDEX_CLOSE, "]");
+      CASE(LIST_CLOSE, "}");
+      CASE(SPECIALIZER_CLOSE, ":>");
+
+      CASE(LINE_CMNT, "//");
+      CASE(BLOCK_CMNT_OPEN, "/*");
+      CASE(BLOCK_CMNT_CLOSE, "*/");
+
+      CASE(ESC, "\\");
+      CASE(PREPROC, "#");
+      CASE(EOS, ";");
+
+      CASE(CHAR, "\'");
+      CASE(STRING, "\"");
+      
+      CASE(ATTR, "@");
+
+      CASE(INLINE_IF, "?");
+      CASE(INLINE_ELSE, ":");
+
+      CASE(SCOPE_RESOLUTION, "::");
+
+      CASE(INC, "++");
+      CASE(DEC, "--");
+
+      CASE(MEMBER_ACCESS, ".");
+      CASE(PTR_MEMBER_ACCESS, "->");
+      CASE(METHOD_PTR, ".*");
+      CASE(ARROW_METHOD_PTR, "->*");
+
+      CASE(SLICE, "[]");
+
+      CASE(RANGE, "..");
+      CASE(SPREAD, "...");
+
+      CASE(ADD, "+");
+      CASE(SUB, "-");
+      CASE(MUL, "*");
+      CASE(DIV, "/");
+      CASE(MOD, "%");
+      CASE(EXP, "^^");
+
+      CASE(LOGICAL_NOT, "!");
+      CASE(LOGICAL_AND, "&&");
+      CASE(LOGICAL_OR, "||");
+
+      CASE(BIT_NOT, "~");
+      CASE(BIT_AND, "&");
+      CASE(BIT_OR, "|");
+      CASE(BIT_XOR, "^");
+      CASE(SHL, "<<");
+      CASE(SHR, ">>");
+
+
+      CASE(THREE_WAY_COMP, "<=>");
+      CASE(LESSER, "<");
+      CASE(GREATER, ">");
+      CASE(LESSER_OR_EQ, "<=");
+      CASE(GREATER_OR_EQ, ">=");
+
+      CASE(IS_EQUAL, "==");
+      CASE(IS_UNEQUAL, "!=");
+
+      CASE(COALESCE, "??");
+
+      CASE(ASSIGN, "=");
+      CASE(ADD_ASSIGN, "+=");
+      CASE(SUB_ASSIGN, "-=");
+      CASE(MUL_ASSIGN, "*=");
+      CASE(DIV_ASSIGN, "/=");
+      CASE(MOD_ASSIGN, "%=");
+      CASE(EXP_ASSIGN, "^^=");
+      CASE(SHL_ASSIGN, "<<=");
+      CASE(SHR_ASSIGN, ">>=");
+      CASE(AND_ASSIGN, "&=");
+      CASE(XOR_ASSIGN, "^=");
+      CASE(OR_ASSIGN, "|=");
+      CASE(COALESCE_ASSIGN, "??=");
+
+      CASE(COMMA, ",");
+
+      CASE(ASSERT, "ASSERT");
+      CASE(STATIC_ASSERT, "STATIC_ASSERT");
+      CASE(ASSUME, "ASSUME");
+
+      CASE(RETURN, "RETURN");
+
+      CASE(CAST, "CAST");
+      CASE(UP_CAST, "UP_CAST");
+      CASE(BIT_CAST, "BIT_CAST");
+      CASE(CONST_CAST, "CONST_CAST");
+
+      CASE(TYPEOF, "TYPEOF");
+      CASE(SIZEOF, "SIZEOF");
+      CASE(ALIGNOF, "ALIGNOF");
+      CASE(STRIDEOF, "STRIDEOF");
+      CASE(ALIGNAS, "ALIGNAS");
+      CASE(STRIDEAS, "STRIDEAS");
    }
    UNREACHABLE;
 }

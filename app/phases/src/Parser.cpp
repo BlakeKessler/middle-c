@@ -10,6 +10,13 @@
 
 #include "dyn_arr.hpp"
 
+void clef::Parser::nextToken() {
+   currTok = _toks.nextToken();
+   if (currTok.type() == TokenType::MACRO_INVOKE) {
+      TODO;
+   }
+}
+
 clef::res<void> clef::Parser::consumeKeyword(KeywordID kw) {
    if (currTok.type() != TokenType::KEYWORD) {
       return {ErrCode::MISSING_KW};
@@ -136,11 +143,13 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
          case TokenType::NONE: UNREACHABLE;
          case TokenType::__OPLIKE: UNREACHABLE;
 
-         case TokenType::MACRO_INVOKE: TODO;
+         case TokenType::MACRO_INVOKE:
+            //macro expansion happens in `nextToken`
+            UNREACHABLE;
 
          case TokenType::KEYWORD: { //keywords
             const KeywordID kw = currTok.keywordID();
-            if (kw == KeywordID::FUNC) {
+            if (kw == KeywordID::FUNC) { //inline functions
                nextToken();
                auto f = expect(parseFunc(), ErrCode::BAD_EXPR, FMT("invalid inline function definition"));
                Expr* expr = tree.make<Expr>(f.first, f.second);
@@ -148,10 +157,7 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
-            else if (kw == KeywordID::LET) {
-               logError(currTok, ErrCode::BAD_EXPR, FMT("may not declare new variables in subexpressions"));
-            }
-            else if (isValue(kw)) {
+            else if (isValue(kw)) { //value keywords
                nextToken();
                Expr* expr;
                switch (kw) {
@@ -159,12 +165,13 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
                   case KeywordID::SELF:
                      TODO;
                      break;
-                  case KeywordID::TRUE: fthru;
-                  case KeywordID::FALSE:
-                     UNREACHABLE;
                   case KeywordID::NULLPTR:
                      expr = tree.make<Expr>(Literal::makePtr(nullptr));
                      break;
+                  case KeywordID::TRUE: fthru;
+                  case KeywordID::FALSE:
+                     //made into BOOL_LIT tokens by the lexer
+                     UNREACHABLE;
 
                   default: UNREACHABLE;
                }
@@ -172,13 +179,13 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
-            else if (isCast(kw)) {
+            else if (isCast(kw)) { //typecasts
                nextToken();
                operandStack.emplace_back(expect(parseCast(kw), ErrCode::BAD_EXPR, FMT("invalid cast expression")), currTok);
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
-            else if (isPrefixOpLike(kw)) {
+            else if (isPrefixOpLike(kw)) { //prefix-operator-like keywords (EX: `return`)
                if (operatorStack.size()) { //prevent use in subexpressions
                   logError(currTok, ErrCode::BAD_EXPR, FMT("`%s` expressions cannot be subexpressions"), toString(kw));
                }
@@ -187,11 +194,12 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
                nextToken();
                goto PARSE_EXPR_CONTINUE;
             }
-            else if (isUnaryFuncLike(kw)) {
+            else if (isUnaryFuncLike(kw)) { //unary function-like
                nextToken();
                expect(consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN), ErrCode::BAD_KW, FMT("keyword `%s` must use function call syntax (and is not generic)"), toString(kw));
-               auto argList = expect(parseArgList(BlockType::CALL, false), ErrCode::BAD_EXPR, FMT("bad `%s` expression"), toString(kw));
-               operandStack.emplace_back(tree.make<Expr>(nullptr, tree.make<Expr>(argList), toOpID(kw)), currTok);
+               Expr* arg = expect(parseExpr(), ErrCode::BAD_EXPR, FMT("bad `%s` expression"), toString(kw));
+               expect(consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE), ErrCode::BAD_KW, FMT("unclosed block `%s`"), toString(Oplike::CALL_CLOSE));
+               operandStack.emplace_back(tree.make<Expr>(nullptr, arg, toOpID(kw)), currTok);
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
@@ -202,12 +210,19 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
-            
-            logError(currTok, ErrCode::BAD_KW, FMT("bad keyword in expression"));
+            else if (kw == KeywordID::LET) { //let subexpression (illegal)
+               logError(currTok, ErrCode::BAD_EXPR, FMT("may not declare new variables in subexpressions"));
+            } else {
+               logError(currTok, ErrCode::BAD_KW, FMT("bad keyword in expression"));
+            }
+            UNREACHABLE;
          }
 
          case TokenType::IDEN: {
-            TODO;
+            Token tok = currTok;
+            operandStack.emplace_back(tree.make<Expr>(expect(parseIden(), ErrCode::BAD_EXPR, FMT("invalid identifier"))), currTok);
+            prevTokIsOperand = true;
+            goto PARSE_EXPR_CONTINUE;
          }
 
          #define DEF_LIT(Type, TYPE) \
@@ -260,6 +275,8 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
             } else if (block.type == BlockType::LIST) { //tuple
                auto args = expect(parseArgList(block.type, false), ErrCode::BAD_BLOCK_DELIM, FMT("bad block"));
                operandStack.emplace_back(tree.make<Expr>(args), tok);
+            } else if (block.type == BlockType::SPECIALIZER) { [[unlikely]]; //specializer (illegal)
+               logError(tok, ErrCode::BAD_EXPR, FMT("floating specializer"));
             } else { //block subexpression
                debug_assert(block.type == BlockType::CALL);
                Expr* expr = expect(parseExpr(), ErrCode::BAD_BLOCK_DELIM, FMT("unmatched block delimiter `%s`"), tok.tokStr());

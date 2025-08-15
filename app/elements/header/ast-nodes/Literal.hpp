@@ -18,11 +18,11 @@ struct clef::Literal {
          char16 ch16;
          char32 ch32;
          const mcsl::str_slice str;
-      } _val;
-      FundTypeID _id;
+      } _val = {.str = {}};
+      FundTypeID _id = {};
       Literal(decltype(_val) val, FundTypeID id):_val{val},_id{id} {}
    public:
-      Literal();
+      Literal() = default;
       Literal(const Literal& other): Literal() { mcsl::memcpy((ubyte*)this, (ubyte*)&other, sizeof(Literal)); }
       Literal& operator=(const Literal& other) { return *new (this) Literal{other}; }
 
@@ -50,6 +50,8 @@ struct clef::Literal {
       static Literal makeStr(const mcsl::str_slice str) {
          return Literal{{.str = str}, FundTypeID::STR};
       }
+
+      FundTypeID type() { return _id; }
 };
 
 #endif

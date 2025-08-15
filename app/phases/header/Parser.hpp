@@ -24,7 +24,7 @@ class clef::Parser {
          _toks.logError(tok, code, fmt, std::forward<decltype(argv)>(argv)...);
       }
 
-      void nextToken() { currTok = _toks.nextToken(); } //!TODO: macros
+      void nextToken();
 
       res<void> consumeKeyword(KeywordID kw);
       res<void> consumeOp(Oplike);

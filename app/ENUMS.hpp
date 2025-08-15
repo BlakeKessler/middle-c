@@ -134,20 +134,8 @@ namespace clef {
 
 
       //keyword pseudo-operators
-      FOR,
-      FOREACH,
-      WHILE,
-      DO_WHILE,
-
       GOTO,
       GOTO_CASE,
-
-      IF,
-
-      SWITCH,
-      MATCH,
-
-      ASM,
 
       BREAK,
       CONTINUE,
@@ -189,12 +177,10 @@ namespace clef {
       RADIX_POINT = MEMBER_ACCESS,
 
       //helpers
-      __FIRST_PSEUDO_OP = FOR,
+      __FIRST_PSEUDO_OP = GOTO,
       __LAST_PSEUDO_OP = STRIDEAS,
       __FIRST_CAST = CAST,
       __LAST_CAST = CONST_CAST,
-      __FIRST_LOOP = FOR,
-      __LAST_LOOP = DO_WHILE,
    };
 
    constexpr auto operator+(const OpID x) { return std::to_underlying(x); }
@@ -203,18 +189,6 @@ namespace clef {
    constexpr bool isOperator(const OpID x) { return x < OpID::__FIRST_PSEUDO_OP; }
 
    constexpr bool isDecl(const OpID op) { return op == OpID::LET; }
-
-   constexpr bool isForLoop(const OpID op) { return op == OpID::FOR; }
-   constexpr bool isForeachLoop(const OpID op) { return op == OpID::FOREACH; }
-   constexpr bool isWhileLoop(const OpID op) { return op == OpID::WHILE; }
-   constexpr bool isDoWhileLoop(const OpID op) { return op == OpID::DO_WHILE; }
-
-   constexpr bool isLoop(const OpID op) { return op >= OpID::__FIRST_LOOP && op <= OpID::__LAST_LOOP; }
-   constexpr bool isSimpleLoop(const OpID op) { return isWhileLoop(op) || isDoWhileLoop(op); }
-
-   constexpr bool isIf(const OpID op) { return op == OpID::IF; }
-   constexpr bool isSwitch(const OpID op) { return op == OpID::SWITCH; }
-   constexpr bool isMatch(const OpID op) { return op == OpID::MATCH; }
 
    constexpr bool isCast(const OpID op) { return op >= OpID::__FIRST_CAST && op <= OpID::__LAST_CAST; }
 
