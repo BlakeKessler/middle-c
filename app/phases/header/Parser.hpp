@@ -18,7 +18,7 @@ class clef::Parser {
          Symbol* type;
       } env;
 
-      Parser(SyntaxTree& tree, Lexer& toks): tree{tree},_toks{toks} {}
+      Parser(SyntaxTree& ast, Lexer& toks): _toks{toks}, tree{ast} {}
    protected:
       [[gnu::noreturn]] void logError(Token tok, ErrCode code, const mcsl::str_slice fmt, mcsl::Printable auto... argv) {
          _toks.logError(tok, code, fmt, std::forward<decltype(argv)>(argv)...);
@@ -27,7 +27,7 @@ class clef::Parser {
       void nextToken() { currTok = _toks.nextToken(); } //!TODO: macros
 
       res<void> consumeKeyword(KeywordID kw);
-      res<void> consumeOp(OpID);
+      res<void> consumeOp(Oplike);
       res<void> consumeBlockDelim(BlockType, BlockDelimRole);
       res<void> consumeEOS();
 
@@ -59,11 +59,18 @@ class clef::Parser {
       res<mcsl::pair<Method*, Overload*>> parseMethod();
       res<mcsl::pair<Macro*, Overload*>> parseMacro();
 
-      template<typename T> T expect(res<T> val, Token badTok, ErrCode code, const mcsl::str_slice fmt, mcsl::Printable auto... argv) {
-         if (val.is_ok()) {
-            return val.ok();
+      template<typename T> T expect(res<T> result, Token tok, ErrCode code, const mcsl::str_slice fmt, mcsl::Printable auto... argv) {
+         if (result.is_ok()) {
+            return result.ok();
          } else {
-            logError(badTok, code, fmt, std::forward<decltype(argv)>(argv)...);
+            logError(tok, code, fmt, std::forward<decltype(argv)>(argv)...);
+         }
+      }
+      template<typename T> T expect(res<T> result, ErrCode code, const mcsl::str_slice fmt, mcsl::Printable auto... argv) {
+         if (result.is_ok()) {
+            return result.ok();
+         } else {
+            logError(currTok, code, fmt, std::forward<decltype(argv)>(argv)...);
          }
       }
    public:

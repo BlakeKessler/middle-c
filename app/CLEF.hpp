@@ -79,13 +79,6 @@ template<diff_t<void> T> struct clef::res<T> {
       ErrCode err() { assume(is_err()); return _err; }
 
       T orelse(T other) { if (is_ok()) { return ok(); } else { return other; } }
-      T expect(const mcsl::str_slice fmt, mcsl::Printable auto... argv) {
-         if (is_ok()) {
-            return _ok;
-         } else {
-            mcsl::__throw(fmt, std::forward<decltype(argv)>(argv)...);
-         }
-      }
 };
 template<> struct clef::res<void> {
    private:
@@ -104,13 +97,6 @@ template<> struct clef::res<void> {
       ErrCode err() { assume(is_err()); return _err; }
 
       void orelse() { return; }
-      void expect(const mcsl::str_slice fmt, mcsl::Printable auto... argv) {
-         if (is_ok()) {
-            return;
-         } else {
-            mcsl::__throw(fmt, std::forward<decltype(argv)>(argv)...);
-         }
-      }
 };
 
 #endif //CLEF_HPP

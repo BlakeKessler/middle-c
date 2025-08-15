@@ -4,6 +4,7 @@
 #include "Parser.hpp"
 
 #include "Lexer.hpp"
+#include "OperatorData.hpp"
 #include "Symbol.hpp"
 #include "pretty-print.hpp"
 
@@ -19,11 +20,11 @@ clef::res<void> clef::Parser::consumeKeyword(KeywordID kw) {
    nextToken();
    return {};
 }
-clef::res<void> clef::Parser::consumeOp(OpID op) {
+clef::res<void> clef::Parser::consumeOp(Oplike op) {
    if (currTok.type() != TokenType::OP) {
       return {ErrCode::MISSING_OP};
    }
-   if (currTok.opID() != op) {
+   if (currTok.op() != op) {
       return {ErrCode::BAD_OP};
    }
    nextToken();
@@ -141,7 +142,7 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
             const KeywordID kw = currTok.keywordID();
             if (kw == KeywordID::FUNC) {
                nextToken();
-               auto f = parseFunc().expect(FMT("invalid inline function definition"));
+               auto f = expect(parseFunc(), ErrCode::BAD_EXPR, FMT("invalid inline function definition"));
                Expr* expr = tree.make<Expr>(f.first, f.second);
                operandStack.emplace_back(expr, currTok);
                prevTokIsOperand = true;
@@ -164,6 +165,8 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
                   case KeywordID::NULLPTR:
                      expr = tree.make<Expr>(Literal::makePtr(nullptr));
                      break;
+
+                  default: UNREACHABLE;
                }
                operandStack.emplace_back(expr, currTok);
                prevTokIsOperand = true;
@@ -171,7 +174,7 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
             }
             else if (isCast(kw)) {
                nextToken();
-               operandStack.emplace_back(parseCast(kw).expect(FMT("invalid cast expression")), currTok);
+               operandStack.emplace_back(expect(parseCast(kw), ErrCode::BAD_EXPR, FMT("invalid cast expression")), currTok);
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
@@ -186,10 +189,9 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
             }
             else if (isUnaryFuncLike(kw)) {
                nextToken();
-               consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN).expect(FMT("keyword `%s` must use function call syntax (and is not generic)"), toString(kw));
-               auto argList = parseArgList(BlockType::CALL, false);
-               TODO;
-               // operandStack.push_back(+make<Expr>(kw, argList));
+               expect(consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN), ErrCode::BAD_KW, FMT("keyword `%s` must use function call syntax (and is not generic)"), toString(kw));
+               auto argList = expect(parseArgList(BlockType::CALL, false), ErrCode::BAD_EXPR, FMT("bad `%s` expression"), toString(kw));
+               operandStack.emplace_back(tree.make<Expr>(nullptr, tree.make<Expr>(argList), toOpID(kw)), currTok);
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
@@ -202,6 +204,10 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
             }
             
             logError(currTok, ErrCode::BAD_KW, FMT("bad keyword in expression"));
+         }
+
+         case TokenType::IDEN: {
+            TODO;
          }
 
          #define DEF_LIT(Type, TYPE) \
@@ -235,18 +241,90 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
          DEF_LIT(Char, CHAR);
          DEF_LIT(Str, STR);
          #undef DEF_LIT
-      }
-      TODO;
 
+         case TokenType::EOS: goto END_OF_EXPR;
+         case TokenType::BLOCK_DELIM: {
+            Token tok = currTok;
+            auto block = currTok.block();
+            if (!isOpener(block.role)) {
+               logError(currTok, ErrCode::BAD_EXPR, FMT("unmatched block delimiter `%s`"), currTok.tokStr());
+            }
+            nextToken();
+            
+            if (prevTokIsOperand) { //function call, initializer list, subscript, or specializer
+               debug_assert(operandStack.size());
+               OpData op = block.invoke;
+               pushOperator(op, tok);
+               auto args = expect(parseArgList(block.type, false), ErrCode::BAD_BLOCK_DELIM, FMT("bad block"));
+               operandStack.emplace_back(tree.make<Expr>(args), tok);
+            } else if (block.type == BlockType::LIST) { //tuple
+               auto args = expect(parseArgList(block.type, false), ErrCode::BAD_BLOCK_DELIM, FMT("bad block"));
+               operandStack.emplace_back(tree.make<Expr>(args), tok);
+            } else { //block subexpression
+               debug_assert(block.type == BlockType::CALL);
+               Expr* expr = expect(parseExpr(), ErrCode::BAD_BLOCK_DELIM, FMT("unmatched block delimiter `%s`"), tok.tokStr());
+               expect(consumeBlockDelim(block.type, BlockDelimRole::CLOSE), ErrCode::BAD_BLOCK_DELIM, FMT("unclosed block `%s`"), toString(block.type));
+               operandStack.emplace_back(expr, tok);
+            }
+            prevTokIsOperand = true;
+            goto PARSE_EXPR_CONTINUE;
+         }
+
+         case TokenType::OP: {
+            if (currTok.op() == Oplike::COMMA || currTok.op() == Oplike::LABEL_DELIM) { //comma or label delimiter - end of expression
+               goto END_OF_EXPR;
+            }
+            else if (currTok.op() == Oplike::INLINE_IF) { //special case for ternary expressions
+               operatorStack.emplace_back(currTok.op(), currTok);
+               nextToken();
+               auto trueVal = expect(parseExpr(), ErrCode::BAD_EXPR, FMT("bad ternary conditional expression"));
+               operandStack.emplace_back(trueVal, currTok);
+               expect(consumeOp(Oplike::INLINE_ELSE), ErrCode::BAD_EXPR, FMT("bad ternary conditional expression"));
+               prevTokIsOperand = false;
+               goto PARSE_EXPR_CONTINUE;
+            } else {
+               debug_assert(currTok.op() != Oplike::INLINE_ELSE);
+               if (prevTokIsOperand) { //binary or postfix unary
+                  OpData op = currTok.op();
+                  op.removeProps(OpProps::PREFIX);
+                  debug_assert(+op.props());
+                  debug_assert(!(+(op.props() & OpProps::CAN_BE_BINARY) && +(op.props() & OpProps::CAN_BE_POSTFIX)));
+                  op.setPrecedence(PRECS.get(op).first);
+                  pushOperator(op, currTok);
+               } else { //prefix unary
+                  OpData op = currTok.op();
+                  debug_assert(op.props() & OpProps::CAN_BE_PREFIX);
+                  op.setProps(OpProps::PREFIX);
+                  op.setPrecedence(PRECS.get(op).first);
+                  operatorStack.emplace_back(op, currTok);
+               }
+
+               prevTokIsOperand = false;
+               nextToken();
+               goto PARSE_EXPR_CONTINUE;
+            }
+         }
+         
+         case TokenType::ATTR: {
+            TODO;
+         }
+
+         case TokenType::PREPROC_INIT:
+            logError(currTok, ErrCode::BAD_EXPR, FMT("floating preprocessor invoke operator"));
+      }
+
+      UNREACHABLE;
       PARSE_EXPR_CONTINUE:
    }
+   END_OF_EXPR:
 
    if (!operandStack.size()) {
-      return {ErrCode::BAD_EXPR};
+      return {ErrCode::EMPTY_EXPR};
    }
-   while (operandStack.size() != 1) {
+   while (operatorStack.size()) {
       eval();
    }
+   debug_assert(operandStack.size() == 1);
    return {operandStack.front().first};
 }
 

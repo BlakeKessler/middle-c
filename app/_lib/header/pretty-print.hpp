@@ -371,6 +371,8 @@ constexpr const mcsl::str_slice clef::toString(const FundTypeID type) {
    using enum FundTypeID;
    switch (type) {
       CASE(null, "\033[31mNULL TYPE\033[39m");
+      CASE(NULLPTR_T, "nullptr_t");
+      CASE(STR, "const char[]");
       CASE(FUNCTION_SIGNATURE, "FUNCTION_SIGNATURE");
 
       CASE(VOID, "void");

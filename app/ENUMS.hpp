@@ -26,8 +26,8 @@ namespace clef {
       BAD_BLOCK_DELIM,
       MISSING_EOS,
       MISSING_LABEL,
+      EMPTY_EXPR,
       BAD_EXPR,
-      BAD_KW,
    };
    constexpr auto      operator+(const ErrCode t) noexcept { return std::to_underlying(t); }
    
@@ -465,31 +465,26 @@ namespace clef {
          case Oplike::CHAR: fthru;
          case Oplike::STRING: fthru;
          case Oplike::ATTR: return OpID::null;
+
+         case Oplike::ASSERT: return OpID::ASSERT;
+         case Oplike::STATIC_ASSERT: return OpID::STATIC_ASSERT;
+         case Oplike::ASSUME: return OpID::ASSUME;
+
+         case Oplike::RETURN: return OpID::RETURN;
+
+         case Oplike::CAST: return OpID::CAST;
+         case Oplike::UP_CAST: return OpID::UP_CAST;
+         case Oplike::BIT_CAST: return OpID::BIT_CAST;
+         case Oplike::CONST_CAST: return OpID::CONST_CAST;
+
+         case Oplike::TYPEOF: return OpID::TYPEOF;
+         case Oplike::SIZEOF: return OpID::SIZEOF;
+         case Oplike::ALIGNOF: return OpID::ALIGNOF;
+         case Oplike::ALIGNAS: return OpID::ALIGNAS;
+         case Oplike::STRIDEOF: return OpID::STRIDEOF;
+         case Oplike::STRIDEAS: return OpID::STRIDEAS;
       }
       UNREACHABLE;
-   }
-   constexpr Oplike toOplike(const KeywordID kw) {
-      switch (kw) {
-         case KeywordID::ASSERT: return Oplike::ASSERT;
-         case KeywordID::STATIC_ASSERT: return Oplike::STATIC_ASSERT;
-         case KeywordID::ASSUME: return Oplike::ASSUME;
-
-         case KeywordID::RETURN: return Oplike::RETURN;
-
-         case KeywordID::CAST: return Oplike::CAST;
-         case KeywordID::UP_CAST: return Oplike::UP_CAST;
-         case KeywordID::BIT_CAST: return Oplike::BIT_CAST;
-         case KeywordID::CONST_CAST: return Oplike::CONST_CAST;
-
-         case KeywordID::TYPEOF: return Oplike::TYPEOF;
-         case KeywordID::SIZEOF: return Oplike::SIZEOF;
-         case KeywordID::ALIGNOF: return Oplike::ALIGNOF;
-         case KeywordID::ALIGNAS: return Oplike::ALIGNAS;
-         case KeywordID::STRIDEOF: return Oplike::STRIDEOF;
-         case KeywordID::STRIDEAS: return Oplike::STRIDEAS;
-
-         default: UNREACHABLE;
-      }
    }
 
    #pragma endregion ops
@@ -761,6 +756,29 @@ namespace clef {
          case KeywordID::UP_CAST       : return OpID::UP_CAST;
          case KeywordID::BIT_CAST      : return OpID::BIT_CAST;
          case KeywordID::CONST_CAST    : return OpID::CONST_CAST;
+
+         default: UNREACHABLE;
+      }
+   }
+   constexpr Oplike toOplike(const KeywordID kw) {
+      switch (kw) {
+         case KeywordID::ASSERT: return Oplike::ASSERT;
+         case KeywordID::STATIC_ASSERT: return Oplike::STATIC_ASSERT;
+         case KeywordID::ASSUME: return Oplike::ASSUME;
+
+         case KeywordID::RETURN: return Oplike::RETURN;
+
+         case KeywordID::CAST: return Oplike::CAST;
+         case KeywordID::UP_CAST: return Oplike::UP_CAST;
+         case KeywordID::BIT_CAST: return Oplike::BIT_CAST;
+         case KeywordID::CONST_CAST: return Oplike::CONST_CAST;
+
+         case KeywordID::TYPEOF: return Oplike::TYPEOF;
+         case KeywordID::SIZEOF: return Oplike::SIZEOF;
+         case KeywordID::ALIGNOF: return Oplike::ALIGNOF;
+         case KeywordID::ALIGNAS: return Oplike::ALIGNAS;
+         case KeywordID::STRIDEOF: return Oplike::STRIDEOF;
+         case KeywordID::STRIDEAS: return Oplike::STRIDEAS;
 
          default: UNREACHABLE;
       }

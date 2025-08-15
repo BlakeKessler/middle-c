@@ -64,7 +64,7 @@ uint mcsl::writef(File& file, const clef::Token& tok, char mode, FmtArgs args) {
       case TokenType::BOOL_LIT:
          return writef(file, tok.valReal(), strMode, args);
       case TokenType::CHAR_LIT:
-         return writef(file, tok.charVal(), charMode, args);
+         return writef(file, tok.valChar(), charMode, args);
       case TokenType::STR_LIT:
          return writef(file, tok.valStr(), strMode, args);
       case TokenType::OP:
