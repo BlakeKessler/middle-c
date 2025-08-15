@@ -51,6 +51,7 @@ class clef::SyntaxTree {
          #undef PUSH
       }
 
+      DataModel dataModel() const { return _dataModel; }
       inline Proc* globalScope() { return &_globalScope; }
 };
 

@@ -9,22 +9,30 @@
 
 class clef::Parser {
    private:
-      SyntaxTree& _tree;
       Lexer& _toks;
-      Token _currTok;
+      SyntaxTree& tree;
+      Token currTok;
+      struct {
+         Symbol* scope;
+         Symbol* func;
+         Symbol* type;
+      } env;
 
-      Parser(SyntaxTree& tree, Lexer& toks):_tree{tree},_toks{toks} {}
+      Parser(SyntaxTree& tree, Lexer& toks): tree{tree},_toks{toks} {}
    protected:
       [[gnu::noreturn]] void logError(Token tok, ErrCode code, const mcsl::str_slice fmt, mcsl::Printable auto... argv) {
          _toks.logError(tok, code, fmt, std::forward<decltype(argv)>(argv)...);
       }
 
-      void nextToken() { _currTok = _toks.nextToken(); }
+      void nextToken() { currTok = _toks.nextToken(); } //!TODO: macros
 
       res<void> consumeKeyword(KeywordID kw);
       res<void> consumeOp(OpID);
       res<void> consumeBlockDelim(BlockType, BlockDelimRole);
       res<void> consumeEOS();
+
+      res<Expr*> parseCast(KeywordID);
+      res<Args*> parseArgList(BlockType, bool isDecl);
       
       res<Expr*> parseExpr();
       res<Expr*> parseCoreExpr();

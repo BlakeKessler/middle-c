@@ -323,9 +323,6 @@ constexpr const mcsl::str_slice clef::toString(const KeywordID kw) {
       CASE(CASE, "case");
       CASE(DEFAULT, "default");
 
-      CASE(CATCH, "catch");
-      CASE(THROW, "throw");
-
       CASE(THIS, "this");
       CASE(SELF, "self");
 

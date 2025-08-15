@@ -79,7 +79,7 @@ template<diff_t<void> T> struct clef::res<T> {
       ErrCode err() { assume(is_err()); return _err; }
 
       T orelse(T other) { if (is_ok()) { return ok(); } else { return other; } }
-      T always(const mcsl::str_slice fmt, mcsl::Printable auto... argv) {
+      T expect(const mcsl::str_slice fmt, mcsl::Printable auto... argv) {
          if (is_ok()) {
             return _ok;
          } else {

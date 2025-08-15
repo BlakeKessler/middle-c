@@ -10,47 +10,47 @@
 #include "dyn_arr.hpp"
 
 clef::res<void> clef::Parser::consumeKeyword(KeywordID kw) {
-   if (_currTok.type() != TokenType::KEYWORD) {
+   if (currTok.type() != TokenType::KEYWORD) {
       return {ErrCode::MISSING_KW};
    }
-   if (_currTok.keywordID() != kw) {
+   if (currTok.keywordID() != kw) {
       return {ErrCode::BAD_KW};
    }
    nextToken();
    return {};
 }
 clef::res<void> clef::Parser::consumeOp(OpID op) {
-   if (_currTok.type() != TokenType::OP) {
+   if (currTok.type() != TokenType::OP) {
       return {ErrCode::MISSING_OP};
    }
-   if (_currTok.opID() != op) {
+   if (currTok.opID() != op) {
       return {ErrCode::BAD_OP};
    }
    nextToken();
    return {};
 }
 clef::res<void> clef::Parser::consumeBlockDelim(BlockType type, BlockDelimRole role) {
-   if (_currTok.type() != TokenType::BLOCK_DELIM) {
+   if (currTok.type() != TokenType::BLOCK_DELIM) {
       return {ErrCode::MISSING_BLOCK_DELIM};
    }
-   if (_currTok.block().type != type || !(+_currTok.block().role & +role)) {
+   if (currTok.block().type != type || !(+currTok.block().role & +role)) {
       return {ErrCode::BAD_BLOCK_DELIM};
    }
    nextToken();
    return {};
 }
 clef::res<void> clef::Parser::consumeEOS() {
-   if (_currTok.type() != TokenType::EOS) {
+   if (currTok.type() != TokenType::EOS) {
       return {ErrCode::MISSING_EOS};
    }
    nextToken();
    return {};
 }
 clef::res<clef::Label> clef::Parser::parseLabel() {
-   if (_currTok.type() != TokenType::IDEN) {
+   if (currTok.type() != TokenType::IDEN) {
       return {ErrCode::MISSING_LABEL};
    }
-   const mcsl::str_slice name = _currTok.name();
+   const mcsl::str_slice name = currTok.name();
    nextToken();
    return Label{name};
 }
@@ -79,8 +79,8 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
          POP_OPERAND(rhs, ErrCode::BAD_EXPR, "bad ternary conditional expression");
          POP_OPERAND(lhs, ErrCode::BAD_EXPR, "bad ternary conditional expression");
          POP_OPERAND(Expr* cond, ErrCode::BAD_EXPR, "bad ternary conditional expression");
-         Ternary* tern = _tree.make<Ternary>(cond, lhs, rhs);
-         Expr* expr = _tree.make<Expr>(tern);
+         Ternary* tern = tree.make<Ternary>(cond, lhs, rhs);
+         Expr* expr = tree.make<Expr>(tern);
          operandStack.emplace_back(expr, op.second);
       }
       else {
@@ -102,7 +102,7 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
          }
          #undef POP_OPERAND
 
-         Expr* expr = _tree.make<Expr>(lhs, rhs, op.first.opID());
+         Expr* expr = tree.make<Expr>(lhs, rhs, op.first.opID());
          operandStack.emplace_back(expr, op.second);
       }
    };
@@ -131,7 +131,114 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
 
    //parse expression
    while (!_toks.done()) {
+      switch (currTok.type()) {
+         case TokenType::NONE: UNREACHABLE;
+         case TokenType::__OPLIKE: UNREACHABLE;
+
+         case TokenType::MACRO_INVOKE: TODO;
+
+         case TokenType::KEYWORD: { //keywords
+            const KeywordID kw = currTok.keywordID();
+            if (kw == KeywordID::FUNC) {
+               nextToken();
+               auto f = parseFunc().expect(FMT("invalid inline function definition"));
+               Expr* expr = tree.make<Expr>(f.first, f.second);
+               operandStack.emplace_back(expr, currTok);
+               prevTokIsOperand = true;
+               goto PARSE_EXPR_CONTINUE;
+            }
+            else if (kw == KeywordID::LET) {
+               logError(currTok, ErrCode::BAD_EXPR, FMT("may not declare new variables in subexpressions"));
+            }
+            else if (isValue(kw)) {
+               nextToken();
+               Expr* expr;
+               switch (kw) {
+                  case KeywordID::THIS: fthru;
+                  case KeywordID::SELF:
+                     TODO;
+                     break;
+                  case KeywordID::TRUE: fthru;
+                  case KeywordID::FALSE:
+                     UNREACHABLE;
+                  case KeywordID::NULLPTR:
+                     expr = tree.make<Expr>(Literal::makePtr(nullptr));
+                     break;
+               }
+               operandStack.emplace_back(expr, currTok);
+               prevTokIsOperand = true;
+               goto PARSE_EXPR_CONTINUE;
+            }
+            else if (isCast(kw)) {
+               nextToken();
+               operandStack.emplace_back(parseCast(kw).expect(FMT("invalid cast expression")), currTok);
+               prevTokIsOperand = true;
+               goto PARSE_EXPR_CONTINUE;
+            }
+            else if (isPrefixOpLike(kw)) {
+               if (operatorStack.size()) { //prevent use in subexpressions
+                  logError(currTok, ErrCode::BAD_EXPR, FMT("`%s` expressions cannot be subexpressions"), toString(kw));
+               }
+               operatorStack.emplace_back(OpData{currTok.tokStr(), toOplike(kw), OpProps::PREFIX, 0, TokenType::KEYWORD}, currTok);
+               prevTokIsOperand = false;
+               nextToken();
+               goto PARSE_EXPR_CONTINUE;
+            }
+            else if (isUnaryFuncLike(kw)) {
+               nextToken();
+               consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN).expect(FMT("keyword `%s` must use function call syntax (and is not generic)"), toString(kw));
+               auto argList = parseArgList(BlockType::CALL, false);
+               TODO;
+               // operandStack.push_back(+make<Expr>(kw, argList));
+               prevTokIsOperand = true;
+               goto PARSE_EXPR_CONTINUE;
+            }
+            else if (isType(kw)) {
+               TODO;
+               // operandStack.push_back(+make<Identifier>(tree.getFundType(kw)));
+               nextToken();
+               prevTokIsOperand = true;
+               goto PARSE_EXPR_CONTINUE;
+            }
+            
+            logError(currTok, ErrCode::BAD_KW, FMT("bad keyword in expression"));
+         }
+
+         #define DEF_LIT(Type, TYPE) \
+            case TokenType::TYPE##_NUM:      \
+            operandStack.emplace_back(       \
+               tree.make<Expr>(              \
+                  Literal::make##Type(       \
+                     currTok.val##Type(),    \
+                     toTypeID(               \
+                        currTok.keywordID(), \
+                        tree.dataModel()))), \
+               currTok);                     \
+            nextToken();                     \
+            prevTokIsOperand = true;         \
+            goto PARSE_EXPR_CONTINUE
+         DEF_LIT(Uint, UINT);
+         DEF_LIT(Sint, SINT);
+         DEF_LIT(Real, REAL);
+         #undef DEF_LIT
+         #define DEF_LIT(Type, TYPE) \
+            case TokenType::TYPE##_LIT:      \
+            operandStack.emplace_back(       \
+               tree.make<Expr>(              \
+                  Literal::make##Type(       \
+                     currTok.val##Type())),  \
+               currTok);                     \
+            nextToken();                     \
+            prevTokIsOperand = true;         \
+            goto PARSE_EXPR_CONTINUE
+         DEF_LIT(Bool, BOOL);
+         DEF_LIT(Char, CHAR);
+         DEF_LIT(Str, STR);
+         #undef DEF_LIT
+      }
       TODO;
+
+      PARSE_EXPR_CONTINUE:
    }
 
    if (!operandStack.size()) {

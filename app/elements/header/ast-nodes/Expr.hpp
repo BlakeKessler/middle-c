@@ -92,6 +92,9 @@ struct clef::Expr {
          null,
 
          EXPR,
+         FUNC,
+         METHOD,
+         MACRO,
          LIT,
          IDEN,
          LABEL,
@@ -112,6 +115,18 @@ struct clef::Expr {
             Expr* rhs;
             OpID op;
          } expr;
+         struct {
+            Func* f;
+            Overload* o;
+         } func;
+         struct {
+            Method* f;
+            Overload* o;
+         } method;
+         struct {
+            Macro* f;
+            Overload* o;
+         } macro;
          Literal lit;
          Identifier iden;
          Label label;
@@ -137,6 +152,18 @@ struct clef::Expr {
       Expr(Expr* lhs, Expr* rhs, OpID op, Attr* attrs = nullptr):
          m{},_attrs{attrs},_type{EXPR} {
             m.expr = {.lhs = lhs, .rhs = rhs, .op = op};
+      }
+      Expr(Func* f, Overload* o, Attr* attrs = nullptr):
+         m{},_attrs{attrs},_type{FUNC} {
+            m.func = {.f = f, .o = o};
+      }
+      Expr(Method* f, Overload* o, Attr* attrs = nullptr):
+         m{},_attrs{attrs},_type{METHOD} {
+            m.method = {.f = f, .o = o};
+      }
+      Expr(Macro* f, Overload* o, Attr* attrs = nullptr):
+         m{},_attrs{attrs},_type{MACRO} {
+            m.macro = {.f = f, .o = o};
       }
       #define DEF_CTOR(T, name, exprType) \
          Expr(T name, Attr* attrs = nullptr):   \

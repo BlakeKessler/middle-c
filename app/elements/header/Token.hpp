@@ -140,12 +140,12 @@ struct [[clang::trivial_abi]] clef::Token {
       TokenType type() const { return m._type; }
       
       const mcsl::str_slice name() const { debug_assert(m._type == TokenType::IDEN || m._type == TokenType::ATTR); return m._name; }
-      ulong uintVal() const { debug_assert(m._type == TokenType::UINT_NUM); return m._uintVal; }
-      slong sintVal() const { debug_assert(m._type == TokenType::SINT_NUM); return m._sintVal; }
-      flong realVal() const { debug_assert(m._type == TokenType::REAL_NUM); return m._realVal; }
-      bool  boolVal() const { debug_assert(m._type == TokenType::BOOL_LIT); return m._boolVal; }
-      char  charVal() const { debug_assert(m._type == TokenType::CHAR_LIT); return m._charVal; }
-      const mcsl::str_slice strVal() const { debug_assert(m._type == TokenType::STR_LIT); return m._strVal; }
+      ulong valUint() const { debug_assert(m._type == TokenType::UINT_NUM); return m._uintVal; }
+      slong valSint() const { debug_assert(m._type == TokenType::SINT_NUM); return m._sintVal; }
+      flong valReal() const { debug_assert(m._type == TokenType::REAL_NUM); return m._realVal; }
+      bool  valBool() const { debug_assert(m._type == TokenType::BOOL_LIT); return m._boolVal; }
+      char  valChar() const { debug_assert(m._type == TokenType::CHAR_LIT); return m._charVal; }
+      const mcsl::str_slice valStr() const { debug_assert(m._type == TokenType::STR_LIT); return m._strVal; }
 
       KeywordID keywordID() const { debug_assert(m._type == TokenType::KEYWORD || isNumber(m._type)); return m._keyword; }
       OpData op() const { debug_assert(m._type == TokenType::OP); return m._op; }

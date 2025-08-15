@@ -27,6 +27,7 @@ namespace clef {
       MISSING_EOS,
       MISSING_LABEL,
       BAD_EXPR,
+      BAD_KW,
    };
    constexpr auto      operator+(const ErrCode t) noexcept { return std::to_underlying(t); }
    
@@ -348,6 +349,25 @@ namespace clef {
       STRING,
       ATTR,
 
+      //keyword pseudo-operators
+      ASSERT,
+      STATIC_ASSERT,
+      ASSUME,
+
+      RETURN,
+
+      CAST,
+      UP_CAST,
+      BIT_CAST,
+      CONST_CAST,
+
+      TYPEOF,
+      SIZEOF,
+      ALIGNOF,
+      ALIGNAS,
+      STRIDEOF,
+      STRIDEAS,
+
       //aliases
       LABEL_DELIM = INLINE_IF,
       EACH_OF = LABEL_DELIM,
@@ -447,6 +467,29 @@ namespace clef {
          case Oplike::ATTR: return OpID::null;
       }
       UNREACHABLE;
+   }
+   constexpr Oplike toOplike(const KeywordID kw) {
+      switch (kw) {
+         case KeywordID::ASSERT: return Oplike::ASSERT;
+         case KeywordID::STATIC_ASSERT: return Oplike::STATIC_ASSERT;
+         case KeywordID::ASSUME: return Oplike::ASSUME;
+
+         case KeywordID::RETURN: return Oplike::RETURN;
+
+         case KeywordID::CAST: return Oplike::CAST;
+         case KeywordID::UP_CAST: return Oplike::UP_CAST;
+         case KeywordID::BIT_CAST: return Oplike::BIT_CAST;
+         case KeywordID::CONST_CAST: return Oplike::CONST_CAST;
+
+         case KeywordID::TYPEOF: return Oplike::TYPEOF;
+         case KeywordID::SIZEOF: return Oplike::SIZEOF;
+         case KeywordID::ALIGNOF: return Oplike::ALIGNOF;
+         case KeywordID::ALIGNAS: return Oplike::ALIGNAS;
+         case KeywordID::STRIDEOF: return Oplike::STRIDEOF;
+         case KeywordID::STRIDEAS: return Oplike::STRIDEAS;
+
+         default: UNREACHABLE;
+      }
    }
 
    #pragma endregion ops
@@ -614,11 +657,9 @@ namespace clef {
       MATCH,
       CASE,
       DEFAULT,
-      CATCH,
-      THROW,
 
       __FIRST_CONTROL_FLOW = GOTO,
-      __LAST_CONTROL_FLOW = THROW,
+      __LAST_CONTROL_FLOW = DEFAULT,
 
 
 
@@ -670,20 +711,29 @@ namespace clef {
    constexpr bool isValue(const KeywordID id) noexcept { return __BETWEEN(VALUE); }
    #undef __BETWEEN
 
-   constexpr bool isC_FunctionLike(const KeywordID id) noexcept {//no specializer parameters
+   constexpr bool isPrefixOpLike(const KeywordID id) noexcept {
       using enum KeywordID;
       switch (id) {
-         case ASSERT:
-         case STATIC_ASSERT:
-         case ASSUME:
-         
+         case ASSERT: fthru;
+         case STATIC_ASSERT: fthru;
+         case ASSUME: fthru;
+
          case RETURN:
-         case THROW:
+            return true;
          
+         default:
+            return false;
+      }
+   }
+   constexpr bool isUnaryFuncLike(const KeywordID id) noexcept {//no specializer parameters
+      using enum KeywordID;
+      switch (id) {
          case TYPEOF:
          case SIZEOF:
          case ALIGNAS:
          case ALIGNOF:
+         case STRIDEAS:
+         case STRIDEOF:
             return true;
          
          default:
@@ -835,6 +885,8 @@ namespace clef {
 
    enum class FundTypeID : uint8 {
       null,
+      NULLPTR_T,
+      STR,
       FUNCTION_SIGNATURE,
       
       VOID,
