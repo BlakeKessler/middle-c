@@ -63,6 +63,25 @@ clef::res<clef::Label> clef::Parser::parseLabel() {
    return Label{name};
 }
 
+clef::res<clef::Expr*> clef::Parser::parseCast(KeywordID castID) {
+   using enum BlockType;
+   using enum BlockDelimRole;
+   using enum ErrCode;
+
+   //type to cast to
+   expect(consumeBlockDelim(SPECIALIZER, OPEN), BAD_EXPR, FMT("expected specializer with type"));
+   auto type = expect(parseType(), BAD_EXPR, FMT("expected type"));
+   expect(consumeBlockDelim(SPECIALIZER, CLOSE), BAD_EXPR, FMT("the only expected specializer parameter is the type to cast to"));
+   
+   //expession being casted
+   expect(consumeBlockDelim(CALL, OPEN), BAD_EXPR, FMT("typecasting uses function call syntax"));
+   auto val = expect(parseExpr(), BAD_EXPR, FMT("bad typecast expression"));
+   expect(consumeBlockDelim(CALL, CLOSE), BAD_EXPR, FMT("unclosed block `%s`"), toString(Oplike::CALL_OPEN));
+
+   //create and return cast expression node
+   return tree.make<Expr>(tree.make<Expr>(type.first), val, toOpID(castID));
+}
+
 //no primary comma
 //no primary label
 clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
@@ -204,11 +223,7 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
                goto PARSE_EXPR_CONTINUE;
             }
             else if (isType(kw)) {
-               TODO;
-               // operandStack.push_back(+make<Identifier>(tree.getFundType(kw)));
-               nextToken();
-               prevTokIsOperand = true;
-               goto PARSE_EXPR_CONTINUE;
+               logError(currTok, ErrCode::BAD_EXPR, FMT("floating type `%s`"), toString(kw));
             }
             else if (kw == KeywordID::LET) { //let subexpression (illegal)
                logError(currTok, ErrCode::BAD_EXPR, FMT("may not declare new variables in subexpressions"));

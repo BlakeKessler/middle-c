@@ -15,7 +15,10 @@ struct clef::Label {
    using SyntaxNode_t = void;
    const mcsl::str_slice name;
 
-   Label& operator=(const Label& other) { mcsl::memcpy((ubyte*)this, (ubyte*)&other, sizeof(Label)); return self; }
+   #pragma GCC diagnostic push
+   #pragma GCC diagnostic ignored "-Wdeprecated-copy-with-user-provided-copy"
+   Label& operator=(const Label& other) { return *new (this) Label(other); }
+   #pragma GCC diagnostic pop
 };
 class clef::Args : public mcsl::dyn_arr<Expr*> {
    using SyntaxNode_t = void;
