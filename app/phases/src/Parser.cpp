@@ -368,4 +368,51 @@ clef::Expr* clef::Parser::parseExpr() {
    return expr;
 }
 
+
+mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseType() {
+   if (currTok.type() == TokenType::KEYWORD) {
+      using enum KeywordID;
+      
+      KeywordID kw = currTok.keywordID();
+      if (isType(kw)) {
+         nextToken();
+         return tree.getFundType(kw);
+      }
+      else if (isObjectType(kw)) {
+         nextToken();
+         return parseTypeDef(kw);
+      }
+      else {
+         logError(currTok, ErrCode::MISSING_TYPE, FMT("keyword `%s` does not name a type"), toString(kw));
+      }
+   } else if (currTok.type() == TokenType::IDEN) {
+      TODO;
+   } else {
+      logError(currTok, ErrCode::MISSING_TYPE, FMT("expected a type"));
+   }
+}
+
+mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseTypeDef() {
+   debug_assert(currTok.type() == TokenType::KEYWORD);
+   KeywordID kw = currTok.keywordID();
+   nextToken();
+   return parseTypeDef(kw);
+}
+mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseTypeDef(KeywordID kw) {
+   using enum KeywordID;
+   switch (kw) {
+      case      CLASS: return parseClass();
+      case     STRUCT: return parseStruct();
+      case      TRAIT: return parseTrait();
+      case      UNION: return parseUnion();
+      case       ENUM: return parseEnum();
+      case ENUM_UNION: return parseEnumunion();
+      case       MASK: return parseMask();
+      case  NAMESPACE: return parseNamespace();
+      case      TUPLE: return parseTuple();
+
+      default: UNREACHABLE;
+   }
+}
+
 #endif

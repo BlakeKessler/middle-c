@@ -44,6 +44,16 @@ class clef::Parser {
       res<Identifier> parseIden();
       mcsl::pair<Identifier, TypeSpec*> parseType();
       mcsl::pair<Identifier, TypeSpec*> parseTypeDef();
+      mcsl::pair<Identifier, TypeSpec*> parseTypeDef(KeywordID);
+         mcsl::pair<Identifier, TypeSpec*> parseClass();
+         mcsl::pair<Identifier, TypeSpec*> parseStruct();
+         mcsl::pair<Identifier, TypeSpec*> parseTrait();
+         mcsl::pair<Identifier, TypeSpec*> parseUnion();
+         mcsl::pair<Identifier, TypeSpec*> parseEnum();
+         mcsl::pair<Identifier, TypeSpec*> parseEnumunion();
+         mcsl::pair<Identifier, TypeSpec*> parseMask();
+         mcsl::pair<Identifier, TypeSpec*> parseNamespace();
+         mcsl::pair<Identifier, TypeSpec*> parseTuple();
 
       Proc* parseProc();
       

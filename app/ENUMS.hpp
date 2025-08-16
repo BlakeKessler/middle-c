@@ -27,6 +27,7 @@ namespace clef {
       MISSING_EOS,
       MISSING_LABEL,
       BAD_EXPR,
+      MISSING_TYPE,
    };
    constexpr auto      operator+(const ErrCode t) noexcept { return std::to_underlying(t); }
    
