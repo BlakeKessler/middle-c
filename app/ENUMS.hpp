@@ -26,7 +26,6 @@ namespace clef {
       BAD_BLOCK_DELIM,
       MISSING_EOS,
       MISSING_LABEL,
-      EMPTY_EXPR,
       BAD_EXPR,
    };
    constexpr auto      operator+(const ErrCode t) noexcept { return std::to_underlying(t); }

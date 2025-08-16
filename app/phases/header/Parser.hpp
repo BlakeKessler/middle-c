@@ -34,30 +34,30 @@ class clef::Parser {
       res<Expr*> parseCast(KeywordID);
       res<Args*> parseArgList(BlockType, bool isDecl);
       
-      res<Expr*> parseExpr();
-      res<Expr*> parseCoreExpr();
+      Expr* parseExpr();
+      Expr* parseCoreExpr();
 
-      res<Attr*> parseAttr();
-      res<Attr*> parseAttrs();
+      Attr* parseAttr();
+      Attr* parseAttrs();
       
       res<Label> parseLabel();
       res<Identifier> parseIden();
-      res<mcsl::pair<Identifier, TypeSpec*>> parseType();
-      res<mcsl::pair<Identifier, TypeSpec*>> parseTypeDef();
+      mcsl::pair<Identifier, TypeSpec*> parseType();
+      mcsl::pair<Identifier, TypeSpec*> parseTypeDef();
 
-      res<Proc*> parseProc();
+      Proc* parseProc();
       
-      res<Expr*> parseIf();
-      res<Expr*> parseWhile();
-      res<Expr*> parseDoWhile();
-      res<Expr*> parseFor();
-      res<Expr*> parseForeach();
-      res<Expr*> parseSwitch();
-      res<Expr*> parseMatch();
+      Expr* parseIf();
+      Expr* parseWhile();
+      Expr* parseDoWhile();
+      Expr* parseFor();
+      Expr* parseForeach();
+      Expr* parseSwitch();
+      Expr* parseMatch();
       
-      res<mcsl::pair<Func*, Overload*>> parseFunc();
-      res<mcsl::pair<Method*, Overload*>> parseMethod();
-      res<mcsl::pair<Macro*, Overload*>> parseMacro();
+      mcsl::pair<Func*, Overload*> parseFunc();
+      mcsl::pair<Method*, Overload*> parseMethod();
+      mcsl::pair<Macro*, Overload*> parseMacro();
 
       template<typename T> T expect(res<T> result, Token tok, ErrCode code, const mcsl::str_slice fmt, mcsl::Printable auto... argv) {
          if (result.is_ok()) {

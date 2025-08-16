@@ -70,12 +70,12 @@ clef::res<clef::Expr*> clef::Parser::parseCast(KeywordID castID) {
 
    //type to cast to
    expect(consumeBlockDelim(SPECIALIZER, OPEN), BAD_EXPR, FMT("expected specializer with type"));
-   auto type = expect(parseType(), BAD_EXPR, FMT("expected type"));
+   auto type = parseType();
    expect(consumeBlockDelim(SPECIALIZER, CLOSE), BAD_EXPR, FMT("the only expected specializer parameter is the type to cast to"));
    
    //expession being casted
    expect(consumeBlockDelim(CALL, OPEN), BAD_EXPR, FMT("typecasting uses function call syntax"));
-   auto val = expect(parseExpr(), BAD_EXPR, FMT("bad typecast expression"));
+   auto val = parseExpr();
    expect(consumeBlockDelim(CALL, CLOSE), BAD_EXPR, FMT("unclosed block `%s`"), toString(Oplike::CALL_OPEN));
 
    //create and return cast expression node
@@ -84,7 +84,7 @@ clef::res<clef::Expr*> clef::Parser::parseCast(KeywordID castID) {
 
 //no primary comma
 //no primary label
-clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
+clef::Expr* clef::Parser::parseCoreExpr() {
    mcsl::dyn_arr<mcsl::pair<OpData, Token>> operatorStack;
    mcsl::dyn_arr<mcsl::pair<Expr*, Token>> operandStack;
    bool prevTokIsOperand = false;
@@ -170,7 +170,7 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
             const KeywordID kw = currTok.keywordID();
             if (kw == KeywordID::FUNC) { //inline functions
                nextToken();
-               auto f = expect(parseFunc(), ErrCode::BAD_EXPR, FMT("invalid inline function definition"));
+               auto f = parseFunc();
                Expr* expr = tree.make<Expr>(f.first, f.second);
                operandStack.emplace_back(expr, currTok);
                prevTokIsOperand = true;
@@ -216,7 +216,7 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
             else if (isUnaryFuncLike(kw)) { //unary function-like
                nextToken();
                expect(consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN), ErrCode::BAD_KW, FMT("keyword `%s` must use function call syntax (and is not generic)"), toString(kw));
-               Expr* arg = expect(parseExpr(), ErrCode::BAD_EXPR, FMT("bad `%s` expression"), toString(kw));
+               Expr* arg = parseExpr();
                expect(consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE), ErrCode::BAD_KW, FMT("unclosed block `%s`"), toString(Oplike::CALL_CLOSE));
                operandStack.emplace_back(tree.make<Expr>(nullptr, arg, toOpID(kw)), currTok);
                prevTokIsOperand = true;
@@ -294,7 +294,7 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
                logError(tok, ErrCode::BAD_EXPR, FMT("floating specializer"));
             } else { //block subexpression
                debug_assert(block.type == BlockType::CALL);
-               Expr* expr = expect(parseExpr(), ErrCode::BAD_BLOCK_DELIM, FMT("unmatched block delimiter `%s`"), tok.tokStr());
+               Expr* expr = parseExpr();
                expect(consumeBlockDelim(block.type, BlockDelimRole::CLOSE), ErrCode::BAD_BLOCK_DELIM, FMT("unclosed block `%s`"), toString(block.type));
                operandStack.emplace_back(expr, tok);
             }
@@ -309,7 +309,7 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
             else if (currTok.op() == Oplike::INLINE_IF) { //special case for ternary expressions
                operatorStack.emplace_back(currTok.op(), currTok);
                nextToken();
-               auto trueVal = expect(parseExpr(), ErrCode::BAD_EXPR, FMT("bad ternary conditional expression"));
+               auto trueVal = parseExpr();
                operandStack.emplace_back(trueVal, currTok);
                expect(consumeOp(Oplike::INLINE_ELSE), ErrCode::BAD_EXPR, FMT("bad ternary conditional expression"));
                prevTokIsOperand = false;
@@ -351,13 +351,21 @@ clef::res<clef::Expr*> clef::Parser::parseCoreExpr() {
    END_OF_EXPR:
 
    if (!operandStack.size()) {
-      return {ErrCode::EMPTY_EXPR};
+      logError(currTok, ErrCode::BAD_EXPR, FMT("empty expression"));
    }
    while (operatorStack.size()) {
       eval();
    }
    debug_assert(operandStack.size() == 1);
-   return {operandStack.front().first};
+   return operandStack.front().first;
+}
+
+clef::Expr* clef::Parser::parseExpr() {
+   Expr* expr = parseCoreExpr();
+   while (consumeOp(Oplike::COMMA).is_ok()) {
+      expr = tree.make<Expr>(expr, parseCoreExpr(), OpID::COMMA);
+   }
+   return expr;
 }
 
 #endif
