@@ -28,6 +28,8 @@ namespace clef {
       MISSING_LABEL,
       BAD_EXPR,
       MISSING_TYPE,
+
+      DUPLICATE_OVERLOAD,
    };
    constexpr auto      operator+(const ErrCode t) noexcept { return std::to_underlying(t); }
    

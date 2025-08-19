@@ -26,6 +26,7 @@ namespace clef {
    //atomic compilation elements
    struct Token;
    class Symbol;
+      struct OpDefTable;
    class TypeSpec;
 
    class Attr;
@@ -44,10 +45,10 @@ namespace clef {
    struct Foreach;
    struct Switch;
    struct Match;
+   class FuncSig;
    class Func;
-   class Method;
+   class Overload;
    class Macro;
-   struct Overload;
 
    template<typename T> concept SyntaxNode_t = mcsl::same_t<typename T::SyntaxNode_t, void>;
 

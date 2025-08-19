@@ -66,7 +66,6 @@ class clef::Parser {
       Expr* parseMatch();
       
       mcsl::pair<Func*, Overload*> parseFunc();
-      mcsl::pair<Method*, Overload*> parseMethod();
       mcsl::pair<Macro*, Overload*> parseMacro();
 
       template<typename T> T expect(res<T> result, Token tok, ErrCode code, const mcsl::str_slice fmt, mcsl::Printable auto... argv) {

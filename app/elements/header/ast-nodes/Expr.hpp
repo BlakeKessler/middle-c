@@ -96,7 +96,6 @@ struct clef::Expr {
 
          EXPR,
          FUNC,
-         METHOD,
          MACRO,
          LIT,
          IDEN,
@@ -122,10 +121,6 @@ struct clef::Expr {
             Func* f;
             Overload* o;
          } func;
-         struct {
-            Method* f;
-            Overload* o;
-         } method;
          struct {
             Macro* f;
             Overload* o;
@@ -157,10 +152,6 @@ struct clef::Expr {
       Expr(Func* f, Overload* o, Attr* attrs = nullptr):
          m{},_attrs{attrs},_type{FUNC} {
             m.func = {.f = f, .o = o};
-      }
-      Expr(Method* f, Overload* o, Attr* attrs = nullptr):
-         m{},_attrs{attrs},_type{METHOD} {
-            m.method = {.f = f, .o = o};
       }
       Expr(Macro* f, Overload* o, Attr* attrs = nullptr):
          m{},_attrs{attrs},_type{MACRO} {

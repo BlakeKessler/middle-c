@@ -138,6 +138,10 @@ clef::Expr* clef::Parser::parseCoreExpr() {
       while (operatorStack.size()) { //while there are operators to check
          //get the last operator on the stack
          auto back = operatorStack.back().first;
+         //stop checking if `op` is unary and `back` is binary
+         if (!+(op.props() & OpProps::CAN_BE_BINARY) && +(back.props() & OpProps::CAN_BE_BINARY)) {
+            break;
+         }
          //stop checking if it has lower precedence than `op`
          if (back.precedence() < op.precedence()) {
             break;
