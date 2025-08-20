@@ -8,8 +8,8 @@
 
 struct clef::Identifier {
    using SyntaxNode_t = void;
-   Args* specializer;
-   Symbol* symbol;
+   Args* gens = nullptr;
+   Symbol* symbol = nullptr;
 };
 struct clef::Label {
    using SyntaxNode_t = void;
@@ -33,25 +33,25 @@ struct clef::If {
    using SyntaxNode_t = void;
    Expr* cond;
    Proc* proc;
-   Expr* elseExpr;
-   Label name;
-   Identifier retType;
+   Expr* elseExpr = nullptr;
+   Label name = {};
+   Identifier retType = {};
 };
 struct clef::While {
    using SyntaxNode_t = void;
    Expr* cond;
    Proc* proc;
-   Proc* elseProc;
-   Label name;
-   Identifier retType;
+   Proc* elseProc = nullptr;
+   Label name = {};
+   Identifier retType = {};
 };
 struct clef::DoWhile {
    using SyntaxNode_t = void;
    Expr* cond;
    Proc* proc;
-   Proc* elseProc;
-   Label name;
-   Identifier retType;
+   Proc* elseProc = nullptr;
+   Label name = {};
+   Identifier retType = {};
 };
 struct clef::For {
    using SyntaxNode_t = void;
@@ -59,18 +59,18 @@ struct clef::For {
    Expr* cond;
    Expr* inc;
    Proc* proc;
-   Proc* elseProc;
-   Label name;
-   Identifier retType;
+   Proc* elseProc = nullptr;
+   Label name = {};
+   Identifier retType = {};
 };
 struct clef::Foreach {
    using SyntaxNode_t = void;
    Expr* it;
    Expr* container;
    Proc* proc;
-   Proc* elseProc;
-   Label name;
-   Identifier retType;
+   Proc* elseProc = nullptr;
+   Label name = {};
+   Identifier retType = {};
 };
 struct clef::Switch {
    using SyntaxNode_t = void;
@@ -78,14 +78,16 @@ struct clef::Switch {
    Expr* cond;
    Proc* proc;
    mcsl::dyn_arr<Case> cases;
-   Identifier retType;
+   Label name = {};
+   Identifier retType = {};
 };
 struct clef::Match {
    using SyntaxNode_t = void;
    struct Case { Expr* val; Proc* proc; };
    Expr* cond;
    mcsl::dyn_arr<Case> cases;
-   Identifier retType;
+   Label name = {};
+   Identifier retType = {};
 };
 
 struct clef::Expr {

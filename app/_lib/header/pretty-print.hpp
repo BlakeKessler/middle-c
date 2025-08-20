@@ -59,6 +59,35 @@ constexpr const mcsl::str_slice clef::toString(const TokenType type) {
    UNREACHABLE;
 }
 
+constexpr const mcsl::str_slice clef::toString(const Symbol::Type type) {
+   using enum Symbol::Type;
+   switch (type) {
+      case Symbol::Type::__type_bit: UNREACHABLE;
+
+      CASE(null, "NULL SYMBOL");
+
+      CASE(EXTERN_UNSPEC, "extern");
+      CASE(LABELED_SCOPE, "labeled scope");
+      CASE(VAR, "variabe");
+      CASE(VAL_GENERIC, "generic value");
+      CASE(FUNC, "function");
+      CASE(METHOD, "method");
+      CASE(MACRO, "macro");
+      CASE(ATTR, "attribute");
+      CASE(TYPE_EXTERN, "extern type");
+      CASE(TYPE_GENERIC, "generic type");
+      CASE(CLASS, "class");
+      CASE(STRUCT, "struct");
+      CASE(TRAIT, "trait");
+      CASE(UNION, "union");
+      CASE(ENUM, "enum");
+      CASE(ENUM_UNION, "enumunion");
+      CASE(MASK, "mask");
+      CASE(NAMESPACE, "namespace");
+      CASE(TUPLE, "tuple");
+   }
+}
+
 constexpr const mcsl::str_slice clef::toString(const OpID op) {
    using enum OpID;
    switch (op) {

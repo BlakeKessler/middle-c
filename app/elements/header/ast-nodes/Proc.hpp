@@ -11,10 +11,13 @@ class clef::Proc {
       using SyntaxNode_t = void;
    private:
       mcsl::dyn_arr<Expr*> _exprs = {};
-      //!TODO: symbols
-      //!TODO: labels
+      Symbol* _symbol = {};
    public:
       Proc() = default;
+      Proc(Symbol* symbol):_symbol{symbol} {}
+
+      Symbol* symbol() { return _symbol; }
+      const Symbol* symbol() const { return _symbol; }
    
       mcsl::arr_span<Expr*> exprs() { return _exprs.span(); }
       void addExpr(Expr* expr) { _exprs.push_back(expr); }

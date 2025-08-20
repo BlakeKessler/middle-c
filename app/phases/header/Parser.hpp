@@ -37,8 +37,8 @@ class clef::Parser {
       bool isBlockDelim(BlockType, BlockDelimRole);
       bool isEOS();
 
-      res<Expr*> parseCast(KeywordID);
-      res<Args*> parseArgList(BlockType, bool isDecl);
+      Expr* parseCast(KeywordID);
+      template<bool isDecl> Args* parseArgList(BlockType);
       
       Expr* parseExpr();
       Expr* parseCoreExpr();
@@ -47,7 +47,7 @@ class clef::Parser {
       Attr* parseAttrs();
       
       res<Label> parseLabel();
-      res<Identifier> parseIden(Identifier type);
+      template<bool isDecl> res<Identifier> parseIden(Identifier type);
       Expr* parseDecl();
       Expr* parseParam();
       Identifier parseType();
@@ -96,5 +96,10 @@ class clef::Parser {
       static Parser ParseFile(mcsl::File&, SyntaxTree&);
       static Parser ParseFile(const mcsl::str_slice, SyntaxTree&);
 };
+
+template<> clef::res<clef::Identifier> clef::Parser::parseIden<true>(Identifier);
+template<> clef::res<clef::Identifier> clef::Parser::parseIden<false>(Identifier);
+template<> clef::Args* clef::Parser::parseArgList<true>(BlockType);
+template<> clef::Args* clef::Parser::parseArgList<false>(BlockType);
 
 #endif

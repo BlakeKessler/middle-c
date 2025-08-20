@@ -86,7 +86,7 @@ clef::res<clef::Label> clef::Parser::parseLabel() {
    return Label{name};
 }
 
-clef::res<clef::Expr*> clef::Parser::parseCast(KeywordID castID) {
+clef::Expr* clef::Parser::parseCast(KeywordID castID) {
    using enum BlockType;
    using enum BlockDelimRole;
    using enum ErrCode;
@@ -225,7 +225,7 @@ clef::Expr* clef::Parser::parseCoreExpr() {
                goto PARSE_EXPR_CONTINUE;
             }
             else if (isCast(kw)) { //typecasts
-               operandStack.emplace_back(expect(parseCast(kw), ErrCode::BAD_EXPR, FMT("invalid cast expression")), currTok);
+               operandStack.emplace_back(parseCast(kw), currTok);
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
@@ -258,7 +258,7 @@ clef::Expr* clef::Parser::parseCoreExpr() {
 
          case TokenType::IDEN: {
             Token tok = currTok;
-            operandStack.emplace_back(tree.make<Expr>(expect(parseIden({}), ErrCode::BAD_EXPR, FMT("invalid identifier"))), currTok);
+            operandStack.emplace_back(tree.make<Expr>(expect(parseIden<false>({}), ErrCode::BAD_EXPR, FMT("invalid identifier"))), currTok);
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
          }
@@ -308,10 +308,10 @@ clef::Expr* clef::Parser::parseCoreExpr() {
                debug_assert(operandStack.size());
                OpData op = block.invoke;
                pushOperator(op, tok);
-               Args* args = expect(parseArgList(block.type, false), ErrCode::BAD_BLOCK_DELIM, FMT("bad block"));
+               Args* args = parseArgList<false>(block.type);
                operandStack.emplace_back(tree.make<Expr>(args), tok);
             } else if (block.type == BlockType::LIST) { //tuple
-               Args* args = expect(parseArgList(block.type, false), ErrCode::BAD_BLOCK_DELIM, FMT("bad block"));
+               Args* args = parseArgList<false>(block.type);
                operandStack.emplace_back(tree.make<Expr>(args), tok);
             } else if (block.type == BlockType::SPECIALIZER) { [[unlikely]]; //specializer (illegal)
                logError(tok, ErrCode::BAD_EXPR, FMT("floating specializer"));
@@ -391,6 +391,58 @@ clef::Expr* clef::Parser::parseExpr() {
    return expr;
 }
 
+template<bool isDecl> clef::res<clef::Identifier> clef::Parser::parseIden(Identifier typeName) {
+   if (currTok.type() == TokenType::KEYWORD) {
+      TODO;
+   }
+   
+   Env oldEnv = env;
+   
+   //check for fully qualified name
+   if (readOp(Oplike::SCOPE_RESOLUTION).is_ok()) {
+      env = {
+         .scope = tree.globalScope()->symbol(),
+         .fn = nullptr,
+         .type = nullptr
+      };
+   }
+
+   if (currTok.type() != TokenType::IDEN) {
+      TODO;
+   }
+   //name
+   Identifier iden;
+   {
+      res<Symbol*> r = [&]() -> auto {
+         if constexpr (isDecl) {
+            return env.scope->insert(currTok.name());
+         } else {
+            return env.scope->get(currTok.name());
+         }
+      }();
+      if (r.is_err()) {
+         return {r.err()};
+      }
+      iden.symbol = r.ok();
+   }
+   nextToken();
+   //specializer
+   if (readOp(Oplike::SPECIALIZER_OPEN).is_ok()) {
+      if constexpr (isDecl) {
+         iden.gens = parseArgList<true>(BlockType::SPECIALIZER);
+         iden.symbol->setGenParams(iden.gens);
+      } else {
+         if (!iden.symbol->isGeneric()) {
+            logError(prevTok, ErrCode::BAD_GENERIC, FMT("`%s` is not generic"), iden);
+         }
+         iden.gens = parseArgList<false>(BlockType::SPECIALIZER);
+      }
+   }
+   
+   while (readOp(Oplike::SCOPE_RESOLUTION).is_ok()) {
+      TODO;
+   }
+}
 
 clef::Identifier clef::Parser::parseType() {
    if (currTok.type() == TokenType::KEYWORD) {
@@ -406,7 +458,7 @@ clef::Identifier clef::Parser::parseType() {
          logError(currTok, ErrCode::MISSING_TYPE, FMT("keyword `%s` does not name a type"), toString(kw));
       }
    } else if (currTok.type() == TokenType::IDEN) {
-      Identifier name = expect(parseIden({}), ErrCode::MISSING_TYPE, FMT("invalid type name"));
+      Identifier name = expect(parseIden<false>({}), ErrCode::MISSING_TYPE, FMT("invalid type name"));
       if (!Symbol::isType(name.symbol->symbolType())) {
          logError(prevTok, ErrCode::MISSING_TYPE, FMT("`%s` does not name a type"), name);
       }
@@ -419,13 +471,13 @@ clef::Identifier clef::Parser::parseType() {
 
 clef::Expr* clef::Parser::parseDecl() {
    Identifier typeName = parseType();
-   Identifier name = expect(parseIden(typeName), ErrCode::BAD_EXPR, FMT("expected variable name"));
+   Identifier name = expect(parseIden<true>(typeName), ErrCode::BAD_EXPR, FMT("expected variable name"));
    
    return tree.make<Expr>(tree.make<Expr>(typeName), tree.make<Expr>(name), OpID::LET);
 }
 clef::Expr* clef::Parser::parseParam() {
    Identifier typeName = parseType();
-   Identifier name = parseIden(typeName).orelse({});
+   Identifier name = parseIden<false>(typeName).orelse({});
 
    return tree.make<Expr>(tree.make<Expr>(typeName), tree.make<Expr>(name), OpID::LET); 
 }
@@ -463,7 +515,7 @@ clef::Identifier clef::Parser::parseTypeDef(KeywordID kw) {
 
 clef::Identifier clef::Parser::parseTuple() {
    //name of type (optional)
-   res<Identifier> r = parseIden({});
+   res<Identifier> r = parseIden<true>({});
    Identifier name;
    if (r.is_ok()) { //named
       name = r.ok();
@@ -478,10 +530,10 @@ clef::Identifier clef::Parser::parseTuple() {
          }
       }
       else { //identifier is NOT already declared
-         name = {{}, registerType(Symbol::TUPLE, name)};
+         name = {.symbol = registerType(Symbol::TUPLE, name), .gens = {}};
       }
    } else { //anonymous
-      name = {{}, registerType(Symbol::TUPLE, {})};
+      name = {.symbol = registerType(Symbol::TUPLE, {}), .gens = {}};
    }
    //preserve and update env
    Env oldEnv = env;

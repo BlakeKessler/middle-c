@@ -15,7 +15,7 @@ class clef::Symbol {
 
          EXTERN_UNSPEC,
 
-         LABELLED_SCOPE,
+         LABELED_SCOPE,
 
          VAR,
          VAL_GENERIC,
@@ -40,7 +40,7 @@ class clef::Symbol {
       static bool isType(Type t) { return t & __type_bit; }
    private:
       const mcsl::str_slice _name;
-      Args _genParams;
+      Args* _genParams;
       struct {
          Symbol* symbol;
          Args genArgs; //should only be non-null if `symbol` is non-null
@@ -57,7 +57,14 @@ class clef::Symbol {
       Type _symbolType;
    public:
 
+      void setGenParams(Args* params) { _genParams = params; }
+      bool isGeneric() const { return _genParams; }
+
       Type symbolType() const { return _symbolType; }
+
+      res<Symbol*> get(const mcsl::str_slice name);
+      res<Symbol*> insert(const mcsl::str_slice name);
+      Symbol* getOrInsert(const mcsl::str_slice name);
 
       TypeSpec*& type() { return _type; }
       const TypeSpec* type() const { return _type; }
