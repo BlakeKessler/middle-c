@@ -11,7 +11,7 @@
 
 namespace clef {
    //utilities
-   template<typename T> struct res;
+   template<typename T> struct [[nodiscard]] res;
    template<typename T> class Box;
    template<typename T> using buffer = mcsl::arr_list<T, ARR_LIST_BUF_SIZE>;
 
@@ -62,7 +62,7 @@ namespace clef {
    class CodeGenerator;
 }
 
-template<diff_t<void> T> struct clef::res<T> {
+template<diff_t<void> T> struct [[nodiscard]] clef::res<T> {
    private:
       union {
          T _ok;
@@ -78,10 +78,11 @@ template<diff_t<void> T> struct clef::res<T> {
       bool is_err() { return !_is_ok; }
       T ok() { assume(is_ok()); return _ok; }
       ErrCode err() { assume(is_err()); return _err; }
+      void ignore() { return; }
 
       T orelse(T other) { if (is_ok()) { return ok(); } else { return other; } }
 };
-template<> struct clef::res<void> {
+template<> struct [[nodiscard]] clef::res<void> {
    private:
       union {
          ErrCode _err;
@@ -96,6 +97,7 @@ template<> struct clef::res<void> {
       bool is_err() { return !_is_ok; }
       void ok() { assume(is_ok()); }
       ErrCode err() { assume(is_err()); return _err; }
+      void ignore() { return; }
 
       void orelse() { return; }
 };

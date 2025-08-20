@@ -26,10 +26,15 @@ class clef::Parser {
 
       void nextToken();
 
-      res<void> consumeKeyword(KeywordID kw);
-      res<void> consumeOp(Oplike);
-      res<void> consumeBlockDelim(BlockType, BlockDelimRole);
-      res<void> consumeEOS();
+      res<void> readKeyword(KeywordID kw);
+      res<void> readOp(Oplike);
+      res<void> readBlockDelim(BlockType, BlockDelimRole);
+      res<void> readEOS();
+
+      bool isKeyword(KeywordID kw);
+      bool isOp(Oplike);
+      bool isBlockDelim(BlockType, BlockDelimRole);
+      bool isEOS();
 
       res<Expr*> parseCast(KeywordID);
       res<Args*> parseArgList(BlockType, bool isDecl);
@@ -41,7 +46,9 @@ class clef::Parser {
       Attr* parseAttrs();
       
       res<Label> parseLabel();
-      res<Identifier> parseIden();
+      res<Identifier> parseIden(Identifier type);
+      Expr* parseDecl();
+      Expr* parseParam();
       mcsl::pair<Identifier, TypeSpec*> parseType();
       mcsl::pair<Identifier, TypeSpec*> parseTypeDef();
       mcsl::pair<Identifier, TypeSpec*> parseTypeDef(KeywordID);
@@ -54,6 +61,7 @@ class clef::Parser {
          mcsl::pair<Identifier, TypeSpec*> parseMask();
          mcsl::pair<Identifier, TypeSpec*> parseNamespace();
          mcsl::pair<Identifier, TypeSpec*> parseTuple();
+      Symbol* registerType(Symbol::Type t, Identifier name);
 
       Proc* parseProc();
       

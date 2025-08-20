@@ -8,7 +8,6 @@
 #include "map.hpp"
 #include "dyn_arr.hpp"
 
-//!TODO:
 class clef::Symbol {
    public:
       enum Type : uint8 {
@@ -25,10 +24,20 @@ class clef::Symbol {
          MACRO,
          ATTR,
 
-         TYPE,
-         TYPE_GENERIC,
+         __type_bit = 8_m,
          TYPE_EXTERN,
+         TYPE_GENERIC,
+         CLASS,
+         STRUCT,
+         TRAIT,
+         UNION,
+         ENUM,
+         ENUM_UNION,
+         MASK,
+         NAMESPACE,
+         TUPLE,
       };
+      static bool isType(Type t) { return t & __type_bit; }
    private:
       const mcsl::str_slice _name;
       Symbol* _parent;
@@ -43,6 +52,8 @@ class clef::Symbol {
 
       Type _symbolType;
    public:
+
+      Type symbolType() const { return _symbolType; }
 
       TypeSpec*& type() { return _type; }
       const TypeSpec* type() const { return _type; }

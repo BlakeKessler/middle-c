@@ -28,6 +28,9 @@ namespace clef {
       MISSING_LABEL,
       BAD_EXPR,
       MISSING_TYPE,
+      BAD_TYPE_DEF,
+      CONFLICTING_REDECL,
+      REDEF,
 
       DUPLICATE_OVERLOAD,
    };
@@ -874,8 +877,9 @@ namespace clef {
       BOTH = OPEN | CLOSE,
    };
    constexpr auto operator+(const BlockDelimRole t) noexcept { return std::to_underlying(t); } 
-   constexpr bool isOpener(const BlockDelimRole t) { return +t & +BlockDelimRole::OPEN; }
-   constexpr bool isCloser(const BlockDelimRole t) { return +t & +BlockDelimRole::CLOSE; }
+   constexpr BlockDelimRole operator&(const BlockDelimRole lhs, const BlockDelimRole rhs) noexcept { return (BlockDelimRole)(+lhs & +rhs);}
+   constexpr bool isOpener(const BlockDelimRole t) { return +(t & BlockDelimRole::OPEN); }
+   constexpr bool isCloser(const BlockDelimRole t) { return +(t & BlockDelimRole::CLOSE); }
 
    enum class FundTypeID : uint8 {
       null,

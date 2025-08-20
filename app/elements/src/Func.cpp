@@ -32,6 +32,7 @@ clef::res<void> clef::Func::registerOverload(Overload* overload) {
       return {ErrCode::DUPLICATE_OVERLOAD};
    }
    _overloads.push_back(overload);
+   return {};
 }
 clef::Overload* clef::Func::getOverload(FuncSig* sig) {
    debug_assert(sig->self_t() == _self_t);

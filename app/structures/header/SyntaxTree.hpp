@@ -9,28 +9,28 @@
 
 class clef::SyntaxTree {
    private:
-      Proc _globalScope;
+      Proc _globalScope = {};
 
-      buffer<Expr> _exprs;
-      buffer<Args> _args;
-      buffer<Proc> _procs;
-      buffer<Ternary> _terns;
-      buffer<If> _ifs;
-      buffer<While> _whiles;
-      buffer<DoWhile> _doWhiles;
-      buffer<For> _fors;
-      buffer<Foreach> _foreaches;
-      buffer<Switch> _switches;
-      buffer<Match> _matches;
+      buffer<Expr> _exprs = {};
+      buffer<Args> _args = {};
+      buffer<Proc> _procs = {};
+      buffer<Ternary> _terns = {};
+      buffer<If> _ifs = {};
+      buffer<While> _whiles = {};
+      buffer<DoWhile> _doWhiles = {};
+      buffer<For> _fors = {};
+      buffer<Foreach> _foreaches = {};
+      buffer<Switch> _switches = {};
+      buffer<Match> _matches = {};
 
-      buffer<Attr> _attrs;
+      buffer<Attr> _attrs = {};
 
-      buffer<Symbol> _symbols;
-      buffer<TypeSpec> _types;
+      buffer<Symbol> _symbols = {};
+      buffer<TypeSpec> _types = {};
 
       DataModel _dataModel;
    public:
-      SyntaxTree(DataModel);
+      SyntaxTree(DataModel model):_dataModel(model) {}
 
       template<SyntaxNode_t T, typename... Argv_t> requires mcsl::valid_ctor<T, Argv_t...> T* make(Argv_t... argv) {
          #define PUSH(T2, buf) \

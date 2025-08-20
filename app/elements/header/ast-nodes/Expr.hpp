@@ -141,6 +141,7 @@ struct clef::Expr {
       Attr* _attrs;
       Type _type;
    public:
+      Expr(const Expr& other) { mcsl::memcpy((ubyte*)this, (ubyte*)&other, sizeof(Expr)); }
       Expr(Attr* attrs = nullptr):
          m{},_attrs{attrs},_type{null} {
             debug_assert(!((uoverlong*)this)[0]);
@@ -201,6 +202,25 @@ struct clef::Expr {
       DEF_GET(switchExpr)
       DEF_GET(matchExpr)
       #undef DEF_GET
+};
+
+#include "io.hpp"
+namespace mcsl {
+   #define DEF_WRITE(Type) uint writef(File&, const clef::Type&, char, FmtArgs)
+   DEF_WRITE(Expr);
+   DEF_WRITE(Literal);
+   DEF_WRITE(Identifier);
+   DEF_WRITE(Label);
+   DEF_WRITE(Args);
+   DEF_WRITE(Ternary);
+   DEF_WRITE(If);
+   DEF_WRITE(While);
+   DEF_WRITE(DoWhile);
+   DEF_WRITE(For);
+   DEF_WRITE(Foreach);
+   DEF_WRITE(Switch);
+   DEF_WRITE(Match);
+   #undef DEF_WRITE
 };
 
 #endif

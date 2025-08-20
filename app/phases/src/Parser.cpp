@@ -17,7 +17,7 @@ void clef::Parser::nextToken() {
    }
 }
 
-clef::res<void> clef::Parser::consumeKeyword(KeywordID kw) {
+clef::res<void> clef::Parser::readKeyword(KeywordID kw) {
    if (currTok.type() != TokenType::KEYWORD) {
       return {ErrCode::MISSING_KW};
    }
@@ -27,7 +27,7 @@ clef::res<void> clef::Parser::consumeKeyword(KeywordID kw) {
    nextToken();
    return {};
 }
-clef::res<void> clef::Parser::consumeOp(Oplike op) {
+clef::res<void> clef::Parser::readOp(Oplike op) {
    if (currTok.type() != TokenType::OP) {
       return {ErrCode::MISSING_OP};
    }
@@ -37,7 +37,7 @@ clef::res<void> clef::Parser::consumeOp(Oplike op) {
    nextToken();
    return {};
 }
-clef::res<void> clef::Parser::consumeBlockDelim(BlockType type, BlockDelimRole role) {
+clef::res<void> clef::Parser::readBlockDelim(BlockType type, BlockDelimRole role) {
    if (currTok.type() != TokenType::BLOCK_DELIM) {
       return {ErrCode::MISSING_BLOCK_DELIM};
    }
@@ -47,13 +47,35 @@ clef::res<void> clef::Parser::consumeBlockDelim(BlockType type, BlockDelimRole r
    nextToken();
    return {};
 }
-clef::res<void> clef::Parser::consumeEOS() {
+clef::res<void> clef::Parser::readEOS() {
    if (currTok.type() != TokenType::EOS) {
       return {ErrCode::MISSING_EOS};
    }
    nextToken();
    return {};
 }
+
+bool clef::Parser::isKeyword(KeywordID kw) {
+   return 
+      currTok.type() == TokenType::KEYWORD &&
+      currTok.keywordID() == kw;
+}
+bool clef::Parser::isOp(Oplike op) {
+   return 
+      currTok.type() == TokenType::OP &&
+      currTok.op() == op;
+}
+bool clef::Parser::isBlockDelim(BlockType type, BlockDelimRole role) {
+   return
+      currTok.type() == TokenType::BLOCK_DELIM &&
+      currTok.block().type == type &&
+      +(currTok.block().role & role);
+}
+bool clef::Parser::isEOS() {
+   return currTok.type() == TokenType::EOS;
+}
+
+
 clef::res<clef::Label> clef::Parser::parseLabel() {
    if (currTok.type() != TokenType::IDEN) {
       return {ErrCode::MISSING_LABEL};
@@ -69,14 +91,14 @@ clef::res<clef::Expr*> clef::Parser::parseCast(KeywordID castID) {
    using enum ErrCode;
 
    //type to cast to
-   expect(consumeBlockDelim(SPECIALIZER, OPEN), BAD_EXPR, FMT("expected specializer with type"));
+   expect(readBlockDelim(SPECIALIZER, OPEN), BAD_EXPR, FMT("expected specializer with type"));
    auto type = parseType();
-   expect(consumeBlockDelim(SPECIALIZER, CLOSE), BAD_EXPR, FMT("the only expected specializer parameter is the type to cast to"));
+   expect(readBlockDelim(SPECIALIZER, CLOSE), BAD_EXPR, FMT("the only expected specializer parameter is the type to cast to"));
    
    //expession being casted
-   expect(consumeBlockDelim(CALL, OPEN), BAD_EXPR, FMT("typecasting uses function call syntax"));
+   expect(readBlockDelim(CALL, OPEN), BAD_EXPR, FMT("typecasting uses function call syntax"));
    auto val = parseExpr();
-   expect(consumeBlockDelim(CALL, CLOSE), BAD_EXPR, FMT("unclosed block `%s`"), toString(Oplike::CALL_OPEN));
+   expect(readBlockDelim(CALL, CLOSE), BAD_EXPR, FMT("unclosed block `%s`"), toString(Oplike::CALL_OPEN));
 
    //create and return cast expression node
    return tree.make<Expr>(tree.make<Expr>(type.first), val, toOpID(castID));
@@ -219,9 +241,9 @@ clef::Expr* clef::Parser::parseCoreExpr() {
             }
             else if (isUnaryFuncLike(kw)) { //unary function-like
                nextToken();
-               expect(consumeBlockDelim(BlockType::CALL, BlockDelimRole::OPEN), ErrCode::BAD_KW, FMT("keyword `%s` must use function call syntax (and is not generic)"), toString(kw));
+               expect(readBlockDelim(BlockType::CALL, BlockDelimRole::OPEN), ErrCode::BAD_KW, FMT("keyword `%s` must use function call syntax (and is not generic)"), toString(kw));
                Expr* arg = parseExpr();
-               expect(consumeBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE), ErrCode::BAD_KW, FMT("unclosed block `%s`"), toString(Oplike::CALL_CLOSE));
+               expect(readBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE), ErrCode::BAD_KW, FMT("unclosed block `%s`"), toString(Oplike::CALL_CLOSE));
                operandStack.emplace_back(tree.make<Expr>(nullptr, arg, toOpID(kw)), currTok);
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
@@ -239,7 +261,7 @@ clef::Expr* clef::Parser::parseCoreExpr() {
 
          case TokenType::IDEN: {
             Token tok = currTok;
-            operandStack.emplace_back(tree.make<Expr>(expect(parseIden(), ErrCode::BAD_EXPR, FMT("invalid identifier"))), currTok);
+            operandStack.emplace_back(tree.make<Expr>(expect(parseIden({}), ErrCode::BAD_EXPR, FMT("invalid identifier"))), currTok);
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
          }
@@ -299,7 +321,7 @@ clef::Expr* clef::Parser::parseCoreExpr() {
             } else { //block subexpression
                debug_assert(block.type == BlockType::CALL);
                Expr* expr = parseExpr();
-               expect(consumeBlockDelim(block.type, BlockDelimRole::CLOSE), ErrCode::BAD_BLOCK_DELIM, FMT("unclosed block `%s`"), toString(block.type));
+               expect(readBlockDelim(block.type, BlockDelimRole::CLOSE), ErrCode::BAD_BLOCK_DELIM, FMT("unclosed block `%s`"), toString(block.type));
                operandStack.emplace_back(expr, tok);
             }
             prevTokIsOperand = true;
@@ -315,7 +337,7 @@ clef::Expr* clef::Parser::parseCoreExpr() {
                nextToken();
                auto trueVal = parseExpr();
                operandStack.emplace_back(trueVal, currTok);
-               expect(consumeOp(Oplike::INLINE_ELSE), ErrCode::BAD_EXPR, FMT("bad ternary conditional expression"));
+               expect(readOp(Oplike::INLINE_ELSE), ErrCode::BAD_EXPR, FMT("bad ternary conditional expression"));
                prevTokIsOperand = false;
                goto PARSE_EXPR_CONTINUE;
             } else {
@@ -366,7 +388,7 @@ clef::Expr* clef::Parser::parseCoreExpr() {
 
 clef::Expr* clef::Parser::parseExpr() {
    Expr* expr = parseCoreExpr();
-   while (consumeOp(Oplike::COMMA).is_ok()) {
+   while (readOp(Oplike::COMMA).is_ok()) {
       expr = tree.make<Expr>(expr, parseCoreExpr(), OpID::COMMA);
    }
    return expr;
@@ -396,11 +418,38 @@ mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseType() {
    }
 }
 
+
+clef::Expr* clef::Parser::parseDecl() {
+   auto [typeName, type] = parseType();
+   auto name = expect(parseIden(typeName), ErrCode::BAD_EXPR, FMT("expected variable name"));
+   
+   return tree.make<Expr>(tree.make<Expr>(typeName), tree.make<Expr>(name), OpID::LET);
+}
+clef::Expr* clef::Parser::parseParam() {
+   auto [typeName, type] = parseType();
+   auto name = parseIden(typeName);
+
+   if (name.is_err()) {
+      return tree.make<Expr>(tree.make<Expr>(typeName), nullptr, OpID::LET);
+   }
+   else {
+      return tree.make<Expr>(tree.make<Expr>(typeName), tree.make<Expr>(name.ok()), OpID::LET); 
+   }
+}
+
+#pragma region type
+
 mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseTypeDef() {
-   debug_assert(currTok.type() == TokenType::KEYWORD);
-   KeywordID kw = currTok.keywordID();
-   nextToken();
-   return parseTypeDef(kw);
+   if (currTok.type() == TokenType::KEYWORD) {
+      KeywordID kw = currTok.keywordID();
+      nextToken();
+      return parseTypeDef(kw);
+   } else if (isBlockDelim(BlockType::LIST, BlockDelimRole::OPEN)) {
+      return parseTuple();
+   } else {
+      logError(currTok, ErrCode::MISSING_TYPE, FMT("expected type definition"));
+   }
+   UNREACHABLE;
 }
 mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseTypeDef(KeywordID kw) {
    using enum KeywordID;
@@ -418,5 +467,62 @@ mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseTypeDef(Keyword
       default: UNREACHABLE;
    }
 }
+
+mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseTuple() {
+   //preserve enviornment state
+   auto oldEnv = env;
+   
+   //name of type (optional)
+   res<Identifier> r = parseIden({});
+   Identifier name;
+   Symbol* symbol;
+   if (r.is_ok()) { //named
+      name = r.ok();
+      symbol = name.symbol;
+      if (symbol) { //identifier is already declared
+         //check that the identifier refers to a tuple
+         if (symbol->symbolType() != Symbol::TUPLE) {
+            logError(currTok, ErrCode::CONFLICTING_REDECL, FMT("%s `%s` cannot be redeclared as a tuple"), toString(symbol->symbolType()), name);
+         }
+         //check that this is not a redeclaration
+         if (symbol->type()) {
+            logError(currTok, ErrCode::REDEF, FMT("tuple `%s` has already been defined"), name);
+         }
+      }
+      else { //identifier is NOT already declared
+         symbol = registerType(Symbol::TUPLE, name);
+      }
+   } else { //anonymous
+      symbol = registerType(Symbol::TUPLE, {});
+   }
+   //update env
+   env = {
+      .scope = symbol,
+      .func = nullptr,
+      .type = symbol
+   };
+   //get tuple object
+   TypeSpec::Tuple& tup = env.type->type()->tup();
+
+   //parse members
+   expect(readBlockDelim(BlockType::LIST, BlockDelimRole::OPEN), ErrCode::BAD_TYPE_DEF, FMT("tuples are defined using curly braces"));
+   do {
+      Expr* memb = parseParam();
+      tup.membs.push_back(memb->iden());
+   } while (
+      readOp(Oplike::COMMA).is_ok() //read member delimiter
+      && !isBlockDelim(BlockType::LIST, BlockDelimRole::CLOSE) //allow trailing commas (EX: `{uint,}`)
+   );
+   //closing curly bracket
+   expect(readBlockDelim(BlockType::LIST, BlockDelimRole::CLOSE), ErrCode::BAD_BLOCK_DELIM, FMT("unclosed block `%s`"), toString(Oplike::LIST_OPEN));
+
+   //restore enviornment state
+   env = oldEnv;
+
+   //return
+   return {name, name.symbol->type()};
+}
+
+#pragma endregion type
 
 #endif

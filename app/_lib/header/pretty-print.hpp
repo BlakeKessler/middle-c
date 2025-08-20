@@ -3,9 +3,10 @@
 
 #include "CLEF.hpp"
 
-#include "str_slice.hpp"
+#include "Symbol.hpp"
+#include "TypeSpec.hpp"
 
-#undef NULL
+#include "str_slice.hpp"
 
 namespace clef {
    constexpr const mcsl::str_slice toString(const TokenType);
@@ -17,6 +18,9 @@ namespace clef {
    constexpr const mcsl::str_slice toString(const BlockDelimRole);
    constexpr const mcsl::str_slice toString(const FundTypeID);
    constexpr const mcsl::str_slice toString(const QualMask);
+
+   constexpr const mcsl::str_slice toString(const Symbol::Type);
+   constexpr const mcsl::str_slice toString(const TypeSpec::Metatype);
 
    constexpr const mcsl::str_slice getSuffix(const FundTypeID);
 };

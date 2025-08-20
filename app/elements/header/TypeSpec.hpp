@@ -26,7 +26,7 @@ class clef::TypeSpec {
       };
       
       struct Tuple {
-         mcsl::dyn_arr<Symbol*> membs;
+         mcsl::dyn_arr<Identifier> membs;
       };
       struct Trait {
          mcsl::dyn_arr<Func*> funcs;
@@ -56,6 +56,7 @@ class clef::TypeSpec {
       };
 
    private:
+      Symbol* _canonName;
       union M {
          FundTypeID fund;
 
@@ -68,24 +69,47 @@ class clef::TypeSpec {
          Func* func;
          FuncSig* sig;
 
-         ~M() {}
-      } m;
+         ~M() {} //trivial destructor - deallocations handled in supertype
+      } m = {.obj = {}}; static_assert(sizeof(Obj) == sizeof(M));
       Metatype _type;
 
+      TypeSpec(Symbol* canonName, Metatype t): _canonName{canonName},_type{t} {}
    public:
+      static TypeSpec makeTuple(Symbol* canonName) { return {canonName, TUPLE}; }
+
       ~TypeSpec() {
          switch (_type) {
             case null     : break;
             case FUND     : break;
-            case TUPLE    : std::destroy_at(&m.tup); break;
+            case TUPLE    : std::destroy_at(&m.tup  ); break;
             case TRAIT    : std::destroy_at(&m.trait); break;
-            case NAMESPACE: std::destroy_at(&m.ns); break;
-            case OBJ      : std::destroy_at(&m.obj); break;
+            case NAMESPACE: std::destroy_at(&m.ns   ); break;
+            case OBJ      : std::destroy_at(&m.obj  ); break;
             case INDIR    : std::destroy_at(&m.indir); break;
             case FUNC     : break;
             case SIG      : break;
          }
       }
+
+      Symbol* canonName() { return _canonName; }
+      const Symbol* canonName() const { return _canonName; }
+      void setCanonName(Symbol* s) { debug_assert(!_canonName); _canonName = s; }
+
+      Metatype metaType() const { return _type; }
+
+      #define GETTERS(name, METATYPE) \
+         auto& name() { assume(_type == METATYPE); return m.name; } \
+         const auto& name() const { assume(_type == METATYPE); return m.name; }
+      GETTERS(fund, FUND)
+      GETTERS(tup, TUPLE)
+      GETTERS(trait, TRAIT)
+      GETTERS(ns, NAMESPACE)
+      GETTERS(obj, OBJ)
+      GETTERS(indir, INDIR)
+      GETTERS(func, FUNC)
+      GETTERS(sig, SIG)
+      #undef GETTERS
+
 };
 
 #endif
