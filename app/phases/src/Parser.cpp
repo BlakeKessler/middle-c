@@ -397,8 +397,6 @@ clef::Expr* clef::Parser::parseExpr() {
 
 mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseType() {
    if (currTok.type() == TokenType::KEYWORD) {
-      using enum KeywordID;
-      
       KeywordID kw = currTok.keywordID();
       if (isType(kw)) {
          nextToken();
@@ -427,14 +425,9 @@ clef::Expr* clef::Parser::parseDecl() {
 }
 clef::Expr* clef::Parser::parseParam() {
    auto [typeName, type] = parseType();
-   auto name = parseIden(typeName);
+   auto name = parseIden(typeName).orelse({});
 
-   if (name.is_err()) {
-      return tree.make<Expr>(tree.make<Expr>(typeName), nullptr, OpID::LET);
-   }
-   else {
-      return tree.make<Expr>(tree.make<Expr>(typeName), tree.make<Expr>(name.ok()), OpID::LET); 
-   }
+   return tree.make<Expr>(tree.make<Expr>(typeName), tree.make<Expr>(name), OpID::LET); 
 }
 
 #pragma region type
@@ -469,9 +462,6 @@ mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseTypeDef(Keyword
 }
 
 mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseTuple() {
-   //preserve enviornment state
-   auto oldEnv = env;
-   
    //name of type (optional)
    res<Identifier> r = parseIden({});
    Identifier name;
@@ -494,15 +484,17 @@ mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseTuple() {
       }
    } else { //anonymous
       symbol = registerType(Symbol::TUPLE, {});
+      name = Identifier{{}, symbol};
    }
-   //update env
+   //preserve and update env
+   Env oldEnv = env;
    env = {
       .scope = symbol,
       .func = nullptr,
       .type = symbol
    };
    //get tuple object
-   TypeSpec::Tuple& tup = env.type->type()->tup();
+   TypeSpec::Tuple& tup = symbol->type()->tup();
 
    //parse members
    expect(readBlockDelim(BlockType::LIST, BlockDelimRole::OPEN), ErrCode::BAD_TYPE_DEF, FMT("tuples are defined using curly braces"));
@@ -520,7 +512,7 @@ mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseTuple() {
    env = oldEnv;
 
    //return
-   return {name, name.symbol->type()};
+   return {name, symbol->type()};
 }
 
 #pragma endregion type

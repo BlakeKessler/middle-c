@@ -12,7 +12,7 @@ class clef::Parser {
       Lexer& _toks;
       SyntaxTree& tree;
       Token currTok;
-      struct {
+      struct Env {
          Symbol* scope;
          Symbol* func;
          Symbol* type;
@@ -91,9 +91,9 @@ class clef::Parser {
          }
       }
    public:
-      static Parser parseSource(Source&&, SyntaxTree&);
-      static Parser parseFile(mcsl::File&, SyntaxTree&);
-      static Parser parseFile(const mcsl::str_slice, SyntaxTree&);
+      static Parser ParseSource(Source&&, SyntaxTree&);
+      static Parser ParseFile(mcsl::File&, SyntaxTree&);
+      static Parser ParseFile(const mcsl::str_slice, SyntaxTree&);
 };
 
 #endif
