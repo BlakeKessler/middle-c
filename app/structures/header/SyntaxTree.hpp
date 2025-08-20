@@ -54,8 +54,8 @@ class clef::SyntaxTree {
       DataModel dataModel() const { return _dataModel; }
       inline Proc* globalScope() { return &_globalScope; }
 
-      mcsl::pair<Identifier, TypeSpec*> getFundType(FundTypeID);
-      inline mcsl::pair<Identifier, TypeSpec*> getFundType(KeywordID kw) { return getFundType(toTypeID(kw, _dataModel)); }
+      Identifier getFundType(FundTypeID);
+      inline Identifier getFundType(KeywordID kw) { return getFundType(toTypeID(kw, _dataModel)); }
 };
 
 #pragma region io

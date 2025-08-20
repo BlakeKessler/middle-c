@@ -12,9 +12,10 @@ class clef::Parser {
       Lexer& _toks;
       SyntaxTree& tree;
       Token currTok;
+      Token prevTok;
       struct Env {
          Symbol* scope;
-         Symbol* func;
+         Symbol* fn;
          Symbol* type;
       } env;
 
@@ -49,18 +50,18 @@ class clef::Parser {
       res<Identifier> parseIden(Identifier type);
       Expr* parseDecl();
       Expr* parseParam();
-      mcsl::pair<Identifier, TypeSpec*> parseType();
-      mcsl::pair<Identifier, TypeSpec*> parseTypeDef();
-      mcsl::pair<Identifier, TypeSpec*> parseTypeDef(KeywordID);
-         mcsl::pair<Identifier, TypeSpec*> parseClass();
-         mcsl::pair<Identifier, TypeSpec*> parseStruct();
-         mcsl::pair<Identifier, TypeSpec*> parseTrait();
-         mcsl::pair<Identifier, TypeSpec*> parseUnion();
-         mcsl::pair<Identifier, TypeSpec*> parseEnum();
-         mcsl::pair<Identifier, TypeSpec*> parseEnumunion();
-         mcsl::pair<Identifier, TypeSpec*> parseMask();
-         mcsl::pair<Identifier, TypeSpec*> parseNamespace();
-         mcsl::pair<Identifier, TypeSpec*> parseTuple();
+      Identifier parseType();
+      Identifier parseTypeDef();
+      Identifier parseTypeDef(KeywordID);
+         Identifier parseClass();
+         Identifier parseStruct();
+         Identifier parseTrait();
+         Identifier parseUnion();
+         Identifier parseEnum();
+         Identifier parseEnumunion();
+         Identifier parseMask();
+         Identifier parseNamespace();
+         Identifier parseTuple();
       Symbol* registerType(Symbol::Type t, Identifier name);
 
       Proc* parseProc();

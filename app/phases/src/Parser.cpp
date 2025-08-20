@@ -11,6 +11,7 @@
 #include "dyn_arr.hpp"
 
 void clef::Parser::nextToken() {
+   prevTok = currTok;
    currTok = _toks.nextToken();
    if (currTok.type() == TokenType::MACRO_INVOKE) {
       TODO;
@@ -92,16 +93,16 @@ clef::res<clef::Expr*> clef::Parser::parseCast(KeywordID castID) {
 
    //type to cast to
    expect(readBlockDelim(SPECIALIZER, OPEN), BAD_EXPR, FMT("expected specializer with type"));
-   auto type = parseType();
+   Identifier type = parseType();
    expect(readBlockDelim(SPECIALIZER, CLOSE), BAD_EXPR, FMT("the only expected specializer parameter is the type to cast to"));
    
    //expession being casted
    expect(readBlockDelim(CALL, OPEN), BAD_EXPR, FMT("typecasting uses function call syntax"));
-   auto val = parseExpr();
+   Expr* val = parseExpr();
    expect(readBlockDelim(CALL, CLOSE), BAD_EXPR, FMT("unclosed block `%s`"), toString(Oplike::CALL_OPEN));
 
    //create and return cast expression node
-   return tree.make<Expr>(tree.make<Expr>(type.first), val, toOpID(castID));
+   return tree.make<Expr>(tree.make<Expr>(type), val, toOpID(castID));
 }
 
 //no primary comma
@@ -159,7 +160,7 @@ clef::Expr* clef::Parser::parseCoreExpr() {
    const auto pushOperator = [&](OpData op, Token tok) {
       while (operatorStack.size()) { //while there are operators to check
          //get the last operator on the stack
-         auto back = operatorStack.back().first;
+         OpData back = operatorStack.back().first;
          //stop checking if `op` is unary and `back` is binary
          if (!+(op.props() & OpProps::CAN_BE_BINARY) && +(back.props() & OpProps::CAN_BE_BINARY)) {
             break;
@@ -170,7 +171,7 @@ clef::Expr* clef::Parser::parseCoreExpr() {
          }
          //stop checking if it has equal precedence to `op` and `op` is right associative
          if (back.precedence() == op.precedence()) {
-            constexpr auto mask = OpProps::IS_LEFT_ASSOC | OpProps::CAN_BE_POSTFIX;
+            constexpr OpProps mask = OpProps::IS_LEFT_ASSOC | OpProps::CAN_BE_POSTFIX;
             if (!+(op.props() & mask)) {
                break;
             }
@@ -194,16 +195,15 @@ clef::Expr* clef::Parser::parseCoreExpr() {
 
          case TokenType::KEYWORD: { //keywords
             const KeywordID kw = currTok.keywordID();
+            nextToken();
             if (kw == KeywordID::FUNC) { //inline functions
-               nextToken();
-               auto f = parseFunc();
-               Expr* expr = tree.make<Expr>(f.first, f.second);
+               auto [fn, ov] = parseFunc();
+               Expr* expr = tree.make<Expr>(fn, ov);
                operandStack.emplace_back(expr, currTok);
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
             else if (isValue(kw)) { //value keywords
-               nextToken();
                Expr* expr;
                switch (kw) {
                   case KeywordID::THIS: fthru;
@@ -225,22 +225,19 @@ clef::Expr* clef::Parser::parseCoreExpr() {
                goto PARSE_EXPR_CONTINUE;
             }
             else if (isCast(kw)) { //typecasts
-               nextToken();
                operandStack.emplace_back(expect(parseCast(kw), ErrCode::BAD_EXPR, FMT("invalid cast expression")), currTok);
                prevTokIsOperand = true;
                goto PARSE_EXPR_CONTINUE;
             }
             else if (isPrefixOpLike(kw)) { //prefix-operator-like keywords (EX: `return`)
                if (operatorStack.size()) { //prevent use in subexpressions
-                  logError(currTok, ErrCode::BAD_EXPR, FMT("`%s` expressions cannot be subexpressions"), toString(kw));
+                  logError(prevTok, ErrCode::BAD_EXPR, FMT("`%s` expressions cannot be subexpressions"), toString(kw));
                }
-               operatorStack.emplace_back(OpData{currTok.tokStr(), toOplike(kw), OpProps::PREFIX, 0, TokenType::KEYWORD}, currTok);
+               operatorStack.emplace_back(OpData{prevTok.tokStr(), toOplike(kw), OpProps::PREFIX, 0, TokenType::KEYWORD}, prevTok);
                prevTokIsOperand = false;
-               nextToken();
                goto PARSE_EXPR_CONTINUE;
             }
             else if (isUnaryFuncLike(kw)) { //unary function-like
-               nextToken();
                expect(readBlockDelim(BlockType::CALL, BlockDelimRole::OPEN), ErrCode::BAD_KW, FMT("keyword `%s` must use function call syntax (and is not generic)"), toString(kw));
                Expr* arg = parseExpr();
                expect(readBlockDelim(BlockType::CALL, BlockDelimRole::CLOSE), ErrCode::BAD_KW, FMT("unclosed block `%s`"), toString(Oplike::CALL_CLOSE));
@@ -311,10 +308,10 @@ clef::Expr* clef::Parser::parseCoreExpr() {
                debug_assert(operandStack.size());
                OpData op = block.invoke;
                pushOperator(op, tok);
-               auto args = expect(parseArgList(block.type, false), ErrCode::BAD_BLOCK_DELIM, FMT("bad block"));
+               Args* args = expect(parseArgList(block.type, false), ErrCode::BAD_BLOCK_DELIM, FMT("bad block"));
                operandStack.emplace_back(tree.make<Expr>(args), tok);
             } else if (block.type == BlockType::LIST) { //tuple
-               auto args = expect(parseArgList(block.type, false), ErrCode::BAD_BLOCK_DELIM, FMT("bad block"));
+               Args* args = expect(parseArgList(block.type, false), ErrCode::BAD_BLOCK_DELIM, FMT("bad block"));
                operandStack.emplace_back(tree.make<Expr>(args), tok);
             } else if (block.type == BlockType::SPECIALIZER) { [[unlikely]]; //specializer (illegal)
                logError(tok, ErrCode::BAD_EXPR, FMT("floating specializer"));
@@ -335,7 +332,7 @@ clef::Expr* clef::Parser::parseCoreExpr() {
             else if (currTok.op() == Oplike::INLINE_IF) { //special case for ternary expressions
                operatorStack.emplace_back(currTok.op(), currTok);
                nextToken();
-               auto trueVal = parseExpr();
+               Expr* trueVal = parseExpr();
                operandStack.emplace_back(trueVal, currTok);
                expect(readOp(Oplike::INLINE_ELSE), ErrCode::BAD_EXPR, FMT("bad ternary conditional expression"));
                prevTokIsOperand = false;
@@ -395,22 +392,25 @@ clef::Expr* clef::Parser::parseExpr() {
 }
 
 
-mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseType() {
+clef::Identifier clef::Parser::parseType() {
    if (currTok.type() == TokenType::KEYWORD) {
       KeywordID kw = currTok.keywordID();
+      nextToken();
       if (isType(kw)) {
-         nextToken();
          return tree.getFundType(kw);
       }
       else if (isObjectType(kw)) {
-         nextToken();
          return parseTypeDef(kw);
       }
       else {
          logError(currTok, ErrCode::MISSING_TYPE, FMT("keyword `%s` does not name a type"), toString(kw));
       }
    } else if (currTok.type() == TokenType::IDEN) {
-      TODO;
+      Identifier name = expect(parseIden({}), ErrCode::MISSING_TYPE, FMT("invalid type name"));
+      if (!Symbol::isType(name.symbol->symbolType())) {
+         logError(prevTok, ErrCode::MISSING_TYPE, FMT("`%s` does not name a type"), name);
+      }
+      return name;
    } else {
       logError(currTok, ErrCode::MISSING_TYPE, FMT("expected a type"));
    }
@@ -418,21 +418,21 @@ mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseType() {
 
 
 clef::Expr* clef::Parser::parseDecl() {
-   auto [typeName, type] = parseType();
-   auto name = expect(parseIden(typeName), ErrCode::BAD_EXPR, FMT("expected variable name"));
+   Identifier typeName = parseType();
+   Identifier name = expect(parseIden(typeName), ErrCode::BAD_EXPR, FMT("expected variable name"));
    
    return tree.make<Expr>(tree.make<Expr>(typeName), tree.make<Expr>(name), OpID::LET);
 }
 clef::Expr* clef::Parser::parseParam() {
-   auto [typeName, type] = parseType();
-   auto name = parseIden(typeName).orelse({});
+   Identifier typeName = parseType();
+   Identifier name = parseIden(typeName).orelse({});
 
    return tree.make<Expr>(tree.make<Expr>(typeName), tree.make<Expr>(name), OpID::LET); 
 }
 
 #pragma region type
 
-mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseTypeDef() {
+clef::Identifier clef::Parser::parseTypeDef() {
    if (currTok.type() == TokenType::KEYWORD) {
       KeywordID kw = currTok.keywordID();
       nextToken();
@@ -444,7 +444,7 @@ mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseTypeDef() {
    }
    UNREACHABLE;
 }
-mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseTypeDef(KeywordID kw) {
+clef::Identifier clef::Parser::parseTypeDef(KeywordID kw) {
    using enum KeywordID;
    switch (kw) {
       case      CLASS: return parseClass();
@@ -461,47 +461,44 @@ mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseTypeDef(Keyword
    }
 }
 
-mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseTuple() {
+clef::Identifier clef::Parser::parseTuple() {
    //name of type (optional)
    res<Identifier> r = parseIden({});
    Identifier name;
-   Symbol* symbol;
    if (r.is_ok()) { //named
       name = r.ok();
-      symbol = name.symbol;
-      if (symbol) { //identifier is already declared
+      if (name.symbol) { //identifier is already declared
          //check that the identifier refers to a tuple
-         if (symbol->symbolType() != Symbol::TUPLE) {
-            logError(currTok, ErrCode::CONFLICTING_REDECL, FMT("%s `%s` cannot be redeclared as a tuple"), toString(symbol->symbolType()), name);
+         if (name.symbol->symbolType() != Symbol::TUPLE) {
+            logError(currTok, ErrCode::CONFLICTING_REDECL, FMT("%s `%s` cannot be redeclared as a tuple"), toString(name.symbol->symbolType()), name);
          }
          //check that this is not a redeclaration
-         if (symbol->type()) {
+         if (name.symbol->type()) {
             logError(currTok, ErrCode::REDEF, FMT("tuple `%s` has already been defined"), name);
          }
       }
       else { //identifier is NOT already declared
-         symbol = registerType(Symbol::TUPLE, name);
+         name = {{}, registerType(Symbol::TUPLE, name)};
       }
    } else { //anonymous
-      symbol = registerType(Symbol::TUPLE, {});
-      name = Identifier{{}, symbol};
+      name = {{}, registerType(Symbol::TUPLE, {})};
    }
    //preserve and update env
    Env oldEnv = env;
    env = {
-      .scope = symbol,
-      .func = nullptr,
-      .type = symbol
+      .scope = name.symbol,
+      .fn = nullptr,
+      .type = name.symbol
    };
    //get tuple object
-   TypeSpec::Tuple& tup = symbol->type()->tup();
+   TypeSpec::Tuple& tup = name.symbol->type()->tup();
 
    //parse members
    expect(readBlockDelim(BlockType::LIST, BlockDelimRole::OPEN), ErrCode::BAD_TYPE_DEF, FMT("tuples are defined using curly braces"));
-   do {
+   do { //member
       Expr* memb = parseParam();
       tup.membs.push_back(memb->iden());
-   } while (
+   } while ( //delimiter
       readOp(Oplike::COMMA).is_ok() //read member delimiter
       && !isBlockDelim(BlockType::LIST, BlockDelimRole::CLOSE) //allow trailing commas (EX: `{uint,}`)
    );
@@ -512,7 +509,7 @@ mcsl::pair<clef::Identifier, clef::TypeSpec*> clef::Parser::parseTuple() {
    env = oldEnv;
 
    //return
-   return {name, symbol->type()};
+   return name;
 }
 
 #pragma endregion type

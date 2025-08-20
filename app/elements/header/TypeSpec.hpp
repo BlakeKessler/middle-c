@@ -66,7 +66,7 @@ class clef::TypeSpec {
          Obj obj;
          Indir indir;
 
-         Func* func;
+         Func* fn;
          FuncSig* sig;
 
          ~M() {} //trivial destructor - deallocations handled in supertype
@@ -106,7 +106,7 @@ class clef::TypeSpec {
       GETTERS(ns, NAMESPACE)
       GETTERS(obj, OBJ)
       GETTERS(indir, INDIR)
-      GETTERS(func, FUNC)
+      GETTERS(fn, FUNC)
       GETTERS(sig, SIG)
       #undef GETTERS
 

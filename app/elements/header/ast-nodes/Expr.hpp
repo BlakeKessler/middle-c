@@ -118,12 +118,12 @@ struct clef::Expr {
             OpID op;
          } expr;
          struct {
-            Func* f;
-            Overload* o;
-         } func;
+            Func* fn;
+            Overload* ov;
+         } fn;
          struct {
-            Macro* f;
-            Overload* o;
+            Macro* fn;
+            Overload* ov;
          } macro;
          Literal lit;
          Identifier iden;
@@ -150,13 +150,13 @@ struct clef::Expr {
          m{},_attrs{attrs},_type{EXPR} {
             m.expr = {.lhs = lhs, .rhs = rhs, .op = op};
       }
-      Expr(Func* f, Overload* o, Attr* attrs = nullptr):
+      Expr(Func* fn, Overload* ov, Attr* attrs = nullptr):
          m{},_attrs{attrs},_type{FUNC} {
-            m.func = {.f = f, .o = o};
+            m.fn = {.fn = fn, .ov = ov};
       }
-      Expr(Macro* f, Overload* o, Attr* attrs = nullptr):
+      Expr(Macro* fn, Overload* ov, Attr* attrs = nullptr):
          m{},_attrs{attrs},_type{MACRO} {
-            m.macro = {.f = f, .o = o};
+            m.macro = {.fn = fn, .ov = ov};
       }
       #define DEF_CTOR(T, name, exprType) \
          Expr(T name, Attr* attrs = nullptr):   \
