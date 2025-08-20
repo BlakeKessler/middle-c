@@ -411,37 +411,38 @@ template<bool isDecl> clef::res<clef::Identifier> clef::Parser::parseIden(Identi
       TODO;
    }
    //name
-   Identifier iden;
-   {
-      res<Symbol*> r = [&]() -> auto {
-         if constexpr (isDecl) {
-            return env.scope->insert(currTok.name());
-         } else {
-            return env.scope->get(currTok.name());
-         }
-      }();
-      if (r.is_err()) {
-         return {r.err()};
-      }
-      iden.symbol = r.ok();
-   }
-   nextToken();
-   //specializer
-   if (readOp(Oplike::SPECIALIZER_OPEN).is_ok()) {
-      if constexpr (isDecl) {
-         iden.gens = parseArgList<true>(BlockType::SPECIALIZER);
-         iden.symbol->setGenParams(iden.gens);
-      } else {
-         if (!iden.symbol->isGeneric()) {
-            logError(prevTok, ErrCode::BAD_GENERIC, FMT("`%s` is not generic"), iden);
-         }
-         iden.gens = parseArgList<false>(BlockType::SPECIALIZER);
-      }
-   }
+   Identifier iden{.symbol = tree.globalScope(), .gens = nullptr};
    
-   while (readOp(Oplike::SCOPE_RESOLUTION).is_ok()) {
-      TODO;
-   }
+   do {
+      {
+         res<Symbol*> r = [&]() -> auto {
+            if constexpr (isDecl) {
+               return env.scope->insert(currTok.name());
+            } else {
+               return env.scope->get(currTok.name());
+            }
+         }();
+         if (r.is_err()) {
+            return {r.err()};
+         }
+         iden.symbol = r.ok();
+      }
+      nextToken();
+      //specializer
+      if (readOp(Oplike::SPECIALIZER_OPEN).is_ok()) {
+         if constexpr (isDecl) {
+            iden.gens = parseArgList<true>(BlockType::SPECIALIZER);
+            iden.symbol->setGenParams(iden.gens);
+         } else {
+            if (!iden.symbol->isGeneric()) {
+               logError(prevTok, ErrCode::BAD_GENERIC, FMT("`%s` is not generic"), iden);
+            }
+            iden.gens = parseArgList<false>(BlockType::SPECIALIZER);
+         }
+      } else { iden.gens = nullptr; }
+   } while (readOp(Oplike::SCOPE_RESOLUTION).is_ok());
+
+   return iden;
 }
 
 clef::Identifier clef::Parser::parseType() {

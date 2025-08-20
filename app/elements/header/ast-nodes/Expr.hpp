@@ -8,8 +8,8 @@
 
 struct clef::Identifier {
    using SyntaxNode_t = void;
-   Args* gens = nullptr;
    Symbol* symbol = nullptr;
+   Args* gens = nullptr;
 };
 struct clef::Label {
    using SyntaxNode_t = void;
