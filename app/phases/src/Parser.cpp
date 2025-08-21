@@ -411,15 +411,15 @@ template<bool isDecl> clef::res<clef::Identifier> clef::Parser::parseIden(Identi
       TODO;
    }
    //name
-   Identifier iden{.symbol = tree.globalScope(), .gens = nullptr};
+   Identifier iden{.symbol = tree.globalScope()->symbol(), .gens = nullptr};
    
    do {
       {
          res<Symbol*> r = [&]() -> auto {
             if constexpr (isDecl) {
-               return env.scope->insert(currTok.name());
+               return iden.symbol->insert(currTok.name());
             } else {
-               return env.scope->get(currTok.name());
+               return iden.symbol->get(currTok.name());
             }
          }();
          if (r.is_err()) {
@@ -442,6 +442,15 @@ template<bool isDecl> clef::res<clef::Identifier> clef::Parser::parseIden(Identi
       } else { iden.gens = nullptr; }
    } while (readOp(Oplike::SCOPE_RESOLUTION).is_ok());
 
+   if constexpr (isDecl) {
+      iden.symbol->setType(typeName);
+   } else {
+      if (iden.symbol->type() != typeName.symbol->type()) {
+         logError(prevTok, ErrCode::TYPE_CONFLICT, FMT("`%s` expected to be of type `%s`"), iden, typeName);
+      }
+   }
+
+   env = oldEnv;
    return iden;
 }
 
@@ -544,7 +553,7 @@ clef::Identifier clef::Parser::parseTuple() {
       .type = name.symbol
    };
    //get tuple object
-   TypeSpec::Tuple& tup = name.symbol->type()->tup();
+   TypeSpec::Tuple& tup = name.symbol->type().spec()->tup();
 
    //parse members
    expect(readBlockDelim(BlockType::LIST, BlockDelimRole::OPEN), ErrCode::BAD_TYPE_DEF, FMT("tuples are defined using curly braces"));

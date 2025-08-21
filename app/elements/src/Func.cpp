@@ -23,8 +23,9 @@ void clef::Func::checkRep() const {
 }
 
 uint64 clef::FuncSig::hash(uint64 seed) const {
-   seed = mcsl::hash_algos::rapid_mix((uint64)_self_t, seed);
-   return mcsl::hash_algos::rapid(_params.begin(), _params.size() * sizeof(TypeSpec*), seed);
+   seed = mcsl::hash_algos::rapid_mix((uint64)_self_t.spec(), seed);
+   seed = mcsl::hash_algos::rapid_mix((uint64)_self_t.gens(), seed);
+   return mcsl::hash_algos::rapid(_params.begin(), _params.size() * sizeof(FullType), seed);
 }
 
 clef::res<void> clef::Func::registerOverload(Overload* overload) {

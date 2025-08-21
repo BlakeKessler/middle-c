@@ -31,6 +31,7 @@ namespace clef {
       BAD_TYPE_DEF,
       CONFLICTING_REDECL,
       REDEF,
+      TYPE_CONFLICT,
       BAD_GENERIC,
 
       DUPLICATE_OVERLOAD,

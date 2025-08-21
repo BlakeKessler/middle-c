@@ -28,6 +28,7 @@ namespace clef {
    class Symbol;
       struct OpDefTable;
    class TypeSpec;
+   class FullType;
 
    class Attr;
 

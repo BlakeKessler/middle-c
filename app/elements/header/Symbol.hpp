@@ -4,6 +4,7 @@
 #include "CLEF.hpp"
 
 #include "ast-nodes/Expr.hpp"
+#include "FullType.hpp"
 
 #include "map.hpp"
 #include "dyn_arr.hpp"
@@ -40,10 +41,10 @@ class clef::Symbol {
       static bool isType(Type t) { return t & __type_bit; }
    private:
       const mcsl::str_slice _name;
-      Args* _genParams;
+      Args* _gens;
       struct {
          Symbol* symbol;
-         Args genArgs; //should only be non-null if `symbol` is non-null
+         Args* gens; //should only be non-null if `symbol` is non-null
       } _parent;
       bool _parentIsExplicit;
       struct {
@@ -52,13 +53,13 @@ class clef::Symbol {
          mcsl::dyn_arr<mcsl::pair<Label, Expr*>> labels; //not common enough in practice to be worth the overhead of a hash table
          OpDefTable* ops;
       } _children; //accessible child symbols
-      TypeSpec* _type;
-
+      FullType _type;
+      
       Type _symbolType;
    public:
 
-      void setGenParams(Args* params) { _genParams = params; }
-      bool isGeneric() const { return _genParams; }
+      void setGenParams(Args* params) { _gens = params; }
+      bool isGeneric() const { return _gens; }
 
       Type symbolType() const { return _symbolType; }
 
@@ -66,8 +67,13 @@ class clef::Symbol {
       res<Symbol*> insert(const mcsl::str_slice name);
       Symbol* getOrInsert(const mcsl::str_slice name);
 
-      TypeSpec*& type() { return _type; }
-      const TypeSpec* type() const { return _type; }
+      auto type() { return _type; }
+      void setType(FullType type) {
+         debug_assert(!_type);
+         _type = type;
+         debug_assert(_type);
+      }
+      inline void setType(Identifier type) { return setType(type.symbol->_type); }
       
 };
 

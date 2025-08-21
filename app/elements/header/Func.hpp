@@ -3,6 +3,7 @@
 
 #include "CLEF.hpp"
 
+#include "FullType.hpp"
 #include "Symbol.hpp"
 
 #include "dyn_arr.hpp"
@@ -10,25 +11,25 @@
 
 class clef::FuncSig {
    private:
-      TypeSpec* _self_t = {};
-      TypeSpec* _ret_t = {};
-      mcsl::dyn_arr<TypeSpec*> _params = {};
+      FullType _self_t = {};
+      FullType _ret_t = {};
+      mcsl::dyn_arr<FullType> _params = {};
 
    public:
-      FuncSig(TypeSpec* self_t):_self_t(self_t) {}
+      FuncSig(FullType self_t):_self_t(self_t) {}
 
-      TypeSpec*& self_t() { return _self_t; }
-      const TypeSpec* self_t() const { return _self_t; }
+      FullType& self_t() { return _self_t; }
+      const FullType self_t() const { return _self_t; }
 
-      TypeSpec*& ret_t() { return _ret_t; }
-      const TypeSpec* ret_t() const { return _ret_t; }
+      FullType& ret_t() { return _ret_t; }
+      const FullType ret_t() const { return _ret_t; }
 
-      mcsl::arr_span<TypeSpec*> params() { return _params.span(); }
-      void addParam(TypeSpec* param_t) {
+      mcsl::arr_span<FullType> params() { return _params.span(); }
+      void addParam(FullType param_t) {
          _params.push_back(param_t);
       }
 
-      bool isMethod() { return _self_t; }
+      bool isMethod() { return (bool)_self_t; }
 
       uint64 hash(uint64 seed = mcsl::RAPIDHASH_RHS_DEFAULT) const;
       explicit operator bool() const { return _ret_t || _params.size(); }
@@ -65,16 +66,16 @@ class clef::Overload {
 class clef::Func {
    private:
       Symbol* _name = {};
-      TypeSpec* _self_t = {}; //should match _self_t of each overload
+      FullType _self_t = {}; //should match _self_t of each overload
       mcsl::dyn_arr<Overload*> _overloads = {};
    public:
       Func() = default;
-      Func(Symbol* name, TypeSpec* self_t):_name{name},_self_t{self_t} {}
+      Func(Symbol* name, FullType self_t):_name{name},_self_t{self_t} {}
 
       res<void> registerOverload(Overload* overload);
       Overload* getOverload(FuncSig* sig);
 
-      bool isMethod() { return _self_t; }
+      bool isMethod() { return (bool)_self_t; }
 
       void checkRep() const;
 };

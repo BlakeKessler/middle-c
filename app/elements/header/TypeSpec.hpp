@@ -3,6 +3,7 @@
 
 #include "CLEF.hpp"
 
+#include "FullType.hpp"
 #include "Func.hpp"
 
 #include "dyn_arr.hpp"
@@ -50,7 +51,7 @@ class clef::TypeSpec {
             SLICE,
             ARR
          };
-         TypeSpec* pointee;
+         FullType pointee;
          IndType indirType;
          uint bounds; //indirType == ARR && bounds == 0 → bounds are auto
       };

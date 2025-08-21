@@ -10,6 +10,8 @@ struct clef::Identifier {
    using SyntaxNode_t = void;
    Symbol* symbol = nullptr;
    Args* gens = nullptr;
+
+   constexpr explicit operator bool() const { return symbol; }
 };
 struct clef::Label {
    using SyntaxNode_t = void;
