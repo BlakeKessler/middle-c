@@ -52,7 +52,7 @@ class clef::SyntaxTree {
       }
 
       Symbol* registerSymbol(const mcsl::str_slice name, Identifier parent, Symbol::Type);
-      Symbol* registerSymbol(Identifier parent, Symbol::Type);
+      Symbol* registerSymbolAnon(Identifier parent, Symbol::Type);
       TypeSpec* registerType(Identifier, Symbol::Type);
       void popSymbol(Symbol* s) { assert(s == _symbols.end()); _symbols.pop_back(); }
 

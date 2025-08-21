@@ -52,6 +52,8 @@ class clef::Symbol {
       FullType _type;
       
       Type _symbolType;
+
+      res<Symbol*> __ANON_CHILDREN_SEARCH(const mcsl::str_slice name);
    public:
       Symbol(Type t, Identifier name);
       Symbol(const mcsl::str_slice name, Identifier parent, Type t);

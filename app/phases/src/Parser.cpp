@@ -608,6 +608,9 @@ clef::res<clef::Symbol*> clef::Parser::registerSymbol(const mcsl::str_slice name
    }
    return symbol;
 }
+clef::Symbol* clef::Parser::registerSymbolAnon(Symbol::Type t) {
+   return tree.registerSymbolAnon(env.scope, t);
+}
 
 #pragma endregion type
 

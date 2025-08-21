@@ -43,13 +43,25 @@ clef::res<clef::Symbol*> clef::Symbol::get(const mcsl::str_slice name) {
    if (sptr) {
       return *sptr;
    }
-   for (Symbol* anonChild : _children.anon) {
-      if (anonChild->name() == name) {
-         return anonChild;
-      }
+   auto r = __ANON_CHILDREN_SEARCH(name);
+   if (r.is_ok()) {
+      return r;
    }
    if (_parent) {
       [[clang::musttail]] return _parent.symbol->get(name);
+   }
+   return {ErrCode::SYMBOL_NOT_FOUND};
+}
+clef::res<clef::Symbol*> clef::Symbol::__ANON_CHILDREN_SEARCH(const mcsl::str_slice name) {
+   for (Symbol* anonChild : _children.anon) {
+      Symbol** sptr = _children.named.find(name);
+      if (sptr) {
+         return *sptr;
+      }
+      auto r = anonChild->__ANON_CHILDREN_SEARCH(name);
+      if (r.is_ok()) {
+         return r;
+      }
    }
    return {ErrCode::SYMBOL_NOT_FOUND};
 }
