@@ -258,7 +258,7 @@ clef::Expr* clef::Parser::parseCoreExpr() {
 
          case TokenType::IDEN: {
             Token tok = currTok;
-            operandStack.emplace_back(tree.make<Expr>(expect(parseIden<false>({}), ErrCode::BAD_EXPR, FMT("invalid identifier"))), currTok);
+            operandStack.emplace_back(tree.make<Expr>(expect(parseIden<NO>({}, {}), ErrCode::BAD_EXPR, FMT("invalid identifier"))), currTok);
             prevTokIsOperand = true;
             goto PARSE_EXPR_CONTINUE;
          }
@@ -308,10 +308,10 @@ clef::Expr* clef::Parser::parseCoreExpr() {
                debug_assert(operandStack.size());
                OpData op = block.invoke;
                pushOperator(op, tok);
-               Args* args = parseArgList<false>(block.type);
+               Args* args = parseArgList<NO>(block.type);
                operandStack.emplace_back(tree.make<Expr>(args), tok);
             } else if (block.type == BlockType::LIST) { //tuple
-               Args* args = parseArgList<false>(block.type);
+               Args* args = parseArgList<NO>(block.type);
                operandStack.emplace_back(tree.make<Expr>(args), tok);
             } else if (block.type == BlockType::SPECIALIZER) { [[unlikely]]; //specializer (illegal)
                logError(tok, ErrCode::BAD_EXPR, FMT("floating specializer"));
@@ -391,7 +391,7 @@ clef::Expr* clef::Parser::parseExpr() {
    return expr;
 }
 
-template<bool isDecl> clef::res<clef::Identifier> clef::Parser::parseIden(Identifier typeName) {
+template<clef::Parser::IsDecl isDecl> clef::res<clef::Identifier> clef::Parser::parseIden(Identifier typeName, Symbol::Type t) {
    if (currTok.type() == TokenType::KEYWORD) {
       TODO;
    }
@@ -401,9 +401,9 @@ template<bool isDecl> clef::res<clef::Identifier> clef::Parser::parseIden(Identi
    //check for fully qualified name
    if (readOp(Oplike::SCOPE_RESOLUTION).is_ok()) {
       env = {
-         .scope = tree.globalScope()->symbol(),
-         .fn = nullptr,
-         .type = nullptr
+         .scope = {.symbol = tree.globalScope()->symbol(), .gens = nullptr},
+         .fn = {},
+         .type = {}
       };
    }
 
@@ -412,15 +412,22 @@ template<bool isDecl> clef::res<clef::Identifier> clef::Parser::parseIden(Identi
    }
    //name
    Identifier iden{.symbol = tree.globalScope()->symbol(), .gens = nullptr};
-   
+   bool didDecl = false;
+
    do {
+      if (didDecl) {
+         TODO;
+      }
       {
          res<Symbol*> r = [&]() -> auto {
-            if constexpr (isDecl) {
-               return iden.symbol->insert(currTok.name());
-            } else {
-               return iden.symbol->get(currTok.name());
+            auto get = iden.symbol->get(currTok.name());
+            if constexpr (isDecl != NO) {
+               if (get.is_err()) {
+                  didDecl = true;
+                  get = iden.symbol->insert(registerSymbol(currTok.name(), t).ok());
+               }
             }
+            return get;
          }();
          if (r.is_err()) {
             return {r.err()};
@@ -430,21 +437,41 @@ template<bool isDecl> clef::res<clef::Identifier> clef::Parser::parseIden(Identi
       nextToken();
       //specializer
       if (readOp(Oplike::SPECIALIZER_OPEN).is_ok()) {
-         if constexpr (isDecl) {
-            iden.gens = parseArgList<true>(BlockType::SPECIALIZER);
+         if constexpr (isDecl == YES) {
+            iden.gens = parseArgList<YES>(BlockType::SPECIALIZER);
             iden.symbol->setGenParams(iden.gens);
+         } else if constexpr (isDecl == MAYBE) {
+            if (didDecl) {
+               iden.gens = parseArgList<YES>(BlockType::SPECIALIZER);
+               iden.symbol->setGenParams(iden.gens);
+            } else {
+               if (!iden.symbol->isGeneric()) {
+                  logError(prevTok, ErrCode::BAD_GENERIC, FMT("`%s` is not generic"), iden);
+               }
+               iden.gens = parseArgList<NO>(BlockType::SPECIALIZER);
+            }
          } else {
             if (!iden.symbol->isGeneric()) {
                logError(prevTok, ErrCode::BAD_GENERIC, FMT("`%s` is not generic"), iden);
             }
-            iden.gens = parseArgList<false>(BlockType::SPECIALIZER);
+            iden.gens = parseArgList<NO>(BlockType::SPECIALIZER);
          }
       } else { iden.gens = nullptr; }
    } while (readOp(Oplike::SCOPE_RESOLUTION).is_ok());
 
-   if constexpr (isDecl) {
+   if constexpr (isDecl == YES) {
+      if (!didDecl) {
+         TODO;
+      }
       iden.symbol->setType(typeName);
+   } else if constexpr (isDecl == MAYBE) {
+      if (didDecl) {
+         iden.symbol->setType(typeName);
+      }
    } else {
+      if (didDecl) {
+         TODO;
+      }
       if (iden.symbol->type() != typeName.symbol->type()) {
          logError(prevTok, ErrCode::TYPE_CONFLICT, FMT("`%s` expected to be of type `%s`"), iden, typeName);
       }
@@ -468,7 +495,7 @@ clef::Identifier clef::Parser::parseType() {
          logError(currTok, ErrCode::MISSING_TYPE, FMT("keyword `%s` does not name a type"), toString(kw));
       }
    } else if (currTok.type() == TokenType::IDEN) {
-      Identifier name = expect(parseIden<false>({}), ErrCode::MISSING_TYPE, FMT("invalid type name"));
+      Identifier name = expect(parseIden<NO>({}, {}), ErrCode::MISSING_TYPE, FMT("invalid type name"));
       if (!Symbol::isType(name.symbol->symbolType())) {
          logError(prevTok, ErrCode::MISSING_TYPE, FMT("`%s` does not name a type"), name);
       }
@@ -481,13 +508,13 @@ clef::Identifier clef::Parser::parseType() {
 
 clef::Expr* clef::Parser::parseDecl() {
    Identifier typeName = parseType();
-   Identifier name = expect(parseIden<true>(typeName), ErrCode::BAD_EXPR, FMT("expected variable name"));
+   Identifier name = expect(parseIden<YES>(typeName, typeName.symbol->symbolType()), ErrCode::BAD_EXPR, FMT("expected variable name"));
    
    return tree.make<Expr>(tree.make<Expr>(typeName), tree.make<Expr>(name), OpID::LET);
 }
 clef::Expr* clef::Parser::parseParam() {
    Identifier typeName = parseType();
-   Identifier name = parseIden<false>(typeName).orelse({});
+   Identifier name = parseIden<YES>(typeName, typeName.symbol->symbolType()).orelse({});
 
    return tree.make<Expr>(tree.make<Expr>(typeName), tree.make<Expr>(name), OpID::LET); 
 }
@@ -525,32 +552,30 @@ clef::Identifier clef::Parser::parseTypeDef(KeywordID kw) {
 
 clef::Identifier clef::Parser::parseTuple() {
    //name of type (optional)
-   res<Identifier> r = parseIden<true>({});
    Identifier name;
-   if (r.is_ok()) { //named
+   if (res<Identifier> r = parseIden<MAYBE>({}, Symbol::Type::TUPLE); r.is_ok()) { //named
       name = r.ok();
-      if (name.symbol) { //identifier is already declared
+      if (name.symbol->type()) { //identifier is already declared
          //check that the identifier refers to a tuple
          if (name.symbol->symbolType() != Symbol::TUPLE) {
             logError(currTok, ErrCode::CONFLICTING_REDECL, FMT("%s `%s` cannot be redeclared as a tuple"), toString(name.symbol->symbolType()), name);
          }
-         //check that this is not a redeclaration
-         if (name.symbol->type()) {
-            logError(currTok, ErrCode::REDEF, FMT("tuple `%s` has already been defined"), name);
-         }
       }
       else { //identifier is NOT already declared
-         name = {.symbol = registerType(Symbol::TUPLE, name), .gens = {}};
+         intoType(name, Symbol::TUPLE).ok();
       }
    } else { //anonymous
-      name = {.symbol = registerType(Symbol::TUPLE, {}), .gens = {}};
+      name = {
+         .symbol = registerSymbolAnon(Symbol::TUPLE),
+         .gens = {}
+      };
    }
    //preserve and update env
    Env oldEnv = env;
    env = {
-      .scope = name.symbol,
-      .fn = nullptr,
-      .type = name.symbol
+      .scope = name,
+      .fn = {},
+      .type = name
    };
    //get tuple object
    TypeSpec::Tuple& tup = name.symbol->type().spec()->tup();
@@ -572,6 +597,16 @@ clef::Identifier clef::Parser::parseTuple() {
 
    //return
    return name;
+}
+
+clef::res<clef::Symbol*> clef::Parser::registerSymbol(const mcsl::str_slice name, Symbol::Type t) {
+   Symbol* symbol = tree.registerSymbol(name, t);
+   auto r = env.scope.symbol->insert(symbol);
+   if (r.is_err()) {
+      tree.popSymbol(symbol);
+      return r;
+   }
+   return symbol;
 }
 
 #pragma endregion type

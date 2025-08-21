@@ -46,7 +46,6 @@ class clef::Symbol {
          Symbol* symbol;
          Args* gens; //should only be non-null if `symbol` is non-null
       } _parent;
-      bool _parentIsExplicit;
       struct {
          mcsl::map<mcsl::str_slice, Symbol*> named;
          mcsl::dyn_arr<Symbol*> anon;
@@ -57,6 +56,7 @@ class clef::Symbol {
       
       Type _symbolType;
    public:
+      Symbol(Type t, Identifier name);
 
       void setGenParams(Args* params) { _gens = params; }
       bool isGeneric() const { return _gens; }
@@ -64,8 +64,7 @@ class clef::Symbol {
       Type symbolType() const { return _symbolType; }
 
       res<Symbol*> get(const mcsl::str_slice name);
-      res<Symbol*> insert(const mcsl::str_slice name);
-      Symbol* getOrInsert(const mcsl::str_slice name);
+      res<Symbol*> insert(Symbol* symbol);
 
       auto type() { return _type; }
       void setType(FullType type) {

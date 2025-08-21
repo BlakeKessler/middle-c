@@ -51,6 +51,10 @@ class clef::SyntaxTree {
          #undef PUSH
       }
 
+      Symbol* registerSymbol(const mcsl::str_slice name, Symbol::Type);
+      TypeSpec* registerType(Identifier, Symbol::Type);
+      void popSymbol(Symbol* s) { assert(s == _symbols.end()); _symbols.pop_back(); }
+
       DataModel dataModel() const { return _dataModel; }
       inline Proc* globalScope() { return &_globalScope; }
 
