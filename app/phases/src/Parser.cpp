@@ -600,7 +600,7 @@ clef::Identifier clef::Parser::parseTuple() {
 }
 
 clef::res<clef::Symbol*> clef::Parser::registerSymbol(const mcsl::str_slice name, Symbol::Type t) {
-   Symbol* symbol = tree.registerSymbol(name, t);
+   Symbol* symbol = tree.registerSymbol(name, env.scope, t);
    auto r = env.scope.symbol->insert(symbol);
    if (r.is_err()) {
       tree.popSymbol(symbol);

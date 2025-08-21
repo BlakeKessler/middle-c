@@ -42,21 +42,23 @@ class clef::Symbol {
    private:
       const mcsl::str_slice _name;
       Args* _gens;
+      Identifier _parent;
       struct {
-         Symbol* symbol;
-         Args* gens; //should only be non-null if `symbol` is non-null
-      } _parent;
-      struct {
-         mcsl::map<mcsl::str_slice, Symbol*> named;
-         mcsl::dyn_arr<Symbol*> anon;
-         mcsl::dyn_arr<mcsl::pair<Label, Expr*>> labels; //not common enough in practice to be worth the overhead of a hash table
-         OpDefTable* ops;
+         mcsl::map<mcsl::str_slice, Symbol*> named = {};
+         mcsl::dyn_arr<Symbol*> anon = {};
+         mcsl::dyn_arr<mcsl::pair<Label, Expr*>> labels = {}; //not common enough in practice to be worth the overhead of a hash table
+         OpDefTable* ops = {};
       } _children; //accessible child symbols
       FullType _type;
       
       Type _symbolType;
    public:
       Symbol(Type t, Identifier name);
+      Symbol(const mcsl::str_slice name, Identifier parent, Type t);
+      Symbol(Identifier parent, Type t);
+
+      const mcsl::str_slice name() const { return _name; }
+      bool isAnon() const { return _name.size(); }
 
       void setGenParams(Args* params) { _gens = params; }
       bool isGeneric() const { return _gens; }
@@ -66,13 +68,16 @@ class clef::Symbol {
       res<Symbol*> get(const mcsl::str_slice name);
       res<Symbol*> insert(Symbol* symbol);
 
-      auto type() { return _type; }
+      FullType type() { return _type; }
       void setType(FullType type) {
          debug_assert(!_type);
          _type = type;
          debug_assert(_type);
       }
-      inline void setType(Identifier type) { return setType(type.symbol->_type); }
+      inline void setType(Identifier type) {
+         debug_assert(isType(type.symbol->symbolType()));
+         return setType(type.symbol->_type);
+      }
       
 };
 

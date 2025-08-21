@@ -33,6 +33,7 @@ namespace clef {
       REDEF,
       TYPE_CONFLICT,
       BAD_GENERIC,
+      SYMBOL_NOT_FOUND,
 
       DUPLICATE_OVERLOAD,
    };
