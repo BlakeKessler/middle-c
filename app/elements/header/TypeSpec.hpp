@@ -26,6 +26,9 @@ class clef::TypeSpec {
          SIG,
       };
       
+      struct Fund {
+         FundTypeID id;
+      };
       struct Tuple {
          mcsl::dyn_arr<Identifier> membs;
       };
@@ -59,7 +62,7 @@ class clef::TypeSpec {
    private:
       Symbol* _canonName;
       union M {
-         FundTypeID fund;
+         Fund fund;
 
          Tuple tup;
          Trait trait;
@@ -74,8 +77,8 @@ class clef::TypeSpec {
       } m = {.obj = {}}; static_assert(sizeof(Obj) == sizeof(M));
       Metatype _type;
 
-      TypeSpec(Symbol* canonName, Metatype t): _canonName{canonName},_type{t} {}
    public:
+      TypeSpec(Symbol* canonName, Metatype t): _canonName{canonName},_type{t} {}
       static TypeSpec makeTuple(Symbol* canonName) { return {canonName, TUPLE}; }
 
       ~TypeSpec() {

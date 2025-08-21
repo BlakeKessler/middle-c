@@ -83,9 +83,6 @@ uint clef::sizeOf(FundTypeID id, DataModel model) {
          if (id == VOID || id == AUTO || id == null) {
             return 0;
          }
-         if (id == FUNCTION_SIGNATURE) {
-            return 8;
-         }
          if (auto offset = +(id & ~__FLAGS) - 1; offset - 1) {
             return 1 << offset;
          } else {

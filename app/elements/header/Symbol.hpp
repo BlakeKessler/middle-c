@@ -62,6 +62,7 @@ class clef::Symbol {
       const mcsl::str_slice name() const { return _name; }
       bool isAnon() const { return _name.size(); }
 
+      Args* genParams() { return _gens; }
       void setGenParams(Args* params) { _gens = params; }
       bool isGeneric() const { return _gens; }
 
@@ -76,9 +77,11 @@ class clef::Symbol {
          _type = type;
          debug_assert(_type);
       }
-      inline void setType(Identifier type) {
-         debug_assert(isType(type.symbol->symbolType()));
-         return setType(type.symbol->_type);
+      void setType(Identifier typeName) {
+         setType(FullType{
+            typeName.symbol->type().spec(),
+            typeName.gens
+         });
       }
       
 };

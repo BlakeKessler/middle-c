@@ -888,7 +888,6 @@ namespace clef {
       null,
       NULLPTR_T,
       STR,
-      FUNCTION_SIGNATURE,
       
       VOID,
       AUTO,
