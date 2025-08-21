@@ -5,6 +5,7 @@
 
 #include "FullType.hpp"
 #include "Symbol.hpp"
+#include "ast-nodes/Expr.hpp"
 
 #include "dyn_arr.hpp"
 #include "hash.hpp"
@@ -14,9 +15,11 @@ class clef::FuncSig {
       FullType _self_t = {};
       FullType _ret_t = {};
       mcsl::dyn_arr<FullType> _params = {};
+      uint64 _hash;
 
+      uint64 calcHash() const;
    public:
-      FuncSig(FullType self_t):_self_t(self_t) {}
+      FuncSig(FullType self_t):_self_t(self_t),_hash{calcHash()} {}
 
       FullType& self_t() { return _self_t; }
       const FullType self_t() const { return _self_t; }
@@ -31,7 +34,8 @@ class clef::FuncSig {
 
       bool isMethod() { return (bool)_self_t; }
 
-      uint64 hash(uint64 seed = mcsl::RAPIDHASH_RHS_DEFAULT) const;
+      uint64 hash() const { return _hash; }
+      uint64 hash(uint64 seed) const { return mcsl::hash_algos::rapid_mix(_hash, seed); }
       explicit operator bool() const { return _ret_t || _params.size(); }
 };
 class clef::Overload {
@@ -58,19 +62,22 @@ class clef::Overload {
 
       bool isMethod() { return _sig->isMethod(); }
 
-      uint64 hash(uint64 seed = mcsl::RAPIDHASH_RHS_DEFAULT) const { return _sig->hash(seed); }
+      uint64 hash() const { return _sig->hash(); }
+      uint64 hash(uint64 seed) const { return _sig->hash(seed); }
       explicit operator bool() const { return _sig; }
 
       void checkRep() const;
 };
 class clef::Func {
    private:
-      Symbol* _name = {};
+      Identifier _name = {};
       FullType _self_t = {}; //should match _self_t of each overload
       mcsl::dyn_arr<Overload*> _overloads = {};
    public:
       Func() = default;
-      Func(Symbol* name, FullType self_t):_name{name},_self_t{self_t} {}
+      Func(Identifier name, FullType self_t):_name{name},_self_t{self_t} {}
+
+      Identifier name() { return _name; }
 
       res<void> registerOverload(Overload* overload);
       Overload* getOverload(FuncSig* sig);

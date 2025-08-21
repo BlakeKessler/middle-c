@@ -22,10 +22,10 @@ void clef::Func::checkRep() const {
    }
 }
 
-uint64 clef::FuncSig::hash(uint64 seed) const {
-   seed = mcsl::hash_algos::rapid_mix((uint64)_self_t.spec(), seed);
-   seed = mcsl::hash_algos::rapid_mix((uint64)_self_t.gens(), seed);
+uint64 clef::FuncSig::calcHash() const {
+   uint64 seed = mcsl::hash_algos::rapid_mix((uint64)_self_t.spec(), (uint64)_self_t.gens());
    return mcsl::hash_algos::rapid(_params.begin(), _params.size() * sizeof(FullType), seed);
+   //!NOTE: the params being `FullType` instead of `TypeSpec*` might cause problems
 }
 
 clef::res<void> clef::Func::registerOverload(Overload* overload) {

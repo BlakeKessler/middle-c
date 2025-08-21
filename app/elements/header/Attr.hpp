@@ -11,6 +11,11 @@ class clef::Attr {
       Attr* _next;
       Attr* _prev;
    public:
+      Symbol* symbol() { return _symbol; }
+      Args* args() { return _args; }
+
+      Attr* next() { return _next; }
+      Attr* prev() { return _prev; }
 };
 
 #endif
