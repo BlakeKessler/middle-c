@@ -467,6 +467,7 @@ clef::Expr* clef::Parser::parseStmt() {
    return expr;
 }
 
+#pragma region ctrlflow
 clef::If* clef::Parser::parseIf() {
    //name (optional)
    Label label = parseLabel().orelse({});
@@ -491,7 +492,7 @@ clef::If* clef::Parser::parseIf() {
    //return
    return tree.make<If>(cond, proc, elseExpr, label, retT);
 }
-void clef::Parser::parseElse(If* dest) {
+void clef::Parser::parseElse(If* dest) { //!NOTE: `dest` is an out-parameter
    if (readKeyword(KeywordID::IF).is_ok()) {
       //condition
       expect(readOp(Oplike::CALL_OPEN), FMT("`if` conditions must be parenthesized"));
@@ -508,6 +509,107 @@ void clef::Parser::parseElse(If* dest) {
       dest->proc = parseProc();
    }
 }
+clef::While* clef::Parser::parseWhile() {
+   //name (optional)
+   Label label = parseLabel().orelse({});
+   //condition
+   expect(readOp(Oplike::CALL_OPEN), FMT("`while` conditions must be parenthesized"));
+   Expr* cond = parseExpr();
+   expect(readOp(Oplike::CALL_CLOSE), FMT("invalid expression"));
+   //return type (optional)
+   Identifier retT;
+   if (readOp(Oplike::ARROW).is_ok()) {
+      retT = parseType();
+   } else { retT = {}; }
+   //procedure
+   Proc* proc = parseProc(label);
+   //else
+   Proc* elseProc;
+   if (readKeyword(KeywordID::ELSE).is_ok()) {
+      elseProc = parseProc();
+   } else { elseProc = nullptr; }
+
+   //return
+   return tree.make<While>(cond, proc, elseProc, label, retT);
+}
+clef::DoWhile* clef::Parser::parseDoWhile() {
+   //name (optional)
+   Label label = parseLabel().orelse({});
+   //return type (optional)
+   Identifier retT;
+   if (readOp(Oplike::ARROW).is_ok()) {
+      retT = parseType();
+   } else { retT = {}; }
+   //procedure
+   Proc* proc = parseProc(label);
+   //condition
+   expect(readOp(Oplike::CALL_OPEN), FMT("`while` conditions must be parenthesized"));
+   Expr* cond = parseExpr();
+   expect(readOp(Oplike::CALL_CLOSE), FMT("invalid expression"));
+   //else
+   Proc* elseProc;
+   if (readKeyword(KeywordID::ELSE).is_ok()) {
+      elseProc = parseProc();
+   } else { elseProc = nullptr; }
+
+   //return
+   return tree.make<DoWhile>(cond, proc, elseProc, label, retT);
+}
+clef::For* clef::Parser::parseFor() {
+   //name (optional)
+   Label label = parseLabel().orelse({});
+   //condition
+   expect(readOp(Oplike::CALL_OPEN), FMT("`while` conditions must be parenthesized"));
+   Expr* decl = parseStmt();
+   Expr* cond = parseStmt();
+   Expr* inc = parseExpr();
+   expect(readOp(Oplike::CALL_CLOSE), FMT("invalid expression"));
+   //return type (optional)
+   Identifier retT;
+   if (readOp(Oplike::ARROW).is_ok()) {
+      retT = parseType();
+   } else { retT = {}; }
+   //procedure
+   Proc* proc = parseProc(label);
+   //else
+   Proc* elseProc;
+   if (readKeyword(KeywordID::ELSE).is_ok()) {
+      elseProc = parseProc();
+   } else { elseProc = nullptr; }
+
+   //return
+   return tree.make<For>(decl, cond, inc, proc, elseProc, label, retT);
+}
+clef::Foreach* clef::Parser::parseForeach() {
+   //name (optional)
+   Label label = parseLabel().orelse({});
+   //condition
+   expect(readOp(Oplike::CALL_OPEN), FMT("`while` conditions must be parenthesized"));
+   Expr* it; {
+      Identifier typeName = parseType();
+      Identifier name = expect(parseIden<YES>(typeName, typeName.symbol->symbolType()), ErrCode::BAD_EXPR, FMT("expected variable name"));
+      it = tree.make<Expr>(name, (Expr*)nullptr);
+   }
+   expect(readOp(Oplike::LABEL_DELIM), FMT("invalid `foreach` loop parameters"));
+   Expr* cont = parseExpr();
+   expect(readOp(Oplike::CALL_CLOSE), FMT("invalid expression"));
+   //return type (optional)
+   Identifier retT;
+   if (readOp(Oplike::ARROW).is_ok()) {
+      retT = parseType();
+   } else { retT = {}; }
+   //procedure
+   Proc* proc = parseProc(label);
+   //else
+   Proc* elseProc;
+   if (readKeyword(KeywordID::ELSE).is_ok()) {
+      elseProc = parseProc();
+   } else { elseProc = nullptr; }
+
+   //return
+   return tree.make<Foreach>(it, cont, proc, elseProc, label, retT);
+}
+#pragma endregion ctrlflow
 
 #define READ_VAL \
    if (res<Expr*> r = parseInit(typeName); r.is_ok()) { \
