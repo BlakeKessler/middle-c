@@ -372,6 +372,7 @@ uint clef::sizeOf(FundTypeID id, DataModel model) {
       case DataModel::LLP64:
       case DataModel::ILP64:
       case DataModel::SILP64:
+      case DataModel::x32:
          TODO;
    }
 }
