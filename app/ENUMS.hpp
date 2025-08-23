@@ -7,6 +7,15 @@
 
 #include "assert.hpp"
 
+#ifdef __GNUC__
+   #define ctz __builtin_ctz
+   #define popcnt __builtin_popcount
+#else
+   #include <bit>
+   #define ctz std::countr_zero
+   #define popcnt std::popcount
+#endif
+
 namespace clef {
    //!enum of CLEF error codes
    enum class ErrCode {
@@ -779,14 +788,14 @@ namespace clef {
    }
 
    constexpr KeywordID makeSized_c(const KeywordID id, const char ch) {
-      #define HASH(val) (val & 31)
+      #define HASH(val) (val & 15)
       using enum KeywordID;
       static constexpr const sbyte offsets[] = {
          [HASH(    WORD_LIT_CHAR)] =  4,
          [HASH(     PTR_LIT_CHAR)] =  3,
          [HASH(OVERLONG_LIT_CHAR)] =  2,
          [HASH(    LONG_LIT_CHAR)] =  1,
-         [HASH(                0)] =  0,
+       //[HASH(                0)] =  0,
          [HASH(   SHORT_LIT_CHAR)] = -1,
          [HASH(    BYTE_LIT_CHAR)] = -2,
       };
@@ -800,7 +809,10 @@ namespace clef {
       #undef HASH
    }
    constexpr KeywordID makeSized_n(const KeywordID id, const uint size) {
-      return (KeywordID)(+id + __builtin_ctz(size << 2));
+      using enum KeywordID;
+      assume(popcnt(size) == 1);
+      assume (id == UINT || id == SINT || id == FLOAT || (id == CHAR && size <= 32));
+      return (KeywordID)(+id + ctz(size << 2) + (id == FLOAT && size >= 128));
    }
    #pragma region testsize
    #ifdef __INTELLISENSE__
