@@ -11,7 +11,6 @@
 #include "dyn_arr.hpp"
 
 void clef::Parser::nextToken() {
-   prevTok = currTok;
    currTok = _toks.nextToken();
    if (currTok.type() == TokenType::MACRO_INVOKE) {
       TODO;
@@ -195,6 +194,7 @@ clef::Expr* clef::Parser::parseExprCore() {
 
          case TokenType::KEYWORD: { //keywords
             const KeywordID kw = currTok.keywordID();
+            Token prevTok = currTok;
             nextToken();
             if (kw == KeywordID::FUNC) { //inline functions
                auto [fn, ov] = parseFunc();
@@ -395,6 +395,7 @@ clef::Expr* clef::Parser::parseStmt() {
    Expr* expr;
    if (currTok.type() == TokenType::KEYWORD) {
       KeywordID kw = currTok.keywordID();
+      Token prevTok = currTok;
       nextToken();
       switch (kw) {
          using enum KeywordID;
@@ -441,7 +442,9 @@ clef::Expr* clef::Parser::parseStmt() {
          case STATIC_ASSERT: fthru;
          case ASSUME: expr = tree.make<Expr>(nullptr, parseExpr(), toOpID(kw)); break;
 
-         default: goto STD_EXPR;
+         default:
+            unget(prevTok); //!NOTE: exception to the no backtracking principle because it is only ever at most the first token of a statement
+            goto STD_EXPR;
       }
       //EOS after statements besides standard expression statements
       if (readEOS().is_err()) {
@@ -452,7 +455,7 @@ clef::Expr* clef::Parser::parseStmt() {
       if (readEOS().is_ok()) { //standard expression
          ;
       }
-      else if (readOp(Oplike::LABEL_DELIM).is_ok()) { //label
+      else if (Token prevTok = currTok; readOp(Oplike::LABEL_DELIM).is_ok()) { //label
          if (expr->type() != Expr::LABEL) {
             logError(prevTok, ErrCode::BAD_EXPR, FMT("labels may only be a single identifier"));
          }
@@ -461,6 +464,10 @@ clef::Expr* clef::Parser::parseStmt() {
       }
    }
    return expr;
+}
+
+clef::Expr* clef::Parser::parseIf() {
+
 }
 
 #define READ_VAL \
@@ -515,6 +522,7 @@ template<clef::Parser::IsDecl isDecl> clef::res<clef::Identifier> clef::Parser::
    Identifier iden{.symbol = tree.globalScope()->symbol(), .gens = nullptr};
    bool didDecl = false;
 
+   Token prevTok;
    do {
       if (didDecl) {
          TODO;
@@ -535,6 +543,7 @@ template<clef::Parser::IsDecl isDecl> clef::res<clef::Identifier> clef::Parser::
          }
          iden.symbol = r.ok();
       }
+      prevTok = currTok;
       nextToken();
       //specializer
       if (readOp(Oplike::SPECIALIZER_OPEN).is_ok()) {
@@ -605,6 +614,7 @@ clef::Identifier clef::Parser::parseType() {
          logError(currTok, ErrCode::MISSING_TYPE, FMT("keyword `%s` does not name a type"), toString(kw));
       }
    } else if (currTok.type() == TokenType::IDEN) {
+      Token prevTok = currTok;
       Identifier name = expect(parseIden<NO>({}, {}), ErrCode::MISSING_TYPE, FMT("invalid type name"));
       if (!Symbol::isType(name.symbol->symbolType())) {
          logError(prevTok, ErrCode::MISSING_TYPE, FMT("`%s` does not name a type"), name);

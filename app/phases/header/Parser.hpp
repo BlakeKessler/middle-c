@@ -12,7 +12,6 @@ class clef::Parser {
       Lexer& _toks;
       SyntaxTree& tree;
       Token currTok;
-      Token prevTok;
       struct Env {
          Identifier scope;
          Identifier fn;
@@ -32,6 +31,10 @@ class clef::Parser {
       }
 
       void nextToken();
+      void unget(Token prevTok) {
+         currTok = prevTok;
+         _toks.rewindTo(prevTok.tokStr().end());
+      }
 
       res<void> readKeyword(KeywordID kw);
       res<void> readOp(Oplike);
