@@ -32,7 +32,7 @@ class clef::Lexer {
 
       bool done() const { return curr >= end; }
       Token nextToken();
-      void rewindTo(const char*);
+      void rewindTo(const char* ch) { debug_assert(ch >= begin && ch < end); tokBegin = curr = const_cast<char*>(ch); }
       mcsl::str_slice currLine();
       uint lineNum() { return lineIndex + 1; }
       mcsl::str_slice prevTokStr() { return {tokBegin, curr}; }
