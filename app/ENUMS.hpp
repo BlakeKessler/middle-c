@@ -117,13 +117,13 @@ namespace clef {
       XOR_ASSIGN, //compound assignment (bitwise exclusive or)
       OR_ASSIGN, //compound assignment (bitwise or)
       COALESCE_ASSIGN, //compound assignment (null-coalescing)
+
+      SLICE,
       
       CALL, //parens
       INDEX, //square brackets
       INIT_LIST, //curly brackets
       SPECIALIZER, //triangle brackets
-
-      SLICE,
 
       INLINE_IF,
       INLINE_ELSE,
@@ -367,106 +367,108 @@ namespace clef {
    constexpr auto operator+(const Oplike op) { return std::to_underlying(op); }
 
    constexpr OpID toOpID(const Oplike op) {
-      switch (op) {
-         case Oplike::null: return OpID::null;
+      using L = Oplike;
+      using O = OpID;
+      static constexpr const OpID buf[] = {
+         [             +L::null] = O::null,
 
-         case Oplike::INC: return OpID::INC;
-         case Oplike::DEC: return OpID::DEC;
+         [              +L::INC] = O::INC,
+         [              +L::DEC] = O::DEC,
 
-         case Oplike::ADD: return OpID::ADD;
-         case Oplike::SUB: return OpID::SUB;
-         case Oplike::MUL: return OpID::MUL;
-         case Oplike::DIV: return OpID::DIV;
-         case Oplike::MOD: return OpID::MOD;
-         case Oplike::EXP: return OpID::EXP;
+         [              +L::ADD] = O::ADD,
+         [              +L::SUB] = O::SUB,
+         [              +L::MUL] = O::MUL,
+         [              +L::DIV] = O::DIV,
+         [              +L::MOD] = O::MOD,
+         [              +L::EXP] = O::EXP,
 
-         case Oplike::LOGICAL_NOT: return OpID::LOGICAL_NOT;
-         case Oplike::LOGICAL_AND: return OpID::LOGICAL_AND;
-         case Oplike::LOGICAL_OR: return OpID::LOGICAL_OR;
+         [      +L::LOGICAL_NOT] = O::LOGICAL_NOT,
+         [      +L::LOGICAL_AND] = O::LOGICAL_AND,
+         [       +L::LOGICAL_OR] = O::LOGICAL_OR,
 
-         case Oplike::BIT_NOT: return OpID::BIT_NOT;
-         case Oplike::BIT_AND: return OpID::BIT_AND;
-         case Oplike::BIT_OR: return OpID::BIT_OR;
-         case Oplike::BIT_XOR: return OpID::BIT_XOR;
-         case Oplike::SHL: return OpID::SHL;
-         case Oplike::SHR: return OpID::SHR;
+         [          +L::BIT_NOT] = O::BIT_NOT,
+         [          +L::BIT_AND] = O::BIT_AND,
+         [           +L::BIT_OR] = O::BIT_OR,
+         [          +L::BIT_XOR] = O::BIT_XOR,
+         [              +L::SHL] = O::SHL,
+         [              +L::SHR] = O::SHR,
 
 
-         case Oplike::THREE_WAY_COMP: return OpID::THREE_WAY_COMP;
-         case Oplike::LESSER: return OpID::LESSER;
-         case Oplike::GREATER: return OpID::GREATER;
-         case Oplike::LESSER_OR_EQ: return OpID::LESSER_OR_EQ;
-         case Oplike::GREATER_OR_EQ: return OpID::GREATER_OR_EQ;
+         [   +L::THREE_WAY_COMP] = O::THREE_WAY_COMP,
+         [           +L::LESSER] = O::LESSER,
+         [          +L::GREATER] = O::GREATER,
+         [     +L::LESSER_OR_EQ] = O::LESSER_OR_EQ,
+         [    +L::GREATER_OR_EQ] = O::GREATER_OR_EQ,
 
-         case Oplike::IS_EQUAL: return OpID::IS_EQUAL;
-         case Oplike::IS_UNEQUAL: return OpID::IS_UNEQUAL;
+         [         +L::IS_EQUAL] = O::IS_EQUAL,
+         [       +L::IS_UNEQUAL] = O::IS_UNEQUAL,
 
-         case Oplike::COALESCE: return OpID::COALESCE;
+         [         +L::COALESCE] = O::COALESCE,
 
-         case Oplike::ASSIGN: return OpID::ASSIGN;
-         case Oplike::ADD_ASSIGN: return OpID::ADD_ASSIGN;
-         case Oplike::SUB_ASSIGN: return OpID::SUB_ASSIGN;
-         case Oplike::MUL_ASSIGN: return OpID::MUL_ASSIGN;
-         case Oplike::DIV_ASSIGN: return OpID::DIV_ASSIGN;
-         case Oplike::MOD_ASSIGN: return OpID::MOD_ASSIGN;
-         case Oplike::EXP_ASSIGN: return OpID::EXP_ASSIGN;
-         case Oplike::SHL_ASSIGN: return OpID::SHL_ASSIGN;
-         case Oplike::SHR_ASSIGN: return OpID::SHR_ASSIGN;
-         case Oplike::AND_ASSIGN: return OpID::AND_ASSIGN;
-         case Oplike::XOR_ASSIGN: return OpID::XOR_ASSIGN;
-         case Oplike::OR_ASSIGN: return OpID::OR_ASSIGN;
-         case Oplike::COALESCE_ASSIGN: return OpID::COALESCE_ASSIGN;
+         [           +L::ASSIGN] = O::ASSIGN,
+         [       +L::ADD_ASSIGN] = O::ADD_ASSIGN,
+         [       +L::SUB_ASSIGN] = O::SUB_ASSIGN,
+         [       +L::MUL_ASSIGN] = O::MUL_ASSIGN,
+         [       +L::DIV_ASSIGN] = O::DIV_ASSIGN,
+         [       +L::MOD_ASSIGN] = O::MOD_ASSIGN,
+         [       +L::EXP_ASSIGN] = O::EXP_ASSIGN,
+         [       +L::SHL_ASSIGN] = O::SHL_ASSIGN,
+         [       +L::SHR_ASSIGN] = O::SHR_ASSIGN,
+         [       +L::AND_ASSIGN] = O::AND_ASSIGN,
+         [       +L::XOR_ASSIGN] = O::XOR_ASSIGN,
+         [        +L::OR_ASSIGN] = O::OR_ASSIGN,
+         [  +L::COALESCE_ASSIGN] = O::COALESCE_ASSIGN,
 
-         case Oplike::SLICE: return OpID::SLICE;
+         [            +L::SLICE] = O::SLICE,
 
-         case Oplike::INLINE_IF: return OpID::INLINE_IF;
-         case Oplike::INLINE_ELSE: return OpID::INLINE_ELSE;
-         case Oplike::SCOPE_RESOLUTION: return OpID::SCOPE_RESOLUTION;
-         case Oplike::MEMBER_ACCESS: return OpID::MEMBER_ACCESS;
-         case Oplike::PTR_MEMBER_ACCESS: return OpID::PTR_MEMBER_ACCESS;
-         case Oplike::METHOD_PTR: return OpID::METHOD_PTR;
-         case Oplike::ARROW_METHOD_PTR: return OpID::ARROW_METHOD_PTR;
-         case Oplike::RANGE: return OpID::RANGE;
-         case Oplike::SPREAD: return OpID::SPREAD;
-         case Oplike::COMMA: return OpID::COMMA;
+         [        +L::INLINE_IF] = O::INLINE_IF,
+         [      +L::INLINE_ELSE] = O::INLINE_ELSE,
+         [ +L::SCOPE_RESOLUTION] = O::SCOPE_RESOLUTION,
+         [    +L::MEMBER_ACCESS] = O::MEMBER_ACCESS,
+         [+L::PTR_MEMBER_ACCESS] = O::PTR_MEMBER_ACCESS,
+         [       +L::METHOD_PTR] = O::METHOD_PTR,
+         [ +L::ARROW_METHOD_PTR] = O::ARROW_METHOD_PTR,
+         [            +L::RANGE] = O::RANGE,
+         [           +L::SPREAD] = O::SPREAD,
+         [            +L::COMMA] = O::COMMA,
 
-         case Oplike::LINE_CMNT: fthru;
-         case Oplike::BLOCK_CMNT_OPEN: fthru;
-         case Oplike::BLOCK_CMNT_CLOSE: fthru;
-         case Oplike::ESC: fthru;
-         case Oplike::CALL_OPEN: fthru;
-         case Oplike::CALL_CLOSE: fthru;
-         case Oplike::INDEX_OPEN: fthru;
-         case Oplike::INDEX_CLOSE: fthru;
-         case Oplike::LIST_OPEN: fthru;
-         case Oplike::LIST_CLOSE: fthru;
-         case Oplike::SPECIALIZER_OPEN: fthru;
-         case Oplike::SPECIALIZER_CLOSE: fthru;
-         case Oplike::PREPROC: fthru;
-         case Oplike::EOS: fthru;
-         case Oplike::CHAR: fthru;
-         case Oplike::STRING: fthru;
-         case Oplike::ATTR: return OpID::null;
+         [        +L::LINE_CMNT] = O::null,
+         [  +L::BLOCK_CMNT_OPEN] = O::null,
+         [ +L::BLOCK_CMNT_CLOSE] = O::null,
+         [              +L::ESC] = O::null,
+         [        +L::CALL_OPEN] = O::null,
+         [       +L::CALL_CLOSE] = O::null,
+         [       +L::INDEX_OPEN] = O::null,
+         [      +L::INDEX_CLOSE] = O::null,
+         [        +L::LIST_OPEN] = O::null,
+         [       +L::LIST_CLOSE] = O::null,
+         [ +L::SPECIALIZER_OPEN] = O::null,
+         [+L::SPECIALIZER_CLOSE] = O::null,
+         [          +L::PREPROC] = O::null,
+         [              +L::EOS] = O::null,
+         [             +L::CHAR] = O::null,
+         [           +L::STRING] = O::null,
+         [             +L::ATTR] = O::null,
 
-         case Oplike::ASSERT: return OpID::ASSERT;
-         case Oplike::STATIC_ASSERT: return OpID::STATIC_ASSERT;
-         case Oplike::ASSUME: return OpID::ASSUME;
+         [           +L::ASSERT] = O::ASSERT,
+         [    +L::STATIC_ASSERT] = O::STATIC_ASSERT,
+         [           +L::ASSUME] = O::ASSUME,
 
-         case Oplike::RETURN: return OpID::RETURN;
+         [           +L::RETURN] = O::RETURN,
 
-         case Oplike::CAST: return OpID::CAST;
-         case Oplike::UP_CAST: return OpID::UP_CAST;
-         case Oplike::BIT_CAST: return OpID::BIT_CAST;
-         case Oplike::CONST_CAST: return OpID::CONST_CAST;
+         [             +L::CAST] = O::CAST,
+         [          +L::UP_CAST] = O::UP_CAST,
+         [         +L::BIT_CAST] = O::BIT_CAST,
+         [       +L::CONST_CAST] = O::CONST_CAST,
 
-         case Oplike::TYPEOF: return OpID::TYPEOF;
-         case Oplike::SIZEOF: return OpID::SIZEOF;
-         case Oplike::ALIGNOF: return OpID::ALIGNOF;
-         case Oplike::ALIGNAS: return OpID::ALIGNAS;
-         case Oplike::STRIDEOF: return OpID::STRIDEOF;
-         case Oplike::STRIDEAS: return OpID::STRIDEAS;
-      }
-      UNREACHABLE;
+         [           +L::TYPEOF] = O::TYPEOF,
+         [           +L::SIZEOF] = O::SIZEOF,
+         [          +L::ALIGNOF] = O::ALIGNOF,
+         [          +L::ALIGNAS] = O::ALIGNAS,
+         [         +L::STRIDEOF] = O::STRIDEOF,
+         [         +L::STRIDEAS] = O::STRIDEAS,
+      };
+      return buf[+op];
    }
 
    #pragma endregion ops
@@ -718,111 +720,93 @@ namespace clef {
       }
    }
    constexpr OpID toOpID(const KeywordID id) {
-      switch (id) {
-         case KeywordID::BREAK         : return OpID::BREAK;
-         case KeywordID::CONTINUE      : return OpID::CONTINUE;
+      using K = KeywordID;
+      using O = OpID;
+      static constexpr const O buf[256] = {
+         [        +K::BREAK] = O::BREAK,
+         [     +K::CONTINUE] = O::CONTINUE,
          
-         case KeywordID::ASSERT        : return OpID::ASSERT;
-         case KeywordID::ASSUME        : return OpID::ASSUME;
-         case KeywordID::STATIC_ASSERT : return OpID::STATIC_ASSERT;
-         case KeywordID::RETURN        : return OpID::RETURN;
+         [       +K::ASSERT] = O::ASSERT,
+         [       +K::ASSUME] = O::ASSUME,
+         [+K::STATIC_ASSERT] = O::STATIC_ASSERT,
+         [       +K::RETURN] = O::RETURN,
          
-         case KeywordID::TYPEOF        : return OpID::TYPEOF;
-         case KeywordID::SIZEOF        : return OpID::SIZEOF;
-         case KeywordID::ALIGNAS       : return OpID::ALIGNAS;
-         case KeywordID::ALIGNOF       : return OpID::ALIGNOF;
-         case KeywordID::STRIDEAS      : return OpID::STRIDEAS;
-         case KeywordID::STRIDEOF      : return OpID::STRIDEOF;
+         [       +K::TYPEOF] = O::TYPEOF,
+         [       +K::SIZEOF] = O::SIZEOF,
+         [      +K::ALIGNAS] = O::ALIGNAS,
+         [      +K::ALIGNOF] = O::ALIGNOF,
+         [     +K::STRIDEAS] = O::STRIDEAS,
+         [     +K::STRIDEOF] = O::STRIDEOF,
 
-         case KeywordID::CAST          : return OpID::CAST;
-         case KeywordID::UP_CAST       : return OpID::UP_CAST;
-         case KeywordID::BIT_CAST      : return OpID::BIT_CAST;
-         case KeywordID::CONST_CAST    : return OpID::CONST_CAST;
-
-         default: UNREACHABLE;
+         [         +K::CAST] = O::CAST,
+         [      +K::UP_CAST] = O::UP_CAST,
+         [     +K::BIT_CAST] = O::BIT_CAST,
+         [   +K::CONST_CAST] = O::CONST_CAST,
+      }; static_assert(sizeof(id) == 1);
+      O val = buf[+id];
+      if (val == O::null) {
+         UNREACHABLE;
       }
+      return val;
    }
    constexpr Oplike toOplike(const KeywordID kw) {
-      switch (kw) {
-         case KeywordID::ASSERT: return Oplike::ASSERT;
-         case KeywordID::STATIC_ASSERT: return Oplike::STATIC_ASSERT;
-         case KeywordID::ASSUME: return Oplike::ASSUME;
+      using K = KeywordID;
+      using O = Oplike;
+      static constexpr const O buf[256] = {
+         [       +K::ASSERT] = O::ASSERT,
+         [+K::STATIC_ASSERT] = O::STATIC_ASSERT,
+         [       +K::ASSUME] = O::ASSUME,
 
-         case KeywordID::RETURN: return Oplike::RETURN;
+         [       +K::RETURN] = O::RETURN,
 
-         case KeywordID::CAST: return Oplike::CAST;
-         case KeywordID::UP_CAST: return Oplike::UP_CAST;
-         case KeywordID::BIT_CAST: return Oplike::BIT_CAST;
-         case KeywordID::CONST_CAST: return Oplike::CONST_CAST;
+         [         +K::CAST] = O::CAST,
+         [      +K::UP_CAST] = O::UP_CAST,
+         [     +K::BIT_CAST] = O::BIT_CAST,
+         [   +K::CONST_CAST] = O::CONST_CAST,
 
-         case KeywordID::TYPEOF: return Oplike::TYPEOF;
-         case KeywordID::SIZEOF: return Oplike::SIZEOF;
-         case KeywordID::ALIGNOF: return Oplike::ALIGNOF;
-         case KeywordID::ALIGNAS: return Oplike::ALIGNAS;
-         case KeywordID::STRIDEOF: return Oplike::STRIDEOF;
-         case KeywordID::STRIDEAS: return Oplike::STRIDEAS;
-
-         default: UNREACHABLE;
+         [       +K::TYPEOF] = O::TYPEOF,
+         [       +K::SIZEOF] = O::SIZEOF,
+         [      +K::ALIGNOF] = O::ALIGNOF,
+         [      +K::ALIGNAS] = O::ALIGNAS,
+         [     +K::STRIDEOF] = O::STRIDEOF,
+         [     +K::STRIDEAS] = O::STRIDEAS,
+      }; static_assert(sizeof(kw) == 1);
+      O val = buf[+kw];
+      if (val == O::null) {
+         UNREACHABLE;
       }
+      return val;
    }
 
    constexpr KeywordID makeSized_c(const KeywordID id, const char ch) {
+      #define HASH(val) (val & 31)
       using enum KeywordID;
+      static constexpr const sbyte offsets[] = {
+         [HASH(    WORD_LIT_CHAR)] =  4,
+         [HASH(     PTR_LIT_CHAR)] =  3,
+         [HASH(OVERLONG_LIT_CHAR)] =  2,
+         [HASH(    LONG_LIT_CHAR)] =  1,
+         [HASH(                0)] =  0,
+         [HASH(   SHORT_LIT_CHAR)] = -1,
+         [HASH(    BYTE_LIT_CHAR)] = -2,
+      };
+      
       assume(id == UINT || id == SINT || id == FLOAT || id == CHAR);
 
       if (id == CHAR) {
          return ch ? _NOT_A_KEYWORD : id;
       }
-      switch (ch) {
-         case     WORD_LIT_CHAR: return (KeywordID)(+id + 4);
-         case      PTR_LIT_CHAR: return (KeywordID)(+id + 3);
-         case OVERLONG_LIT_CHAR: return (KeywordID)(+id + 2);
-         case     LONG_LIT_CHAR: return (KeywordID)(+id + 1);
-         case                 0: return              id     ;
-         case    SHORT_LIT_CHAR: return (KeywordID)(+id - 1);
-         case     BYTE_LIT_CHAR: return (KeywordID)(+id - 2);
-
-         default: return KeywordID::_NOT_A_KEYWORD;
-      }
+      return (KeywordID)(+id + offsets[(uint)HASH(ch)]);
+      #undef HASH
    }
    constexpr KeywordID makeSized_n(const KeywordID id, const uint size) {
-      using enum KeywordID;
-      assume(id == UINT || id == SINT || id == FLOAT || id == CHAR);
-
-      static_assert(+_NOT_A_KEYWORD == 0);
-      constexpr KeywordID table[4][8] = {
-         { UINT,  UINT_8,  UINT_16,  UINT_32,  UINT_64,  UINT_128,  UINT_256, _NOT_A_KEYWORD},
-         { SINT,  SINT_8,  SINT_16,  SINT_32,  SINT_64,  SINT_128,  SINT_256, _NOT_A_KEYWORD},
-         {FLOAT, FLOAT_8, FLOAT_16, FLOAT_32, FLOAT_64, FLOAT_128, FLOAT_256, _NOT_A_KEYWORD},
-         { CHAR,  CHAR_8,  CHAR_16,  CHAR_32,       {},        {},        {}, _NOT_A_KEYWORD}
-      };
-
-      uint offset;
-      switch (size) {
-         case   0: offset = 0; break;
-         case   8: offset = 1; break;
-         case  16: offset = 2; break;
-         case  32: offset = 3; break;
-         case  64: offset = 4; break;
-         case 128: offset = 5; break;
-         case 256: offset = 6; break;
-
-         default: offset = 7; break;
-      }
-      switch (id) {
-         case UINT : return table[0][offset];
-         case SINT : return table[1][offset];
-         case FLOAT: return table[2][offset];
-         case CHAR : return table[3][offset];
-         default: UNREACHABLE;
-      }
+      return (KeywordID)(+id + __builtin_ctz(size << 2));
    }
    #pragma region testsize
+   #ifdef __INTELLISENSE__
+      #pragma diag_suppress 28
+   #endif
    #pragma region testsize_c
-   static_assert(makeSized_c(KeywordID::UINT , 0) == KeywordID::UINT );
-   static_assert(makeSized_c(KeywordID::SINT , 0) == KeywordID::SINT );
-   static_assert(makeSized_c(KeywordID::FLOAT, 0) == KeywordID::FLOAT);
-
    #define CHECK(base, baseChar, offset) static_assert(makeSized_c(KeywordID::base, offset##_LIT_CHAR) == KeywordID::baseChar##offset)
    #define FOVERLONG FLEXT
    CHECK( UINT, U, BYTE); CHECK( UINT, U, SHORT); CHECK( UINT, U, LONG); CHECK( UINT, U, OVERLONG); CHECK( UINT, U, PTR); CHECK( UINT, U, WORD);
@@ -833,25 +817,24 @@ namespace clef {
    #pragma endregion testsize_c
 
    #pragma region testsize_n
-   static_assert(makeSized_n(KeywordID::UINT , 0) == KeywordID::UINT );
-   static_assert(makeSized_n(KeywordID::SINT , 0) == KeywordID::SINT );
-   static_assert(makeSized_n(KeywordID::FLOAT, 0) == KeywordID::FLOAT);
-
    #define CHECK(base, size) static_assert(makeSized_n(KeywordID::base, size) == KeywordID::base##_##size)
    CHECK( UINT, 8); CHECK( UINT, 16); CHECK( UINT, 32); CHECK( UINT, 64); CHECK( UINT, 128); CHECK( UINT, 256);
    CHECK( SINT, 8); CHECK( SINT, 16); CHECK( SINT, 32); CHECK( SINT, 64); CHECK( SINT, 128); CHECK( SINT, 256);
    CHECK(FLOAT, 8); CHECK(FLOAT, 16); CHECK(FLOAT, 32); CHECK(FLOAT, 64); CHECK(FLOAT, 128); CHECK(FLOAT, 256);
    #undef CHECK
    #pragma endregion testsize_n
+   #ifdef __INTELLISENSE__
+      #pragma diag_default 28
+   #endif
    #pragma endregion testsize
    #pragma endregion keyword
 
    //delimiter pair specification
    enum class BlockType : uint8 {
-      NONE = 0,      //not a block type
+      NONE = 0,         //not a block type
 
       CALL = 3_m,       //PARENTHESES
-      INDEX,        //SQUARE BRACKETS
+      INDEX,            //SQUARE BRACKETS
       LIST,             //CURLY BRACKETS
       SPECIALIZER,      //TRIANGLE BRACKETS
 
@@ -860,17 +843,16 @@ namespace clef {
    constexpr auto operator+(const BlockType t) noexcept { return std::to_underlying(t); }
    constexpr OpID getInvoker(const BlockType t) {
       using enum BlockType;
-      switch (t) {
-         case CALL         : return OpID::CALL;
-         case INDEX    : return OpID::INDEX;
-         case LIST         : return OpID::INIT_LIST;
-         case SPECIALIZER  : return OpID::SPECIALIZER;
-
-         case TERNARY      : return OpID::INLINE_IF;
-
-         default: UNREACHABLE;
+      if (t < BlockType::CALL || t > BlockType::TERNARY) {
+         UNREACHABLE;
       }
+      return (OpID)(+t - +BlockType::CALL + +OpID::CALL);
    }
+   static_assert(getInvoker(BlockType::CALL) == OpID::CALL);
+   static_assert(getInvoker(BlockType::INDEX) == OpID::INDEX);
+   static_assert(getInvoker(BlockType::LIST) == OpID::INIT_LIST);
+   static_assert(getInvoker(BlockType::SPECIALIZER) == OpID::SPECIALIZER);
+   static_assert(getInvoker(BlockType::TERNARY) == OpID::INLINE_IF);
    //block delimiter token role
    //!NOTE: could merge into BlockType, but that would not provide any performance advantages because significantly more bytes are going to be used for other Token types anyway
    enum class BlockDelimRole : uint8 {
