@@ -103,6 +103,8 @@ struct clef::Expr {
          MACRO,
          LIT,
          IDEN,
+         DECL,
+         TYPE_DECL,
          LABEL,
          ARGS,
          TERNARY,
@@ -131,6 +133,13 @@ struct clef::Expr {
          } macro;
          Literal lit;
          Identifier iden;
+         struct {
+            Identifier iden; //Symbol::isType(name.symbol->symbolType()) → anonymous parameter
+            Expr* val;
+         } decl;
+         struct {
+            Identifier iden;
+         } typeDecl;
          Label label;
          Args* args;
          Ternary* ternary;
@@ -141,9 +150,13 @@ struct clef::Expr {
          Foreach* foreachExpr;
          Switch* switchExpr;
          Match* matchExpr;
-      } m = {.expr = {}}; static_assert(sizeof(m.expr) == sizeof(m));
+      } m = {.decl = {.iden = {}, .val = {}}}; static_assert(sizeof(m.decl) == sizeof(m));
       Attr* _attrs;
       Type _type;
+      Expr(Identifier typeName, Attr* attrs, std::in_place_t):
+         m{},_attrs{attrs},_type{TYPE_DECL} {
+            m.typeDecl = {.iden = typeName};
+      }
    public:
       Expr(const Expr& other) { mcsl::memcpy((ubyte*)this, (ubyte*)&other, sizeof(Expr)); }
       Expr(Attr* attrs = nullptr):
@@ -158,9 +171,15 @@ struct clef::Expr {
          m{},_attrs{attrs},_type{FUNC} {
             m.fn = {.fn = fn, .ov = ov};
       }
+      Expr(mcsl::pair<Func*, Overload*> fn, Attr* attrs = nullptr): Expr(fn.first, fn.second, attrs) {}
       Expr(Macro* fn, Overload* ov, Attr* attrs = nullptr):
          m{},_attrs{attrs},_type{MACRO} {
             m.macro = {.fn = fn, .ov = ov};
+      }
+      Expr(mcsl::pair<Macro*, Overload*> fn, Attr* attrs = nullptr): Expr(fn.first, fn.second, attrs) {}
+      Expr(Identifier iden, Expr* val, Attr* attrs = nullptr):
+         m{},_attrs{attrs},_type{DECL} {
+            m.decl = {.iden = iden, .val = val};
       }
       #define DEF_CTOR(T, name, exprType) \
          Expr(T name, Attr* attrs = nullptr):   \
@@ -180,6 +199,9 @@ struct clef::Expr {
       DEF_CTOR(Switch*, switchExpr, SWITCH)
       DEF_CTOR(Match*, matchExpr, MATCH)
       #undef DEF_CTOR
+      static Expr makeTypeDecl(Identifier typeName, Attr* attrs = nullptr) {
+         return Expr(typeName, attrs, std::in_place);
+      }
 
       Type type() const { return _type; }
       Attr* attrs() { return _attrs; }
@@ -192,6 +214,8 @@ struct clef::Expr {
       DEF_GET(lit)
       DEF_GET(iden)
       DEF_GET(label)
+      DEF_GET(decl)
+      DEF_GET(typeDecl)
       #undef DEF_GET
       #define DEF_GET(name) \
          auto& name() { return *m.name; } \

@@ -47,7 +47,10 @@ class clef::Parser {
       template<IsDecl isDecl> Args* parseArgList(BlockType);
       
       Expr* parseExpr();
-      Expr* parseCoreExpr();
+      Expr* parseExprCore();
+      Expr* parseStmt();
+
+      res<Expr*> parseInit(Identifier typeName);
 
       Attr* parseAttr();
       Attr* parseAttrs();
@@ -56,6 +59,7 @@ class clef::Parser {
       template<IsDecl isDecl> res<Identifier> parseIden(Identifier type, Symbol::Type t);
       Expr* parseDecl();
       Expr* parseParam();
+      Expr* parseUsing();
       Identifier parseType();
       Identifier parseTypeDef();
       Identifier parseTypeDef(KeywordID);
@@ -70,7 +74,7 @@ class clef::Parser {
          Identifier parseTuple();
       res<Symbol*> registerSymbol(const mcsl::str_slice name, Symbol::Type t);
       Symbol* registerSymbolAnon(Symbol::Type t);
-      res<TypeSpec*> intoType(Identifier, Symbol::Type);
+      res<TypeSpec*> intoType(Symbol*, TypeSpec::Metatype);
 
       Proc* parseProc();
       
@@ -81,6 +85,7 @@ class clef::Parser {
       Expr* parseForeach();
       Expr* parseSwitch();
       Expr* parseMatch();
+      Expr* parseASM() { TODO; }
       
       mcsl::pair<Func*, Overload*> parseFunc();
       mcsl::pair<Macro*, Overload*> parseMacro();

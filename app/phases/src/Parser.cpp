@@ -107,7 +107,7 @@ clef::Expr* clef::Parser::parseCast(KeywordID castID) {
 
 //no primary comma
 //no primary label
-clef::Expr* clef::Parser::parseCoreExpr() {
+clef::Expr* clef::Parser::parseExprCore() {
    mcsl::dyn_arr<mcsl::pair<OpData, Token>> operatorStack;
    mcsl::dyn_arr<mcsl::pair<Expr*, Token>> operandStack;
    bool prevTokIsOperand = false;
@@ -384,12 +384,113 @@ clef::Expr* clef::Parser::parseCoreExpr() {
 }
 
 clef::Expr* clef::Parser::parseExpr() {
-   Expr* expr = parseCoreExpr();
+   Expr* expr = parseExprCore();
    while (readOp(Oplike::COMMA).is_ok()) {
-      expr = tree.make<Expr>(expr, parseCoreExpr(), OpID::COMMA);
+      expr = tree.make<Expr>(expr, parseExprCore(), OpID::COMMA);
    }
    return expr;
 }
+
+clef::Expr* clef::Parser::parseStmt() {
+   Expr* expr;
+   if (currTok.type() == TokenType::KEYWORD) {
+      KeywordID kw = currTok.keywordID();
+      nextToken();
+      switch (kw) {
+         using enum KeywordID;
+
+         case LET: expr = parseDecl(); break;
+
+         #define PARSE(type) expr = tree.make<Expr>(Expr::makeTypeDecl(parse##type())); break
+         case      CLASS: PARSE(Class);
+         case     STRUCT: PARSE(Struct);
+         case      TRAIT: PARSE(Trait);
+         case      UNION: PARSE(Union);
+         case       ENUM: PARSE(Enum);
+         case ENUM_UNION: PARSE(Enumunion);
+         case       MASK: PARSE(Mask);
+         case  NAMESPACE: PARSE(Namespace);
+         case      TUPLE: PARSE(Tuple);
+         #undef PARSE
+         #define PARSE(type) expr = tree.make<Expr>(parse##type()); break
+         case       FUNC: PARSE(Func);
+         case      MACRO: PARSE(Macro);
+         #undef PARSE
+
+         case USING: expr = parseUsing(); break;
+
+         case IF     : expr = parseIf();      break;
+         case FOR    : expr = parseFor();     break;
+         case FOREACH: expr = parseForeach(); break;
+         case WHILE  : expr = parseWhile();   break;
+         case DO     : expr = parseDoWhile(); break;
+         case SWITCH : expr = parseSwitch();  break;
+         case MATCH  : expr = parseMatch();   break;
+         case ASM    : expr = parseASM();     break;
+
+         case ELSE   : logError(prevTok, ErrCode::BAD_EXPR, FMT("floating `else`")); break;
+
+         case RETURN:
+            if (res<Expr*> r = parseInit(env.type); r.is_ok()) {
+               expr = tree.make<Expr>(nullptr, r.ok(), OpID::RETURN);
+               break;
+            }
+            fthru;
+
+         case ASSERT: fthru;
+         case STATIC_ASSERT: fthru;
+         case ASSUME: expr = tree.make<Expr>(nullptr, parseExpr(), toOpID(kw)); break;
+
+         default: goto STD_EXPR;
+      }
+      //EOS after statements besides standard expression statements
+      if (readEOS().is_err()) {
+         logError(currTok, ErrCode::BAD_EXPR, FMT("expected EOS `%c`"), EOS);
+      }
+   } else { STD_EXPR:
+      expr = parseExpr();
+      if (readEOS().is_ok()) { //standard expression
+         ;
+      }
+      else if (readOp(Oplike::LABEL_DELIM).is_ok()) { //label
+         if (expr->type() != Expr::LABEL) {
+            logError(prevTok, ErrCode::BAD_EXPR, FMT("labels may only be a single identifier"));
+         }
+      } else { //invalid statement
+         logError(currTok, ErrCode::BAD_EXPR, FMT("expected EOS `%c`"), EOS);
+      }
+   }
+   return expr;
+}
+
+#define READ_VAL \
+   if (res<Expr*> r = parseInit(typeName); r.is_ok()) { \
+      val = r.ok();                                     \
+   }                                                    \
+   else if (readOp(Oplike::ASSIGN).is_ok()) {           \
+      if (r = parseInit(typeName); r.is_ok()) {         \
+         val = r.ok();                                  \
+      } else {                                          \
+         val = parseExpr();                             \
+      }                                                 \
+   } else { val = nullptr; }
+clef::Expr* clef::Parser::parseDecl() {
+   Identifier typeName = parseType();
+   Identifier name = expect(parseIden<YES>(typeName, typeName.symbol->symbolType()), ErrCode::BAD_EXPR, FMT("expected variable name"));
+   Expr* val;
+   READ_VAL;
+   // return tree.make<Expr>(tree.make<Expr>(typeName), tree.make<Expr>(name), OpID::LET);
+   return tree.make<Expr>(name, val);
+}
+clef::Expr* clef::Parser::parseParam() {
+   Identifier typeName = parseType();
+   res<Identifier> name = parseIden<YES>(typeName, typeName.symbol->symbolType());
+   Expr* val;
+   READ_VAL;
+   // return tree.make<Expr>(tree.make<Expr>(typeName), tree.make<Expr>(name), OpID::LET); 
+   return tree.make<Expr>(name.is_ok() ? name.ok() : typeName, val);
+}
+#undef READ_VAL
 
 template<clef::Parser::IsDecl isDecl> clef::res<clef::Identifier> clef::Parser::parseIden(Identifier typeName, Symbol::Type t) {
    if (currTok.type() == TokenType::KEYWORD) {
@@ -481,6 +582,15 @@ template<clef::Parser::IsDecl isDecl> clef::res<clef::Identifier> clef::Parser::
    return iden;
 }
 
+clef::res<clef::TypeSpec*> clef::Parser::intoType(Symbol* symbol, TypeSpec::Metatype t) {
+   if (!symbol->type()) {
+      return {ErrCode::REDEF};
+   }
+   TypeSpec* spec = tree.registerType(symbol, t);
+   symbol->setType({spec, nullptr});
+   return spec;
+}
+
 clef::Identifier clef::Parser::parseType() {
    if (currTok.type() == TokenType::KEYWORD) {
       KeywordID kw = currTok.keywordID();
@@ -503,20 +613,6 @@ clef::Identifier clef::Parser::parseType() {
    } else {
       logError(currTok, ErrCode::MISSING_TYPE, FMT("expected a type"));
    }
-}
-
-
-clef::Expr* clef::Parser::parseDecl() {
-   Identifier typeName = parseType();
-   Identifier name = expect(parseIden<YES>(typeName, typeName.symbol->symbolType()), ErrCode::BAD_EXPR, FMT("expected variable name"));
-   
-   return tree.make<Expr>(tree.make<Expr>(typeName), tree.make<Expr>(name), OpID::LET);
-}
-clef::Expr* clef::Parser::parseParam() {
-   Identifier typeName = parseType();
-   Identifier name = parseIden<YES>(typeName, typeName.symbol->symbolType()).orelse({});
-
-   return tree.make<Expr>(tree.make<Expr>(typeName), tree.make<Expr>(name), OpID::LET); 
 }
 
 #pragma region type
@@ -562,7 +658,7 @@ clef::Identifier clef::Parser::parseTuple() {
          }
       }
       else { //identifier is NOT already declared
-         intoType(name, Symbol::TUPLE).ok();
+         intoType(name.symbol, TypeSpec::TUPLE).ok(); //should be impossible for this call to fail
       }
    } else { //anonymous
       name = {
