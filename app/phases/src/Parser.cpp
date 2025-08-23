@@ -420,14 +420,15 @@ clef::Expr* clef::Parser::parseStmt() {
 
          case USING: expr = parseUsing(); break;
 
-         case IF     : expr = parseIf();      break;
-         case FOR    : expr = parseFor();     break;
-         case FOREACH: expr = parseForeach(); break;
-         case WHILE  : expr = parseWhile();   break;
-         case DO     : expr = parseDoWhile(); break;
-         case SWITCH : expr = parseSwitch();  break;
-         case MATCH  : expr = parseMatch();   break;
-         case ASM    : expr = parseASM();     break;
+         #define PARSE(type) expr = tree.make<Expr>(parse##type()); break
+         case IF     : PARSE(If);
+         case FOR    : PARSE(For);
+         case FOREACH: PARSE(Foreach);
+         case WHILE  : PARSE(While);
+         case DO     : PARSE(DoWhile);
+         case SWITCH : PARSE(Switch);
+         case MATCH  : PARSE(Match);
+         case ASM    : TODO;
 
          case ELSE   : logError(prevTok, ErrCode::BAD_EXPR, FMT("floating `else`")); break;
 
@@ -466,8 +467,46 @@ clef::Expr* clef::Parser::parseStmt() {
    return expr;
 }
 
-clef::Expr* clef::Parser::parseIf() {
+clef::If* clef::Parser::parseIf() {
+   //name (optional)
+   Label label = parseLabel().orelse({});
+   //condition
+   expect(readOp(Oplike::CALL_OPEN), FMT("`if` conditions must be parenthesized"));
+   Expr* cond = parseExpr();
+   expect(readOp(Oplike::CALL_CLOSE), FMT("invalid expression"));
+   //return type (optional)
+   Identifier retT;
+   if (readOp(Oplike::ARROW).is_ok()) {
+      retT = parseType();
+   } else { retT = {}; }
+   //procedure
+   Proc* proc = parseProc(label);
+   //else
+   If* elseExpr;
+   if (readKeyword(KeywordID::ELSE).is_ok()) {
+      elseExpr = tree.make<If>(nullptr, nullptr, nullptr, label, retT);
+      parseElse(elseExpr);
+   } else { elseExpr = nullptr; }
 
+   //return
+   return tree.make<If>(cond, proc, elseExpr, label, retT);
+}
+void clef::Parser::parseElse(If* dest) {
+   if (readKeyword(KeywordID::IF).is_ok()) {
+      //condition
+      expect(readOp(Oplike::CALL_OPEN), FMT("`if` conditions must be parenthesized"));
+      dest->cond = parseExpr();
+      expect(readOp(Oplike::CALL_CLOSE), FMT("invalid expression"));
+      //procedure
+      dest->proc = parseProc(dest->name);
+      //else
+      if (readKeyword(KeywordID::ELSE).is_ok()) {
+         dest->elseExpr = tree.make<If>(nullptr, nullptr, nullptr, dest->name, dest->retType);
+         parseElse(dest->elseExpr);
+      }
+   } else {
+      dest->proc = parseProc();
+   }
 }
 
 #define READ_VAL \

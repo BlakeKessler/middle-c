@@ -35,7 +35,7 @@ struct clef::If {
    using SyntaxNode_t = void;
    Expr* cond;
    Proc* proc;
-   Expr* elseExpr = nullptr;
+   If* elseExpr = nullptr;
    Label name = {};
    Identifier retType = {};
 };

@@ -80,15 +80,17 @@ class clef::Parser {
       res<TypeSpec*> intoType(Symbol*, TypeSpec::Metatype);
 
       Proc* parseProc();
-      
-      Expr* parseIf();
-      Expr* parseWhile();
-      Expr* parseDoWhile();
-      Expr* parseFor();
-      Expr* parseForeach();
-      Expr* parseSwitch();
-      Expr* parseMatch();
-      Expr* parseASM() { TODO; }
+      Proc* parseProc(Label);
+      Proc* parseProc(Symbol*);
+
+      If* parseIf();
+      void parseElse(If* dest);
+      While* parseWhile();
+      DoWhile* parseDoWhile();
+      For* parseFor();
+      Foreach* parseForeach();
+      Switch* parseSwitch();
+      Match* parseMatch();
       
       mcsl::pair<Func*, Overload*> parseFunc();
       mcsl::pair<Macro*, Overload*> parseMacro();
